@@ -12,6 +12,8 @@ ToxPipe aims to repurpose JARVIS and Auto-GPT for AI-augmented exploration of ex
 
 The following diagram demonstrates an overall structure of ToxPipe. This model is subject to change as the project develops.
 
+![ToxPipe Overview](res/diagrams/toxpipe-overview.png)
+
 ### Azure Cloud
 
 Hosting inference endpoints, documents, databases, orchistrator agent, etc.
@@ -36,6 +38,8 @@ Following in the steps of [ChemCrow](https://arxiv.org/abs/2304.05376), ToxPipe 
 
 ## Tech Stack
 
+- Thinking nbdev might be a good tool for this project?
+  - <https://nbdev.fast.ai/>
 - Terraform for Azure deployment management
   - <https://gitlab.niehs.nih.gov/help/user/infrastructure/iac/terraform_state.md>
   - <https://aztfmod.github.io/documentation/>
@@ -64,12 +68,12 @@ Following in the steps of [ChemCrow](https://arxiv.org/abs/2304.05376), ToxPipe 
 
 ## Repo Structure
 
-- src Folder: The source code folder! However, in languages that use headers (or if you have a framework for your application) don’t put those files in here.
-- test Folder: Unit tests, integration tests… go here.
-- .config Folder: It should local configuration related to setup on local machine.
-- .build Folder: This folder should contain all scripts related to build process (PowerShell, Docker compose…).
-- dep Folder: This is the directory where all your dependencies should be stored.
-- doc Folder: The documentation folder
-- res Folder: For all static resources in your project. For example, images.
-- samples Folder: Providing “Hello World” & Co code that supports the documentation.
-- tools Folder: Convenience directory for your use. Should contain scripts to automate tasks in the project, for example, build scripts, rename scripts. Usually contains .sh, .cmd files for example.
+- `.build`: This folder should contain all scripts related to build process (PowerShell, Docker compose…).
+- `.config`: It should local configuration related to setup on local machine.
+- `dep`: This is the directory where all your dependencies should be stored.
+- `doc`: The documentation folder
+- `res`: For all static resources in your project. For example, images.
+- `samples`: Providing “Hello World” & Co code that supports the documentation.
+- `src`: The source code folder! However, in languages that use headers (or if you have a framework for your application) don’t put those files in here.
+- `test`: Unit tests, integration tests… go here.
+- `tools`: Convenience directory for your use. Should contain scripts to automate tasks in the project, for example, build scripts, rename scripts. Usually contains .sh, .cmd files for example.
