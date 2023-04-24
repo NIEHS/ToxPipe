@@ -19,6 +19,7 @@ Following in the steps of [ChemCrow](https://arxiv.org/abs/2304.05376), ToxPipe 
 # Tech Stack
 
 - Terraform for Azure deployment management
+    - https://gitlab.niehs.nih.gov/help/user/infrastructure/iac/terraform_state.md
     - https://aztfmod.github.io/documentation/
     - Ansible for machine management
 - Gitlab for CI/CD
@@ -28,5 +29,28 @@ Following in the steps of [ChemCrow](https://arxiv.org/abs/2304.05376), ToxPipe 
 - Auto-GPT, JARVIS for orchistration agents
 - Posit Connect for front end, either Shiny or Shiny for Python for MVP
     - golem is a good framework for building production shiny apps in R
+    - https://engineering-shiny.org/index.html
 - Kubernetes on Azure for inference endpoints?
+    - Trying to figure out how to make sure that inference endpoints have access to GPUs through MLFlow and Kubernetes
 - Need to figoure out the best structure for storing pdf documents like NTP Technical Reports
+
+# Useful Links
+
+- https://github.com/Azure/azure-quickstart-templates
+- https://aztfmod.github.io/documentation/
+- https://github.com/microsoft/JARVIS
+- https://github.com/Azure/Azurite
+- https://github.com/mlflow/mlflow
+- https://github.com/microsoft/DeepSpeed
+
+# Repo Structure
+
+- src Folder: The source code folder! However, in languages that use headers (or if you have a framework for your application) don’t put those files in here.
+- test Folder: Unit tests, integration tests… go here.
+- .config Folder: It should local configuration related to setup on local machine.
+- .build Folder: This folder should contain all scripts related to build process (PowerShell, Docker compose…).
+- dep Folder: This is the directory where all your dependencies should be stored.
+- doc Folder: The documentation folder
+- res Folder: For all static resources in your project. For example, images.
+- samples Folder: Providing “Hello World” & Co code that supports the documentation.
+- tools Folder: Convenience directory for your use. Should contain scripts to automate tasks in the project, for example, build scripts, rename scripts. Usually contains .sh, .cmd files for example.

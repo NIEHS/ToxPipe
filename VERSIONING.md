@@ -1,0 +1,1 @@
+This document will explain the versioning scheme used for ToxPipe. This document is based on [Semantic Versioning](https://semver.org/).
