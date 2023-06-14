@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 version: '3.3'
 
 services:
@@ -41,3 +42,14 @@ services:
 networks:
   autonomous:
     external: true
+=======
+version: '3'
+
+services:
+  nginx:
+    build: .
+    volumes:
+      - ../.config/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+>>>>>>> d59e4cd (Remove python in order to make way for nginx and CI/CD)
