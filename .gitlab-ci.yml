@@ -42,4 +42,8 @@ deploy-job:      # This job runs in the deploy stage.
   stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
   script:
     - echo "Deploying application..."
+    - mkdir -p /etc/nginx
+    # - cp "$SSL_CERTIFICATE" /etc/nginx/toxpipe_niehs_nih_gov.crt
+    # - cp "$SSL_CERTIFICATE_KEY" /etc/nginx/toxpipe_niehs_nih_gov_chain.crt
+    - docker-compose up -d
     - echo "Application successfully deployed."
