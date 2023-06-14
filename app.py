@@ -19,6 +19,8 @@ from shiny.types import FileInfo
 import chatstream
 from chatstream import openai_types
 
+from supabase import create_client, Client
+
 # Maximum number of context chunks to send to the API.
 N_DOCUMENTS = 16
 # Maximum number of tokens in the context chunks to send to the API.
@@ -48,7 +50,7 @@ app_ui = x.ui.page_fillable(
             ui.h4("Shiny Document Query"),
             ui.hr(),
             ui.input_file("file", "Drag to upload text or PDF files", multiple=True),
-            ui.input_select("model", "Model", choices=["gpt-3.5-turbo", "gpt-4"]),
+            ui.input_select("model", "Model", choices=["gpt-3.5-turbo"]),
             ui.hr(),
             ui.output_ui("uploaded_filenames_ui"),
             ui.hr(),
@@ -84,15 +86,21 @@ app_ui = x.ui.page_fillable(
 
 
 def server(input: Inputs, output: Outputs, session: Session):
-    chroma_client = chromadb.Client()
-    collection = (
-        chroma_client.create_collection(  # pyright: ignore[reportUnknownMemberType]
-            name="my_collection"
-        )
-    )
-
+    # chroma_client = chromadb.Client()
+    # collection = (
+    #     chroma_client.create_collection(  # pyright: ignore[reportUnknownMemberType]
+    #         name="my_collection"
+    #     )
+    # )
+    
+    # Establish connection to supabase using supabase-py
+    url: str = os.environ.get("SUPABASE_URL")
+    key: str = os.environ.get("SUPABASE_KEY")
+    supabase: Client = create_client(url, key)
     uploaded_filenames = reactive.Value[tuple[str, ...]](tuple())
 
+    # Create a variable to convert model name to API model name
+    
     def add_context_to_query(query: str) -> str:
         results = collection.query(
             query_texts=[query],
@@ -131,9 +139,11 @@ def server(input: Inputs, output: Outputs, session: Session):
 
     chat_session = chatstream.chat_server(
         "chat1",
-        model=input.model,
+        model="gpt-3.5-turbo",
+        url="https://toxpipe-openai-test.openai.azure.com/",
+        api_key=os.environ["OPENAI_API_KEY"],
         query_preprocessor=add_context_to_query,
-        debug=True,
+        debug=True
     )
 
     @reactive.Effect

@@ -1,0 +1,200 @@
+The Egyptian pyramids are ancient masonry structures located in Egypt. Sources cite at least 118 identified "Egyptian" pyramids.[1][2] Approximately 80 pyramids were built within the Kingdom of Kush, now located in the modern country of Sudan. Of those located in modern Egypt, most were built as tombs for the country's pharaohs and their consorts during the Old and Middle Kingdom periods.[3][4][5]
+
+The earliest known Egyptian pyramids are found at Saqqara, northwest of Memphis, although at least one step-pyramid-like structure has been found at Saqqara, dating to the First Dynasty: Mastaba 3808, which has been attributed to the reign of Pharaoh Anedjib, with inscriptions, and other archaeological remains of the period, suggesting there may have been others.[6] The otherwise earliest among these is the Pyramid of Djoser built c. 2630–2610 BCE during the Third Dynasty.[7] This pyramid and its surrounding complex are generally considered to be the world's oldest monumental structures constructed of dressed masonry.[8]
+
+The most famous Egyptian pyramids are those found at Giza, on the outskirts of Cairo. Several of the Giza pyramids are counted among the largest structures ever built.[9] The Pyramid of Khufu is the largest Egyptian pyramid. It is the only one of the Seven Wonders of the Ancient World still in existence, despite its being the oldest wonder by about 2,000 years.[10]
+
+Name
+U23	G17
+r	O24
+
+Unicode: 𓍋𓅓𓂋𓉴
+Pyramid
+Egyptian hieroglyphs
+The name for a pyramid in Egyptian is myr, written with symbol 𓉴 (O24 in the Gardner Sign List). Myr is preceded by three other signs used as phonetics. The meaning of myr is unclear, as it only self-references the built object itself. By contrast architecture of similar function like 'temple', per-ka, is a compound of 'house' and 'soul'. It has been speculated myr belongs to a class of words like djed and ankh, which refer to objects already in existence when the Egyptian language split off from afroasiatic.[citation needed] A typical translation of myr is given as 'High Place'. By graphical analysis, myr uses the same sign, O24, as benben. The benben is the mound of existence that rose of out of the abyss, nun, in the Egyptian creation myth. The relationship between myr and benben is further linked by the capstone architectural element of pyramids and obelisks, which was named benbenet, the feminine form of benben.
+
+Sign O24 related terms
+Hieroglyph	Sign	Egyptian	English
+U23	G17
+r	O24
+O24	myr	Pyramid
+D58
+N35	D58
+N35	O24
+O39
+O24	benben	Primeval Mound
+D58
+N35	D58
+N35	X1
+O24
+O24	benbent	Pyramidon
+Historical development
+
+The Mastabat al-Fir’aun at Saqqara
+Preceded by assumed earlier sites in the Eastern Sahara, tumuli with megalithic monuments developed as early as 4700 BCE in the Saharan region of Niger.[11][citation needed] According to F.A. Hassan, it is also possible that these megalithic monuments in the Saharan region of Niger and the Eastern Sahara may have served as antecedents for the mastabas and pyramids of ancient Egypt.[11][citation needed] During Predynastic Egypt, tumuli were present at various locations (e.g., Naqada, Helwan).[11]
+
+From the time of the Early Dynastic Period (c. 3150–2686 BCE), Egyptians with sufficient means were buried in bench-like structures known as mastabas.[12][13] At Saqqara, Mastaba 3808, dating from the latter part of the 1st Dynasty, was discovered to contain a large, independently built step-pyramid-like structure enclosed within the outer palace facade mastaba. Archaeological remains and inscriptions suggest there may have been other similar structures dating to this period.[14]
+
+The first historically documented Egyptian pyramid is attributed by Egyptologists to the 3rd Dynasty pharaoh Djoser. Although Egyptologists often credit his vizier Imhotep as its architect, the dynastic Egyptians themselves, contemporaneously or in numerous later dynastic writings about the character, did not credit him with either designing Djoser's pyramid or the invention of stone architecture.[15] The Pyramid of Djoser was first built as a square mastaba-like structure, which as a rule were known to otherwise be rectangular, and was expanded several times by way of a series of accretion layers, to produce the stepped pyramid structure we see today.[16] Egyptologists believe this design served as a gigantic stairway by which the soul of the deceased pharaoh could ascend to the heavens.[17]
+
+Though other pyramids were attempted in the 3rd Dynasty after Djoser, it was the 4th Dynasty, transitioning from the step pyramid to true pyramid shape, which gave rise to the great pyramids of Meidum, Dahshur, and Giza. The last pharaoh of the 4th Dynasty, Shepseskaf, did not build a pyramid and beginning in the 5th Dynasty; for various reasons, the massive scale and precision of construction decreased significantly leaving these later pyramids smaller, less well-built, and often hastily constructed. By the end of the 6th Dynasty, pyramid building had largely ended and it was not until the Middle Kingdom that large pyramids were built again, though instead of stone, mudbrick was the main construction material.[18]
+
+Long after the end of Egypt's own pyramid-building period, a burst of pyramid-building occurred in what is present-day Sudan, after much of Egypt came under the rule of the Kingdom of Kush, which was then based at Napata. Napatan rule, known as the 25th Dynasty, lasted from 750 BCE to 664 BCE. The Meroitic period of Kushite history, when the kingdom was centered on Meroë, (approximately in the period between 300 BCE and 300 CE), experienced a full-blown pyramid-building revival, which saw about 180 Egyptian-inspired indigenous royal pyramid-tombs constructed in the vicinity of the kingdom's capital cities.[19]
+
+Al-Aziz Uthman (1171–1198), the second Ayyubid Sultan of Egypt, tried to destroy the Giza pyramid complex. He gave up after only damaging the Pyramid of Menkaure because the task proved too large.[20]
+
+Pyramid symbolism
+
+Diagram of the interior structures of the Great Pyramid. The inner line indicates the pyramid's present profile, the outer line indicates the original profile.
+The shape of Egyptian pyramids is thought to represent the primordial mound from which the Egyptians believed the earth was created. The shape of a pyramid is also thought to be representative of the descending rays of the sun, and most pyramids were faced with polished, highly reflective white limestone, in order to give them a brilliant appearance when viewed from a distance. Pyramids were often also named in ways that referred to solar luminescence. For example, the formal name of the Bent Pyramid at Dahshur was The Southern Shining Pyramid, and that of Senusret II at El Lahun was Senusret Shines.
+
+While it is generally agreed that pyramids were burial monuments, there is continued disagreement on the particular theological principles that might have given rise to them. One suggestion is that they were designed as a type of "resurrection machine."[21]
+
+The Egyptians believed the dark area of the night sky around which the stars appear to revolve was the physical gateway into the heavens. One of the narrow shafts that extend from the main burial chamber through the entire body of the Great Pyramid points directly towards the center of this part of the sky. This suggests the pyramid may have been designed to serve as a means to magically launch the deceased pharaoh's soul directly into the abode of the gods.[21]
+
+All Egyptian pyramids were built on the west bank of the Nile, which, as the site of the setting sun, was associated with the realm of the dead in Egyptian mythology.[22]
+
+Number and location of pyramids
+For a more comprehensive list, see List of Egyptian pyramids.
+In 1842, Karl Richard Lepsius produced the first modern list of pyramids—now known as the Lepsius list of pyramids—in which he counted 67. A great many more have since been discovered. At least 118 Egyptian pyramids have been identified.[3] The location of Pyramid 29 which Lepsius called the "Headless Pyramid", was lost for a second time when the structure was buried by desert sands after Lepsius's survey. It was found again only during an archaeological dig conducted in 2008.[23]
+
+Many pyramids are in a poor state of preservation or buried by desert sands. If visible at all, they may appear as little more than mounds of rubble. As a consequence, archaeologists are continuing to identify and study previously unknown pyramid structures.
+
+The most recent pyramid to be discovered was that of Neith, a wife of Teti.[24]
+
+All of Egypt's pyramids, except the small Third Dynasty pyramid at Zawyet el-Maiyitin, are sited on the west bank of the Nile, and most are grouped together in a number of pyramid fields. The most important of these are listed geographically, from north to south, below.
+
+Abu Rawash
+Main article: Abu Rawash
+
+The largely destroyed Pyramid of Djedefre
+Abu Rawash is the site of Egypt's most northerly pyramid (other than the ruins of Lepsius pyramid number one),[citation needed] the mostly ruined Pyramid of Djedefre, son and successor of Khufu. Originally it was thought that this pyramid had never been completed, but the current archaeological consensus is that not only was it completed, but that it was originally about the same size as the Pyramid of Menkaure, which would have placed it among the half-dozen or so largest pyramids in Egypt.[citation needed]
+
+Its location adjacent to a major crossroads made it an easy source of stone. Quarrying, which began in Roman times, has left little apart from about fifteen courses of stone superimposed upon the natural hillock that formed part of the pyramid's core. A small adjacent satellite pyramid is in a better state of preservation.
+
+Giza
+Main article: Giza pyramid complex
+
+Map of the Giza pyramid complex
+
+Aerial view of the Giza pyramid complex
+The Giza Plateau is the location of the Pyramid of Khufu (also known as the "Great Pyramid" and the "Pyramid of Cheops"), the somewhat smaller Pyramid of Khafre (or Chephren), the relatively modest-sized Pyramid of Menkaure (or Mykerinus), along with a number of smaller satellite edifices known as "Queen's pyramids", and the Great Sphinx of Giza. Of the three, only Khafre's pyramid retains part of its original polished limestone casing, near its apex. This pyramid appears larger than the adjacent Khufu pyramid by virtue of its more elevated location, and the steeper angle of inclination of its construction—it is, in fact, smaller in both height and volume.
+
+The Giza pyramid complex has been a popular tourist destination since antiquity and was popularized in Hellenistic times when the Great Pyramid was listed by Antipater of Sidon as one of the Seven Wonders of the Ancient World. Today it is the only one of those wonders still in existence.
+
+Zawyet el-Aryan
+See also: Zawyet el'Aryan
+This site, halfway between Giza and Abusir, is the location for two unfinished Old Kingdom pyramids. The northern structure's owner is believed to be pharaoh Nebka, while the southern structure, known as the Layer Pyramid, may be attributable to the Third Dynasty pharaoh Khaba, a close successor of Sekhemkhet. If this attribution is correct, Khaba's short reign could explain the seemingly unfinished state of this step pyramid. Today it stands around 17 m (56 ft) high; had it been completed, it is likely to have exceeded 40 m (130 ft).
+
+Abusir
+Main article: Abusir
+
+The Pyramid of Sahure at Abusir, viewed from the pyramid's causeway
+There are a total of fourteen pyramids at this site, which served as the main royal necropolis during the Fifth Dynasty. The quality of construction of the Abusir pyramids is inferior to those of the Fourth Dynasty—perhaps signaling a decrease in royal power or a less vibrant economy. They are smaller than their predecessors and are built of low-quality local limestone.
+
+The three major pyramids are those of Niuserre, which is also the best-preserved, Neferirkare Kakai and Sahure. The site is also home to the incomplete Pyramid of Neferefre. Most of the major pyramids at Abusir were built using similar construction techniques, comprising a rubble core surrounded by steps of mudbricks with a limestone outer casing. The largest of these Fifth Dynasty pyramids, the Pyramid of Neferirkare Kakai, is believed to have been built originally as a step pyramid some 70 m (230 ft) high and then later transformed into a "true" pyramid by having its steps filled in with loose masonry.
+
+Saqqara
+Main article: Saqqara
+
+The Pyramid of Djoser
+Major pyramids located here include the Pyramid of Djoser—generally identified as the world's oldest substantial monumental structure to be built of dressed stone—the Pyramid of Userkaf, the Pyramid of Teti and the Pyramid of Merikare, dating to the First Intermediate Period of Egypt. Also at Saqqara is the Pyramid of Unas, which retains a pyramid causeway that is one of the best-preserved in Egypt. Together with the pyramid of Userkaf, this pyramid was the subject of one of the earliest known restoration attempts, conducted by Khaemweset, a son of Ramesses II.[25] Saqqara is also the location of the incomplete step pyramid of Djoser's successor Sekhemkhet, known as the Buried Pyramid. Archaeologists believe that had this pyramid been completed, it would have been larger than Djoser's.
+
+South of the main pyramid field at Saqqara is a second collection of later, smaller pyramids, including those of Pepi I, Djedkare Isesi, Merenre, Pepi II and Ibi. Most of these are in a poor state of preservation.
+
+The Fourth Dynasty pharaoh Shepseskaf either did not share an interest in or have the capacity to undertake pyramid construction like his predecessors. His tomb, which is also sited at south Saqqara, was instead built as an unusually large mastaba and offering temple complex. It is commonly known as the Mastabat al-Fir’aun.[26]
+
+A previously unknown pyramid was discovered in north Saqqara in late 2008. Believed to be the tomb of Teti's mother, it currently stands approximately 5 m (16 ft) high, although the original height was closer to 14 m (46 ft).
+
+Dahshur
+Main article: Dahshur
+
+Sneferu's Red Pyramid
+This area is arguably the most important pyramid field in Egypt outside Giza and Saqqara, although until 1996 the site was inaccessible due to its location within a military base and was relatively unknown outside archaeological circles.
+
+The southern Pyramid of Sneferu, commonly known as the Bent Pyramid, is believed to be the first Egyptian pyramid intended by its builders to be a "true" smooth-sided pyramid from the outset; the earlier pyramid at Meidum had smooth sides in its finished state, but it was conceived and built as a step pyramid, before having its steps filled in and concealed beneath a smooth outer casing of dressed stone. As a true smooth-sided structure, the Bent Pyramid was only a partial success—albeit a unique, visually imposing one; it is also the only major Egyptian pyramid to retain a significant proportion of its original smooth outer limestone casing intact. As such it serves as the best contemporary example of how the ancient Egyptians intended their pyramids to look. Several kilometres to the north of the Bent Pyramid is the last—and most successful—of the three pyramids constructed during the reign of Sneferu; the Red Pyramid is the world's first successfully completed smooth-sided pyramid. The structure is also the third-largest pyramid in Egypt, after the pyramids of Khufu and Khafra at Giza.
+
+Also at Dahshur is one of two pyramids built by Amenemhat III, known as the Black Pyramid, as well as a number of small, mostly ruined subsidiary pyramids.
+
+Mazghuna
+Main article: Mazghuna
+Located to the south of Dahshur, several mudbrick pyramids were built in this area in the late Middle Kingdom, perhaps for Amenemhat IV and Sobekneferu.
+
+
+The Pyramid of Amenemhet I at Lisht
+Lisht
+Main article: Lisht
+Two major pyramids are known to have been built at Lisht: those of Amenemhat I and his son, Senusret I. The latter is surrounded by the ruins of ten smaller subsidiary pyramids. One of these subsidiary pyramids is known to be that of Amenemhat's cousin, Khaba II.[27] The site which is in the vicinity of the oasis of the Faiyum, midway between Dahshur and Meidum, and about 100 kilometres south of Cairo, is believed to be in the vicinity of the ancient city of Itjtawy (the precise location of which remains unknown), which served as the capital of Egypt during the Twelfth Dynasty.
+
+Meidum
+Main article: Meidum
+
+The pyramid at Meidum
+The pyramid at Meidum is one of three constructed during the reign of Sneferu, and is believed by some to have been started by that pharaoh's father and predecessor, Huni. However, that attribution is uncertain, as no record of Huni's name has been found at the site. It was constructed as a step pyramid and then later converted into the first "true" smooth-sided pyramid, when the steps were filled in and an outer casing added. The pyramid suffered several catastrophic collapses in ancient and medieval times. Medieval Arab writers described it as having seven steps, although today only the three uppermost of these remain, giving the structure its odd, tower-like appearance. The hill on which the pyramid is situated is not a natural landscape feature, it is the small mountain of debris created when the lower courses and outer casing of the pyramid gave way.
+
+Hawara
+Main article: Hawara
+
+The Pyramid of Amenemhet III at Hawara
+Amenemhat III was the last powerful ruler of the Twelfth Dynasty, and the pyramid he built at Hawara, near the Faiyum, is believed to post-date the so-called "Black Pyramid" built by the same ruler at Dahshur. It is the Hawara pyramid that is believed to have been Amenemhet's final resting place.
+
+El Lahun
+Main article: El Lahun
+
+The Pyramid of Senusret II. The pyramid's natural limestone core is clearly visible as the yellow stratum at its base.
+The Pyramid of Senusret II at El Lahun is the southernmost royal-tomb pyramid structure in Egypt. Its builders reduced the amount of work necessary to construct it by using as its foundation and core a 12-meter-high natural limestone hill.
+
+El-Kurru
+Main article: El-Kurru
+
+Piye's pyramid at El-Kurru
+Piye, the king of Kush who became the first ruler of the Twenty-fifth Dynasty, built a pyramid at El-Kurru. He was the first Egyptian pharaoh to be buried in a pyramid in centuries.
+
+Nuri
+Main article: Nuri
+
+Taharqa's pyramid at Nuri
+Taharqa, a Kushite ruler of the Twenty-fifth Dynasty, built his pyramid at Nuri. It was the largest in the area (North Sudan).
+
+Construction dates and heights
+The following table lays out the chronology of the construction of most of the major pyramids mentioned here. Each pyramid is identified through the pharaoh who ordered it built, his approximate reign, and its location.
+
+Pyramid / Pharaoh	Reign	Field	Height
+Djoser	c. 2670 BCE	Saqqara	62 meters (203 feet)
+Sneferu	c. 2612–2589 BCE	Dashur	104 meters (341 feet)
+Sneferu	c. 2612–2589 BCE	Meidum	65 meters (213 feet) (ruined)
+*Would have been 91.65 meters (301 feet) or 175 Egyptian Royal cubits.
+
+Khufu	c. 2589–2566 BCE	Giza	146.7 meters (481 feet) or 280 Egyptian Royal cubits
+Djedefre	c. 2566–2558 BCE	Abu Rawash	60 meters (197 feet)
+Khafre	c. 2558–2532 BCE	Giza	136.4 meters (448 feet)
+*Originally: 143.5 m or 471 feet or 274 Egyptian Royal cubits
+
+Menkaure	c. 2532–2504 BCE	Giza	65 meters (213 feet) or 125 Egyptian Royal cubits
+Userkaf	c. 2494–2487 BCE	Saqqara	48 meters (161 feet)
+Sahure	c. 2487–2477 BCE	Abusir	47 meters (155 feet)
+Neferirkare Kakai	c. 2477–2467 BCE	Abusir	72.8 meters (239 feet)
+Nyuserre Ini	c. 2416–2392 BCE	Abusir	51.68 m (169.6 feet) or 99 Egyptian Royal cubits
+Amenemhat I	c. 1991–1962 BCE	Lisht	55 meters (181 feet)
+Senusret I	c. 1971–1926 BCE	Lisht	61.25 meters (201 feet)
+Senusret II	c. 1897–1878 BCE	el-Lahun	48.65 m (159.6 ft; 93 Egyptian Royal cubits) or
+47.6 m (156 ft; 91 Egyptian Royal cubits)
+
+Amenemhat III	c. 1860–1814 BCE	Hawara	75 meters (246 feet)
+Khendjer	c. 1764–1759 BCE	Saqqara	37.35 m (122.5 feet), now 1 m (3.3 feet)
+Piye	c. 721 BCE	El-Kurru	20 meters (66 feet) or
+30 meters (99 feet)
+
+Taharqa	c. 664 BCE	Nuri	40 meters (132 feet) or
+50 meters (164 feet)
+
+Construction techniques
+
+Drawing showing transportation of a colossus. The water poured in the path of the sledge, long dismissed by Egyptologists as ritual, but now confirmed as feasible, served to increase the stiffness of the sand, and likely reduced by 50% the force needed to move the statue.[28]
+Main article: Egyptian pyramid construction techniques
+Further information: Diary of Merer
+Constructing the pyramids involved moving huge quantities of stone. While most blocks came from nearby quarries, special stones were transported on great barges from distant locations, for instance white limestone from Tura and granite from Aswan.[29]
+
+In 2013, papyri, named Diary of Merer, were discovered at an ancient Egyptian harbor at the Red Sea coast. They are logbooks written over 4,500 years ago by an official with the title inspector, who documented the transport of white limestone from the Tura quarries, along the Nile River, to the Great Pyramid of Giza, the tomb of the Pharaoh Khufu.[30]
+
+It is possible that quarried blocks were then transported to the construction site by wooden sleds, with sand in front of the sled wetted to reduce friction. Droplets of water created bridges between the grains of sand, helping them stick together.[31] Workers cut the stones close to the construction site, as indicated by the numerous finds of cutting tools.[32] The finished blocks were placed on the pre-prepared foundations.[33] The foundations were levelled using a rough square level, water trenches and experienced surveyors.[34]

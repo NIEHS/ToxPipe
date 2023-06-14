@@ -1,3 +1,3 @@
 # Resources
 
-For all static resources in your project. For example, images.
+For all static resources in your project. For example, images, plots, etc.
