@@ -1,9 +1,43 @@
-version: '3'
+version: '3.3'
 
 services:
   nginx:
-    build: .
+    container_name: nginx
+    build:
+      context: "../.config/nginx"
+      dockerfile: "Dockerfile"
     volumes:
-      - ../.config/nginx.conf:/etc/nginx/nginx.conf
+      # - ./nginx/:/etc/nginx/
+      - /root/toxpipe_niehs_nih_gov.crt:/etc/nginx/toxpipe_niehs_nih_gov.crt
+      - /root/toxpipe_niehs_nih_gov_chain.crt:/etc/nginx/toxpipe_niehs_nih_gov_chain.crt
+      - /root/toxpipe_niehs_nih_gov.key:/etc/nginx/toxpipe_niehs_nih_gov.key
     ports:
       - "80:80"
+      - "443:443"
+    networks:
+      autonomous:
+        aliases:
+          - nginx
+
+  heimdall:
+    image: lscr.io/linuxserver/heimdall
+    container_name: heimdall
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - ../.config/heimdall:/config
+    ports:
+      - "81:80"
+      - "444:443"
+    restart: unless-stopped
+    networks:
+      autonomous:
+        aliases:
+          - heimdall
+
+
+networks:
+  autonomous:
+    external: true
