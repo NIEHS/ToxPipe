@@ -1,12 +1,12 @@
-# Backend Decision Record | 2023-06-13
-
-This is a decision record for the backend of the project. 
+# Frontend Decision Record | 2023-06-23
 
 * **Issue**: Describe the architectural design issue you’re addressing, leaving no questions about why you’re addressing this issue now. Following a minimalist approach, address and document only the issues that need addressing at various points in the life cycle.
 
+The issue is that we need to decide on the frontend architecture for the project. 
+
 * **Decision**: Clearly state the architecture’s direction—that is, the position you’ve selected.
 
-* **Status**: The decision’s status, such as pending, decided, or approved.
+* **Status**: Currently pending.
 
 * **Group**: You can use a simple grouping—such as integration, presentation, data, and so on—to help organize the set of decisions. You could also use a more sophisticated architecture ontology, such as John Kyaruzi and Jan van Katwijk’s, which includes more abstract categories such as event, calendar, and location. For example, using this ontology, you’d group decisions that deal with occurrences where the system requires information under event.
 
