@@ -2,9 +2,6 @@
 title: "Fixing nginx conf issues"
 ---
 
-
-
-
 # Current relevant server block
 ```{nginx}
 server {
