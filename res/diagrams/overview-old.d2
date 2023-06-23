@@ -1,0 +1,158 @@
+classes: {
+  api: {
+    style: {
+      stroke-width: 0
+      fill: "#44C7B1"
+      shadow: true
+      border-radius: 5
+    }
+  }
+  app: {
+    style: {
+      fill: "Maroon"
+    }
+  }
+  storage: {
+    style: {
+      fill: "Orange"
+    }
+  }
+  models: {
+    style: {
+      fill: "Red"
+    }
+  }
+  database: {
+    style: {
+      fill: "#c52dc5"
+    }
+  }
+  server
+  container: {
+    style: {
+      fill: "Green"
+    }
+  }
+  agent: {
+    style: {
+      fill: "#44C7B1"
+    }
+  }
+  docs: {
+    style: {
+      fill: "Yellow"
+    }
+  }
+}
+
+azure: Azure Cloud {
+  shape: cloud
+  icon: https://logos-world.net/wp-content/uploads/2021/02/Microsoft-Azure-Symbol.png
+
+  toxpipe -> openaiApi: Queries GPT-4 and GPT-3.5
+  flask -> toxpipe: Routes requests
+  toxpipe -> _.internet
+
+  toxpipe -> storage
+
+  toxpipe -> chembiotox
+  toxpipe -> milvus
+}
+
+nih: NIH Internal {
+  niehs: NIEHS Internal {
+    # icon: https://www.niehs.nih.gov/web-resources/images/niehs-logo.svg
+
+    posit: Posit Connect {
+      icon: https://datanalytics.worldbank.org/connect/__logo__
+      shiny: ToxPipe Shiny Interface {
+        shape: image
+        icon: https://stevenmortimer.com/blog/tips-for-making-professional-shiny-apps-with-r/shiny-hex.png
+      }
+      orchistrator: ToxPipe \nOrchistrator Agent
+      apps: Shiny User Applications {
+        shape: image
+        icon: https://stevenmortimer.com/blog/tips-for-making-professional-shiny-apps-with-r/shiny-hex.png
+      }
+      flask: ToxPipe API {
+        shape: image
+        icon: https://raw.githubusercontent.com/Buuntu/fastapi-react/master/assets/fastapi-logo.png
+      }
+      flask -> orchistrator: Forwards requests
+      shiny -> flask <- apps: Uses API
+      flask -> _._._.azure.flask: Forwards requests
+
+      orchistrator -> _._.biowulf
+      orchistrator -> _.storage
+      _._._.azure: {
+        flask: ToxPipe API {
+          class: container
+        }
+        toxpipe: ToxPipe {link: Overview.ToxPipe Azure}
+        openaiApi: Azure OpenAI API {
+          class: api
+          shape: image
+          icon: https://th.bing.com/th/id/OIP.GHKS9_8PjlsBEvUNUdZgEwHaFI?pid=ImgDet&rs=1
+        }
+        chembiotox: ChemBioToxDB {
+          class: database
+          shape: image
+          icon: https://icons.terrastruct.com/dev/postgresql-words.svg
+        }
+        milvus: Milvus Vector DB {
+          shape: image
+          icon: https://th.bing.com/th/id/OIP.T9C8bjZNEO0p7C5A9adpkQAAAA?pid=ImgDet&rs=1
+        }
+        storage: Storage {
+          class: storage
+          documents: Documents {
+            shape: image
+            icon: https://www.freeiconspng.com/thumbs/document-icon/document-icon-19.png
+          }
+          models: Models {
+            class: models
+          }
+        }
+        storage
+      }
+    }
+    user -> posit.shiny: Explores ToxPipe Data
+    _._.azure
+
+    user -> posit.apps
+    user: Users/Developers {
+      icon: https://icons.terrastruct.com/azure/General%20Service%20Icons/User%20Icon.svg
+      shape: image
+    }
+    storage: Storage {
+      class: storage
+      models: Model Storage {
+        class: models
+      }
+      models -> _._._.azure.storage.models
+      _._._.azure
+    }
+  }
+  biowulf: BioWulf {
+    icon: https://hpc.nih.gov/images/BIOWULF_LOGO
+    training: Model Finetuning
+    training -> _.niehs.storage.models
+    style.3d: false
+    style.shadow: true
+    style.multiple: false
+    style.fill: "#0324ab"
+    link: Overview.BioWulf
+  }
+}
+internet: Internet {
+  pubmed: PubMed {
+    class: api
+  }
+  comptox: EPA Comptox Dashboard {
+    class: api
+  }
+  google: Google
+  pubchem: PubChem {
+    class: api
+  }
+}

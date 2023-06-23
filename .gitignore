@@ -1,2 +1,8 @@
 *_files/
 *.html
+.config/heimdall/log/
+.config/heimdall/www/logs/
+.config/heimdall/keys/*
+.config/nginx/dhparam.pem
+.config/heimdall/nginx/dhparams.pem
+.config/heimdall/www/app.sqlite
