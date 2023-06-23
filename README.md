@@ -14,7 +14,7 @@ ToxPipe aims to repurpose semi-autonomous AI agents to explore existing toxicolo
 
 The following diagram demonstrates an overall structure of ToxPipe. This model is subject to change as the project develops.
 
-![ToxPipe Overview](res/diagrams/toxpipe-overview.png)
+![ToxPipe Overview](res/diagrams/overview.svg)
 
 ToxPipe aims to repurpose semi-autonomous AI agents to explore existing toxicological data and literature using in-context learning. Some of the tasks that we believe are possible with this system are generation of toxicological narratives with deep explanatory context, analysis of chemical structure, analysis of biological assay results, summarization of journal abstracts, biological database exploration using text-to-SQL AI models, and a variety of other tasks that currently require large amounts of human time and labor. By offloading these tasks to autonomous agents, it would allow toxicologists to repurpose their time towards higher-level cognitive tasks of directing the AI towards specific outputs.
 
