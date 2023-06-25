@@ -1,4 +1,4 @@
-[NIEHS-STRIDES/ToxPipe Channel](https://teams.microsoft.com/l/channel/19%3a5aa8e5c5ac6a400da6b57916a96083ee%40thread.skype/ToxPipe?groupId=af61690e-7397-48d4-947c-8a0444e36e90&tenantId=14b77578-9773-42d5-8507-251ca2dc2b06)
+[NIEHS-STRIDES/ToxPipe Microsoft Teams Channel](https://teams.microsoft.com/l/channel/19%3a5aa8e5c5ac6a400da6b57916a96083ee%40thread.skype/ToxPipe?groupId=af61690e-7397-48d4-947c-8a0444e36e90&tenantId=14b77578-9773-42d5-8507-251ca2dc2b06)
 
 # ToxPipe
 
@@ -18,57 +18,11 @@ The following diagram demonstrates an overall structure of ToxPipe. This model i
 
 ![ToxPipe Overview](res/diagrams/overview.svg)
 
-This stack is currently in flux and is subject to change. The current stack is as follows:
-
-- topipe
-  - nginx | 80:80, 443:443
-  - heimdall | 81:80, 444:443
-- [toxpipe-supabase](https://gitlab.niehs.nih.gov/bsb/toxpipe-supabase)
-  - kong | 8000:8000, 8443:8443
-    - supabase-auth
-    - supabase-realtime
-    - supabase-functions
-    - supabase-postgrest | 3000
-    - supabase-storage | 5000
-    - imgproxy | 8080
-  - postgres | 5432:5432
-  - studio | 3000:3000 Not reverse-proxied for security, must ssh tunnel
-- [dialoqbase](https://gitlab.niehs.nih.gov/bsb/dialoqbase)
-  - 3000:3000
-- [agixt](https://gitlab.niehs.nih.gov/bsb/AGiXT/)
-  - 8501:8501 | Streamlit frontend
-  - 7437:7437 | API
-
-Stack decisions are saved in [`docs/decisions`](docs/decisions/index.md). This is where we will document the reasoning behind our stack decisions.
+Architecture documentation is in [`docs/architecture`](docs/architecture/index.qmd). Stack decisions are saved in [`docs/decisions`](docs/decisions/index.md). This is where we will document the reasoning behind our stack decisions.
 
 ## Deployment
 
-TODO: Stack will automatically be deployed from the `prod` branch of this repo. This will be done through GitLab CI/CD.
-Currently deployed on ehsdttlp30 using Docker Compose for each individual repository. 
-
-### ToxPipe Supabase Deployment
-```
-cd /toxpipe/toxpipe-supabase/docker
-docker compose up -d
-```
-
-### Dialoqbase Deployment
-```
-cd /toxpipe/dialoqbase/docker
-docker compose up -d
-```
-
-### AGiXT Deployment
-```
-cd /toxpipe/AGiXT
-docker compose up -d
-```
-
-### ToxPipe Deployment
-```
-cd /toxpipe/toxpipe/.build
-docker compose up -d
-```
+Deployment information is contained in [`docs/deployment`](docs/deployment/index.md).
 
 ## GitLab Repo is source of truth
 
