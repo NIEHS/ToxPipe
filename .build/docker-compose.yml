@@ -1,42 +1,78 @@
-version: '3.3'
+version: "3.8"
 
 services:
-  nginx:
-    container_name: nginx
-    build:
-      context: "../.config/nginx"
-      dockerfile: "Dockerfile"
-    volumes:
-      # - ./nginx/:/etc/nginx/
-      - /root/toxpipe_niehs_nih_gov.crt:/etc/nginx/toxpipe_niehs_nih_gov.crt
-      - /root/toxpipe_niehs_nih_gov_chain.crt:/etc/nginx/toxpipe_niehs_nih_gov_chain.crt
-      - /root/toxpipe_niehs_nih_gov.key:/etc/nginx/toxpipe_niehs_nih_gov.key
-    ports:
-      - "80:80"
-      - "443:443"
+  traefik:
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
+      traefik.http.routers.traefik.entrypoints: "https"
+      traefik.http.routers.traefik.middlewares: "traefikAuth@file,default@file"
+      # traefik.http.routers.traefik.rule: "Host(`${TRAEFIK_SUBDOMAIN}.${TRAEFIK_DOMAIN}`)"
+      # traefik.http.routers.traefik.rule: "HostSNI(`toxpipe.niehs.nih.gov`)"
+      traefik.http.routers.traefik.service: "api@internal"
+      # traefik.http.routers.traefik.tls.certresolver: "letsEncrypt"
+      traefik.http.routers.traefik.tls.options: "modern@file"
+      traefik.http.routers.traefik.tls: "true"
+      traefik.http.services.traefik.loadbalancer.server.port: 8080
+      traefik.http.services.traefik.loadbalancer.sticky.cookie.httpOnly: "true"
+      traefik.http.services.traefik.loadbalancer.sticky.cookie.secure: "true"
+      # mode: global
+      # Schedule Traefik on the Swarm manager nodes, as the Swarm API is only exposed on the manager nodes
+      # See https://docs.traefik.io/providers/docker/#docker-api-access_1
+      # placement:
+      #   constraints:
+      #     - node.role == manager
+    # Published on https://hub.docker.com/_/traefik?tab=tags
+    image: traefik:2.10                                                      # See https://github.com/containous/traefik/releases
     networks:
-      autonomous:
-        aliases:
-          - nginx
+      - autonomous
+    ports:
+      # To be able to listen on port 80 (http)
+      - mode: host
+        published: 80
+        target: 80
+      # To be able to listen on port 443 (https)
+      - mode: host
+        published: 443
+        target: 443
+      - mode: host
+        published: 8080
+        target: 8080
+    volumes:
+      - /etc/localtime:/etc/localtime:ro                                        # Set the container timezone by sharing the read-only localtime
+      - /toxpipe/toxpipe/.config/traefik/config.yml:/etc/traefik/config.yml:ro            # Set the dynamic configuration for the file provider
+      - /toxpipe/toxpipe/.config/traefik/traefik.yml:/etc/traefik/traefik.yml:ro          # Set the static configuration
+      # - /var/opt/traefik:/etc/traefik/acme                                      # Set the location where my ACME certificates are saved to
+      - /var/run/docker.sock:/var/run/docker.sock:ro                            # Give access to the UNIX Docker socket
+      - /root/toxpipe_niehs_nih_gov.crt:/etc/traefik/tls/toxpipe_niehs_nih_gov.crt
+      - /root/toxpipe_niehs_nih_gov_chain.crt:/etc/traefik/tls//toxpipe_niehs_nih_gov_chain.crt
+      - /root/toxpipe_niehs_nih_gov.key:/etc/traefik/tls/toxpipe_niehs_nih_gov.key
 
-  heimdall:
-    image: lscr.io/linuxserver/heimdall
-    container_name: heimdall
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/New_York
-    volumes:
-      - ../.config/heimdall:/config
-    ports:
-      - "81:80"
-      - "444:443"
-    restart: unless-stopped
+  dashy:
+    container_name: dashy
+    image: lissy93/dashy
+    # volumes:
+      # - /path/to/my-config.yml:/app/public/conf.yml
+      # - /path/to/item-icons:/app/public/item-icons
     networks:
-      autonomous:
-        aliases:
-          - heimdall
+      - autonomous
+    ports:
+      - 4000:80
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
+      traefik.http.routers.traefik.service: ""
+      traefik.http.routers.dashy.rule: "Host(`toxpipe.niehs.nih.gov`)"
+      traefik.http.routers.dashy.entrypoints: "https"
+      traefik.http.routers.dashy.tls: "true"
+      # traefik.http.services.dashy.loadbalancer.server.port: 4000
+      traefik.http.services.dashy.loadbalancer.server.scheme: "http"
+
 
 networks:
   autonomous:
+    driver: overlay
     external: true

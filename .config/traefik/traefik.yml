@@ -1,0 +1,37 @@
+# Traefik static configuration file (/etc/traefik/traefik.yml)
+# See https://doc.traefik.io/traefik/getting-started/configuration-overview/#the-static-configuration
+# and https://doc.traefik.io/traefik/reference/static-configuration/cli/
+
+api:
+  dashboard: true                             # Enable the dashboard
+  insecure: true                              # Enable insecure mode (no auth)
+
+entryPoints:
+  http:
+    address: ":80"                            # Create the HTTP entrypoint on port 80
+    http:
+      redirections:                           # HTTPS redirection (80 to 443)
+        entryPoint:
+          to: "https"                         # The target element
+          scheme: "https"                     # The redirection target scheme
+  https:
+    address: ":443"                           # Create the HTTPS entrypoint on port 443
+      # tls:
+      #   certFile: "/etc/traefik/tls/toxpipe_niehs_nih_gov.crt"
+      #   keyFile: "/etc/traefik/tls/toxpipe_niehs_nih_gov.key"
+global:
+  checknewversion: true                       # Periodically check if a new version has been released.
+  sendanonymoususage: true                    # Periodically send anonymous usage statistics.
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"   # Listen to the UNIX Docker socket
+    exposedByDefault: true                   # Only expose container that are explicitly enabled (using label traefik.enabled)
+    network: "autonomous"                     # Default network to use for connections to all containers.
+    swarmmode: false                          # Activates the Swarm Mode (instead of standalone Docker).
+    #swarmModeRefreshSeconds: 15               # Defines the polling interval (in seconds) in Swarm Mode.
+    #watch: true                               # Watch Docker Swarm events
+  file:
+    filename: "/etc/traefik/config.yml"       # Link to the dynamic configuration
+    watch: true                               # Watch for modifications
+  providersThrottleDuration: 10               # Configuration reload frequency
