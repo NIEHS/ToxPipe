@@ -30,8 +30,8 @@ providers:
     network: "autonomous"                     # Default network to use for connections to all containers.
     swarmmode: false                          # Activates the Swarm Mode (instead of standalone Docker).
     #swarmModeRefreshSeconds: 15               # Defines the polling interval (in seconds) in Swarm Mode.
-    #watch: true                               # Watch Docker Swarm events
+    watch: true                               # Watch Docker events
   file:
     filename: "/etc/traefik/config.yml"       # Link to the dynamic configuration
     watch: true                               # Watch for modifications
-  providersThrottleDuration: 10               # Configuration reload frequency
+  providersThrottleDuration: 2               # Configuration reload frequency

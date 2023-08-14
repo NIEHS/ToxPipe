@@ -60,12 +60,46 @@ http:
         servers:
           - url: "https://www.usherbrooke.ca/error-pages/"
 
+  # routers:
+  #   db:
+  #     entryPoints:
+  #       - "https"
+  #     # middlewares:
+  #     #   - "default@file"
+  #     rule: "HostRegexp(`db.toxpipe.niehs.nih.gov`)"
+  #     service: "kong-docker"
+  #     tls: "true"
 
 # See https://doc.traefik.io/traefik/https/tls/
 tls:
   certificates:
     - certFile: "/etc/traefik/tls/toxpipe_niehs_nih_gov.crt"
       keyFile: "/etc/traefik/tls/toxpipe_niehs_nih_gov.key"
+      stores:
+        - default
+        - traefik
+    - certFile: "/etc/traefik/tls/db_toxpipe_niehs_nih_gov_chain.crt"
+      keyFile: "/etc/traefik/tls/db_toxpipe_niehs_nih_gov.key"
+      stores:
+        - default
+        - traefik
+    - certFile: "/etc/traefik/tls/chat_toxpipe_niehs_nih_gov_chain.crt"
+      keyFile: "/etc/traefik/tls/chat_toxpipe_niehs_nih_gov.key"
+      stores:
+        - default
+        - traefik
+    - certFile: "/etc/traefik/tls/docs_toxpipe_niehs_nih_gov_chain.crt"
+      keyFile: "/etc/traefik/tls/docs_toxpipe_niehs_nih_gov.key"
+      stores:
+        - default
+        - traefik
+    - certFile: "/etc/traefik/tls/auth_toxpipe_niehs_nih_gov.crt"
+      keyFile: "/etc/traefik/tls/auth_toxpipe_niehs_nih_gov.key"
+      stores:
+        - default
+        - traefik
+    - certFile: "/etc/traefik/tls/api_toxpipe_niehs_nih_gov_chain.crt"
+      keyFile: "/etc/traefik/tls/api_toxpipe_niehs_nih_gov.key"
       stores:
         - default
         - traefik

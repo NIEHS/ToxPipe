@@ -1,0 +1,274 @@
+---
+title: "ToxPipe: Semi-autonomous AI integration of diverse toxicological data streams"
+author: "Trey Saddler"
+institute: "Predictive Toxicology Branch - Division of Translational Toxicology"
+title-slide-attributes:
+    data-background-image: "2023-09-12\ NIEHS\ Council/dtt_title_slide_background.jpg"
+    data-background-size: contain
+    data-background-opacity: "0.75"
+format:
+  revealjs:
+    controls: true
+    controls-layout: bottom-right
+    fig-responsive: true
+    theme: ../res/css/ntp-orig.scss
+    preview-links: auto
+    navigation-mode: vertical
+---
+
+# Potential Title: ToxPipe: Semi-autonomous AI integration of diverse toxicological data streams
+
+-   Also "Opportunities to use LLMs to support the DTT and NTP mission" or some variation combining what you currently have and this one.
+
+# Will the slides be shared? {.center style="text-align: center;" background-image="2023-09-12 NIEHS Council//dtt_slide_header.jpg" background-size="contain" background-repeat="no-repeat" background-position="top"}
+
+Yes, in fact this presentation is already uploaded to Posit Connect!
+
+["ToxPipe: Semi-autonomous AI integration of diverse toxicological data streams" (Posit Connect)](https://sandbox-staging.ntp.niehs.nih.gov/rsconnect/changeme/)
+
+::: notes
+-   Insert notes here
+:::
+
+# My AI Story {.center style="text-align: center;" background-image="2023-09-12 NIEHS Council//dtt_slide_header.jpg" background-size="contain" background-repeat="no-repeat" background-position="top"}
+
+\[Insert OpenAI logo here\]
+
+::: notes
+I first used ChatGPT in December of last year. The first time that I tried it, I thought that the technology was neat, but I didn't see the full potential. In the January and February, I watched a few YouTube videos that showed some of the abilities that ChatGPT had. It was then that I realized that this technology could be used to solve some of the problems that I was facing in my research.
+:::
+
+# Did I go overboard?
+
+\[Show bookmarks, feedly, and/or other screenshots showing how much information been exposed to this year.\]
+
+::: notes
+So since the beginning of the year, I've completely immersed myself in the world of AI and machine learning. I've read hundreds of articles and watched dozens of videos. I've also spent a lot of time playing around with various AI technologies, including ChatGPT, ChemCrow, and others. I've also spent a lot of time thinking about how these technologies could be used to solve problems in environmental health sciences, especially in understanding GxE interactions.
+:::
+
+# Introduction (5 minutes)
+
+-   Have you had your 'Aha' moment yet?
+-   \[Insert citation showing estimated current exposure/usage rates of ChatGPT\]
+
+::: notes
+Once it clicks, you'll become as excited as I am! And maybe as scared as well.
+:::
+
+# Agenda
+
+-   Intro
+-   The Current State of AI, Machine Learning, and Large Language Models in Science
+-   ToxPipe
+-   Addressing Concerns: Security, Privacy, and Accuracy
+-   Future Plans for ToxPipe
+-   Conclusion
+
+::: notes
+-   Here is a note.
+:::
+
+# The Current State of AI, Machine Learning, and Large Language Models in Science (5 minutes)
+
+::: notes
+-   Brief history and evolution of AI and machine learning in science
+-   Current applications and successes in the field, with a focus on GxE studies and multi-omic integration
+-   The role and impact of large language models in scientific research, especially in understanding GxE interactions
+-   Case studies of successful AI applications in environmental health sciences
+:::
+
+## Huggingface
+
+-   \[Show Huggingface website\]
+
+::: notes
+-   Some more notes
+:::
+
+## ChemCrow: from text to chemical production
+
+-   \[Show ChemCrow website\]
+
+::: notes
+-   Some more notes
+:::
+
+# ToxPipe Inspiration
+
+-   JARVIS
+-   AutoGPT
+-   BabyGPT
+-   ChemCrow
+
+::: notes
+-   Some more notes
+:::
+
+## JARVIS
+
+-   \[Show JARVIS website/figure\]
+
+::: notes
+-   Some more notes
+:::
+
+## AutoGPT
+
+-   \[Show AutoGPT website\]
+
+::: notes
+-   Some more notes
+:::
+
+## ChemCrow
+
+-   \[Show ChemCrow website\]
+
+::: notes
+-   Some more notes
+:::
+
+# Introduction to ToxPipe (15 minutes)
+
+-   Explanation of the ToxPipe project
+-   The problem ToxPipe aims to solve in the context of GxE interactions and multi-omic integration
+-   How ToxPipe works: semi-autonomous AI agents and data-augmented prompt engineering
+-   Demonstration of ToxPipe in action: generating toxicological narratives and answering general toxicological questions by integrating various data sources, including PubMed, PubChem, EPA Comptox Dashboard, and other toxicological databases and data sets
+-   How ToxPipe can aid in understanding and predicting GxE interactions
+
+# Generative AI and production challenges
+
+-   Creating an app is easy
+-   Creating a production-ready app is hard
+-   \[Demonstrate the various frontend apps tried\]
+
+::: notes
+-   Notes go here.
+:::
+
+## DTT/NIEHS Use Cases \[THIS IS IMPORTANT\]
+
+-   Retrieval-augmented generation
+-   Question answering - ChemBioTox
+    -   Comprehensive reports on Toxicity
+-   Systematic Review
+    -   \[Show example of systematic review\]
+-   Kamel's Stuff
+-   Image Segmentation
+
+::: notes
+-   Notes go here.
+:::
+
+# Addressing Concerns: Security, Privacy, and Accuracy (10 minutes)
+
+-   Explanation of the security measures in place for ToxPipe
+-   How ToxPipe ensures user privacy
+-   The steps taken to ensure the accuracy of ToxPipe's outputs, especially in the context of GxE interactions and multi-omic data
+-   How ToxPipe handles errors and inaccuracies
+-   The role of human oversight in ToxPipe's operations
+-   "Here's what we have done to address these concerns with our implementation"
+
+::: notes
+-   Insert notes here
+:::
+
+# Future Plans for ToxPipe (5 minutes)
+
+-   Upcoming features and improvements for ToxPipe, with a focus on enhancing its capabilities in GxE studies and multi-omic integration
+-   Long-term vision for ToxPipe's role in environmental health sciences
+-   Opportunities for collaboration and partnership
+
+::: notes
+-   Insert notes here
+:::
+
+# 'The Stack'
+
+-   \[Show diagram of the stack\]
+
+# Incorporate additional Data Sources
+
+-   EPA Comptox Dashboard
+-   Tox21
+-   PubMed
+
+::: notes
+-   Insert notes here
+:::
+
+## Text2SQL
+
+-   \[Show example of Text2SQL\]
+
+::: notes
+-   Insert notes here
+:::
+
+## Text2SPARQL
+
+-   \[Show example of Text2SPARQL\]
+
+::: notes
+-   Insert notes here
+:::
+
+## Text2API
+
+-   \[Show example of Text2API\]
+
+::: notes
+-   Insert notes here
+:::
+
+# Conclusion and Call to Action (2 minutes)
+
+-   Recap of the key points from the presentation
+-   The potential impact of ToxPipe on the field of environmental health sciences, particularly in understanding GxE interactions
+-   Call to action: how the audience can get involved or support ToxPipe
+
+# Q&A Session (20 minutes)
+
+-   Open the floor for questions and discussion
+
+## Security
+
+Here is some info on security.
+
+## Privacy
+
+Here is some info on privacy.
+
+## Accuracy
+
+Here is some info on accuracy.
+
+## Why use GPT-3.5/4 rather than other models?
+
+## When should you use GPT-3.5/4 rather than other models?
+
+# 'Cause an Effect'
+
+-   Define your goal(s): I want to convince the members of NIEHS Council that:
+    -   AI technologies are very useful but there are limitations and pitfalls to watch out for.
+    -   AI technologies can be used to solve problems in environmental health sciences, especially in understanding GxE interactions.
+    -   ToxPipe is a platform that can be used to integrate various AI technologies into a single, easy-to-use tool and that it should receive additional support from NIEHS.
+
+## 'Cause an Effect pt. 2'
+
+What do you want people to remember (Define your message)? - Various state of the art AI technologies can be used to solve problems in environmental health sciences, especially in understanding GxE interactions and ToxPipe is a platform that can be used to integrate these technologies into a single, easy-to-use tool.
+
+-   Align your goal and message with the time you have, the audience, and the theme of the conference.
+-   Start and end your presentation with this single take away message.
+
+## Notes
+
+-   Example can be to query ROBOKOP using natural language, then summarize the results
+
+-   So the first is the fact that you can actually find something that's true. The second is now that you've found something that's true, you can hypothesize something, and that's something that you can test. And I think that's an important thing to get across both there's some tangible reality to what it is synthesizing we already know. And then it has a capacity to hypothesize the same at the same time, which would be great.
+
+-   One of the questions in theory, you could prompt secondary secondary to generating the profile is a set of hypotheses around interspecies translation.
+
+-   Meaning, what's the evolutionary conservation of the known targets of toxicological effect that would be challenging with certain chemicals?
+
+-   Like furan, because it's just like scorched earth, but for other things like estradiol or something along those lines, there's there's a resource actually the DPA made that was really great that looked at the evolutionary conservation of the pocket space.

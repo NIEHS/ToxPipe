@@ -45,11 +45,26 @@ services:
       # - /var/opt/traefik:/etc/traefik/acme                                      # Set the location where my ACME certificates are saved to
       - /var/run/docker.sock:/var/run/docker.sock:ro                            # Give access to the UNIX Docker socket
       - /root/toxpipe_niehs_nih_gov.crt:/etc/traefik/tls/toxpipe_niehs_nih_gov.crt
-      - /root/toxpipe_niehs_nih_gov_chain.crt:/etc/traefik/tls//toxpipe_niehs_nih_gov_chain.crt
+      - /root/toxpipe_niehs_nih_gov_chain.crt:/etc/traefik/tls/toxpipe_niehs_nih_gov_chain.crt
       - /root/toxpipe_niehs_nih_gov.key:/etc/traefik/tls/toxpipe_niehs_nih_gov.key
+      - /root/chat_toxpipe_niehs_nih_gov.crt:/etc/traefik/tls/chat_toxpipe_niehs_nih_gov.crt
+      - /root/chat_toxpipe_niehs_nih_gov_chain.crt:/etc/traefik/tls/chat_toxpipe_niehs_nih_gov_chain.crt
+      - /root/chat_toxpipe_niehs_nih_gov.key:/etc/traefik/tls/chat_toxpipe_niehs_nih_gov.key
+      - /root/docs_toxpipe_niehs_nih_gov.crt:/etc/traefik/tls/docs_toxpipe_niehs_nih_gov.crt
+      - /root/docs_toxpipe_niehs_nih_gov_chain.crt:/etc/traefik/tls/docs_toxpipe_niehs_nih_gov_chain.crt
+      - /root/docs_toxpipe_niehs_nih_gov.key:/etc/traefik/tls/docs_toxpipe_niehs_nih_gov.key
+      - /root/db_toxpipe_niehs_nih_gov.crt:/etc/traefik/tls/db_toxpipe_niehs_nih_gov.crt
+      - /root/db_toxpipe_niehs_nih_gov_chain.crt:/etc/traefik/tls/db_toxpipe_niehs_nih_gov_chain.crt
+      - /root/db_toxpipe_niehs_nih_gov.key:/etc/traefik/tls/db_toxpipe_niehs_nih_gov.key
+      - /root/api_toxpipe_niehs_nih_gov.crt:/etc/traefik/tls/api_toxpipe_niehs_nih_gov.crt
+      - /root/api_toxpipe_niehs_nih_gov_chain.crt:/etc/traefik/tls/api_toxpipe_niehs_nih_gov_chain.crt
+      - /root/api_toxpipe_niehs_nih_gov.key:/etc/traefik/tls/api_toxpipe_niehs_nih_gov.key
+      - /root/auth_toxpipe_niehs_nih_gov.crt:/etc/traefik/tls/auth_toxpipe_niehs_nih_gov.crt
+      - /root/auth_toxpipe_niehs_nih_gov_chain.crt:/etc/traefik/tls/auth_toxpipe_niehs_nih_gov_chain.crt
+      - /root/auth_toxpipe_niehs_nih_gov.key:/etc/traefik/tls/auth_toxpipe_niehs_nih_gov.key
 
   dashy:
-    container_name: dashy
+    # container_name: dashy
     image: lissy93/dashy
     # volumes:
       # - /path/to/my-config.yml:/app/public/conf.yml
@@ -57,20 +72,65 @@ services:
     networks:
       - autonomous
     ports:
-      - 4000:80
+      - "4000:80"
     environment:
       - NODE_ENV=production
     restart: unless-stopped
     labels:
       traefik.docker.network: "autonomous"
       traefik.enable: "true"
-      traefik.http.routers.traefik.service: ""
-      traefik.http.routers.dashy.rule: "Host(`toxpipe.niehs.nih.gov`)"
       traefik.http.routers.dashy.entrypoints: "https"
+      traefik.http.routers.dashy.service: "dashy@docker"
+      traefik.http.routers.dashy.rule: "Host(`toxpipe.niehs.nih.gov`)"
       traefik.http.routers.dashy.tls: "true"
+      traefik.http.routers.dashy.priority: 1
       # traefik.http.services.dashy.loadbalancer.server.port: 4000
       traefik.http.services.dashy.loadbalancer.server.scheme: "http"
 
+    healthcheck:
+      test: ['CMD', 'node', '/app/services/healthcheck']
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  keycloak:
+    image: jboss/keycloak:latest
+    networks:
+      - autonomous
+    ports:
+      - "8088:8080"
+      - "8444:8443"
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+      - KC_HOSTNAME=auth.toxpipe.niehs.nih.gov
+      - KC_HTTPS_CERTIFICATE_FILE=/tls/auth_toxpipe_niehs_nih_gov.crt
+      - KC_HTTPS_CERTIFICATE_KEY_FILE=/tls/auth_toxpipe_niehs_nih_gov.key
+      - KC_HOSTNAME_STRICT=false
+      - KC_PROXY=edge
+    restart: unless-stopped
+    volumes:
+      - /root/auth_toxpipe_niehs_nih_gov.crt:/tls/auth_toxpipe_niehs_nih_gov.crt
+      - /root/auth_toxpipe_niehs_nih_gov_chain.crt:/tls/auth_toxpipe_niehs_nih_gov_chain.crt
+      - /root/auth_toxpipe_niehs_nih_gov.key:/tls/auth_toxpipe_niehs_nih_gov.key
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
+      traefik.http.routers.keycloak.entrypoints: "https"
+      traefik.http.routers.keycloak.service: "keycloak@docker"
+      traefik.http.routers.keycloak.rule: "Host(`auth.toxpipe.niehs.nih.gov`)"
+      traefik.http.routers.keycloak.tls: "true"
+      traefik.http.routers.keycloak.priority: 5
+      traefik.http.services.keycloak.loadbalancer.server.port: 8080
+      traefik.http.services.keycloak.loadbalancer.server.scheme: "http"
+
+    # healthcheck:
+    #   test: ['CMD', 'node', '/app/services/healthcheck']
+    #   interval: 10s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 10s
 
 networks:
   autonomous:

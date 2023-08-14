@@ -6,3 +6,5 @@
 .config/nginx/dhparam.pem
 .config/heimdall/nginx/dhparams.pem
 .config/heimdall/www/app.sqlite
+.vscode/saddlerto.code-workspace
+docs/data/
