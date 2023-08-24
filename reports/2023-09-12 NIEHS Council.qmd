@@ -21,17 +21,17 @@ format:
     # All presentations have a “normal” size, that is, the resolution at which they are authored. This default “normal” size is 1050 x 700, which is used to match as nearly as possible the aspect ratio of most laptops.
 ---
 
-# Will the slides be shared {.center style="text-align: center;" background-image="2023-09-12 NIEHS Council//dtt_slide_header.jpg" background-size="contain" background-repeat="no-repeat" background-position="top"}
+# Will the slides be shared {style="text-align: center; font-size: 5vh; margin-top: 10vh;" background-image="2023-09-12 NIEHS Council//dtt_slide_header.jpg" background-size="contain" background-repeat="no-repeat" background-position="top"}
 
 Yes, in fact this presentation is already uploaded to
 
-![](2023-09-12\ NIEHS\ Council/posit_connect_logo.svg)
+![](2023-09-12\ NIEHS\ Council/posit_connect_logo.svg){style="height: 15vh;"}
 
 ["ToxPipe: Semi-autonomous AI integration of diverse toxicological data streams" (Posit Connect)](https://sandbox-staging.ntp.niehs.nih.gov/rsconnect/changeme/)
 
 <br>
 
-This presentation was created using:
+[This presentation was created using:]{style="font-size: 10vh;"}
 
 :::: {.columns}
 
@@ -48,6 +48,32 @@ This presentation was created using:
 ::: notes
 So one question that I always get is, "Will the slides be shared?" Yes! I've already uploaded them to our Posit Connect server, and you can follow along with me there. 
 :::
+
+# Animate Test {auto-animate=true}
+
+::: {data-id="figure1" style="margin-top: 100px;"}
+```{mermaid}
+flowchart LR
+  A[Hard edge] --> B(Round edge)
+  B --> C{Decision}
+  C --> D[Result one]
+  C --> E[Result two]
+```
+:::
+
+# Animate Test {auto-animate=true}
+
+::: {data-id="figure1" style="margin-top: 100px;"}
+```{mermaid}
+flowchart LR
+  A[Hard edge] --> B(Round edge)
+  B --> C{Decision}
+  C --> D[Result one]
+  C --> E[Result two]
+  C --> F[Result three]
+```
+:::
+
 
 # My AI Story {.center style="text-align: center;" background-image="2023-09-12 NIEHS Council//dtt_slide_header.jpg" background-size="contain" background-repeat="no-repeat" background-position="top"}
 
