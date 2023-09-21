@@ -51,6 +51,12 @@ format:
       formatting: preprint
       model: 5p
       cite-style: super
+      #graphical-abstract: "![](abstract.png)"
+      # highlights:
+      #   - Metastases mostly disseminate late from primary breast tumors, keeping most drivers
+      #   - Drivers at relapse sample from a wider range of cancer genes than in primary tumors
+      #   - Mutations in SWI-SNF complex and inactivated JAK-STAT signaling enriched at relapse
+      #   - Mutational processes similar in primary and relapse; radiotherapy can damage genome
 filters:
   - abstract-section
 ---
@@ -153,6 +159,11 @@ alone or form a subsection of a Discussion or Results and Discussion section.
 -->
 
 Summary of the main findings and future directions for the ToxPipe project.
+
+<!--#
+Sample CRediT author statement
+Zhang San: Conceptualization, Methodology, Software Priya Singh.: Data curation, Writing- Original draft preparation. Wang Wu: Visualization, Investigation. Jan Jansen: Supervision.: Ajay Kumar: Software, Validation.: Sun Qi: Writing- Reviewing and Editing,
+-->
 
 # Acknowledgements
 
