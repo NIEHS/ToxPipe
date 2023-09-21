@@ -928,6 +928,13 @@ $xy-block-grid-max: 8;
   }
 }
 
+.reveal .slide {
+  background-image: url("");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: top;
+}
+
 /*-- scss:functions --*/
 /// Scales a color to be darker if it's light, or lighter if it's dark. Use this function to tint a color appropriate to its lightness.
 ///
@@ -942,3 +949,4 @@ $xy-block-grid-max: 8;
   }
   @return scale-color($color, $lightness: $scale);
 }
+

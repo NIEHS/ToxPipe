@@ -55,12 +55,38 @@ filters:
   - abstract-section
 ---
 
-<!--# -->
 # Abstract
+
+<!--#
+A concise and factual abstract of approx. 200-300 words is mandatory. The abstract should
+state briefly the purpose of the research, the principal results and major conclusions. An abstract
+is often presented separately from the article, so it must be able to stand alone. For this reason,
+References should be avoided, but if essential, then cite the author(s) and year(s). Also, non-standard
+or uncommon abbreviations should be avoided, but if essential they must be defined at their first
+mention in the abstract itself.
+-->
 
 The Division of Translational Toxicology at NIEHS introduces ToxPipe, a pioneering project aiming to harness expert entrained AI-based systems and cloud computing to revolutionize the analysis and interpretation of toxicological properties of compounds. ToxPipe repurposes advanced AI models like JARVIS and Auto-GPT to facilitate the exploration of toxicologically-relevant data through natural language instructions, enabling a semi-autonomous approach to toxicological characterization and data integration. This project is grounded in the success of expert entrained AI models like Auto-GPT and JARVIS, which employ OpenAI’s GPT-based models as controllers to connect fine-tuned, expert AI models, allowing the execution of complex tasks through plain language interfaces. ToxPipe utilizes Azure Cloud to enhance the speed and efficiency of toxicological predictions, leveraging its pay-as-you-go model for cost-effective utilization of resources and direct access to crucial OpenAI models. The project also integrates Posit Connect for the deployment of Shiny web applications, Jupyter notebooks, and APIs, allowing seamless interaction with ToxPipe through a primary Shiny application and facilitating the development of additional applications using the ToxPipe API. The project leverages existing resources on BioWulf and NIEHS HPC clusters for heavy compute loads, exploring hybrid deployment models and reducing cloud costs. The utilization of these resources also allows easy integration of scientific tools and data already loaded on BioWulf. The implementation of ToxPipe is poised to significantly accelerate the research process in toxicology, serving as a blueprint for harnessing cloud computing in scientific discovery. The project’s success will be evaluated against a set of clearly defined metrics and performance indicators, including accuracy, speed, cost-effectiveness, and the quality and scope of ToxPipe generated products, aligning with NIH’s strategic goals in data science and research. In conclusion, ToxPipe represents a groundbreaking initiative in computational toxicology, combining expert entrained AI, cloud computing, and hybrid deployments to advance toxicological workflows and scientific knowledge discovery. The well-defined milestones and experienced team are set to ensure the project’s success and contribute to the evolution of toxicological research methodologies.
 
+<!--#
+
+# Graphical Abstract
+
+Although a graphical abstract is optional, its use is encouraged as it draws more attention to the online
+article. The graphical abstract should summarize the contents of the article in a concise, pictorial form
+designed to capture the attention of a wide readership. Graphical abstracts should be submitted as a
+separate file in the online submission system. Image size: Please provide an image with a minimum
+of 531 × 1328 pixels (h × w) or proportionally more. The image should be readable at a size of 5 ×
+13 cm using a regular screen resolution of 96 dpi. Preferred file types: TIFF, EPS, PDF or MS Office
+files. You can view Example Graphical Abstracts on our information site.
+-->
+
 # Introduction
+
+<!--#
+State the objectives of the work and provide an adequate background, avoiding a detailed literature
+survey or a summary of the results
+-->
 
 - Background on toxicological information retrieval.
 - The significance of AI in enhancing toxicological data interpretation.
@@ -68,7 +94,14 @@ The Division of Translational Toxicology at NIEHS introduces ToxPipe, a pioneeri
 
 Toxicological research is an important field that plays a critical role in protecting public health and the environment. However, the sheer volume of toxicological data available can make it difficult for researchers to quickly and accurately retrieve and interpret the information they need. ToxPipe is designed to address this challenge by providing an AI-assisted platform that can help researchers quickly and accurately retrieve and interpret toxicological information.
 
-# Methods
+# Materials and methods
+
+<!--#
+Provide sufficient details to allow the work to be reproduced by an independent researcher. Methods
+that are already published should be summarized, and indicated by a reference. If quoting directly
+from a previously published method, use quotation marks and also cite the source. Any modifications
+to existing methods should also be described.
+-->
 
 ToxPipe uses a combination of natural language processing, machine learning, and data visualization techniques to help researchers retrieve and interpret toxicological information. The platform is designed to be user-friendly and intuitive, with a simple and intuitive interface that allows researchers to quickly and easily search for and retrieve the information they need.
 
@@ -85,7 +118,7 @@ Description of the data sources and collection methods.
 
 Description of the ToxPipe platform's user interface, features, and functionalities.
 
-# Results
+# Results <!--# Results should be clear and concise.-->
 
 ToxPipe has been tested on a variety of toxicological datasets, and has been shown to be highly effective at retrieving and interpreting toxicological information. The platform has also been well-received by toxicologists and researchers, who have praised its ease of use and effectiveness.
 
@@ -98,7 +131,13 @@ ToxPipe has been tested on a variety of toxicological datasets, and has been sho
 
 Feedback and results from user testing of the ToxPipe platform.
 
-# Discussion
+# Discussion 
+
+<!--#
+This should explore the significance of the results of the work, not repeat them. A combined Results
+and Discussion section is often appropriate. Avoid extensive citations and discussion of published
+literature.
+-->
 
 - Interpretation of the results.
 - Implications of the findings.
@@ -106,11 +145,23 @@ Feedback and results from user testing of the ToxPipe platform.
 
 ToxPipe represents a significant advance in the field of toxicological research, providing researchers with a powerful tool for quickly and accurately retrieving and interpreting toxicological information. The platform has the potential to significantly improve the efficiency and effectiveness of toxicological research, and could have important implications for public health and the environment.
 
-# Conclusion
+# Conclusions
+
+<!--#
+The main conclusions of the study may be presented in a short Conclusions section, which may stand
+alone or form a subsection of a Discussion or Results and Discussion section.
+-->
 
 Summary of the main findings and future directions for the ToxPipe project.
 
 # Acknowledgements
+
+<!--#
+Collate acknowledgements in a separate section at the end of the article before the references and do
+not, therefore, include them on the title page, as a footnote to the title or otherwise. List here those
+individuals who provided help during the research (e.g., providing language help, writing assistance
+or proof reading the article, etc.).
+-->
 
 Acknowledging individuals or institutions that contributed to the project but are not listed as authors.
 

@@ -1,0 +1,274 @@
+WEBVTT
+Trey: Talk to you about was like target audience and like how deep to go and and figuring out what you know.
+David: Yeah.
+David: Yeah.
+David: No, that's perfect.
+Trey: Umm.
+David: Really that the deal is umm, so I I was having a conversation with, you know, Robert Sills, RSD, you know about, you know, establishing uh, it things like AI and and machine learning and and predictive talks in their home and you know was telling about this project you're working on how cool it was and he thought it was really neat and then say hey, there's actually a slot coming up that we could really plug this into umm and reached out and so you know he's like sold on how this is cool already normally these presentations are for various senior people so if you look at the other people on the list it's like Thomas Hartong and umm other people have been doing this in a while to have very mature projects.
+Trey: Umm.
+David: So what I'm really looking to highlight here is and then and so you know, I told Scott that I said, hey the you know usually and I counsel you know, these people are presenting or they're sort of presenting finished work and it's it's a you know different kind of thing and and and he said yeah actually like you know it trades represented and I said yeah I know.
+David: I mean, I've seen your present and it's I've no doubts about that.
+David: It was just sort of like the scale of what we're gonna do.
+David: And he said, yeah, I, you know, expressed a lot of confidence in you.
+David: And I said, yeah, that's great.
+David: I feel the same way.
+David: Let's do it.
+Trey: Umm.
+David: So you know you're gonna be up there presenting side by side with people presenting very different aspects of it at a high level years is going to be the only one that is as hands on.
+Trey: What do you mean by hands on like?
+David: Umm, but hands on and mean like.
+Trey: Well, I like like or what?
+Trey: Like how are the other ones not hands on, I guess is what I'm asking like.
+David: Yes, if you the I think where you CC D on the email from Robert Sills with the the lineup that day.
+Trey: Ice everything that I no, I only saw the emails that I saw were just like hey, like we we talked about this and we wanna have him like we're OK with it and then like the back and forth.
+David: OK.
+David: Yeah.
+Trey: I didn't see any and then the only highlight in there was the theme, the gene environment interactions and like various omics and stuff multi omics.
+Trey: And that's all I said.
+David: Well, I tell you what.
+Trey: I didn't see that's one of the things.
+Trey: Yeah, I wanted.
+Trey: I did want to see who the audience was so I could see their well.
+David: Umm.
+Trey: I mean, I know in general because it's like the large language model stuff is all so new that I'm gonna, no matter what, I'm gonna have to like kind of pick and choose and use my time wisely to kind of guide them.
+David: Umm.
+David: Yeah.
+Trey: I kind of already, so I'm very interested in doing good presentation as you know like as you see I I can ramble a little bit, but for big ones like this I really do like to go kind of all in and.
+Trey: And so I've already kind of got some like animations planned cause so for some of the things they're really hard to explain.
+David: Umm.
+Trey: Like easily like the vector database stuff to people you know, it's like there's so with like I've already been thinking of some animations that I can make that will help, like facilitate teaching, like, because in order to understand no vector databases are something I need to talk about in order to explain, like, how the whole system kind of works together, you know?
+Trey: And so.
+Trey: But I'm a big fan of this of this book called Cause and effect, and it's about science.
+Trey: It's about giving good scientific presentations and I'm very much like minimize the amount of words if possible and use and like uh, you know so so I am focusing on that sort of thing and I wouldn't look too much like the the layout of this stuff like I need to.
+Trey: This is all just like boilerplate.
+Trey: Still same thing.
+Trey: It's gonna be on reveal dot J, so I'm gonna put it straight on.
+Trey: Pause it and they can click and look there.
+David: Umm.
+Trey: So I kind of I was reading back through my cause and effect book and I was thinking about like how to go about talking about this and let's see if I close this, will it mess up the hold on?
+Trey: Let me just do.
+Trey: There we go.
+Trey: So I wanted to find my goals.
+David: Hmm.
+Trey: So I define my goals as I want to convince the members of the Council that AI technologies are useful, but there are limitations and pitfalls to watch out for.
+Trey: I wanna convince them that AI technologies can be used to solve problems and environmental Health Sciences, especially in understanding gene environment interactions.
+David: Umm.
+David: Umm.
+Trey: And then I'll talk about how with the pulling data from different sources, whatever, and I wanna convince them that talks about platform that talks pipe is a platform that can be used to do this thing and it that it should get more support because it's it's getting to the point where I need.
+David: Yeah, yeah.
+Trey: You know, I've gotten the bones set up for it, but to start adding more features into integrate disparate data sets and everything else like and scale it up, I'm going to definitely need more, more help from a variety of people you know and funding.
+Trey: So that's like my message like I want.
+Trey: I think I can probably, uh, clean this up a little bit, but this is kind of what I have now.
+David: Umm.
+Trey: Various state of the art AI technologies can be used to solve problems in environmental Health Sciences, especially in understanding gene environment interactions and talks.
+Trey: Pipe is a platform that can be used to do this thing.
+David: Yep.
+Trey: So yeah, and so I wanna do a line.
+David: Umm.
+Trey: My goal, my message with time, which I figured you know, I asked Scott like, can I have an hour like for just the talk and then like 30 minutes of question.
+Trey: He's like, no, like pretty much.
+Trey: It's probably gonna be an hour Max.
+David: Yeah.
+Trey: So and I know that no matter how much I talk, like, people are always gonna have questions about AI stuff.
+David: Umm.
+Trey: Like don't matter what they're it's super interesting.
+Trey: And there's just so many different levels of knowledge about it, so I wanna leave enough time that and just have extra backup.
+David: Umm.
+Trey: Uh slides with stuff that I figure people will, you know, and I'll let them gauge it off of whatever.
+David: Yeah.
+Trey: But the the most common questions that I always see about AI stuff are security, privacy, and accuracy.
+David: Umm.
+Trey: Our kind of the three things that I notice like people are concerned about, you know, if I'm sending my stuff off to open AI like is it gonna end up on the black market?
+Trey: Whatever, especially with reference to like Phi, PII stuff, which is a very hot topic, but obviously people are concerned about their all the extra restrictions on that kind of thing.
+David: Umm.
+Trey: Privacy.
+Trey: So is along the same lines, but also making sure that like individual users, data doesn't leak and that kind of thing.
+Trey: And then, of course, a big one is always accuracy.
+David: Umm.
+Trey: So I wanna kind of address these three things in my talk, at least to try and head off most of those questions, cuz this is always where people want to know the most.
+David: Umm.
+Trey: I think the one that's the longest to explain is probably accuracy, because privacy and security can basically be dealt with by making sure that we utilize the open AI API when we use theirs.
+David: Umm.
+Trey: Because if you use the API then they don't use that data for retraining or anything like that and secure chain.
+Trey: I don't think it's good.
+David: Umm.
+Trey: It's good enough for THIPI yet, but for just like our purposes, you know, and especially because we could hook straight up into Azure Cloud, that will handle the security aspect like where technically no data is traveling across the, it's traveling across the Internet, but it's on a completely.
+David: Yeah. OK.
+Trey: Separate pipe and network, so that's totally taken care of.
+David: Yeah.
+Trey: But the accuracy portion is the one that's going to take me the most to talk about because there's so many.
+Trey: Obviously there's working with the models themselves, either changing your training data or fine tuning or whatever, and then there's stuff like.
+David: Umm.
+Trey: I mean NVIDIA Nemo guardrails that lets you guide the output.
+Trey: There's the LQL, the language model quickly and then just doing other stuff like prompt engineering like there's so many different ways to address the accuracy portion of it that I wanted to talk about. So.
+David: Umm yeah.
+David: Well, the frame it a little bit.
+David: Here's the case.
+David: There's two things that I have unfortunately date, so I had to.
+David: I have a like extra long meeting with Jeremy that I had to add on time too because we're trying to solve like a purchase thing for him.
+Trey: Yeah.
+David: So I won't be able to stay super long a day and we can check it again later this week, but this is the I put in the chat.
+Trey: Ah, OK.
+David: Umm, the other people we're going to be doing and what I think that's useful is because these people are all googleable and it should be the right.
+David: If you'd like add talks and AI, I'll get mikes.
+David: You'll get the right mix, Snyder, but you'll see kind of what they're coming from and they'll have very public presentations that you can see what they'll touch on.
+Trey: Right.
+David: And so it doesn't mean don't touch on anything that they do, but what it is, what it is, yeah.
+Trey: But that allows me to build off of their there's there's stuff.
+Trey: Yes, of course.
+David: Yep.
+David: Exactly.
+David: Yeah, I think that's very reasonable.
+Trey: Like if I if I know when they're presenting in what like roughly what they're presenting on, then I can definitely like, you know anticipate or plan like around that a little bit and make sure that OK I have slides but if they talk about something that I don't need to cover then I can kind of just skip past it real quick and use additional time.
+David: Yeah.
+David: So I think to vote to, I think the focus of your development at least like right now you know would hopefully be at least in the the July portion of this where we have like time to play and have fun is work on the actual product itself and then you know we can come and and and do the presentation, but the outline is the right way to start.
+David: I'm not saying go away from your outline.
+Trey: Right. Right. Right.
+Trey: Yeah.
+Trey: No, I'm not.
+David: Background stuff may not need to spend time on.
+Trey: Yeah.
+David: Umm yeah.
+David: Umm.
+Trey: Yeah, that's and that's again one of the things that I wanted to kind of back and forth with you like about, you know, this is just a chat, GBT outline kind of you know and I've been tweaking it a little bit and putting in stuff, but I kind of wanted to talk about it in like, but like a short story like you know, you don't wanna, you wanna be interesting, you wanna have a good opening and closing.
+David: Umm.
+Trey: And so for me, I kind of wanna just, like, talk about my AI story a little bit.
+David: Umm yeah.
+Trey: So I kind of wanted to talk about like, OK, the first time that I use chat, GBT, I was like, OK, this is interesting, is not it's like OK.
+Trey: But then I started seeing videos of how people were using it and I was like, oh, OK, like started seeing the potential.
+Trey: And then that's when I really started getting into the AI stuff.
+David: Yeah.
+David: Umm.
+David: Umm.
+David: Umm.
+Trey: For the past six months and then like talking about how we, you know, like then go over maybe whatever, whoever else hasn't already gone over chat, GPT and kind of talk about our experiments with it, you know, the what like, where we were asking at the talks related questions and then go into, OK well, you know, we've had how Scott and I came up with the idea for talks pipe that we kind of had this idea and then we saw Chem crow come out, which was the like, OK we see that like, yeah, this is like basic.
+Trey: Uh.
+Trey: Focused but.
+David: Ohh, download went OK yeah.
+Trey: But it's like the exact same like I was already looking at Lang Chain.
+David: And.
+Trey: I was already looking at the the different language models and tools that they were hooking into.
+Trey: So and then talk about, you know, how where I'm at right now, which or where I will be at that at the point of the talk which I am like, I basically am playing around with various front ends.
+David: Umm.
+Trey: So I'm testing a lot of different open source projects, but I've got my back end is pretty much planned.
+David: Umm.
+Trey: I got my database not like fully not the database like planned out but I know which database I'm gonna use.
+Trey: How I'm gonna use it and I could talk about that really briefly because, uh, the database that I picked is really useful because it incorporates file storage and vector database and real time for chatting with chat bots like it's it's, you know, it's covers a whole.
+Trey: I just.
+David: Umm.
+Trey: I'm really like and it's all open source, so it's just nice because it covers instead of having to write all of this stuff by hand, it's just like all in one tool.
+Trey: Umm, but I don't.
+Trey: I know I don't wanna go super far until like all of the technical details, but I did want to kind of give the high level overview of OK, everything like show the current infrastructure and then from there like show what the planned infrastructure is.
+Trey: And I'm gonna do it using this.
+Trey: Really. Cool.
+Trey: Uh, I'm.
+Trey: I kind of wanted to learn it, so this is like an excuse for me to work to learn it.
+Trey: There's an open source uh library called motion canvas.
+David: Umm.
+David: Umm.
+Trey: Uh, and this is basically like writing animations as code and it's just super like so I can do stuff like showing how how the like text moves and how like how you can create prompts and how the data moves from user to the server to the API.
+David: Umm.
+Trey: I, like, you know, like all that kind of stuff.
+Trey: And it'll I think that will really help.
+Trey: I don't wanna go overboard with the animations, but I do think that I found that all of the other instances of people trying to.
+David: Umm.
+Trey: Explain this with just like flow charts that are like static, it just it's such a complex topic that you really need like that little bit of extra.
+David: Umm.
+David: Umm.
+Trey: You know, especially when I'm explaining the vector database stuff, because I've, you know, like it's really difficult to just use words or just a static and static graphic to explain how vector database stuff works.
+David: Yeah.
+David: No, it's very cool.
+David: Umm.
+Trey: But again, I the only reason I wanna talk about vector database stuff is again, it's really essential to the whole talks pipe system of how you can semantically search.
+Trey: Either previous conversations or different, or the different papers or that kind of stuff.
+David: No, it's very cool. Yeah.
+Trey: So it's really important and I don't know if anybody else is gonna cover.
+Trey: I kind of have a feeling that they might skim it, but it really is like very crucial to how to to doing this kind of a usage of the models so.
+David: Yeah.
+David: No, it's cool.
+David: Well, I'm so I have to jump because I had to join Jeremy.
+Trey: Yeah.
+David: Uh, right now, but whatever is going to say is that I'm I think that stuff is right on.
+David: And I think the some of the angles of like what can you do that these other people aren't able to or whatever it is like all that kind of stuff is really cool, right?
+David: Cause what we're trying to establish here, I can tell you like a super.
+David: There's a lot of pressure on you, but long term I want us to invest in this area with people in infrastructure and scientific money, all that kind of cool stuff, right?
+David: So like but built around essentially this project, right?
+Trey: Yeah.
+David: So like the purpose of these meetings that we're gonna have is the presentation is like a near term like a milestone or whatever.
+David: But it's really to like for the project, right?
+Trey: Umm.
+David: Like I'm interested in pushing this for you and having it be a saddler at all thing that comes out, and it kind of we build around it.
+Trey: Yeah.
+David: So it should be really fun.
+David: So I'm like, and I think the presentation can be a a really fun thing to do, but we'll we'll make sure that we're talking about stuff that's beyond just the talk, you know, like.
+Trey: Yeah.
+Trey: Yeah, of course.
+David: But the talk is a great kickoff and all that kind of stuff.
+Trey: Yeah.
+David: Yeah, it's super exciting.
+David: It's yeah.
+David: Yeah, that's awesome.
+Trey: And even in even in compiling this this present like part of compiling this presentation is just getting is getting my documentation together for stuff like it's a good.
+David: Umm.
+David: Umm.
+David: Ohh yeah for sure yeah.
+Trey: It's a good like working on the same time and so even if I'm like putting stuff in there that we may cut later, like it's stuff that I know that I will be nice to have around cuz somebody will ask about it at some point and then I can just, Oh yeah, I have a slide for that.
+Trey: Hold on.
+Trey: Let's go. So.
+David: Yep, no, this is really good and it kind of, you know, establishes you as a person who talked to her for this within our, uh, pretty, you know for for the division so.
+Trey: Yeah, I mean, I I kind of see where things are.
+Trey: I see where things are headed in terms of like trying to do more investment in this and and moving this forward as kind of a main focus area.
+Trey: And I'm I'm all for it.
+David: Yeah.
+Trey: So I I'm on board.
+David: And and there's a I I I see a.
+David: For me, it's really important to have the like technical understanding is different.
+David: You know, a lot of people are using these vocab words right now.
+Trey: Yeah.
+Trey: Yeah, right.
+David: Without yeah.
+David: Umm yeah.
+Trey: I and that's the thing too is like I I would like to know what the and I I kind of have a feeling for when I've been watching other people talk like the the reaction from the audience or the questions that people are getting.
+David: Yeah.
+David: Yeah, it's super neat.
+Trey: I have a good feeling of like how far what words I will and won't need to explain and how technical to get so.
+David: Yeah, it it's super neat.
+David: And I'm also I I just think I mean the way you present is cool too.
+David: So I'm I'm excited about that.
+Trey: Uh.
+David: So yeah, well, cool.
+David: We'll check back in again.
+Trey: Yeah.
+David: I talked to Scott for a while too, and she'll make sure I knew everything.
+David: Tori went from vacation and all that kind of stuff, so I think we're good.
+David: But yeah, we can expand on the time.
+David: I just sort of bookmarks the weekly time just to have, but we can certainly expand on if we need so.
+David: Umm yeah.
+Trey: No, it's nice to have and it's even just hearing this initial bit of like this is what's, you know, who's gonna be there and what is gonna happen is still useful to me.
+David: Yeah.
+Trey: So to kind of guide me as I work on this, but I know it's a couple months away, but I'm definitely like.
+David: Yeah.
+David: Yeah, it's gonna be super fun.
+Trey: I I know the I know the venue that I have, so I'm definitely not gonna let it slip by and I wanna make a strong showing so.
+David: Yeah, it's it's gonna be super fun.
+David: I'm telling you like this is gonna be I'm.
+David: I'm very excited about this, so I'm sure about the project too.
+David: Yeah.
+David: Yeah, the talk.
+Trey: Yes, yes.
+Trey: So all right.
+David: So, yeah, cool.
+David: OK.
+David: Yeah.
+David: Thanks.
+Trey: Well, yeah, I'll let you talk to Jeremy and I'll catch up with you later.
+David: Thanks for assembling it and if I'm helpful at any point with welcome to share stuff or we can talk, you know?
+Trey: Yeah, I will definitely hit you up if I have, yes.
+David: Yeah, I'm back.
+David: The new machine is to be used for coding, so I'm finally starting to take a trip to original code. Again.
+Trey: Awesome, alright.
+David: It's happening.
+David: Yeah.
+David: OK.
+Trey: Alright, bye.
+David: Later, right.

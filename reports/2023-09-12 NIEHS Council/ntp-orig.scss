@@ -1,0 +1,952 @@
+/*-- scss:defaults --*/
+
+//  0. Colors
+//  -----------------------------
+$NavyBlue:			#0e132d;
+$DarkBlue:			#232b5f;
+$MarbleBlue:		#3e4257;
+$NTPBlue:			#0b4898;
+$DenimBlue:			#215f90;
+$BrightBlue:		#4c6eac;
+$SteelBlue:			#c8d7e3;
+$LightBlue:			#dae6ee;
+$Green:				#527f24;
+$DarkGreen:			#426a19;
+$SageGreen:			#c1d1b1;
+$LightGreen:		#e1edd5;
+$Red:				#cd0000;
+$BlushRed:			#fcdbd3;
+$PetalRed:			#fef2f2;
+$Orange:			#f26522;
+$DarkOrange:		#b64a17;
+$ApricotOrange:		#f9d0bc;
+$ChablisOrange:		#fdece4;
+$GoldYellow:		#b48823;
+$FawnYellow:		#c7a65a;
+$Yellow:			#ffcc33;
+$KhakiYellow:		#e0d2b5;
+$LightYellow:		#fff1d4;
+$Black:				#000;
+$NearlyBlack:		#262626;
+$DarkGray:			#545454;
+$Gray:				#888;
+$SilverGray:		#9f9f9f;
+$MediumGray:		#ccc;
+$AltoGray:			#d9d9d9;
+$LightGray:			#f0f0f0;
+$NearlyWhite:		#f8f8f8;
+$White:				#fff;
+$Value1:			#0b4898;
+$Value2:			#f26522;
+$Value3:			#527f24;
+$Value4:			#cc2027;
+$Value5:			#ffcc33;
+$Value6:			#07a4a6;
+$Value7:			#dd1790;
+$Value8:			#783f87;
+
+// 1. Global
+// ---------
+
+$global-font-size: 100%;
+$global-width: rem-calc(1290);
+$global-lineheight: 1.5;
+$foundation-palette: (
+  primary: $NTPBlue,
+  secondary: $DarkGray,
+  success: $Green,
+  warning: $DarkOrange,
+  alert: $Red,
+);
+
+$primary-color: $NTPBlue;
+$secondary-color: $DarkGray;
+$success-color: $Green;
+$warning-color: $DarkOrange;
+$alert-color: $Red;
+
+$light-gray: $LightGray;
+$medium-gray: $MediumGray;
+$dark-gray: $DarkGray;
+$black: $Black;
+$white: $White;
+$body-background: $White;
+$body-font-color: $Black;
+$body-font-family: 'Source Sans Pro', Arial, Helvetica, sans-serif;
+/* 6.7.4 */			$body-safe-padding: false;
+$body-antialiased: true;
+$global-margin: 1rem;
+$global-padding: 1rem;
+$global-position: 1rem;
+$global-weight-normal: normal;
+$global-weight-bold: bold;
+$global-radius: 6px;
+$global-menu-padding: 0.7rem 1rem;
+$global-menu-nested-margin: 1rem;
+$global-text-direction: ltr;
+$global-flexbox: true;
+$global-prototype-breakpoints: false;
+$global-button-cursor: auto;
+$global-color-pick-contrast-tolerance: 0;
+$print-transparent-backgrounds: true;
+$print-hrefs: true;
+/* NTP Custom */	$no-underline: none !important;
+/* NTP Custom */	$underline: underline !important;
+/* NTP Custom */	$imageBase: "//ntp.niehs.nih.gov/images";
+/* NTP Custom */	$fontBase: "//ntp.niehs.nih.gov/fonts";
+/* NTP Custom */	$externalDark: url('#{$imageBase}/icons/icon_external.svg');
+/* NTP Custom */	$externalLight: url('#{$imageBase}/icons/icon_external_white.svg');
+
+// Presentation settings
+$presentation-heading-font: 	$body-font-family;
+$presentation-heading-color: 	#00447C;
+$presentation-heading-line-height: 	1.2;
+$presentation-heading-letter-spacing: 	normal;
+$presentation-heading-text-transform: 	none;
+$presentation-heading-text-shadow: 	none;
+$presentation-h1-text-shadow: 	none;
+$presentation-heading-font-weight: 	600;
+$presentation-h1-font-size: 	2.5em;
+$presentation-h2-font-size: 	1.6em;
+$presentation-h3-font-size: 	1.3em;
+$presentation-h4-font-size: 	1em;
+$presentation-block-margin: 	12px;
+$presentation-slide-text-align: 	left;
+$presentation-title-slide-text-align: 	center;
+
+
+// 2. Breakpoints
+// --------------
+
+$breakpoints: (
+  small: 0,
+  medium: 640px,
+  large: 1024px,
+  xlarge: 1200px,
+  xxlarge: 1440px,
+);
+$breakpoints-hidpi: (
+  hidpi-1: 1,
+  hidpi-1-5: 1.5,
+  hidpi-2: 2,
+  retina: 2,
+  hidpi-3: 3
+);
+$print-breakpoint: large;
+$breakpoint-classes: (small medium large);
+
+// 3. The Grid
+// -----------
+
+$xy-grid: false;
+$grid-row-width: $global-width;
+$grid-column-count: 12;
+$grid-column-gutter: (
+  small: 20px,
+  medium: 30px,
+);
+$grid-column-align-edge: true;
+$grid-column-alias: 'columns';
+$block-grid-max: 8;
+
+// 4. Base Typography
+// ------------------
+
+$header-font-family: $body-font-family;
+$header-font-weight: $global-weight-normal;
+$header-font-style: normal;
+$font-family-monospace: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', Courier, monospace;
+/* NTP Custom */	$font-family-icon: 'FontAwesome';
+$header-color: inherit;
+$header-lineheight: 1.4;
+$header-margin-bottom: 0.5rem;
+$header-styles: (
+  small: (
+    'h1': ('font-size': 36, 'font-weight': 300),
+    'h2': ('font-size': 20, 'font-weight': 300),
+    'h3': ('font-size': 19),
+    'h4': ('font-size': 18),
+    'h5': ('font-size': 17),
+    'h6': ('font-size': 16),
+  ),
+  medium: (
+    'h1': ('font-size': 46),
+    'h2': ('font-size': 34),
+    'h3': ('font-size': 30),
+    'h4': ('font-size': 24),
+    'h5': ('font-size': 18),
+    'h6': ('font-size': 16),
+  ),
+);
+$header-text-rendering: optimizeLegibility;
+$small-font-size: 80%;
+$header-small-font-color: $MediumGray;
+$paragraph-lineheight: 1.5;
+$paragraph-margin-bottom: 1.5rem;
+$paragraph-text-rendering: optimizeLegibility;
+$enable-code-inline: true;
+$anchor-color: $primary-color;
+$anchor-color-hover: scale-color($anchor-color, $lightness: -14%);
+$anchor-text-decoration: none;
+$anchor-text-decoration-hover: none;
+$hr-width: 100%;
+$hr-border: 1px solid $AltoGray;
+$hr-margin: rem-calc(30) 0;
+$list-lineheight: $paragraph-lineheight;
+$list-margin-bottom: $paragraph-margin-bottom;
+$list-style-type: disc;
+$list-style-position: outside;
+$list-side-margin: 1.25rem;
+$list-nested-side-margin: 1.25rem;
+$defnlist-margin-bottom: 1rem;
+$defnlist-term-weight: $global-weight-bold;
+$defnlist-term-margin-bottom: 0.3rem;
+$blockquote-color: $DarkGray;
+$blockquote-padding: rem-calc(9 20 0 19);
+$blockquote-border: 1px solid $MediumGray;
+$enable-cite-block: true;
+$keystroke-font: $font-family-monospace;
+$keystroke-color: $Black;
+$keystroke-background: $LightGray;
+$keystroke-padding: rem-calc(2 4 0);
+$keystroke-radius: 0;
+$abbr-underline: 1px dotted $Black;
+
+// 5. Typography Helpers
+// ---------------------
+
+$lead-font-size: $global-font-size * 1.25;
+$lead-lineheight: 1.6;
+$subheader-lineheight: 1.4;
+$subheader-color: $DarkGray;
+$subheader-font-weight: $global-weight-normal;
+$subheader-margin-top: 0.2rem;
+$subheader-margin-bottom: 0.5rem;
+$stat-font-size: 2.5rem;
+$cite-color: $DarkGray;
+$cite-font-size: rem-calc(13);
+$cite-pseudo-content: '\2014 \0020';
+$code-color: $Black;
+$code-font-family: $font-family-monospace;
+$code-font-weight: $global-weight-normal;
+$code-background: $LightGray;
+$code-border: 1px solid $AltoGray;
+$code-padding: rem-calc(2 5 1);
+$code-block-padding: 1rem;
+$code-block-margin-bottom: 1.5rem;
+
+// 6. Abide
+// --------
+
+$abide-inputs: true;
+$abide-labels: true;
+$input-background-invalid: $White;
+$form-label-color-invalid: $Black;
+$input-error-color: get-color(alert);
+$input-error-font-size: rem-calc(12);
+$input-error-font-weight: $global-weight-bold;
+
+// 7. Accordion
+// ------------
+
+$accordion-background: $DarkBlue;
+$accordion-plusminus: false;
+$accordion-plus-content: '\002B';
+$accordion-minus-content: '\2013';
+$accordion-title-font-size: rem-calc(16);
+$accordion-item-color: $White;
+$accordion-item-background-hover: $NavyBlue;
+$accordion-item-padding: 0.8rem 1.25rem;
+$accordion-content-background: $LightBlue;
+$accordion-content-border: 1px solid $SteelBlue;
+$accordion-content-color: $body-font-color;
+$accordion-content-padding: 0.8rem 1.7rem;
+
+// 8. Accordion Menu
+// -----------------
+
+$accordionmenu-padding: $global-menu-padding;
+$accordionmenu-nested-margin: $global-menu-nested-margin;
+$accordionmenu-submenu-padding: $accordionmenu-padding;
+$accordionmenu-arrows: true;
+$accordionmenu-arrow-color: $primary-color;
+$accordionmenu-item-background: null;
+$accordionmenu-border: null;
+$accordionmenu-submenu-toggle-background: null;
+$accordion-submenu-toggle-border: $accordionmenu-border;
+$accordionmenu-submenu-toggle-width: 40px;
+$accordionmenu-submenu-toggle-height: $accordionmenu-submenu-toggle-width;
+$accordionmenu-arrow-size: 6px;
+
+// 9. Badge
+// --------
+
+$badge-background: $primary-color;
+$badge-color: $White;
+$badge-color-alt: $Black;
+$badge-palette: $foundation-palette;
+$badge-padding: 0.3em;
+$badge-minwidth: 2.1em;
+$badge-font-size: 0.6rem;
+
+// 10. Breadcrumbs
+// ---------------
+
+$breadcrumbs-margin: 0;
+$breadcrumbs-item-font-size: rem-calc(14);
+$breadcrumbs-item-color: $DarkBlue;
+$breadcrumbs-item-color-current: $Black;
+$breadcrumbs-item-color-disabled: $MediumGray;
+$breadcrumbs-item-margin: 0.75rem;
+$breadcrumbs-item-uppercase: true;
+$breadcrumbs-item-separator: true;
+$breadcrumbs-item-separator-item: '/';
+$breadcrumbs-item-separator-item-rtl: '\\';
+$breadcrumbs-item-separator-color: $MediumGray;
+
+// 11. Button
+// ----------
+
+$button-font-family: inherit;
+$button-font-weight: null;
+$button-padding: 0.85em 1.2em;
+$button-margin: 0;
+$button-fill: solid;
+$button-background: $Green;
+$button-background-hover: scale-color($button-background, $lightness: -15%);
+$button-color: $White;
+$button-color-alt: $White;
+$button-radius: 0;
+$button-border: 1px solid transparent;
+$button-hollow-border-width: 1px;
+$button-sizes: (
+  tiny: 0.6rem,
+  small: 0.875rem,
+  default: 1rem,
+  large: 1.25rem,
+);
+$button-palette: $foundation-palette;
+$button-opacity-disabled: 0.25;
+$button-background-hover-lightness: -20%;
+$button-hollow-hover-lightness: -50%;
+$button-transition: background-color 0.25s ease-out, color 0.25s ease-out;
+$button-responsive-expanded: false;
+
+// 12. Button Group
+// ----------------
+
+$buttongroup-margin: 0;
+$buttongroup-spacing: 0;
+$buttongroup-child-selector: '.button';
+$buttongroup-expand-max: 6;
+$buttongroup-radius-on-each: false;
+
+// 13. Callout
+// -----------
+
+$callout-background: $White;
+$callout-background-fade: 0%;
+$callout-border: 1px solid $AltoGray;
+$callout-margin: 0 0 1rem 0;
+$callout-sizes: (
+  small: 0.5rem,
+  default: 1rem,
+  large: 3rem,
+);
+$callout-font-color: $body-font-color;
+$callout-font-color-alt: $body-background;
+$callout-radius: 0;
+$callout-link-tint: 0%;
+
+// 14. Card
+// --------
+
+$card-background: $White;
+$card-font-color: $body-font-color;
+$card-divider-background: $LightGray;
+$card-border: 1px solid $LightGray;
+$card-shadow: none;
+$card-border-radius: 0;
+$card-padding: $global-padding;
+$card-margin-bottom: $global-margin;
+
+// 15. Close Button
+// ----------------
+
+$closebutton-position: right top;
+$closebutton-z-index: 10;
+$closebutton-default-size: medium;
+$closebutton-offset-horizontal: (
+  small: 0.66rem,
+  medium: 1rem,
+);
+$closebutton-offset-vertical: (
+  small: 0.66rem,
+  medium: 1rem,
+);
+$closebutton-size: (
+  small: 1.125rem,
+  medium: 1.125rem,
+);
+$closebutton-lineheight: 1;
+$closebutton-color: $SilverGray;
+$closebutton-color-hover: $MediumGray;
+
+// 16. Drilldown
+// -------------
+
+$drilldown-transition: transform 0.15s linear;
+$drilldown-arrows: true;
+$drilldown-padding: $global-menu-padding;
+$drilldown-nested-margin: 0;
+$drilldown-background: transparent;
+$drilldown-submenu-padding: $drilldown-padding;
+$drilldown-submenu-background: transparent;
+$drilldown-arrow-color: $primary-color;
+$drilldown-arrow-size: 6px;
+
+// 17. Dropdown
+// ------------
+
+$dropdown-padding: 1rem;
+$dropdown-background: $body-background;
+$dropdown-border: 1px solid $MediumGray;
+$dropdown-font-size: 1rem;
+$dropdown-width: 300px;
+$dropdown-radius: 0;
+$dropdown-sizes: (
+  tiny: 100px,
+  small: 200px,
+  large: 400px,
+);
+
+// 18. Dropdown Menu
+// -----------------
+
+$dropdownmenu-arrows: true;
+$dropdownmenu-arrow-color: $DenimBlue;
+$dropdownmenu-arrow-size: 4px;
+$dropdownmenu-arrow-padding: 1.5rem;
+$dropdownmenu-min-width: 355px;
+$dropdownmenu-background: $White;
+$dropdownmenu-submenu-background: $White;
+$dropdownmenu-padding: $global-menu-padding;
+$dropdownmenu-nested-margin: 0;
+$dropdownmenu-submenu-padding: $dropdownmenu-padding;
+$dropdownmenu-border: 1px solid $MediumGray;
+$dropdown-menu-item-color-active: get-color(primary);
+$dropdown-menu-item-background-active: transparent;
+
+// 19. Flexbox Utilities
+// ---------------------
+
+$flex-source-ordering-count: 6;
+$flexbox-responsive-breakpoints: true;
+
+// 20. Forms
+// ---------
+
+$fieldset-border: 1px solid $MediumGray;
+$fieldset-padding: rem-calc(20);
+$fieldset-margin: rem-calc(18 0);
+$legend-padding: rem-calc(0 3);
+$form-spacing: rem-calc(16);
+$helptext-color: $DarkGray;
+$helptext-font-size: rem-calc(12);
+$helptext-font-style: normal;
+$input-prefix-color: $Black;
+$input-prefix-background: $LightGray;
+$input-prefix-border: 1px solid $MediumGray;
+$input-prefix-padding: 1rem;
+$form-label-color: $Black;
+$form-label-font-size: rem-calc(16);
+$form-label-font-weight: $global-weight-normal;
+$form-label-line-height: 1.8;
+$select-background: $White;
+$select-triangle-color: $DarkGray;
+$select-radius: 0;
+$input-color: $Black;
+$input-placeholder-color: $NearlyBlack;
+$input-font-family: inherit;
+$input-font-size: rem-calc(16);
+$input-font-weight: $global-weight-normal;
+$input-line-height: $global-lineheight;
+$input-background: $White;
+$input-background-focus: $White;
+$input-background-disabled: $LightGray;
+$input-border: 1px solid $MediumGray;
+$input-border-focus: 1px solid $DarkGray;
+$input-padding: $form-spacing / 2;
+$input-shadow: none;
+$input-shadow-focus: 0 0 5px $MediumGray;
+$input-cursor-disabled: not-allowed;
+$input-transition: box-shadow 0.5s, border-color 0.25s ease-in-out;
+$input-number-spinners: true;
+$input-radius: 0;
+$form-button-radius: 0;
+
+// 21. Label
+// ---------
+
+$label-background: $primary-color;
+$label-color: $White;
+$label-color-alt: $White;
+$label-palette: $foundation-palette;
+$label-font-size: 0.8rem;
+$label-padding: 0.33333rem 0.5rem;
+$label-radius: $global-radius;
+
+// 22. Media Object
+// ----------------
+
+$mediaobject-margin-bottom: $global-margin;
+$mediaobject-section-padding: $global-padding;
+$mediaobject-image-width-stacked: 100%;
+
+// 23. Menu
+// --------
+
+$menu-margin: 0; 
+$menu-nested-margin: 1rem;
+$menu-items-padding: 0.7rem 1rem;
+$menu-simple-margin: $menu-nested-margin;
+$menu-item-color-active: $White;
+$menu-item-color-alt-active: $Black;
+$menu-item-background-active: get-color(primary);
+$menu-icon-spacing: 0.25rem;
+$menu-state-back-compat: true;
+$menu-centered-back-compat: true;
+$menu-icons-back-compat: true;
+
+// 24. Meter
+// ---------
+
+$meter-height: 1rem;
+$meter-radius: $global-radius;
+$meter-background: $MediumGray;
+$meter-fill-good: $success-color;
+$meter-fill-medium: $warning-color;
+$meter-fill-bad: $alert-color;
+
+// 25. Off-canvas
+// --------------
+
+$offcanvas-sizes: (
+  small: 25vw,
+);
+$offcanvas-vertical-sizes: (
+  small: 25vw,
+);
+$offcanvas-background: transparent;
+$offcanvas-shadow: none;
+$offcanvas-inner-shadow-size: 20px;
+$offcanvas-inner-shadow-color: rgba($black, 0.25);
+$offcanvas-overlay-zindex: 11;
+$offcanvas-push-zindex: 12;
+$offcanvas-overlap-zindex: 13;
+$offcanvas-reveal-zindex: 12;
+$offcanvas-transition-length: 0.5s;
+$offcanvas-transition-timing: ease;
+$offcanvas-fixed-reveal: true;
+$offcanvas-exit-background: transparent;
+$maincontent-class: 'off-canvas-content';
+
+// 26. Orbit
+// ---------
+
+$orbit-bullet-background: $DarkGray;
+$orbit-bullet-background-active: $Black;
+$orbit-bullet-diameter: 1.2rem;
+$orbit-bullet-margin: 0.1rem;
+$orbit-bullet-margin-top: 0.8rem;
+$orbit-bullet-margin-bottom: 0.8rem;
+$orbit-caption-background: rgba($Black, 0.7);
+$orbit-caption-padding: 1rem;
+$orbit-control-background-hover: transparent;
+$orbit-control-padding: 1rem;
+$orbit-control-zindex: 10;
+
+// 27. Pagination
+// --------------
+
+$pagination-font-size: rem-calc(16);
+$pagination-margin-bottom: $global-margin;
+$pagination-item-color: $Black;
+$pagination-item-padding: rem-calc(3 10);
+$pagination-item-spacing: rem-calc(1);
+$pagination-radius: 3px;
+$pagination-item-background-hover: $LightGray;
+$pagination-item-background-current: $Green;
+$pagination-item-color-current: $White;
+$pagination-item-color-disabled: $DarkGray;
+$pagination-ellipsis-color: $Black;
+$pagination-mobile-items: false;
+$pagination-mobile-current-item: false;
+$pagination-arrows: false;
+$pagination-arrow-previous: '\00AB';
+$pagination-arrow-next: '\00BB';
+
+// 28. Progress Bar
+// ----------------
+
+$progress-height: 1rem;
+$progress-background: $AltoGray;
+$progress-margin-bottom: $global-margin;
+$progress-meter-background: $primary-color;
+$progress-radius: 1rem;
+
+// 29. Prototype Arrow
+// -------------------
+
+$prototype-arrow-directions: (
+  down,
+  up,
+  right,
+  left
+);
+$prototype-arrow-size: 0.4375rem;
+$prototype-arrow-color: $Black;
+
+// 30. Prototype Border-Box
+// ------------------------
+
+$prototype-border-box-breakpoints: $global-prototype-breakpoints;
+
+// 31. Prototype Border-None
+// -------------------------
+
+$prototype-border-none-breakpoints: $global-prototype-breakpoints;
+
+// 32. Prototype Bordered
+// ----------------------
+
+$prototype-bordered-breakpoints: $global-prototype-breakpoints;
+$prototype-border-width: rem-calc(1);
+$prototype-border-type: solid;
+$prototype-border-color: $MediumGray;
+
+// 33. Prototype Display
+// ---------------------
+
+$prototype-display-breakpoints: $global-prototype-breakpoints;
+$prototype-display: (
+  inline,
+  inline-block,
+  block,
+  table,
+  table-cell
+);
+
+// 34. Prototype Font-Styling
+// --------------------------
+
+$prototype-font-breakpoints: $global-prototype-breakpoints;
+$prototype-wide-letter-spacing: rem-calc(4);
+$prototype-font-normal: $global-weight-normal;
+$prototype-font-bold: $global-weight-bold;
+
+// 35. Prototype List-Style-Type
+// -----------------------------
+
+$prototype-list-breakpoints: $global-prototype-breakpoints;
+$prototype-style-type-unordered: (
+  disc,
+  circle,
+  square
+);
+$prototype-style-type-ordered: (
+  decimal,
+  lower-alpha,
+  lower-latin,
+  lower-roman,
+  upper-alpha,
+  upper-latin,
+  upper-roman
+);
+
+// 36. Prototype Overflow
+// ----------------------
+
+$prototype-overflow-breakpoints: $global-prototype-breakpoints;
+$prototype-overflow: (
+  visible,
+  hidden,
+  scroll
+);
+
+// 37. Prototype Position
+// ----------------------
+
+$prototype-position-breakpoints: $global-prototype-breakpoints;
+$prototype-position: (
+  static,
+  relative,
+  absolute,
+  fixed
+);
+$prototype-position-z-index: 975;
+
+// 38. Prototype Rounded
+// ---------------------
+
+$prototype-rounded-breakpoints: $global-prototype-breakpoints;
+$prototype-border-radius: rem-calc(3);
+
+// 39. Prototype Separator
+// -----------------------
+
+$prototype-separator-breakpoints: $global-prototype-breakpoints;
+$prototype-separator-align: center;
+$prototype-separator-height: rem-calc(2);
+$prototype-separator-width: 3rem;
+$prototype-separator-background: $primary-color;
+$prototype-separator-margin-top: $global-margin;
+
+// 40. Prototype Shadow
+// --------------------
+
+$prototype-shadow-breakpoints: $global-prototype-breakpoints;
+$prototype-box-shadow: 0 2px 5px 0 rgba(0,0,0,.16),
+                       0 2px 10px 0 rgba(0,0,0,.12);
+
+// 41. Prototype Sizing
+// --------------------
+
+$prototype-sizing-breakpoints: $global-prototype-breakpoints;
+$prototype-sizing: (
+  width,
+  height
+);
+$prototype-sizes: (
+  25: 25%,
+  50: 50%,
+  75: 75%,
+  100: 100%
+);
+
+// 42. Prototype Spacing
+// ---------------------
+
+$prototype-spacing-breakpoints: $global-prototype-breakpoints;
+$prototype-spacers-count: 3;
+
+// 43. Prototype Text-Decoration
+// -----------------------------
+
+$prototype-decoration-breakpoints: $global-prototype-breakpoints;
+$prototype-text-decoration: (
+  overline,
+  underline,
+  line-through,
+);
+
+// 44. Prototype Text-Transformation
+// ---------------------------------
+
+$prototype-transformation-breakpoints: $global-prototype-breakpoints;
+$prototype-text-transformation: (
+  lowercase,
+  uppercase,
+  capitalize
+);
+
+// 45. Prototype Text-Utilities
+// ----------------------------
+
+$prototype-utilities-breakpoints: $global-prototype-breakpoints;
+$prototype-text-overflow: ellipsis;
+
+// 46. Responsive Embed
+// --------------------
+
+$responsive-embed-margin-bottom: rem-calc(16);
+$responsive-embed-ratios: (
+  default: 4 by 3,
+  widescreen: 16 by 9,
+);
+
+// 47. Reveal
+// ----------
+
+$reveal-background: $White;
+$reveal-width: 80%;
+$reveal-max-width: $global-width;
+$reveal-padding: $global-padding;
+$reveal-border: 0;
+$reveal-radius: 0;
+$reveal-zindex: 1005;
+$reveal-overlay-background: rgba($Black, 0.5);
+
+// 48. Slider
+// ----------
+
+$slider-width-vertical: 0.5rem;
+$slider-transition: all 0.2s ease-in-out;
+$slider-height: 0.5rem;
+$slider-background: $LightGray;
+$slider-fill-background: $MediumGray;
+$slider-handle-height: 1.4rem;
+$slider-handle-width: 1.4rem;
+$slider-handle-background: $primary-color;
+$slider-opacity-disabled: 0.25;
+$slider-radius: 0;
+
+// 49. Switch
+// ----------
+
+$switch-background: $MediumGray;
+$switch-background-active: $primary-color;
+$switch-height: 2rem;
+$switch-height-tiny: 1.5rem;
+$switch-height-small: 1.75rem;
+$switch-height-large: 2.5rem;
+$switch-radius: $global-radius;
+$switch-margin: $global-margin;
+$switch-paddle-background: $White;
+$switch-paddle-offset: 0.25rem;
+$switch-paddle-radius: $global-radius;
+$switch-paddle-transition: all 0.25s ease-out;
+$switch-opacity-disabled: .5;
+$switch-cursor-disabled: not-allowed;
+
+// 50. Table
+// ---------
+
+$table-background: $LightGray;
+$table-color-scale: 5%;
+$table-border: 0;
+$table-padding: rem-calc(10 20 10 20);
+$table-hover-scale: 2%;
+$table-row-hover: darken($table-background, $table-hover-scale);
+$table-row-stripe-hover: darken($table-background, $table-color-scale + $table-hover-scale);
+$table-is-striped: true;
+$table-striped-background: $White;
+$table-stripe: even;
+$table-head-background: $DarkBlue;
+$table-head-row-hover: darken($table-head-background, $table-hover-scale);
+$table-foot-background: smart-scale($table-background, $table-color-scale);
+$table-foot-row-hover: darken($table-foot-background, $table-hover-scale);
+$table-head-font-color: $White;
+$table-foot-font-color: $body-font-color;
+$show-header-for-stacked: false;
+$table-stack-breakpoint: medium;
+
+// 51. Tabs
+// --------
+
+$tab-margin: 0;
+$tab-background: $LightGray;
+$tab-color: $NTPBlue;
+$tab-background-active: $White;
+$tab-active-color: $NTPBlue;
+$tab-item-font-size: $global-font-size;
+$tab-item-background-hover: $White;
+$tab-item-padding: $button-padding;
+$tab-content-background: $White;
+$tab-content-border: $AltoGray;
+$tab-content-color: $body-font-color;
+$tab-content-padding: 1rem;
+
+// 52. Thumbnail
+// -------------
+
+$thumbnail-border: solid 4px $White;
+$thumbnail-margin-bottom: $global-margin;
+$thumbnail-shadow: 0 0 0 1px rgba($Black, 0.2);
+$thumbnail-shadow-hover: 0 0 6px 1px rgba($primary-color, 0.5);
+$thumbnail-transition: box-shadow 200ms ease-out;
+$thumbnail-radius: 0;
+
+// 53. Title Bar
+// -------------
+
+$titlebar-background: transparent;
+$titlebar-color: $Black;
+$titlebar-padding: 0.5rem;
+$titlebar-text-font-weight: bold;
+$titlebar-icon-color: $DenimBlue;
+$titlebar-icon-color-hover: $MediumGray;
+$titlebar-icon-spacing: 0.25rem;
+
+// 54. Tooltip
+// -----------
+
+$has-tip-cursor: help;
+$has-tip-font-weight: $global-weight-bold;
+$has-tip-border-bottom: dotted 1px #8a8a8a;
+$tooltip-background-color: $NavyBlue;
+$tooltip-color: $White;
+$tooltip-padding: 0.75rem;
+$tooltip-max-width: 10rem;
+$tooltip-font-size: $small-font-size;
+$tooltip-pip-width: 0.75rem;
+$tooltip-pip-height: $tooltip-pip-width * 0.866;
+$tooltip-radius: 0;
+
+// 55. Top Bar
+// -----------
+
+$topbar-padding: 0.5rem;
+$topbar-background: $White;
+$topbar-submenu-background: $topbar-background;
+$topbar-title-spacing: 0.5rem 1rem 0.5rem 0;
+$topbar-input-width: 200px;
+$topbar-unstack-breakpoint: medium;
+
+// 56. Xy Grid
+// -----------
+
+$xy-grid: true;
+$grid-container: $global-width;
+$grid-columns: 12;
+$grid-margin-gutters: (
+  small: 20px,
+  medium: 30px
+);
+$grid-padding-gutters: $grid-margin-gutters;
+$grid-container-padding: $grid-padding-gutters;
+$grid-container-max: $global-width;
+$xy-block-grid-max: 8;
+
+/*-- scss:rules --*/
+
+@mixin add-foundation-colors() {
+  @if map-has-key($foundation-palette, primary) {
+    $primary-color: map-get($foundation-palette, primary) !global;
+  }
+  @if map-has-key($foundation-palette, secondary) {
+    $secondary-color: map-get($foundation-palette, secondary) !global;
+  }
+  @if map-has-key($foundation-palette, success) {
+    $success-color: map-get($foundation-palette, success) !global;
+  }
+  @if map-has-key($foundation-palette, warning) {
+    $warning-color: map-get($foundation-palette, warning) !global;
+  }
+  @if map-has-key($foundation-palette, alert) {
+    $alert-color: map-get($foundation-palette, alert) !global;
+  }
+}
+
+.reveal .slide-background:not(.quarto-title-block) {
+  background-image: url(dtt_slide_header.jpg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: top;
+}
+
+/*-- scss:functions --*/
+/// Scales a color to be darker if it's light, or lighter if it's dark. Use this function to tint a color appropriate to its lightness.
+///
+/// @param {Color} $color - Color to scale.
+/// @param {Percentage} $scale [5%] - Amount to scale up or down.
+/// @param {Percentage} $threshold [40%] - Threshold of lightness to check against.
+///
+/// @returns {Color} A scaled color.
+@function smart-scale($color, $scale: 5%, $threshold: 40%) {
+  @if lightness($color) > $threshold {
+    $scale: -$scale;
+  }
+  @return scale-color($color, $lightness: $scale);
+}
+

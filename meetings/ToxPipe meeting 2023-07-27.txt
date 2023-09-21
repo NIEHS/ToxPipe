@@ -1,0 +1,1048 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:00.380
+<v Reif, David (NIH/NIEHS) [E]>Something.</v>
+
+00:00:01.130 --> 00:00:07.620
+<v Saddler, Trey (NIH/NIEHS) [C]>I am starting recording just because I figured now that this is the stuff that I'll need to take the you know, get feedback and everything.</v>
+
+00:00:08.490 --> 00:00:08.690
+<v Auerbach, Scott S (NIH/NIEHS) [E]>OK.</v>
+
+00:00:08.570 --> 00:00:08.930
+<v Reif, David (NIH/NIEHS) [E]>Umm.</v>
+
+00:00:08.510 --> 00:00:09.740
+<v Saddler, Trey (NIH/NIEHS) [C]>So this is kind of where.</v>
+
+00:00:14.690 --> 00:00:15.490
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Dropping out tray.</v>
+
+00:00:17.710 --> 00:00:18.030
+<v Saddler, Trey (NIH/NIEHS) [C]>Again.</v>
+
+00:00:21.150 --> 00:00:21.660
+<v Saddler, Trey (NIH/NIEHS) [C]>Hold on.</v>
+
+00:00:21.670 --> 00:00:26.270
+<v Saddler, Trey (NIH/NIEHS) [C]>Let me see if I can't like position my laptop to make it stop doing that.</v>
+
+00:00:28.770 --> 00:00:30.980
+<v Saddler, Trey (NIH/NIEHS) [C]>OK, hopefully that helps a little bit.</v>
+
+00:00:31.840 --> 00:00:32.130
+<v Reif, David (NIH/NIEHS) [E]>Umm.</v>
+
+00:00:34.330 --> 00:00:42.960
+<v Saddler, Trey (NIH/NIEHS) [C]>So using a quarto and reveal dot JS kind of like I did for my first talk that I did with you for the group.</v>
+
+00:00:43.870 --> 00:00:46.570
+<v Saddler, Trey (NIH/NIEHS) [C]>Umm I wanna.</v>
+
+00:00:46.580 --> 00:00:47.530
+<v Saddler, Trey (NIH/NIEHS) [C]>I guess the thing that I.</v>
+
+00:00:49.320 --> 00:00:52.150
+<v Saddler, Trey (NIH/NIEHS) [C]>David and I talked about this during our last meeting while you were gone.</v>
+
+00:00:52.160 --> 00:00:52.420
+<v Saddler, Trey (NIH/NIEHS) [C]>Scope.</v>
+
+00:00:52.430 --> 00:00:54.610
+<v Saddler, Trey (NIH/NIEHS) [C]>Kind of like who, who is gonna be there?</v>
+
+00:00:54.620 --> 00:00:55.420
+<v Saddler, Trey (NIH/NIEHS) [C]>Target audience.</v>
+
+00:00:55.430 --> 00:00:56.160
+<v Saddler, Trey (NIH/NIEHS) [C]>All of that?</v>
+
+00:00:56.560 --> 00:01:06.610
+<v Saddler, Trey (NIH/NIEHS) [C]>I don't know if you ever got to send an update email about asking to like cuz I think they said 30 like last thing we said it officially in the email was 30 minutes for talk and 30 minutes for questions.</v>
+
+00:01:07.080 --> 00:01:07.350
+<v Reif, David (NIH/NIEHS) [E]>Umm.</v>
+
+00:01:07.260 --> 00:01:07.480
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Yeah.</v>
+
+00:01:06.620 --> 00:01:12.350
+<v Saddler, Trey (NIH/NIEHS) [C]>So I don't know if we need to like update with them and say 40 minutes for talk 20 minutes for questions.</v>
+
+00:01:12.360 --> 00:01:13.610
+<v Saddler, Trey (NIH/NIEHS) [C]>If possible, just because I.</v>
+
+00:01:15.980 --> 00:01:16.160
+<v Saddler, Trey (NIH/NIEHS) [C]>Yeah.</v>
+
+00:01:15.450 --> 00:01:16.860
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Yeah, I think I think I did.</v>
+
+00:01:16.950 --> 00:01:17.540
+<v Auerbach, Scott S (NIH/NIEHS) [E]>I think I did.</v>
+
+00:01:17.550 --> 00:01:18.620
+<v Auerbach, Scott S (NIH/NIEHS) [E]>They said you can make up.</v>
+
+00:01:17.910 --> 00:01:18.800
+<v Reif, David (NIH/NIEHS) [E]>Yeah, yeah.</v>
+
+00:01:18.810 --> 00:01:19.380
+<v Reif, David (NIH/NIEHS) [E]>Scott sent that.</v>
+
+00:01:18.630 --> 00:01:20.220
+<v Auerbach, Scott S (NIH/NIEHS) [E]>You can do whatever you want with them, yeah.</v>
+
+00:01:20.260 --> 00:01:21.050
+<v Reif, David (NIH/NIEHS) [E]>Yeah. Yeah.</v>
+
+00:01:20.540 --> 00:01:21.380
+<v Saddler, Trey (NIH/NIEHS) [C]>OK, OK.</v>
+
+00:01:21.360 --> 00:01:24.210
+<v Reif, David (NIH/NIEHS) [E]>David Balshaw replied back to Scotts email. Yep.</v>
+
+00:01:24.070 --> 00:01:24.650
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Yeah, we can.</v>
+
+00:01:24.080 --> 00:01:25.260
+<v Saddler, Trey (NIH/NIEHS) [C]>OK, sounds.</v>
+
+00:01:24.660 --> 00:01:25.820
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Do we got an hour?</v>
+
+00:01:26.090 --> 00:01:27.210
+<v Auerbach, Scott S (NIH/NIEHS) [E]>So however you wanna use that hour.</v>
+
+00:01:27.810 --> 00:01:28.180
+<v Saddler, Trey (NIH/NIEHS) [C]>OK.</v>
+
+00:01:28.230 --> 00:01:28.500
+<v Saddler, Trey (NIH/NIEHS) [C]>Yeah.</v>
+
+00:01:28.510 --> 00:01:31.000
+<v Saddler, Trey (NIH/NIEHS) [C]>So 40 minutes for a talk, 20 minutes for questions.</v>
+
+00:01:31.870 --> 00:01:35.440
+<v Saddler, Trey (NIH/NIEHS) [C]>Right now this is kind of like this is with chat GBT.</v>
+
+00:01:35.760 --> 00:01:36.170
+<v Reif, David (NIH/NIEHS) [E]>Umm.</v>
+
+00:01:35.450 --> 00:01:38.130
+<v Saddler, Trey (NIH/NIEHS) [C]>So I'm open to open to feedback.</v>
+
+00:01:39.590 --> 00:01:48.800
+<v Saddler, Trey (NIH/NIEHS) [C]>I think that like it started off saying 10, I I think that I need the most time to actually talk about talks pipe itself.</v>
+
+00:01:48.810 --> 00:01:57.140
+<v Saddler, Trey (NIH/NIEHS) [C]>So I think I'm gonna go 15 minutes there and just like I'm gonna do probably just five minutes of, like really quickly, especially because.</v>
+
+00:01:57.210 --> 00:02:06.010
+<v Saddler, Trey (NIH/NIEHS) [C]>And I was talking to David about this, like, I don't know what what point in the in the like whole schedule I'll be talking.</v>
+
+00:02:12.040 --> 00:02:12.220
+<v Reif, David (NIH/NIEHS) [E]>Yeah.</v>
+
+00:02:06.020 --> 00:02:12.350
+<v Saddler, Trey (NIH/NIEHS) [C]>But apparently you know other people will be talking about related things and about large language models and stuff.</v>
+
+00:02:12.360 --> 00:02:24.960
+<v Saddler, Trey (NIH/NIEHS) [C]>So I'm gonna kind of try and keep this short and I'll have some backup slides in case they don't talk about some of the stuff, but I assume that they'll I don't wanna bore everybody.</v>
+
+00:02:24.970 --> 00:02:29.090
+<v Saddler, Trey (NIH/NIEHS) [C]>Going over chat, GBT for the fifth time, like explaining it all.</v>
+
+00:02:29.100 --> 00:02:29.630
+<v Saddler, Trey (NIH/NIEHS) [C]>Whatever.</v>
+
+00:02:29.640 --> 00:02:31.530
+<v Saddler, Trey (NIH/NIEHS) [C]>So I'm gonna keep that short.</v>
+
+00:02:32.250 --> 00:02:42.120
+<v Saddler, Trey (NIH/NIEHS) [C]>And then I want to talk about talks pipe and and then my whole thing was like kind of talk like I have this book that I told David about before it's called cause and effect.</v>
+
+00:02:42.170 --> 00:02:46.360
+<v Saddler, Trey (NIH/NIEHS) [C]>It's, you know how to give good scientific presentations.</v>
+
+00:02:46.370 --> 00:02:50.570
+<v Saddler, Trey (NIH/NIEHS) [C]>And so one of the things that they talked about was, uh, define your goals.</v>
+
+00:02:50.980 --> 00:02:53.660
+<v Saddler, Trey (NIH/NIEHS) [C]>So can you see that Scott as a too small?</v>
+
+00:02:53.950 --> 00:02:54.800
+<v Auerbach, Scott S (NIH/NIEHS) [E]>No, Nancy, you.</v>
+
+00:02:55.740 --> 00:03:02.690
+<v Saddler, Trey (NIH/NIEHS) [C]>Umm so my I wanna convince them that the AI technologies are useful but there's limitations and pitfalls.</v>
+
+00:03:15.740 --> 00:03:16.250
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Thank you.</v>
+
+00:03:03.280 --> 00:03:30.260
+<v Saddler, Trey (NIH/NIEHS) [C]>I wanna convince them that they can be used to solve some of the problems that we're facing, especially in understanding gene and environment interactions, since that's the theme of the talk or the meeting, whatever I wanna convince them that it's a platform that that talks pipe is a platform that can be used to integrate all these technologies into an easy to use tool and that it should perceive additional support in the form of onboarding people and and building it up from there.</v>
+
+00:03:30.370 --> 00:03:31.460
+<v Saddler, Trey (NIH/NIEHS) [C]>So what do I want?</v>
+
+00:03:31.570 --> 00:03:31.850
+<v Saddler, Trey (NIH/NIEHS) [C]>Go ahead.</v>
+
+00:03:39.080 --> 00:03:39.550
+<v Saddler, Trey (NIH/NIEHS) [C]>I'm.</v>
+
+00:03:30.440 --> 00:03:42.000
+<v Auerbach, Scott S (NIH/NIEHS) [E]>So how specifically or we thinking the gene by environment interactions are going to going to play out in this context?</v>
+
+00:03:42.830 --> 00:04:02.320
+<v Saddler, Trey (NIH/NIEHS) [C]>I think it's more I since I think it's gonna be more just like brushing on how these kinds of tools can help us explore that space rather than like I don't know how well I'll be able to demonstrate a full pipeline that does the like.</v>
+
+00:04:02.330 --> 00:04:11.000
+<v Saddler, Trey (NIH/NIEHS) [C]>We're talking about wanting to explore gene interpretation or gene expression interpretation, and I don't know that we'll get all the way there.</v>
+
+00:04:11.090 --> 00:04:20.290
+<v Saddler, Trey (NIH/NIEHS) [C]>But like for generating a full report, but we'll definitely be able to at least like query some tools and start showing how we're building up these pipelines.</v>
+
+00:04:20.300 --> 00:04:45.470
+<v Saddler, Trey (NIH/NIEHS) [C]>You know, so at least getting to the point where we can use the tool to do a query on Chembio talks or some other database where we're putting in a natural language query and it's converting it to SQL or converting it to an API call or whatever I think would be a huge demonstration of this is how we can start using these tools and building them up to generate these pipelines so.</v>
+
+00:04:47.140 --> 00:04:47.690
+<v Auerbach, Scott S (NIH/NIEHS) [E]>OK.</v>
+
+00:04:47.760 --> 00:04:51.150
+<v Auerbach, Scott S (NIH/NIEHS) [E]>I mean I so I think of it and and maybe I'm just being too rigid.</v>
+
+00:04:51.420 --> 00:05:08.190
+<v Auerbach, Scott S (NIH/NIEHS) [E]>You know, I think of gene by environment as you're you're basically your structural genome and your epigenome, which is relatively stable relative to a functional genomic impact of an environmental exposure, say, or a mutagenic exposure or something along those lines.</v>
+
+00:05:08.200 --> 00:05:12.280
+<v Auerbach, Scott S (NIH/NIEHS) [E]>So like gene by environment interaction, great example is if you carry.</v>
+
+00:05:12.850 --> 00:05:26.140
+<v Auerbach, Scott S (NIH/NIEHS) [E]>If you carry an aldehyde dehydrogenase deficiency and you know a lot of Asians do and you consume alcohol, you're formation of acetaldehyde is much higher, and therefore you're at higher risk for esophageal cancer.</v>
+
+00:05:26.360 --> 00:05:38.110
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Then, if your tend to be and it's true this allele, this little exists across all populations but Asian just proportionately are susceptible to it and have a higher rates of the.</v>
+
+00:05:39.440 --> 00:05:41.500
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Outlined hydrogenase deficiency. So.</v>
+
+00:05:43.740 --> 00:05:52.990
+<v Auerbach, Scott S (NIH/NIEHS) [E]>It's it's being able to hopefully synthesize some tangible examples that tax pipe can pull together.</v>
+
+00:05:53.000 --> 00:06:00.690
+<v Auerbach, Scott S (NIH/NIEHS) [E]>The question is, is the data substrate is the data substrate there in the context of what?</v>
+
+00:06:01.080 --> 00:06:01.230
+<v Auerbach, Scott S (NIH/NIEHS) [E]>What?</v>
+
+00:06:01.240 --> 00:06:10.630
+<v Auerbach, Scott S (NIH/NIEHS) [E]>You're gonna make accessible, and I think that's a it's an important thing and it's something that, you know, you can do in interfaces like Illumina correlation engine and things along those lines.</v>
+
+00:06:10.640 --> 00:06:12.620
+<v Auerbach, Scott S (NIH/NIEHS) [E]>So you can look for.</v>
+
+00:06:13.160 --> 00:06:19.520
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Yes, you know you can identify genes that have polymorphisms in them that are associated with certain diseases, they diabetes.</v>
+
+00:06:19.530 --> 00:06:23.710
+<v Auerbach, Scott S (NIH/NIEHS) [E]>And then you can look to see how chemical treatment modifies expression of those genes.</v>
+
+00:06:26.230 --> 00:06:26.420
+<v Saddler, Trey (NIH/NIEHS) [C]>Mm-hmm.</v>
+
+00:06:24.320 --> 00:06:35.480
+<v Auerbach, Scott S (NIH/NIEHS) [E]>So that's a real simple one, and there's a, but that's sort of the way I've been historically oriented to the gene by environment.</v>
+
+00:06:35.490 --> 00:06:51.080
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Now I think people are probably broadened the term to some degree, right, but the other one is the classic example is pharmacogenomics, which is if you carry this polymorphism in this in this P-450 you need to take a lower dose of this drug, you know.</v>
+
+00:06:50.840 --> 00:06:51.180
+<v Saddler, Trey (NIH/NIEHS) [C]>Mm-hmm.</v>
+
+00:06:51.130 --> 00:06:51.840
+<v Auerbach, Scott S (NIH/NIEHS) [E]>And so.</v>
+
+00:06:52.390 --> 00:06:58.000
+<v Auerbach, Scott S (NIH/NIEHS) [E]>So I think that's the thing that you know, do just getting something more tangible down.</v>
+
+00:06:58.010 --> 00:07:08.910
+<v Auerbach, Scott S (NIH/NIEHS) [E]>So we can know what the inherent limitations of the large language model that we're building here has in respect with respect to a tangible example of what it's what it can do.</v>
+
+00:07:08.380 --> 00:07:08.930
+<v Saddler, Trey (NIH/NIEHS) [C]>Yeah.</v>
+
+00:07:08.940 --> 00:07:14.120
+<v Saddler, Trey (NIH/NIEHS) [C]>OK, so how about how about the example being and?</v>
+
+00:07:14.130 --> 00:07:19.370
+<v Saddler, Trey (NIH/NIEHS) [C]>And this is like directly related to the email that David sent which is querying.</v>
+
+00:07:20.670 --> 00:07:30.810
+<v Saddler, Trey (NIH/NIEHS) [C]>RoboCop using large language models using a regular natural language query and then having it perform the query and pull the data out and then perform a summary on it.</v>
+
+00:07:31.430 --> 00:07:32.840
+<v Auerbach, Scott S (NIH/NIEHS) [E]>That would that would that would do.</v>
+
+00:07:33.620 --> 00:07:33.900
+<v Reif, David (NIH/NIEHS) [E]>Umm.</v>
+
+00:07:34.020 --> 00:07:34.240
+<v Saddler, Trey (NIH/NIEHS) [C]>OK.</v>
+
+00:07:32.850 --> 00:07:44.640
+<v Auerbach, Scott S (NIH/NIEHS) [E]>And I think I I think if if if we can synthesize something that already to some degree exists and also something that can formulate represent a hypothesis.</v>
+
+00:07:44.650 --> 00:07:48.120
+<v Auerbach, Scott S (NIH/NIEHS) [E]>So the first is the fact that you can actually find something that's true.</v>
+
+00:07:48.870 --> 00:07:55.000
+<v Auerbach, Scott S (NIH/NIEHS) [E]>The second is now that you've found something that's true, you can hypothesize something, and that's something that you can test.</v>
+
+00:07:55.010 --> 00:08:03.400
+<v Auerbach, Scott S (NIH/NIEHS) [E]>And I think that's an important thing to get across both there's some tangible reality to what it is synthesizing we already know.</v>
+
+00:08:03.650 --> 00:08:08.730
+<v Auerbach, Scott S (NIH/NIEHS) [E]>And then it has a capacity to hypothesize the same at the same time, which would be great.</v>
+
+00:08:09.570 --> 00:08:10.420
+<v Reif, David (NIH/NIEHS) [E]>Yeah, that's a great.</v>
+
+00:08:10.430 --> 00:08:13.160
+<v Reif, David (NIH/NIEHS) [E]>I think that's a way better way to state that aim than I could.</v>
+
+00:08:13.690 --> 00:08:14.370
+<v Reif, David (NIH/NIEHS) [E]>That's that.</v>
+
+00:08:14.380 --> 00:08:18.120
+<v Reif, David (NIH/NIEHS) [E]>This is recording and etrade, but that's a really good that's a really good statement.</v>
+
+00:08:20.160 --> 00:08:24.580
+<v Saddler, Trey (NIH/NIEHS) [C]>Is what the that to use the RoboCop for or what do you?</v>
+
+00:08:24.590 --> 00:08:26.030
+<v Saddler, Trey (NIH/NIEHS) [C]>Which statement are you talking about? Sorry.</v>
+
+00:08:31.040 --> 00:08:32.910
+<v Saddler, Trey (NIH/NIEHS) [C]>Ohh OK yeah, yeah, yeah.</v>
+
+00:08:25.510 --> 00:08:37.040
+<v Reif, David (NIH/NIEHS) [E]>Ohh, the the second half of the the the last three sentences of of Scots, which again I can't like restate the words of but, but the in terms of like putting it into the purpose of like what you're trying to do there.</v>
+
+00:08:38.200 --> 00:08:38.370
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Yeah.</v>
+
+00:08:38.150 --> 00:08:51.260
+<v Saddler, Trey (NIH/NIEHS) [C]>Yeah, example can be to query RoboCop using natural language, then summarize the results.</v>
+
+00:08:51.930 --> 00:08:52.270
+<v Reif, David (NIH/NIEHS) [E]>Yeah.</v>
+
+00:08:52.320 --> 00:08:52.670
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Yeah.</v>
+
+00:08:52.680 --> 00:08:53.430
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Can you find?</v>
+
+00:08:52.320 --> 00:08:56.440
+<v Reif, David (NIH/NIEHS) [E]>And then the other thing is like dot dot dot hypothesis because there was the.</v>
+
+00:08:53.440 --> 00:08:56.440
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Can you find known? Yeah.</v>
+
+00:08:56.450 --> 00:09:01.060
+<v Reif, David (NIH/NIEHS) [E]>I like the way Scott used hypothesis in there and I feel like that's gonna hook a lot of the language.</v>
+
+00:09:05.170 --> 00:09:05.620
+<v Saddler, Trey (NIH/NIEHS) [C]>Uh.</v>
+
+00:09:01.490 --> 00:09:07.120
+<v Reif, David (NIH/NIEHS) [E]>A lot of the audience, so this would otherwise is gonna hate this stuff for being a fishing expedition until we tell them.</v>
+
+00:09:07.130 --> 00:09:09.470
+<v Reif, David (NIH/NIEHS) [E]>That's way inside the hypothesis that are testable.</v>
+
+00:09:10.560 --> 00:09:10.850
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Umm.</v>
+
+00:09:11.650 --> 00:09:13.880
+<v Saddler, Trey (NIH/NIEHS) [C]>Well, then, I'm just gonna do this thing.</v>
+
+00:09:13.890 --> 00:09:15.650
+<v Saddler, Trey (NIH/NIEHS) [C]>God for transcripts, put.</v>
+
+00:09:15.660 --> 00:09:17.750
+<v Reif, David (NIH/NIEHS) [E]>Yes, I just noticed it was being recorded, so.</v>
+
+00:09:19.590 --> 00:09:19.910
+<v Saddler, Trey (NIH/NIEHS) [C]>So.</v>
+
+00:09:19.840 --> 00:09:21.780
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Well, I mean so there.</v>
+
+00:09:21.790 --> 00:09:29.610
+<v Auerbach, Scott S (NIH/NIEHS) [E]>So there's probably there's got to be a paper that someone already published on known gene by environment interactions established and pharmacogenomic interactions.</v>
+
+00:09:29.950 --> 00:09:36.850
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Now the important thing there is can we find them, given that they already exist, right?</v>
+
+00:09:36.850 --> 00:09:37.600
+<v Saddler, Trey (NIH/NIEHS) [C]>OK.</v>
+
+00:09:37.610 --> 00:09:38.120
+<v Saddler, Trey (NIH/NIEHS) [C]>OK, sorry.</v>
+
+00:09:38.130 --> 00:09:38.730
+<v Saddler, Trey (NIH/NIEHS) [C]>I guess I didn't.</v>
+
+00:09:37.250 --> 00:09:39.180
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Like it actually, right.</v>
+
+00:09:38.740 --> 00:09:40.520
+<v Saddler, Trey (NIH/NIEHS) [C]>I didn't parse what you now I get what you're saying.</v>
+
+00:09:40.530 --> 00:09:40.720
+<v Saddler, Trey (NIH/NIEHS) [C]>Yeah.</v>
+
+00:09:40.730 --> 00:09:40.980
+<v Saddler, Trey (NIH/NIEHS) [C]>Yeah.</v>
+
+00:09:44.720 --> 00:09:44.910
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Yes.</v>
+
+00:09:48.460 --> 00:09:48.560
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Yes.</v>
+
+00:09:51.250 --> 00:09:51.420
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Yeah.</v>
+
+00:09:40.990 --> 00:09:54.300
+<v Saddler, Trey (NIH/NIEHS) [C]>So we take something that's kind of like they did for RoboCop, like they take the thing that's already known and just demonstrate yes, what's in there and we can prove that we have evidence in our knowledge base to to back that up.</v>
+
+00:09:55.060 --> 00:09:55.250
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Yeah.</v>
+
+00:09:54.310 --> 00:09:58.290
+<v Saddler, Trey (NIH/NIEHS) [C]>So yeah, I think that's a great way to prove to them.</v>
+
+00:09:58.300 --> 00:10:03.280
+<v Saddler, Trey (NIH/NIEHS) [C]>Yeah, that we that we're pulling stuff that's real and not just completely.</v>
+
+00:10:04.510 --> 00:10:05.510
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Yeah, free association.</v>
+
+00:10:03.340 --> 00:10:06.290
+<v Saddler, Trey (NIH/NIEHS) [C]>He hallucinated from Jet GBT.</v>
+
+00:10:07.100 --> 00:10:07.730
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Yeah.</v>
+
+00:10:07.840 --> 00:10:14.610
+<v Auerbach, Scott S (NIH/NIEHS) [E]>And if you can have associated for the subsequent step, which is OK, now let's look for things we don't.</v>
+
+00:10:14.960 --> 00:10:16.730
+<v Auerbach, Scott S (NIH/NIEHS) [E]>You know, we got these things we don't know.</v>
+
+00:10:17.810 --> 00:10:30.020
+<v Auerbach, Scott S (NIH/NIEHS) [E]>I a a weight of evidence or confidence score for that hypothesis would be outstanding, if that's even possible, even have to possible, but he said.</v>
+
+00:10:30.030 --> 00:10:37.870
+<v Auerbach, Scott S (NIH/NIEHS) [E]>So you can rank cause you can generate 1,000,000 hypotheses if it's a flat list with no prioritization, you're just going to pick your favorite one and go for it.</v>
+
+00:10:38.980 --> 00:10:39.320
+<v Saddler, Trey (NIH/NIEHS) [C]>Yeah.</v>
+
+00:10:38.350 --> 00:10:39.510
+<v Auerbach, Scott S (NIH/NIEHS) [E]>You know, and so I think it's.</v>
+
+00:10:40.360 --> 00:10:47.400
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Important to be able to say look, the combined weight of evidence suggests that this is the best hypothesis and down from there.</v>
+
+00:10:47.550 --> 00:10:50.750
+<v Saddler, Trey (NIH/NIEHS) [C]>Yeah, I do think it's possible to do that kind of confidence scoring.</v>
+
+00:10:50.760 --> 00:10:54.720
+<v Saddler, Trey (NIH/NIEHS) [C]>I just don't think anybody has really done it yet.</v>
+
+00:10:54.770 --> 00:11:06.070
+<v Saddler, Trey (NIH/NIEHS) [C]>You know, like they haven't, because everything that I've been seeing is that everybody's still playing with the like, just getting the models working and asking them questions.</v>
+
+00:11:20.330 --> 00:11:20.510
+<v Auerbach, Scott S (NIH/NIEHS) [E]>OK.</v>
+
+00:11:06.080 --> 00:11:23.170
+<v Saddler, Trey (NIH/NIEHS) [C]>And injecting a little bit of context, whereas I'm already thinking like two or three steps ahead of that and wanting to generate the whole pipeline with logs and with you know showing where the data came from and sources and all that kind of stuff.</v>
+
+00:11:23.320 --> 00:11:36.350
+<v Saddler, Trey (NIH/NIEHS) [C]>And that's I think the like defining characteristic of what we're doing versus a lot of the other projects that I've seen, which are usually just like Jupiter notebooks that are querying a database with and then throwing it straight to chat.</v>
+
+00:11:36.360 --> 00:11:45.050
+<v Saddler, Trey (NIH/NIEHS) [C]>GPT, but they don't have any kind of logging or feedback or way to verify that information like.</v>
+
+00:11:45.060 --> 00:11:51.180
+<v Saddler, Trey (NIH/NIEHS) [C]>That's all the kind of stuff that I think is going to be especially like the like.</v>
+
+00:12:10.800 --> 00:12:10.930
+<v Auerbach, Scott S (NIH/NIEHS) [E]>OK.</v>
+
+00:12:30.040 --> 00:12:30.330
+<v Reif, David (NIH/NIEHS) [E]>Umm.</v>
+
+00:11:51.190 --> 00:12:30.980
+<v Saddler, Trey (NIH/NIEHS) [C]>The safety aspects of of having the queue be run across by a bot that checks for anything dangerous or illegal or whatever, you know, and these are like safeguards that a lot of people haven't been putting into their their little mini language model projects that I think will also set this apart because the one of the things I told David before one of the things I really wanna spend a good chunk of time on is what I think is the three most common questions I hear about language models, which is the security, privacy and accuracy aspects.</v>
+
+00:12:30.990 --> 00:12:41.760
+<v Saddler, Trey (NIH/NIEHS) [C]>So I definitely wanted to talk about for security that we're hosting our own language models and we're using the Azure open AI endpoint that is completely within the Azure cloud.</v>
+
+00:12:44.060 --> 00:12:44.320
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Yeah.</v>
+
+00:12:41.770 --> 00:12:44.380
+<v Saddler, Trey (NIH/NIEHS) [C]>So that never leaves the network.</v>
+
+00:12:44.930 --> 00:12:51.130
+<v Saddler, Trey (NIH/NIEHS) [C]>The privacy aspect of OK, they're not gonna be logging the output from our from our input into open AI.</v>
+
+00:13:02.750 --> 00:13:03.010
+<v Reif, David (NIH/NIEHS) [E]>Umm.</v>
+
+00:12:51.140 --> 00:13:13.310
+<v Saddler, Trey (NIH/NIEHS) [C]>And if we use the local models, then it's definitely no privacy issues and then the accuracy with talking about verifying the interaction, verifying the information it gets, and like using different bots to kind of improve the quality of the output and all of that kind of stuff I think is something that is constant question that's asked.</v>
+
+00:13:13.380 --> 00:13:16.630
+<v Saddler, Trey (NIH/NIEHS) [C]>And this is something that I really wanna focus on because I know that they're well.</v>
+
+00:13:15.890 --> 00:13:16.680
+<v Reif, David (NIH/NIEHS) [E]>Yeah, that's great.</v>
+
+00:13:16.640 --> 00:13:17.320
+<v Saddler, Trey (NIH/NIEHS) [C]>How do we know what's?</v>
+
+00:13:16.690 --> 00:13:23.990
+<v Reif, David (NIH/NIEHS) [E]>And yeah, yeah, on that front with them, there was a trans NIH meeting or trans.</v>
+
+00:13:24.000 --> 00:13:30.770
+<v Reif, David (NIH/NIEHS) [E]>I see meeting of the day of like a bunch of NH people and people are like implementing this in the federal system is a challenge or it can't be done or whatever.</v>
+
+00:13:30.780 --> 00:13:35.790
+<v Reif, David (NIH/NIEHS) [E]>So like one other way to add to your description here, is actually just stayed out loud.</v>
+
+00:13:41.000 --> 00:13:41.210
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Umm.</v>
+
+00:13:35.800 --> 00:13:46.960
+<v Reif, David (NIH/NIEHS) [E]>That, like, here's how we did it within the here's what we used to do this in a federal setting because after you've gone through all the security, privacy, and accuracy and they're like, oh, this guy's really been thinking about this.</v>
+
+00:13:57.190 --> 00:13:57.420
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Umm.</v>
+
+00:13:46.970 --> 00:14:02.810
+<v Reif, David (NIH/NIEHS) [E]>I think if you highlight at the end that like yeah, we wrapped all that into our implementation here and and we're proud of you know like that kind of I think that's umm like it's a good way to tie that off because as you say most people aren't building that in right now.</v>
+
+00:14:03.900 --> 00:14:04.110
+<v Saddler, Trey (NIH/NIEHS) [C]>Mm-hmm.</v>
+
+00:14:04.000 --> 00:14:04.210
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Umm.</v>
+
+00:14:04.370 --> 00:14:06.100
+<v Reif, David (NIH/NIEHS) [E]>You're doing it in a difficult setting.</v>
+
+00:14:10.200 --> 00:14:11.200
+<v Saddler, Trey (NIH/NIEHS) [C]>Yeah, just I I.</v>
+
+00:14:07.270 --> 00:14:12.860
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Yeah, the trainer and in the way of time, look at.</v>
+
+00:14:13.230 --> 00:14:13.430
+<v Saddler, Trey (NIH/NIEHS) [C]>Huh.</v>
+
+00:14:14.300 --> 00:14:14.630
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Go ahead.</v>
+
+00:14:15.630 --> 00:14:16.420
+<v Auerbach, Scott S (NIH/NIEHS) [E]>No, I'm just gonna.</v>
+
+00:14:15.660 --> 00:14:17.590
+<v Saddler, Trey (NIH/NIEHS) [C]>No, no, I I, I I was just.</v>
+
+00:14:18.140 --> 00:14:18.990
+<v Saddler, Trey (NIH/NIEHS) [C]>Yeah, it wasn't important.</v>
+
+00:14:19.000 --> 00:14:19.240
+<v Saddler, Trey (NIH/NIEHS) [C]>Go ahead.</v>
+
+00:14:19.250 --> 00:14:19.770
+<v Saddler, Trey (NIH/NIEHS) [C]>What were you gonna say?</v>
+
+00:14:21.520 --> 00:14:27.980
+<v Auerbach, Scott S (NIH/NIEHS) [E]>So the the other way you can think about this just from the original motivations to talks pipe which is can you generate me a toxicological narrative?</v>
+
+00:14:28.750 --> 00:14:29.140
+<v Auerbach, Scott S (NIH/NIEHS) [E]>OK.</v>
+
+00:14:29.660 --> 00:14:29.970
+<v Saddler, Trey (NIH/NIEHS) [C]>Right.</v>
+
+00:14:29.650 --> 00:14:31.220
+<v Auerbach, Scott S (NIH/NIEHS) [E]>And can you can you send this size?</v>
+
+00:14:31.230 --> 00:14:34.340
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Or don't bunch of information and generate me a toxicological narrative.</v>
+
+00:14:34.470 --> 00:14:35.160
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Peggy chemical.</v>
+
+00:14:36.350 --> 00:14:37.790
+<v Saddler, Trey (NIH/NIEHS) [C]>Yeah, I mean that's.</v>
+
+00:14:35.590 --> 00:14:47.440
+<v Auerbach, Scott S (NIH/NIEHS) [E]>OK, there are major questions about species extrapolation and major questions about genetic variability, both format and toxicokinetic and toxico dynamic variability.</v>
+
+00:14:47.730 --> 00:14:48.120
+<v Auerbach, Scott S (NIH/NIEHS) [E]>OK.</v>
+
+00:14:48.130 --> 00:14:49.820
+<v Auerbach, Scott S (NIH/NIEHS) [E]>And those are true across interspecies.</v>
+
+00:14:49.830 --> 00:14:52.930
+<v Auerbach, Scott S (NIH/NIEHS) [E]>And those are across across interactive visual.</v>
+
+00:14:54.390 --> 00:14:54.990
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Yeah.</v>
+
+00:14:55.040 --> 00:15:06.540
+<v Auerbach, Scott S (NIH/NIEHS) [E]>One of the questions in theory, you could prompt secondary secondary to generating the profile is a set of hypotheses around interspecies translation.</v>
+
+00:15:07.680 --> 00:15:16.130
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Meaning, what's the evolutionary conservation of the known targets of toxicological effect that would be challenging with certain chemicals?</v>
+
+00:15:16.140 --> 00:15:31.770
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Like furan, because it's just like scorched earth, but for other things like estradiol or something along those lines, there's there's a resource actually the DPA made that was really great that looked at the evolutionary conservation of the pocket space.</v>
+
+00:15:31.780 --> 00:15:39.430
+<v Auerbach, Scott S (NIH/NIEHS) [E]>I believe of each one of the receptors, so this is the pocket space, basically the same, and if it is then it's going to bind the same chemicals.</v>
+
+00:15:39.440 --> 00:15:41.490
+<v Auerbach, Scott S (NIH/NIEHS) [E]>So it's still pretty much the whole idea I think of it.</v>
+
+00:15:41.500 --> 00:15:43.640
+<v Auerbach, Scott S (NIH/NIEHS) [E]>They might even just straight up evolutionary conservation.</v>
+
+00:15:43.850 --> 00:16:01.230
+<v Auerbach, Scott S (NIH/NIEHS) [E]>I don't remember but umm, so there are certain things like car and PXR that are highly evolutionary divergent and so the interspecies translation on a qualitative level can be very weak, whereas something like the hormone receptors it's quite strong.</v>
+
+00:16:01.730 --> 00:16:06.390
+<v Auerbach, Scott S (NIH/NIEHS) [E]>The the other thing is the genetic polymorphism database.</v>
+
+00:16:06.480 --> 00:16:16.960
+<v Auerbach, Scott S (NIH/NIEHS) [E]>The known functional genetic polymorphisms in humans that could be both toxicokinetic, meaning like the P4, if you know a certain chemicals, then you'll and you'll know this.</v>
+
+00:16:17.020 --> 00:16:21.320
+<v Auerbach, Scott S (NIH/NIEHS) [E]>You'll know this because of what you're what Jeremy has in the gem Biotoxin database.</v>
+
+00:16:21.410 --> 00:16:25.740
+<v Auerbach, Scott S (NIH/NIEHS) [E]>What enzymes metabolize it and is it only metabolized by just one enzyme?</v>
+
+00:16:25.750 --> 00:16:33.090
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Primarily, if it's just one enzyme, there's a really significant genetic liability from a toxicokinetic standpoint, right?</v>
+
+00:16:33.130 --> 00:16:35.020
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Because that's the only thing I metabolize it.</v>
+
+00:16:35.030 --> 00:16:40.800
+<v Auerbach, Scott S (NIH/NIEHS) [E]>So if you don't have it, your cmax and area under the curve go way up, right?</v>
+
+00:16:40.850 --> 00:16:42.530
+<v Auerbach, Scott S (NIH/NIEHS) [E]>So your exposure goes way up.</v>
+
+00:16:42.640 --> 00:16:47.180
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Tosco Dynamic is a polymorphism in the receptor doesn't make the receptor hypomorphic.</v>
+
+00:16:48.230 --> 00:16:58.080
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Ohh Hydromorphic or hypomorphic meaning less or more functional, at which point you can have a what's called a pharmacodynamic or toxic code, dynamic variability.</v>
+
+00:16:59.030 --> 00:17:05.420
+<v Auerbach, Scott S (NIH/NIEHS) [E]>And so it's it's first asking what those plausible genetic liabilities could be.</v>
+
+00:17:05.670 --> 00:17:10.970
+<v Auerbach, Scott S (NIH/NIEHS) [E]>And secondarily, formulating hypothesis around whether they're functionally meaningful.</v>
+
+00:17:28.320 --> 00:17:28.520
+<v Saddler, Trey (NIH/NIEHS) [C]>Yeah.</v>
+
+00:17:12.470 --> 00:17:30.390
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Now you know this is happening in a month and 1/2 I realized that it's probably not going to be a realistic outcome, but that's the other gene by environment question that you can build directly off of talks pipe in the original goal of talks pipe which is generating a narrative, you know so.</v>
+
+00:17:32.820 --> 00:17:33.170
+<v Saddler, Trey (NIH/NIEHS) [C]>OK.</v>
+
+00:17:33.180 --> 00:17:34.530
+<v Saddler, Trey (NIH/NIEHS) [C]>Yeah, I mean that. Yeah.</v>
+
+00:17:34.540 --> 00:17:41.610
+<v Saddler, Trey (NIH/NIEHS) [C]>Like that sounds like a plan, and I definitely think we should.</v>
+
+00:17:41.680 --> 00:17:42.430
+<v Saddler, Trey (NIH/NIEHS) [C]>I should push that.</v>
+
+00:17:44.790 --> 00:17:45.220
+<v Saddler, Trey (NIH/NIEHS) [C]>Umm.</v>
+
+00:17:45.450 --> 00:17:48.260
+<v Saddler, Trey (NIH/NIEHS) [C]>Like message through the talk itself.</v>
+
+00:17:48.270 --> 00:17:51.220
+<v Saddler, Trey (NIH/NIEHS) [C]>So I I have all the notes now.</v>
+
+00:17:52.340 --> 00:17:52.480
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Yeah.</v>
+
+00:17:52.360 --> 00:17:53.470
+<v Saddler, Trey (NIH/NIEHS) [C]>Uh, from what you said.</v>
+
+00:17:58.390 --> 00:17:58.530
+<v Auerbach, Scott S (NIH/NIEHS) [E]>No.</v>
+
+00:17:53.480 --> 00:18:00.040
+<v Saddler, Trey (NIH/NIEHS) [C]>So I'm gonna go ask Chad doubt to summarize that and then we'll incorporate it.</v>
+
+00:18:07.510 --> 00:18:07.810
+<v Saddler, Trey (NIH/NIEHS) [C]>Mm-hmm.</v>
+
+00:17:59.350 --> 00:18:11.480
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Well, I mean I think you can, you can introduce it from the context of data use in risk assessment and the considerations in the process of deriving a reference dose.</v>
+
+00:18:11.610 --> 00:18:18.370
+<v Auerbach, Scott S (NIH/NIEHS) [E]>These considerations relate to the safety factors that are applied, so you start with a rodent, you get a number.</v>
+
+00:18:18.470 --> 00:18:19.620
+<v Auerbach, Scott S (NIH/NIEHS) [E]>That's the most potent effect.</v>
+
+00:18:21.610 --> 00:18:33.550
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Secondarily, you adjusted for interspecies variability that could happen that certainly has genetic implications because you know rats are different than us by about 10%.</v>
+
+00:18:34.240 --> 00:18:53.380
+<v Auerbach, Scott S (NIH/NIEHS) [E]>And then and then you have the inter individual which is much more targeted and more what people typically think of as gene by environment, which is a specific allelic variant, modifies either the task code dynamic or the task code kinetic components of chemical metabolism or action.</v>
+
+00:18:54.360 --> 00:18:54.640
+<v Saddler, Trey (NIH/NIEHS) [C]>Umm.</v>
+
+00:18:56.550 --> 00:18:56.850
+<v Auerbach, Scott S (NIH/NIEHS) [E]>So.</v>
+
+00:18:56.460 --> 00:19:04.860
+<v Saddler, Trey (NIH/NIEHS) [C]>I guess one other thing that I wanted to ask about since since it was something you brought up before was umm.</v>
+
+00:19:08.060 --> 00:19:16.840
+<v Saddler, Trey (NIH/NIEHS) [C]>The you said you wanted to like kind of go through the pipeline of of how you would do gene expression analysis with talks pipe.</v>
+
+00:19:16.850 --> 00:19:41.140
+<v Saddler, Trey (NIH/NIEHS) [C]>And so, yeah, that's something that I would still need from you in terms of just like a flow chart or even if you just, if you just chain of thought recorded into chat GPT, the process I can use that to break it down into its component pieces and create a a chain of prompts for Chad GBT to generate that kind of analysis.</v>
+
+00:19:43.790 --> 00:19:43.970
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Yeah.</v>
+
+00:19:41.150 --> 00:19:45.110
+<v Saddler, Trey (NIH/NIEHS) [C]>So umm, I know, I know you've been sending this stuff on.</v>
+
+00:19:46.630 --> 00:19:55.920
+<v Saddler, Trey (NIH/NIEHS) [C]>On LinkedIn about, you know, using knowledge graphs and generating knowledge graphs to to augment the the language models.</v>
+
+00:19:55.930 --> 00:20:06.820
+<v Saddler, Trey (NIH/NIEHS) [C]>And that's definitely something that I'm like keeping in the back of my mind as I'm as we're moving forward with this as a way to, again, I think robocop's a great way because it's already a great way to test it because it's already there.</v>
+
+00:20:15.350 --> 00:20:15.490
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Yeah.</v>
+
+00:20:06.830 --> 00:20:19.330
+<v Saddler, Trey (NIH/NIEHS) [C]>There and then all I have to do is just use the uh conversion to a cipher or NEO for jQuery and then we can pull that data and then use that for summary.</v>
+
+00:20:19.580 --> 00:20:33.090
+<v Saddler, Trey (NIH/NIEHS) [C]>But as we get further along, yeah, being able to actually use the connections that are in chem bio talks, I think that's I think the nice thing about the trying to use RoboCop right now just for this demonstration is that it's already there.</v>
+
+00:20:40.810 --> 00:20:41.050
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Umm.</v>
+
+00:20:33.100 --> 00:20:45.850
+<v Saddler, Trey (NIH/NIEHS) [C]>It's well documented and it's well structured, whereas chem bio talks is still a little bit messy and difficult to use and just that's just because you know, we need to go back and kind of revisit it a little bit.</v>
+
+00:20:49.010 --> 00:20:49.270
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Umm.</v>
+
+00:20:46.120 --> 00:20:50.670
+<v Saddler, Trey (NIH/NIEHS) [C]>Uh, but for now, I think that yeah, we can use RoboCop.</v>
+
+00:20:50.680 --> 00:20:51.070
+<v Saddler, Trey (NIH/NIEHS) [C]>We can.</v>
+
+00:20:51.120 --> 00:20:56.470
+<v Saddler, Trey (NIH/NIEHS) [C]>We can demonstrate a hypothesis and A and testing and get data back and.</v>
+
+00:20:56.880 --> 00:20:57.890
+<v Saddler, Trey (NIH/NIEHS) [C]>But yeah, for the gene.</v>
+
+00:20:57.940 --> 00:21:02.970
+<v Saddler, Trey (NIH/NIEHS) [C]>But for the gene interpretation gene expression analysis just.</v>
+
+00:21:02.980 --> 00:21:08.000
+<v Saddler, Trey (NIH/NIEHS) [C]>Yeah, I just need something to kind of guide me when I'm like guiding the bots on how to do this so.</v>
+
+00:21:08.890 --> 00:21:09.200
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Hmm.</v>
+
+00:21:09.530 --> 00:21:09.860
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Yeah.</v>
+
+00:21:09.870 --> 00:21:10.140
+<v Auerbach, Scott S (NIH/NIEHS) [E]>No.</v>
+
+00:21:10.150 --> 00:21:12.160
+<v Auerbach, Scott S (NIH/NIEHS) [E]>And the gene expression was a separate thing.</v>
+
+00:21:12.170 --> 00:21:12.860
+<v Auerbach, Scott S (NIH/NIEHS) [E]>I think it's a.</v>
+
+00:21:12.870 --> 00:21:34.140
+<v Auerbach, Scott S (NIH/NIEHS) [E]>It's a much more focused and she so gene expression interpretation and narrative generation based upon a difference of differentially expressed genes is very much an art form, and if there's a, there's a uniform way of approaching it, and that's why I think this could be potentially really valuable in characterizing patterns of gene expression, understanding causality in the in the gene expression.</v>
+
+00:21:34.150 --> 00:21:44.280
+<v Auerbach, Scott S (NIH/NIEHS) [E]>If you can do that, and I think that's really where it would be incredibly helpful, the causality both on both on from a a molecular driven process.</v>
+
+00:21:44.290 --> 00:21:45.040
+<v Auerbach, Scott S (NIH/NIEHS) [E]>What's driving it?</v>
+
+00:21:45.050 --> 00:21:45.840
+<v Auerbach, Scott S (NIH/NIEHS) [E]>What receptors?</v>
+
+00:21:45.990 --> 00:21:53.100
+<v Auerbach, Scott S (NIH/NIEHS) [E]>And then the causality of any pathological manifestations or otherwise, in the tissue where you're seeing the effects.</v>
+
+00:21:53.210 --> 00:21:55.180
+<v Auerbach, Scott S (NIH/NIEHS) [E]>So how do those linked together?</v>
+
+00:21:57.740 --> 00:21:57.940
+<v Saddler, Trey (NIH/NIEHS) [C]>Umm.</v>
+
+00:21:55.190 --> 00:22:20.730
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Because it's big black box in between and so that's that's an exercise that I personally it's not necessarily gene by environment, although it could be that I would see really to be really valuable someone could say someone could say I did this study in a rat this exploration I these are my differential expression needs and liver these are my differential expression genes and kidney tell me what's happening.</v>
+
+00:22:21.460 --> 00:22:21.700
+<v Saddler, Trey (NIH/NIEHS) [C]>Umm.</v>
+
+00:22:22.970 --> 00:22:29.940
+<v Auerbach, Scott S (NIH/NIEHS) [E]>And I have these pathological outcomes in these organ systems that would be outstanding, that sort of thing.</v>
+
+00:22:42.110 --> 00:22:42.320
+<v Saddler, Trey (NIH/NIEHS) [C]>Umm.</v>
+
+00:22:29.950 --> 00:22:45.920
+<v Auerbach, Scott S (NIH/NIEHS) [E]>If there was a linkage that could borrow through the data using some of the tools like ingenuity, pathways and things along those lines to infer hierarchy on the data and then infer the outcome, that would be incredibly powerful.</v>
+
+00:22:46.390 --> 00:22:54.850
+<v Auerbach, Scott S (NIH/NIEHS) [E]>And again, the uniformity as opposed to what you know, I try to be unbiased in it, but everyone cherry picks what they know when they see that data.</v>
+
+00:22:56.770 --> 00:22:57.070
+<v Saddler, Trey (NIH/NIEHS) [C]>Right.</v>
+
+00:22:54.860 --> 00:23:00.020
+<v Auerbach, Scott S (NIH/NIEHS) [E]>And so that's what they write about and that's what they try to attribute their findings too. So.</v>
+
+00:23:02.190 --> 00:23:02.720
+<v Saddler, Trey (NIH/NIEHS) [C]>Awesome.</v>
+
+00:23:06.720 --> 00:23:06.900
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Yeah.</v>
+
+00:23:02.790 --> 00:23:10.240
+<v Saddler, Trey (NIH/NIEHS) [C]>Well, I know we're at our end of our time here and I know you guys probably have other stuff to do, but the feedback is definitely been helpful.</v>
+
+00:23:11.090 --> 00:23:31.660
+<v Saddler, Trey (NIH/NIEHS) [C]>I got the recording, so I'll go back and kind of summarize it and incorporate it, but I think that we're, I think that I'm on the right path and it's good to hear from you guys that like some additional feedback on how to go about doing this, especially for the gene by environment interaction, stuff like I know that you pitched me for doing this and I know that we can make it work.</v>
+
+00:23:32.290 --> 00:23:37.580
+<v Saddler, Trey (NIH/NIEHS) [C]>It's not like it's so far away from what talks pipe was meant to be doing, but it does help.</v>
+
+00:23:37.590 --> 00:23:38.170
+<v Saddler, Trey (NIH/NIEHS) [C]>Just because I'm not.</v>
+
+00:23:39.280 --> 00:23:44.940
+<v Saddler, Trey (NIH/NIEHS) [C]>Yeah, not quite as familiar with that view of toxicology, so.</v>
+
+00:23:45.980 --> 00:23:46.230
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Umm.</v>
+
+00:23:45.880 --> 00:23:46.290
+<v Reif, David (NIH/NIEHS) [E]>Yeah.</v>
+
+00:23:46.340 --> 00:23:46.770
+<v Reif, David (NIH/NIEHS) [E]>I mean it.</v>
+
+00:23:46.780 --> 00:24:06.550
+<v Reif, David (NIH/NIEHS) [E]>It's got and I spent a lot of time thinking about that and we have largely overlapping definitions of what it means, but I think it's fun here because it will separate you from the other presenters who will use, like, sort of 1 hop things or whatever from, you know, graph theory is just to call it gene environment interactions and and use will be different.</v>
+
+00:24:07.630 --> 00:24:07.900
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Umm.</v>
+
+00:24:08.040 --> 00:24:08.970
+<v Reif, David (NIH/NIEHS) [E]>And I think that's cool.</v>
+
+00:24:09.480 --> 00:24:11.000
+<v Reif, David (NIH/NIEHS) [E]>I think it's really cool, so I'm yeah.</v>
+
+00:24:12.010 --> 00:24:13.250
+<v Reif, David (NIH/NIEHS) [E]>I'm I'm very excited about it.</v>
+
+00:24:14.000 --> 00:24:20.230
+<v Saddler, Trey (NIH/NIEHS) [C]>And we get to say we got 150K too, so that should help make them like ohh, they NIH gave them a ton of money.</v>
+
+00:24:20.240 --> 00:24:22.700
+<v Saddler, Trey (NIH/NIEHS) [C]>So that must mean that they have something going on.</v>
+
+00:24:24.780 --> 00:24:25.400
+<v Reif, David (NIH/NIEHS) [E]>Yeah, no.</v>
+
+00:24:24.850 --> 00:24:26.320
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Well, you gotta slip in there.</v>
+
+00:24:26.810 --> 00:24:43.770
+<v Auerbach, Scott S (NIH/NIEHS) [E]>You have you have a automated AI driven way of overcoming the overcoming the inherent statistical limitations of epistasis, and so you can you can throw those words in there.</v>
+
+00:24:43.780 --> 00:24:51.160
+<v Auerbach, Scott S (NIH/NIEHS) [E]>You know, it's like I'm blending all this knowledge together to filter through the plausibility of all each of these thousands of possible associations.</v>
+
+00:24:51.410 --> 00:24:51.820
+<v Reif, David (NIH/NIEHS) [E]>Yeah.</v>
+
+00:24:51.890 --> 00:24:59.380
+<v Reif, David (NIH/NIEHS) [E]>And Scott will see some of this stuff come across to, you know, just for your own personal, you know, motivation tray.</v>
+
+00:25:00.150 --> 00:25:04.660
+<v Reif, David (NIH/NIEHS) [E]>You know, we're putting some of this in the slide PMT program document too, right?</v>
+
+00:25:04.670 --> 00:25:12.160
+<v Reif, David (NIH/NIEHS) [E]>So, umm, about coordinating these kinds of efforts and centering them, and there's a lot of text in here about this, right?</v>
+
+00:25:12.170 --> 00:25:16.390
+<v Reif, David (NIH/NIEHS) [E]>So I mean this is a lot of us wanna invest in this and people are really excited about it.</v>
+
+00:25:16.450 --> 00:25:20.910
+<v Reif, David (NIH/NIEHS) [E]>So I appreciate the work that you're doing that I I can't do.</v>
+
+00:25:23.080 --> 00:25:23.260
+<v Saddler, Trey (NIH/NIEHS) [C]>Yeah.</v>
+
+00:25:22.450 --> 00:25:25.380
+<v Reif, David (NIH/NIEHS) [E]>And and I I hope to get more like you know, converse it in some of this.</v>
+
+00:25:26.250 --> 00:25:26.840
+<v Saddler, Trey (NIH/NIEHS) [C]>Yeah.</v>
+
+00:25:25.390 --> 00:25:27.890
+<v Reif, David (NIH/NIEHS) [E]>But this is also where I'd like to focus too, so I'm.</v>
+
+00:25:37.400 --> 00:25:37.590
+<v Reif, David (NIH/NIEHS) [E]>Umm.</v>
+
+00:25:26.850 --> 00:25:40.920
+<v Saddler, Trey (NIH/NIEHS) [C]>Well, I mean, it's just that I I am just very lucky that all of the that my skill sets have all combined to kind of land in the right spot at the right time to be able to do this sort of stuff because yeah, I needed.</v>
+
+00:25:40.930 --> 00:25:52.000
+<v Saddler, Trey (NIH/NIEHS) [C]>I needed knowledge of all of the things of computer science, of biology, of system, administration and networking and cloud stuff, and all of this stuff to be able to get this to work.</v>
+
+00:25:52.320 --> 00:25:52.560
+<v Reif, David (NIH/NIEHS) [E]>Umm.</v>
+
+00:25:58.050 --> 00:25:58.250
+<v Reif, David (NIH/NIEHS) [E]>Yeah.</v>
+
+00:25:52.010 --> 00:26:13.670
+<v Saddler, Trey (NIH/NIEHS) [C]>So I really kind of just and I do have to give a lot of credit to to Scott and Charles because they both for my entire time working here have been very focused on making sure that I skill up and develop skills that are not just useful for especially Scott has always been telling me, like develop skills that aren't just useful for toxicology.</v>
+
+00:26:33.330 --> 00:26:34.000
+<v Reif, David (NIH/NIEHS) [E]>Yeah.</v>
+
+00:26:34.060 --> 00:26:34.820
+<v Reif, David (NIH/NIEHS) [E]>No, it's super cool.</v>
+
+00:26:35.300 --> 00:26:35.620
+<v Reif, David (NIH/NIEHS) [E]>Super cool.</v>
+
+00:26:35.820 --> 00:26:36.110
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Yeah.</v>
+
+00:26:36.120 --> 00:26:37.970
+<v Auerbach, Scott S (NIH/NIEHS) [E]>No, I mean and you're 150K richer now.</v>
+
+00:26:39.370 --> 00:26:39.580
+<v Reif, David (NIH/NIEHS) [E]>Yeah.</v>
+
+00:26:37.980 --> 00:26:39.640
+<v Auerbach, Scott S (NIH/NIEHS) [E]>So congratulations, let's make something happen.</v>
+
+00:26:39.610 --> 00:26:40.150
+<v Saddler, Trey (NIH/NIEHS) [C]>You.</v>
+
+00:26:41.010 --> 00:26:42.330
+<v Reif, David (NIH/NIEHS) [E]>Yeah, that's a nice chunk.</v>
+
+00:26:42.950 --> 00:26:49.070
+<v Saddler, Trey (NIH/NIEHS) [C]>Yeah, I definitely don't have to worry about about like spinning up servers on the cloud or anything like that now.</v>
+
+00:26:50.230 --> 00:26:50.540
+<v Reif, David (NIH/NIEHS) [E]>So cool.</v>
+
+00:26:51.830 --> 00:26:51.990
+<v Reif, David (NIH/NIEHS) [E]>Yeah.</v>
+
+00:26:49.080 --> 00:26:53.020
+<v Saddler, Trey (NIH/NIEHS) [C]>So not with 150K, so no.</v>
+
+00:26:52.990 --> 00:26:53.740
+<v Reif, David (NIH/NIEHS) [E]>No, it's super cool.</v>
+
+00:26:53.190 --> 00:26:54.380
+<v Saddler, Trey (NIH/NIEHS) [C]>Alrighty you guys.</v>
+
+00:26:54.170 --> 00:26:54.980
+<v Reif, David (NIH/NIEHS) [E]>OK, cool.</v>
+
+00:26:54.990 --> 00:26:55.310
+<v Reif, David (NIH/NIEHS) [E]>Yeah.</v>
+
+00:26:55.210 --> 00:26:55.480
+<v Auerbach, Scott S (NIH/NIEHS) [E]>Don't.</v>
+
+00:26:55.070 --> 00:26:56.120
+<v Saddler, Trey (NIH/NIEHS) [C]>Well, thank you for the feedback.</v>
+
+00:26:55.370 --> 00:26:57.420
+<v Reif, David (NIH/NIEHS) [E]>Thanks for thanks for keeping it so organized too.</v>
+
+00:26:57.430 --> 00:26:58.020
+<v Reif, David (NIH/NIEHS) [E]>I appreciate it.</v>
+
+00:26:58.030 --> 00:26:58.090
+<v Reif, David (NIH/NIEHS) [E]>Yeah.</v>
+
+00:26:58.880 --> 00:26:59.080
+<v Saddler, Trey (NIH/NIEHS) [C]>Yep.</v>
+
+00:26:59.690 --> 00:27:00.740
+<v Reif, David (NIH/NIEHS) [E]>Yeah, OK.</v>
+
+00:27:01.180 --> 00:27:01.720
+<v Reif, David (NIH/NIEHS) [E]>Alright, thank you.</v>
+
+00:27:00.560 --> 00:27:02.140
+<v Saddler, Trey (NIH/NIEHS) [C]>All right, we'll catch up again next week.</v>
+
+00:27:01.880 --> 00:27:02.190
+<v Reif, David (NIH/NIEHS) [E]>See.</v>
+
+00:27:02.700 --> 00:27:03.380
+<v Auerbach, Scott S (NIH/NIEHS) [E]>But I guess.</v>
+
+00:27:02.680 --> 00:27:03.810
+<v Reif, David (NIH/NIEHS) [E]>Yeah, but.</v>

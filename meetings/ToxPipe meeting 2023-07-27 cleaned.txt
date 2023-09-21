@@ -1,0 +1,350 @@
+WEBVTT
+David: Something.
+Trey: I am starting recording just because I figured now that this is the stuff that I'll need to take the you know, get feedback and everything.
+Scott: OK.
+David: Umm.
+Trey: So this is kind of where.
+Scott: Dropping out tray.
+Trey: Again.
+Trey: Hold on.
+Trey: Let me see if I can't like position my laptop to make it stop doing that.
+Trey: OK, hopefully that helps a little bit.
+David: Umm.
+Trey: So using a quarto and reveal dot JS kind of like I did for my first talk that I did with you for the group.
+Trey: Umm I wanna.
+Trey: I guess the thing that I.
+Trey: David and I talked about this during our last meeting while you were gone.
+Trey: Scope.
+Trey: Kind of like who, who is gonna be there?
+Trey: Target audience.
+Trey: All of that?
+Trey: I don't know if you ever got to send an update email about asking to like cuz I think they said 30 like last thing we said it officially in the email was 30 minutes for talk and 30 minutes for questions.
+David: Umm.
+Scott: Yeah.
+Trey: So I don't know if we need to like update with them and say 40 minutes for talk 20 minutes for questions.
+Trey: If possible, just because I.
+Trey: Yeah.
+Scott: Yeah, I think I think I did.
+Scott: I think I did.
+Scott: They said you can make up.
+David: Yeah, yeah.
+David: Scott sent that.
+Scott: You can do whatever you want with them, yeah.
+David: Yeah. Yeah.
+Trey: OK, OK.
+David: David Balshaw replied back to Scotts email. Yep.
+Scott: Yeah, we can.
+Trey: OK, sounds.
+Scott: Do we got an hour?
+Scott: So however you wanna use that hour.
+Trey: OK.
+Trey: Yeah.
+Trey: So 40 minutes for a talk, 20 minutes for questions.
+Trey: Right now this is kind of like this is with chat GBT.
+David: Umm.
+Trey: So I'm open to open to feedback.
+Trey: I think that like it started off saying 10, I I think that I need the most time to actually talk about talks pipe itself.
+Trey: So I think I'm gonna go 15 minutes there and just like I'm gonna do probably just five minutes of, like really quickly, especially because.
+Trey: And I was talking to David about this, like, I don't know what what point in the in the like whole schedule I'll be talking.
+David: Yeah.
+Trey: But apparently you know other people will be talking about related things and about large language models and stuff.
+Trey: So I'm gonna kind of try and keep this short and I'll have some backup slides in case they don't talk about some of the stuff, but I assume that they'll I don't wanna bore everybody.
+Trey: Going over chat, GBT for the fifth time, like explaining it all.
+Trey: Whatever.
+Trey: So I'm gonna keep that short.
+Trey: And then I want to talk about talks pipe and and then my whole thing was like kind of talk like I have this book that I told David about before it's called cause and effect.
+Trey: It's, you know how to give good scientific presentations.
+Trey: And so one of the things that they talked about was, uh, define your goals.
+Trey: So can you see that Scott as a too small?
+Scott: No, Nancy, you.
+Trey: Umm so my I wanna convince them that the AI technologies are useful but there's limitations and pitfalls.
+Scott: Thank you.
+Trey: I wanna convince them that they can be used to solve some of the problems that we're facing, especially in understanding gene and environment interactions, since that's the theme of the talk or the meeting, whatever I wanna convince them that it's a platform that that talks pipe is a platform that can be used to integrate all these technologies into an easy to use tool and that it should perceive additional support in the form of onboarding people and and building it up from there.
+Trey: So what do I want?
+Trey: Go ahead.
+Trey: I'm.
+Scott: So how specifically or we thinking the gene by environment interactions are going to going to play out in this context?
+Trey: I think it's more I since I think it's gonna be more just like brushing on how these kinds of tools can help us explore that space rather than like I don't know how well I'll be able to demonstrate a full pipeline that does the like.
+Trey: We're talking about wanting to explore gene interpretation or gene expression interpretation, and I don't know that we'll get all the way there.
+Trey: But like for generating a full report, but we'll definitely be able to at least like query some tools and start showing how we're building up these pipelines.
+Trey: You know, so at least getting to the point where we can use the tool to do a query on Chembio talks or some other database where we're putting in a natural language query and it's converting it to SQL or converting it to an API call or whatever I think would be a huge demonstration of this is how we can start using these tools and building them up to generate these pipelines so.
+Scott: OK.
+Scott: I mean I so I think of it and and maybe I'm just being too rigid.
+Scott: You know, I think of gene by environment as you're you're basically your structural genome and your epigenome, which is relatively stable relative to a functional genomic impact of an environmental exposure, say, or a mutagenic exposure or something along those lines.
+Scott: So like gene by environment interaction, great example is if you carry.
+Scott: If you carry an aldehyde dehydrogenase deficiency and you know a lot of Asians do and you consume alcohol, you're formation of acetaldehyde is much higher, and therefore you're at higher risk for esophageal cancer.
+Scott: Then, if your tend to be and it's true this allele, this little exists across all populations but Asian just proportionately are susceptible to it and have a higher rates of the.
+Scott: Outlined hydrogenase deficiency. So.
+Scott: It's it's being able to hopefully synthesize some tangible examples that tax pipe can pull together.
+Scott: The question is, is the data substrate is the data substrate there in the context of what?
+Scott: What?
+Scott: You're gonna make accessible, and I think that's a it's an important thing and it's something that, you know, you can do in interfaces like Illumina correlation engine and things along those lines.
+Scott: So you can look for.
+Scott: Yes, you know you can identify genes that have polymorphisms in them that are associated with certain diseases, they diabetes.
+Scott: And then you can look to see how chemical treatment modifies expression of those genes.
+Trey: Mm-hmm.
+Scott: So that's a real simple one, and there's a, but that's sort of the way I've been historically oriented to the gene by environment.
+Scott: Now I think people are probably broadened the term to some degree, right, but the other one is the classic example is pharmacogenomics, which is if you carry this polymorphism in this in this P-450 you need to take a lower dose of this drug, you know.
+Trey: Mm-hmm.
+Scott: And so.
+Scott: So I think that's the thing that you know, do just getting something more tangible down.
+Scott: So we can know what the inherent limitations of the large language model that we're building here has in respect with respect to a tangible example of what it's what it can do.
+Trey: Yeah.
+Trey: OK, so how about how about the example being and?
+Trey: And this is like directly related to the email that David sent which is querying.
+Trey: RoboCop using large language models using a regular natural language query and then having it perform the query and pull the data out and then perform a summary on it.
+Scott: That would that would that would do.
+David: Umm.
+Trey: OK.
+Scott: And I think I I think if if if we can synthesize something that already to some degree exists and also something that can formulate represent a hypothesis.
+Scott: So the first is the fact that you can actually find something that's true.
+Scott: The second is now that you've found something that's true, you can hypothesize something, and that's something that you can test.
+Scott: And I think that's an important thing to get across both there's some tangible reality to what it is synthesizing we already know.
+Scott: And then it has a capacity to hypothesize the same at the same time, which would be great.
+David: Yeah, that's a great.
+David: I think that's a way better way to state that aim than I could.
+David: That's that.
+David: This is recording and etrade, but that's a really good that's a really good statement.
+Trey: Is what the that to use the RoboCop for or what do you?
+Trey: Which statement are you talking about? Sorry.
+Trey: Ohh OK yeah, yeah, yeah.
+David: Ohh, the the second half of the the the last three sentences of of Scots, which again I can't like restate the words of but, but the in terms of like putting it into the purpose of like what you're trying to do there.
+Scott: Yeah.
+Trey: Yeah, example can be to query RoboCop using natural language, then summarize the results.
+David: Yeah.
+Scott: Yeah.
+Scott: Can you find?
+David: And then the other thing is like dot dot dot hypothesis because there was the.
+Scott: Can you find known? Yeah.
+David: I like the way Scott used hypothesis in there and I feel like that's gonna hook a lot of the language.
+Trey: Uh.
+David: A lot of the audience, so this would otherwise is gonna hate this stuff for being a fishing expedition until we tell them.
+David: That's way inside the hypothesis that are testable.
+Scott: Umm.
+Trey: Well, then, I'm just gonna do this thing.
+Trey: God for transcripts, put.
+David: Yes, I just noticed it was being recorded, so.
+Trey: So.
+Scott: Well, I mean so there.
+Scott: So there's probably there's got to be a paper that someone already published on known gene by environment interactions established and pharmacogenomic interactions.
+Scott: Now the important thing there is can we find them, given that they already exist, right?
+Trey: OK.
+Trey: OK, sorry.
+Trey: I guess I didn't.
+Scott: Like it actually, right.
+Trey: I didn't parse what you now I get what you're saying.
+Trey: Yeah.
+Trey: Yeah.
+Scott: Yes.
+Scott: Yes.
+Scott: Yeah.
+Trey: So we take something that's kind of like they did for RoboCop, like they take the thing that's already known and just demonstrate yes, what's in there and we can prove that we have evidence in our knowledge base to to back that up.
+Scott: Yeah.
+Trey: So yeah, I think that's a great way to prove to them.
+Trey: Yeah, that we that we're pulling stuff that's real and not just completely.
+Scott: Yeah, free association.
+Trey: He hallucinated from Jet GBT.
+Scott: Yeah.
+Scott: And if you can have associated for the subsequent step, which is OK, now let's look for things we don't.
+Scott: You know, we got these things we don't know.
+Scott: I a a weight of evidence or confidence score for that hypothesis would be outstanding, if that's even possible, even have to possible, but he said.
+Scott: So you can rank cause you can generate 1,000,000 hypotheses if it's a flat list with no prioritization, you're just going to pick your favorite one and go for it.
+Trey: Yeah.
+Scott: You know, and so I think it's.
+Scott: Important to be able to say look, the combined weight of evidence suggests that this is the best hypothesis and down from there.
+Trey: Yeah, I do think it's possible to do that kind of confidence scoring.
+Trey: I just don't think anybody has really done it yet.
+Trey: You know, like they haven't, because everything that I've been seeing is that everybody's still playing with the like, just getting the models working and asking them questions.
+Scott: OK.
+Trey: And injecting a little bit of context, whereas I'm already thinking like two or three steps ahead of that and wanting to generate the whole pipeline with logs and with you know showing where the data came from and sources and all that kind of stuff.
+Trey: And that's I think the like defining characteristic of what we're doing versus a lot of the other projects that I've seen, which are usually just like Jupiter notebooks that are querying a database with and then throwing it straight to chat.
+Trey: GPT, but they don't have any kind of logging or feedback or way to verify that information like.
+Trey: That's all the kind of stuff that I think is going to be especially like the like.
+Scott: OK.
+David: Umm.
+Trey: The safety aspects of of having the queue be run across by a bot that checks for anything dangerous or illegal or whatever, you know, and these are like safeguards that a lot of people haven't been putting into their their little mini language model projects that I think will also set this apart because the one of the things I told David before one of the things I really wanna spend a good chunk of time on is what I think is the three most common questions I hear about language models, which is the security, privacy and accuracy aspects.
+Trey: So I definitely wanted to talk about for security that we're hosting our own language models and we're using the Azure open AI endpoint that is completely within the Azure cloud.
+Scott: Yeah.
+Trey: So that never leaves the network.
+Trey: The privacy aspect of OK, they're not gonna be logging the output from our from our input into open AI.
+David: Umm.
+Trey: And if we use the local models, then it's definitely no privacy issues and then the accuracy with talking about verifying the interaction, verifying the information it gets, and like using different bots to kind of improve the quality of the output and all of that kind of stuff I think is something that is constant question that's asked.
+Trey: And this is something that I really wanna focus on because I know that they're well.
+David: Yeah, that's great.
+Trey: How do we know what's?
+David: And yeah, yeah, on that front with them, there was a trans NIH meeting or trans.
+David: I see meeting of the day of like a bunch of NH people and people are like implementing this in the federal system is a challenge or it can't be done or whatever.
+David: So like one other way to add to your description here, is actually just stayed out loud.
+Scott: Umm.
+David: That, like, here's how we did it within the here's what we used to do this in a federal setting because after you've gone through all the security, privacy, and accuracy and they're like, oh, this guy's really been thinking about this.
+Scott: Umm.
+David: I think if you highlight at the end that like yeah, we wrapped all that into our implementation here and and we're proud of you know like that kind of I think that's umm like it's a good way to tie that off because as you say most people aren't building that in right now.
+Trey: Mm-hmm.
+Scott: Umm.
+David: You're doing it in a difficult setting.
+Trey: Yeah, just I I.
+Scott: Yeah, the trainer and in the way of time, look at.
+Trey: Huh.
+Scott: Go ahead.
+Scott: No, I'm just gonna.
+Trey: No, no, I I, I I was just.
+Trey: Yeah, it wasn't important.
+Trey: Go ahead.
+Trey: What were you gonna say?
+Scott: So the the other way you can think about this just from the original motivations to talks pipe which is can you generate me a toxicological narrative?
+Scott: OK.
+Trey: Right.
+Scott: And can you can you send this size?
+Scott: Or don't bunch of information and generate me a toxicological narrative.
+Scott: Peggy chemical.
+Trey: Yeah, I mean that's.
+Scott: OK, there are major questions about species extrapolation and major questions about genetic variability, both format and toxicokinetic and toxico dynamic variability.
+Scott: OK.
+Scott: And those are true across interspecies.
+Scott: And those are across across interactive visual.
+Scott: Yeah.
+Scott: One of the questions in theory, you could prompt secondary secondary to generating the profile is a set of hypotheses around interspecies translation.
+Scott: Meaning, what's the evolutionary conservation of the known targets of toxicological effect that would be challenging with certain chemicals?
+Scott: Like furan, because it's just like scorched earth, but for other things like estradiol or something along those lines, there's there's a resource actually the DPA made that was really great that looked at the evolutionary conservation of the pocket space.
+Scott: I believe of each one of the receptors, so this is the pocket space, basically the same, and if it is then it's going to bind the same chemicals.
+Scott: So it's still pretty much the whole idea I think of it.
+Scott: They might even just straight up evolutionary conservation.
+Scott: I don't remember but umm, so there are certain things like car and PXR that are highly evolutionary divergent and so the interspecies translation on a qualitative level can be very weak, whereas something like the hormone receptors it's quite strong.
+Scott: The the other thing is the genetic polymorphism database.
+Scott: The known functional genetic polymorphisms in humans that could be both toxicokinetic, meaning like the P4, if you know a certain chemicals, then you'll and you'll know this.
+Scott: You'll know this because of what you're what Jeremy has in the gem Biotoxin database.
+Scott: What enzymes metabolize it and is it only metabolized by just one enzyme?
+Scott: Primarily, if it's just one enzyme, there's a really significant genetic liability from a toxicokinetic standpoint, right?
+Scott: Because that's the only thing I metabolize it.
+Scott: So if you don't have it, your cmax and area under the curve go way up, right?
+Scott: So your exposure goes way up.
+Scott: Tosco Dynamic is a polymorphism in the receptor doesn't make the receptor hypomorphic.
+Scott: Ohh Hydromorphic or hypomorphic meaning less or more functional, at which point you can have a what's called a pharmacodynamic or toxic code, dynamic variability.
+Scott: And so it's it's first asking what those plausible genetic liabilities could be.
+Scott: And secondarily, formulating hypothesis around whether they're functionally meaningful.
+Trey: Yeah.
+Scott: Now you know this is happening in a month and 1/2 I realized that it's probably not going to be a realistic outcome, but that's the other gene by environment question that you can build directly off of talks pipe in the original goal of talks pipe which is generating a narrative, you know so.
+Trey: OK.
+Trey: Yeah, I mean that. Yeah.
+Trey: Like that sounds like a plan, and I definitely think we should.
+Trey: I should push that.
+Trey: Umm.
+Trey: Like message through the talk itself.
+Trey: So I I have all the notes now.
+Scott: Yeah.
+Trey: Uh, from what you said.
+Scott: No.
+Trey: So I'm gonna go ask Chad doubt to summarize that and then we'll incorporate it.
+Trey: Mm-hmm.
+Scott: Well, I mean I think you can, you can introduce it from the context of data use in risk assessment and the considerations in the process of deriving a reference dose.
+Scott: These considerations relate to the safety factors that are applied, so you start with a rodent, you get a number.
+Scott: That's the most potent effect.
+Scott: Secondarily, you adjusted for interspecies variability that could happen that certainly has genetic implications because you know rats are different than us by about 10%.
+Scott: And then and then you have the inter individual which is much more targeted and more what people typically think of as gene by environment, which is a specific allelic variant, modifies either the task code dynamic or the task code kinetic components of chemical metabolism or action.
+Trey: Umm.
+Scott: So.
+Trey: I guess one other thing that I wanted to ask about since since it was something you brought up before was umm.
+Trey: The you said you wanted to like kind of go through the pipeline of of how you would do gene expression analysis with talks pipe.
+Trey: And so, yeah, that's something that I would still need from you in terms of just like a flow chart or even if you just, if you just chain of thought recorded into chat GPT, the process I can use that to break it down into its component pieces and create a a chain of prompts for Chad GBT to generate that kind of analysis.
+Scott: Yeah.
+Trey: So umm, I know, I know you've been sending this stuff on.
+Trey: On LinkedIn about, you know, using knowledge graphs and generating knowledge graphs to to augment the the language models.
+Trey: And that's definitely something that I'm like keeping in the back of my mind as I'm as we're moving forward with this as a way to, again, I think robocop's a great way because it's already a great way to test it because it's already there.
+Scott: Yeah.
+Trey: There and then all I have to do is just use the uh conversion to a cipher or NEO for jQuery and then we can pull that data and then use that for summary.
+Trey: But as we get further along, yeah, being able to actually use the connections that are in chem bio talks, I think that's I think the nice thing about the trying to use RoboCop right now just for this demonstration is that it's already there.
+Scott: Umm.
+Trey: It's well documented and it's well structured, whereas chem bio talks is still a little bit messy and difficult to use and just that's just because you know, we need to go back and kind of revisit it a little bit.
+Scott: Umm.
+Trey: Uh, but for now, I think that yeah, we can use RoboCop.
+Trey: We can.
+Trey: We can demonstrate a hypothesis and A and testing and get data back and.
+Trey: But yeah, for the gene.
+Trey: But for the gene interpretation gene expression analysis just.
+Trey: Yeah, I just need something to kind of guide me when I'm like guiding the bots on how to do this so.
+Scott: Hmm.
+Scott: Yeah.
+Scott: No.
+Scott: And the gene expression was a separate thing.
+Scott: I think it's a.
+Scott: It's a much more focused and she so gene expression interpretation and narrative generation based upon a difference of differentially expressed genes is very much an art form, and if there's a, there's a uniform way of approaching it, and that's why I think this could be potentially really valuable in characterizing patterns of gene expression, understanding causality in the in the gene expression.
+Scott: If you can do that, and I think that's really where it would be incredibly helpful, the causality both on both on from a a molecular driven process.
+Scott: What's driving it?
+Scott: What receptors?
+Scott: And then the causality of any pathological manifestations or otherwise, in the tissue where you're seeing the effects.
+Scott: So how do those linked together?
+Trey: Umm.
+Scott: Because it's big black box in between and so that's that's an exercise that I personally it's not necessarily gene by environment, although it could be that I would see really to be really valuable someone could say someone could say I did this study in a rat this exploration I these are my differential expression needs and liver these are my differential expression genes and kidney tell me what's happening.
+Trey: Umm.
+Scott: And I have these pathological outcomes in these organ systems that would be outstanding, that sort of thing.
+Trey: Umm.
+Scott: If there was a linkage that could borrow through the data using some of the tools like ingenuity, pathways and things along those lines to infer hierarchy on the data and then infer the outcome, that would be incredibly powerful.
+Scott: And again, the uniformity as opposed to what you know, I try to be unbiased in it, but everyone cherry picks what they know when they see that data.
+Trey: Right.
+Scott: And so that's what they write about and that's what they try to attribute their findings too. So.
+Trey: Awesome.
+Scott: Yeah.
+Trey: Well, I know we're at our end of our time here and I know you guys probably have other stuff to do, but the feedback is definitely been helpful.
+Trey: I got the recording, so I'll go back and kind of summarize it and incorporate it, but I think that we're, I think that I'm on the right path and it's good to hear from you guys that like some additional feedback on how to go about doing this, especially for the gene by environment interaction, stuff like I know that you pitched me for doing this and I know that we can make it work.
+Trey: It's not like it's so far away from what talks pipe was meant to be doing, but it does help.
+Trey: Just because I'm not.
+Trey: Yeah, not quite as familiar with that view of toxicology, so.
+Scott: Umm.
+David: Yeah.
+David: I mean it.
+David: It's got and I spent a lot of time thinking about that and we have largely overlapping definitions of what it means, but I think it's fun here because it will separate you from the other presenters who will use, like, sort of 1 hop things or whatever from, you know, graph theory is just to call it gene environment interactions and and use will be different.
+Scott: Umm.
+David: And I think that's cool.
+David: I think it's really cool, so I'm yeah.
+David: I'm I'm very excited about it.
+Trey: And we get to say we got 150K too, so that should help make them like ohh, they NIH gave them a ton of money.
+Trey: So that must mean that they have something going on.
+David: Yeah, no.
+Scott: Well, you gotta slip in there.
+Scott: You have you have a automated AI driven way of overcoming the overcoming the inherent statistical limitations of epistasis, and so you can you can throw those words in there.
+Scott: You know, it's like I'm blending all this knowledge together to filter through the plausibility of all each of these thousands of possible associations.
+David: Yeah.
+David: And Scott will see some of this stuff come across to, you know, just for your own personal, you know, motivation tray.
+David: You know, we're putting some of this in the slide PMT program document too, right?
+David: So, umm, about coordinating these kinds of efforts and centering them, and there's a lot of text in here about this, right?
+David: So I mean this is a lot of us wanna invest in this and people are really excited about it.
+David: So I appreciate the work that you're doing that I I can't do.
+Trey: Yeah.
+David: And and I I hope to get more like you know, converse it in some of this.
+Trey: Yeah.
+David: But this is also where I'd like to focus too, so I'm.
+David: Umm.
+Trey: Well, I mean, it's just that I I am just very lucky that all of the that my skill sets have all combined to kind of land in the right spot at the right time to be able to do this sort of stuff because yeah, I needed.
+Trey: I needed knowledge of all of the things of computer science, of biology, of system, administration and networking and cloud stuff, and all of this stuff to be able to get this to work.
+David: Umm.
+David: Yeah.
+Trey: So I really kind of just and I do have to give a lot of credit to to Scott and Charles because they both for my entire time working here have been very focused on making sure that I skill up and develop skills that are not just useful for especially Scott has always been telling me, like develop skills that aren't just useful for toxicology.
+David: Yeah.
+David: No, it's super cool.
+David: Super cool.
+Scott: Yeah.
+Scott: No, I mean and you're 150K richer now.
+David: Yeah.
+Scott: So congratulations, let's make something happen.
+Trey: You.
+David: Yeah, that's a nice chunk.
+Trey: Yeah, I definitely don't have to worry about about like spinning up servers on the cloud or anything like that now.
+David: So cool.
+David: Yeah.
+Trey: So not with 150K, so no.
+David: No, it's super cool.
+Trey: Alrighty you guys.
+David: OK, cool.
+David: Yeah.
+Scott: Don't.
+Trey: Well, thank you for the feedback.
+David: Thanks for thanks for keeping it so organized too.
+David: I appreciate it.
+David: Yeah.
+Trey: Yep.
+David: Yeah, OK.
+David: Alright, thank you.
+Trey: All right, we'll catch up again next week.
+David: See.
+Scott: But I guess.
+David: Yeah, but.

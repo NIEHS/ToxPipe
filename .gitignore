@@ -8,3 +8,8 @@
 .config/heimdall/www/app.sqlite
 .vscode/saddlerto.code-workspace
 docs/data/
+.Rproj.user
+
+/.luarc.json
+reports/2023-09-12 NIEHS Council/.Rhistory
+.vscode/settings.json

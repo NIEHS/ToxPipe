@@ -1,0 +1,459 @@
+Trey: OK, so the current state of where things are.
+Trey: I I did a little bit more on this, but what I really worked on last week and I guess this is one of the things I wanted to talk to you guys about.
+David: Umm.
+Trey: Umm is I got.
+Trey: Uh, I think I've told Scott about a little bit.
+Trey: I'm and I.
+Trey: Maybe I've kind of forgot cause it kind of just hit me.
+David: Umm.
+Trey: It was about a month ago that David Fargo, or actually Adam Burkholder emailed me asking about talking to build journals and helping them take all the info that they had for the strategic plan and using it to like write a draft of the.
+Trey: Initial things.
+Trey: So.
+David: Yeah, it's cool.
+Trey: Umm, so that's that's one of the like.
+Trey: One of the things I've really been working on, and I know that my talk there is about talks pipe, but I guess I finally went and actually started taking a look at who all is the gonna be there.
+David: Yeah.
+Trey: I didn't realize how like big of a thing it was.
+Trey: And who normally presents there?
+David: Umm.
+Trey: I was looking at the.
+Trey: Was it U the strategic plan?
+Trey: Ohh no it is it here.
+Trey: Yeah, or do we not strategic plan it is under.
+Trey: Dev and talks by president.
+David: Umm.
+Trey: Hold on resources, no.
+Trey: Where did I put all of those?
+Trey: Anyways, I saw yeah, like I saw the previous list of and and I was also doing some of my research and looking at like, you know what, how these meetings sort of go and who and have you, have you been to these before, David.
+Trey: OK. OK.
+David: Yeah, yeah, yeah.
+Trey: And Scott, have you?
+Trey: I'm assuming you were around for the last time that they were talking about the strategic plan and.
+Trey: How all that goes like since I'm helping them write this draft, I know that Bill said that he wanted things like they were trying to have something done like sometime in August in order to, you know, finalize their draft before they go to before this September 12th thing because it sounds like it's a good chunk of or not good.
+Trey: I don't know how much of it actually they're going to talk about there, but yeah, do you have any?
+Trey: Do you like know what do you remember from prep past iterations when they're like talking about the strategic plan?
+Trey: This will been like five years ago, you know, but.
+Trey: OK.
+Scott: No, no, I haven't.
+Scott: I I haven't paid much attention to this treaty plan, to be honest with you.
+Trey: OK.
+Trey: Yeah, I I've figured.
+Trey: I just wanted to know if that if like any additional info and then as far as like a schedule goes, I didn't see anything posted on it just like just yet.
+Trey: Uh, but do you guys happen to know when?
+Trey: When I might be able to get a or like when they're going to finalize the agenda for the meeting.
+David: You mean for the?
+David: For the not the strategic plan meeting, but the the Council meeting.
+Trey: Yeah.
+Trey: Well, isn't it part of that or is it or is like are they not gonna talk about it at that same meeting?
+David: Uh it, I mean the they always have the meeting, but the agenda can change.
+David: So if they're, they won't present the strategic plan.
+David: If they're not ready to present on it.
+Trey: OK.
+Trey: OK, that's what I was wondering.
+David: Yeah.
+David: So the the the external meeting that the Council meeting is a a required periodic meeting where the whole world continued.
+Trey: Yeah, it's like quarterly, right?
+David: Yeah.
+David: Yeah.
+David: So.
+David: Umm yeah, so that so the, you know, the list of folks on there right now is, you know, who's slated to present.
+Trey: OK.
+David: But we can ask, I can get more deep, you know, if you want an agenda, I can ask David Balshaw if he has an updated agenda.
+Trey: Yeah.
+David: Yes.
+Trey: I just see the one here and see June 6th and 7th was the last, so they just don't have it in here.
+Trey: You just yet?
+Trey: Yeah.
+Trey: I I just wanted to know because I wanted to know like, am I gonna be talking on the first day or the 2nd day?
+Trey: And who's gonna go before me?
+Trey: That is all because you guys said there was a couple other people that were gonna be doing AI related stuff.
+David: Right, yeah.
+Trey: And so I was hoping to know if I was going to go first or they're gonna go first cuz I'm planning for it either way.
+Trey: And that's one of the benefits of using Jarvis.
+Trey: I'm sorry, using reveal Dot JS to do this presentation is like I have vertical slides and horizontal slides.
+David: Umm.
+Trey: So if I you know if something is, I can kind of preplan as I'm like, talking about introduction to to like current state of AI stuff is like, do I go further?
+Trey: Do I actually talk about like where models are stored?
+David: Umm.
+Trey: Or do I go more into talking about like actually how they the latest iteration of Chem Crow, where they've gone all the way from put in synthesis like synthesizing me, this chemical and actually the machine will do it for them.
+David: Umm.
+Trey: Kind of thing. Yeah.
+Trey: So I I'm planning for it either way, but this is kind of where I like.
+Trey: Yeah.
+Trey: I just wanted to the better prepared I can be knowing like how much they might like and if I can contact them before and just be like, hey, I just wondering if I could like get a rough idea of, like how much you're gonna talk about this stuff so that I can, do you think that they, I don't know the people that you guys mentioned who are gonna be talking if they would possibly be amenable to that or not?
+David: So no.
+David: Well, like in a in.
+David: In short, no.
+David: We'll set the agenda beforehand, Umm, and and won't it's it's not dynamic.
+David: So what we can do is if you would prefer part of your time to be the the intro to something like if you feel like you're material is best first I'll tell David.
+David: I'll shout beforehand that we really want trade to lead the, you know, of the four people giving talks in that session will want him to go first.
+David: They're not going to be spread over days.
+Trey: Right, right.
+David: He'll be all back to back as ohh usually be done.
+Trey: Yeah, I mean, I saw the schedule, so that I, I guess that was the other thing too is like, yeah, are all of the, is it all gonna be on the second day and and because I I noticed, yeah, like there's an hour, there's an hour.
+Trey: OK.
+David: Normally, normally they do science first, so the first day would be like science presentations.
+David: Umm.
+Trey: OK.
+David: And then there's the second day is like other stuff.
+David: So you guys, you know you you'd be in the session with the other people and you know, we should decide now that the content of what you want, whether that should be first or not, because we'll have to state that.
+Trey: Yeah, that that's good to know.
+David: Umm.
+Scott: So.
+Trey: Umm yeah, I'm not sure I I think that I I guess it really depends on how amenable you think that the other like the other people are to like doing a a little bit of pre collaboration just to kind of see how you know get on the same page if they're if you think that they're willing to do that then I'd be happier to go later so that I can kind of build off of other people and not have to spend time talking about jet GBT you know in explaining what it is and all that kind of stuff you know.
+Scott: So can we bring up?
+Scott: Can we bring up the the schedule?
+Scott: That's just the for the for the meeting.
+Scott: Do you have it available immediately available?
+Trey: No, that's what I was asking for.
+Scott: Like who's but who's speaking?
+Scott: So we don't, we don't have a specific list of speakers yet, is what you're saying.
+Scott: I thought we did.
+Trey: I the only thing that I know is is in the email that you sent me.
+David: Yeah, that's right.
+Trey: There was like 3 names of these are the other people that or or you send it to me in like a person in a chat between us to Scott uh, I think.
+Trey: But I don't remember who I remember seeing like 3 names on there. Uh.
+David: Yeah.
+Trey: See, it's not there.
+David: Now it's umm.
+Trey: Said in my email.
+David: That.
+Trey: In bongs from Scott.
+Trey: From Scott, let's see.
+Trey: And then FYI.
+David: Yep, no, it's it's it's a, it's an email.
+David: So it's Mike Snyder, Thomas Hart Tongue and Shirag Patel.
+Scott: It's so I don't think any of them are going to really talk about large language models.
+Scott: So hard, Tong is gonna talk about his.
+Scott: His brains on the chip and you know he's gonna talk.
+Trey: Ohh yeah, that was some cool stuff.
+Scott: He's gonna talk on a really high level about AI because he's not really an AI guy.
+Scott: He's he's an MD and and then Snyder.
+Trey: Umm yeah, and I think I've heard them talk about the brain, didn't they?
+Trey: Didn't want, didn't he just do a talk like in the last couple of months?
+Scott: Yeah.
+Trey: Yeah.
+Trey: Yeah, so.
+David: Yeah.
+Scott: And and then then.
+David: Well, heart, you know, hard times rebranding himself to be me understands about AI stuff, right.
+David: So I'll there are recent talks from him if you want.
+Scott: Yeah.
+David: Umm, I can.
+David: I'll start a tab and I'll I'll send you some of those.
+Trey: I I think we can just, uh, keep it in the same talks, pipe Trio meeting group or wait.
+Scott: OK.
+Trey: Actually, let me see.
+Trey: Hold on. Uh.
+Scott: And Schneider?
+Scott: Schneider, just alright.
+David: And now to something new and exciting in the AI space.
+David: Grammarly go, it's a new product is making sure those are real like.
+Trey: What was the name of the thing?
+Trey: Brown. What?
+David: What?
+Trey: That, he said, like in the little clip that you just listened to says like, what?
+Trey: What tool was it that you just mentioned?
+David: I I don't know.
+David: It was an ad.
+Scott: Yeah, so don't.
+Trey: Ohh, it sounded OK.
+Scott: So so try. Don't.
+David: Does the ad I was clicking to make sure it had a real thing?
+Scott: So.
+Trey: Sorry, go ahead Scott.
+David: No, no new tools, no new tools.
+Scott: So yeah, so try.
+Scott: You're gonna know much more about large language models that I think anyone that's going to be talking.
+Scott: OK, Snyder.
+Scott: What Snyder did Snyder claimed to fame was that he he used himself as a model for precision medicine, or he sampled himself and watched himself develop a disease and could diagnose it beforehand.
+Scott: So that's his big claim to fame.
+Trey: OK.
+Scott: There are probably other components of that, but that's what his his really built on personalized medicine and aging and things along those lines.
+Scott: And then a hard tongue.
+Scott: Hartong usually talks at a pretty high level.
+Scott: You know, he has people that he works with that are detailed people, but he's not a a.
+Scott: He's not a detail guy.
+Scott: Umm, the the other fella?
+Scott: Shirag shirag is really good and cautious and crazy smart and.
+Trey: And cautious.
+Trey: What?
+Trey: What?
+Trey: That's kind of like a weird.
+Scott: He's he's he's, he's so it.
+Trey: Yeah.
+Trey: Ohh.
+Scott: I don't know if you ever seen Hartong speak, but he's exceedingly bombastic and it it it it it rubs people the wrong way a lot, but he's that's just his nature.
+Scott: And then we're shirag is very cautious and he is very specific and very, you know he's a when you hear him speak he he's a very calm and very to the in my in my experience very to the point.
+Scott: Umm, he does do a lot of grand landscape.
+Trey: What?
+Scott: Sort of stuff, and it's possible he's using the large language models in some of his research along the lines of of, you know, he does a lot of data mining from insurance databases, looking at relationships, relationships between relationships, between plausible exposures.
+Scott: And you know, like so in insurance records, in certain cases of medical records, you have what people's occupations are, things along those lines.
+Scott: And So what he does is he does these things called ewas, Environmental Wide Association studies, and that's his.
+Scott: And So what he does is he basically uses expose predicted exposures as genetic variants to identify associations with disease.
+Scott: And so it's it's been his thing for a while.
+Scott: No one in particular is looking.
+Scott: I mean heartsong maybe maybe venturing down this path because of the people he works with, but no one is going to be venturing down, you know, in in this particular path.
+Scott: I don't think particularly at the level of detail that you're talking about.
+Trey: OK, good to know.
+Trey: No, that's all very useful.
+Trey: So I mean, I have been think like I have a lot of this in my head still cause I've just been spending a lot of time thinking about it as I've been, you know, doing all this other stuff.
+Trey: But basically I I kind of wanted to do it in a.
+Trey: I I know that after seeing the the audience and how broad it's going to be, I'm I definitely want to target that audience and not go super ******** in depth on the on the language models are the science or anything.
+Trey: But I did kind of want to talk about like how I think the the underlying theme of what I wanna talk about is kind of like the mindset.
+Trey: Alright, so umm and what do I I I I know it's not making sense just yet but.
+Trey: So umm my cause and effect right?
+Trey: And my goals, I wanna convince them that that API's useful, but there's limitations and one of the ways I want to do that is just kind of like I the mindset when I first started, I was like back in December playing with JWT.
+Trey: It was kind of like, OK, this is, you know, whatever.
+Trey: It's cool, but I didn't really see the, you know, the full potential.
+Trey: And then by January, I watched some videos and seeing the real potential of it.
+Trey: And then I was reading an article last night.
+Trey: Umm.
+Trey: On Hacker News, where the Pete, like a lot of people who are in my same kind of position, are hitting the same roadblock with people of.
+Trey: There you know, the people are either in the same boat, they're super excited about the AI stuff, which I think most people are.
+Trey: But the people that I want to really target are the ones in the audience who haven't, like, gotten it yet.
+Trey: Right.
+Trey: The aha moment right, I think.
+Trey: I think all of us have had the at least us three have had the aha moment playing with the generative model stuff like Oh my God, OK, you see the potential right?
+Trey: You know, it's not.
+Trey: It's not, and it's final iteration, but we all three of us see what the possibilities are that we can do with it, and that's what's like, so exciting about it.
+Trey: And so I kind of wanted to talk about, OK, like once, if you haven't had that moment, let me try and help you get there.
+Trey: And that's what I wanna talk about.
+Trey: Like the different use cases and stuff.
+Scott: Umm.
+Trey: But I kind of wanted to talk about it in terms of, like, my journey a little bit, my GPT journey.
+Trey: So I was gonna start off by saying UM about.
+Trey: So I was just gonna start off with like my my I story.
+Trey: I wanted to say, you know, I first season in December, but I didn't.
+Trey: I thought it was neat, but then I watched the videos and I finally realized.
+Trey: And then I wanted to say my next slide I wanna say, did I go overboard and I kind of I was going to go take some screenshots of my bookmarks like, you know, I have like 500 bookmarks on AI stuff since January.
+Trey: And the number of videos that I've watched on YouTube and I was just gonna like pop up a few different things on the screen.
+Trey: Like yeah, I might have.
+Trey: I didn't go overboard.
+Trey: I too much, did I?
+Trey: You know, umm.
+Scott: Yeah.
+Trey: And then and then just kind of like talk, OK, so yeah, did I like all this other stuff?
+Trey: OK.
+Trey: Then have you had your aha moment?
+Trey: And then I I there's one paper I need to go find that talks about the current estimated current like exposure and usage rates.
+Trey: So I think it said something like only and this is maybe a month ago like only 15% of people in the US have actually tried chat, GPT and only like 60% or 70% have even heard of chat.
+Trey: GPT.
+Scott: Umm.
+Trey: Even at this point, like six months into the year, so you know, there's still a lot of fear, uncertainty, doubt.
+Trey: But yeah, so that's kind of what I wanted to.
+Scott: Umm.
+Trey: I wanted to show how many people are actually like using it and how far we still have to come and the fact that we're still like on the upward trend of the curve of adoption of large language models.
+Trey: And then I'm going to talk about my agenda.
+Trey: OK, so I've already went through the intro and I've already kind of went through the current state of AI at a little bit with the did I go overboard and kind of talking about that?
+Trey: Then I'll start talking about talks pipe.
+Trey: So are actually.
+Trey: Let's see.
+Trey: Yeah.
+Trey: OK, so that's my intro to my language and I also was trying to figure out how much I should talk about my like how much of an introduction will be done for me or like how much I how far I should go into my I and I figure Scott since you know my background so well, like how how far I should go because I'm sure a lot of people are gonna be like, what's my area of expertise kind of thing and why should they listen to me about this?
+Scott: You know.
+Trey: So I kind of figured I have to do at least some and that's part of the reason for doing this.
+Trey: Introduction, too is to kind of explain how I got like yeah, how I gain the knowledge, how I got here.
+Trey: To establish credibility.
+Trey: But yeah, how?
+Trey: What do you think Scott like?
+Trey: Should I go out?
+Trey: Should I go all the way back to kind of how I started doing the computer stuff with you and switched to Charles and the work I've done in ODS to kind of like give a background of my stuff?
+Trey: Or should I not worry too much about that?
+Scott: I wouldn't worry too much about it.
+Scott: I think you know, it personalizes a little bit, but I think, you know, I think your strengths are going to be digging into the example applications that we at DT imagined it can be used for.
+Scott: And I think that's so I would spend your time in that space.
+Trey: Mm-hmm.
+Scott: It's every you know and I and I think that it it goes in the examples go in a variety of directions, whether it be, whether it be institutional knowledge capture, all the way through automating processes of returning information to people that come to the website and ask about toxicity of certain chemicals.
+Trey: Yeah.
+Scott: Right to I to being able to interpret gene expression data.
+Scott: And you know the those possibilities is.
+Scott: And I think that's and the idea that you know we we have we're building this the substrate data resources to integrate these technologies with those resources.
+Scott: So chem biotoxins is something that you can get a slide from Germany and say hey, so here's this resource where we have 100 million chemicals, which toxicological predictions from a variety of different resources and then we can talk about, you can talk about the inference based stuff that we're doing with oral, which in theory could populate that database with you know CTD predictions for genes and diseases and all sorts of other things using again at some variation on AI.
+Scott: That you layer that in with the LLM you have a real opportunity to be able to build out, assuming you can get the metadata in there that's necessary the the narratives you know the predicted narratives on what the toxicological properties are and we can talk about.
+Scott: The other thing we can talk about, too is now we're going to have genre up and running pretty soon.
+Scott: Jeremy has it and he's going to batch run 100 million chemicals through genre.
+Scott: And so we're gonna have target organ toxicity predictions, you know and and so like those sorts of things that we're doing at scale combined with these large language models and metadata are are going to be incredibly powerful for formulating. Ohh.
+Trey: Umm.
+Scott: Yeah, basically being able to formulate comprehensive predictive reports on toxicity, right, and that's and and you know the parallel you know, so it's one thing to predict something.
+Scott: It's like old school talks.
+Scott: College versus new school talks college, right?
+Scott: Old school toxicology.
+Scott: We observe it.
+Scott: We have no idea why it happened, right?
+Scott: So that's all.
+Scott: That's all the predictions, but you saw stuff from Kamal yesterday that actually was interpreted.
+Scott: Now we're starting to interpret those models, and we're using large language models to interpret, and we're starting to get into a space now where you're with.
+Scott: You're gonna start scribing mechanistically and and doing an inferential process given data and additional frameworks.
+Scott: It's like that that it's going to be possible to not only say what may happen predict it, but they also say why that thing may happen, right?
+Trey: Umm.
+Scott: And I think that's the thing that is very powerful.
+Scott: It's blending sort of the new with the old, albeit under this, you know, very predictive framework that you you know we have to bear in mind.
+Scott: The other thing too, that's really powerful that you can bring up and jeremies Germany and Parker are working on.
+Scott: This is can you get it to say when it doesn't know something is?
+Trey: Yeah.
+Scott: Sometimes that's even more important.
+Trey: Yeah, that's yeah.
+Trey: I think like one the the real key that and the thing that we're going for and I don't know if I really.
+David: Yes, I do.
+David: Yeah.
+Trey: I'm not sure if how and I as I know it's noon and it do you guys have another meeting or do we have more time a little bit, OK.
+Scott: Yeah, I gotta jump in.
+David: So look, here's the thing.
+David: And you know the depth use cases, you know, please write down the, you know, contact drove and and.
+Trey: The what?
+David: And Mel drew the the person he self presenting yesterday.
+Trey: Oh, right.
+Trey: OK. Sorry.
+David: Umm yeah.
+David: Drew and camel.
+David: You know well when we talk about applications, we wanna mention that too.
+Scott: Yeah.
+David: Is the DTD application you know they're cool?
+David: Interpretative thing, so that should be on the list.
+Scott: Yeah.
+David: You know, I I sent you a link to the hard tongue webinar.
+Trey: OK.
+David: Umm, that's upcoming.
+David: You can watch it and say we're just gonna say and what Scott says is 100% sure that he's gonna be bombastic, and then it's here and it's solved everything. Right?
+Trey: Umm.
+David: So, so, you know, don't, that's not the space that you're.
+Scott: Yeah.
+Trey: Right.
+David: That's not what you're offering right now.
+David: We're offering also, like senior leadership is super bought into this idea and they have no idea what it means. Right?
+Trey: Yeah, I know. That's.
+David: So so you know you, you got you got that stuff and and you have people that understand a part of it though, right?
+David: So like you get that stuff, the Mike Snyder thing is gonna be on like genomics, you know, it's like, you know, I I totally agree with Scott characterization.
+David: Chirag Patel is just a really good scientist who's gonna do expose omic stuff and how to learn with it.
+Scott: Yeah.
+Trey: Umm.
+David: And so like I think where your special place is is umm the the, the, the trust, the data that we actually feed into it, that we can do reliable results and how you're doing this within a Fed system with all of that like it I it sounds like an implementation talk which it's not, but it's actually like you can address these issues because it let's say you're not on the list and you only hear those three other talks a bunch of people are gonna be like well we can never do that here because XYZ because they don't have the talent to do it right.
+David: So you can do that.
+David: So I would say frame it that way and and I'm gonna say I I don't.
+David: Hey, no, I'm not.
+David: I don't mean to sound a little bit and you know I'm being pushy here, but I think that we should, you know, when we talk.
+David: Next, it's next Friday.
+Trey: OK.
+David: Like, let's go over like the the talk and outline is basically ready like to practice, right?
+David: They'll be material there, but let's do that because and I'm saying this like with all honesty, I know you have other responsibilities and if if there's if this is still more of a, you're doing research to get to this point and do it, that's OK and we can present another time.
+Trey: No, no, no, no.
+Trey: So.
+Trey: So the thing, yeah, I understand completely.
+David: But like we, we can't do that the the week before, yeah.
+David: Umm.
+Trey: And the The thing is like in terms of the research and stuff, the the research is done, I've already like, I know, I know.
+Trey: I like if I had to, I could give a talk right now with no slides and be fine.
+Trey: That's not the, you know.
+Trey: So I I know that that's not the issue.
+Trey: It's just, yeah, like getting it down into the final format is kind of where I was still struggling, but I.
+Trey: Yes, next Friday I will have a complete like a first draft of ready to actually present to you guys and start getting feedback about the whole layout and everything, so.
+David: Yeah, I think it's good because the these other people have given can to talks for years and they're adding a slide at the end, right?
+Scott: Umm.
+Trey: Right.
+David: Like this is a long term project, right?
+David: Instead of like I think and it's what you laid out is compelling and cool and and and I want to see that.
+David: And I also want to say too, if there's something where you need help or resources or protected time like through Scott or through me or us together.
+David: You know, we can ask.
+Trey: Yeah.
+David: I know your inbox is full of people asking you like, hey, Trey, you're the only one who can help, you know, like.
+David: So if you if you need a a pause, we can also coordinate that too, right?
+Trey: Yeah.
+Trey: No, I honestly like right now.
+Trey: I.
+David: So I just wanna make sure you have the time to feel good about it.
+Trey: No, I do.
+David: Yeah. OK.
+Trey: I feel good about it, like already like working on it this far in advance is already like.
+Trey: Making me feel very comfortable.
+Trey: I feel like I'm on track and part of it too was just like the technical side of things and I've gotten it now to where I actually, umm, let me just.
+Trey: Let's see if I have it still up.
+Trey: I know you guys have another meeting, but a PPP, I don't have it up right now or I can't find it.
+Trey: I have too much stuff.
+Trey: Wait, hold on.
+Trey: There it is.
+David: We.
+Trey: So this is one of the interfaces I was just working with and I was trying to use this one to actually like query documentation for libraries to help me.
+David: Oh cool.
+Trey: Finish like speeding up the because I'm having to go skim through documentation to understand stuff, so this is actually letting me like ask questions about specific documentation kind of stuff.
+Trey: So this is just one implementation.
+David: That's cool.
+Trey: This also will let you do like PDFs and stuff, but I have this and I've almost done with the dancer stack and umm like I'm at a stopping point.
+Trey: Basically where I'm I like I'm not gonna be doing much more work.
+Trey: At least just yet on doing the whole talks pipe stuff.
+Trey: I'm gonna be, you know, doing the talk.
+Trey: And doing the. Yeah.
+David: OK.
+David: Yeah.
+Trey: So anyways, I'll let you guys go and next Friday I will be ready with a first draft and ready to kinda give a rough idea of the talk. So.
+David: And that that time means, you know, I mean, I I can only offer, you know, directly, you know, my own time.
+David: But like if you want a longer time to chat too. I was.
+Scott: Umm.
+David: I kind of had these check half hour things as check-ins, but also like if we want to sit down and get in like that's good too because the other aspects that aren't showing up in your outline.
+David: Are in my opinion are cool.
+David: Things like what does cloud mean for the like?
+David: Hi how do you do this?
+Trey: Right.
+Trey: I kind of needed to.
+David: Where we where we all live and work like.
+Trey: Uh, yeah.
+David: It's very cool, yeah.
+Trey: And that's another thing too, is to how to fit in the whole.
+David: Yeah.
+Scott: Umm.
+Trey: We got the 150K thing to and and so kind of show off their a little bit.
+Trey: So anyways, yeah, I know you guys have another meeting, so I'll let you go for that.
+Scott: OK.
+Trey: And next Friday, I will be ready with a completed first draft and ready to get feedback on that.
+Trey: So but the.
+Trey: Are going good.
+Trey: I have a rough outline and I have it in my head.
+David: Yeah.
+Trey: It's just getting it down onto the slides that I'm, but I I feel comfortable about giving the talk.
+Trey: I don't have any issues.
+Scott: Yeah.
+Trey: Like I said I I feel like if I needed to I could go up there right now and no slides.
+Scott: Yes.
+Trey: Give a talk on all of this so.
+David: Umm yeah.
+David: And and the things where you know you're not trying to.
+David: We're not trying to win the, you know, we're not trying to win Council meetings.
+David: So you don't have to have like.
+Trey: Right, right.
+David: Something that's the the other speakers but it, but I appreciate your your thinking through like what content is different including the order that we talk, right.
+David: So like if you are gonna really introduce long, large language models, we'll tell David Balshaw to like, hey, of these speakers, let's go.
+Trey: Yeah.
+David: First, I would encourage you to watch the hard tongue seminar, because I think Scott captured it.
+David: Bombastic is the right word, like it's basically like a it's a video on AI that you would like send your grandma to get or interested about it, right?
+Trey: Ohh yeah.
+David: It's everything.
+David: Everything is great and it's all there.
+David: And done and hurray and stop working.
+Trey: Yeah.
+David: You know, so like you know.
+Trey: No, I I am very much a I am very much a in the same boat as Scott of this is all really cool stuff, but we have to be careful.
+Trey: We have to double check our work.
+Trey: All that kind of stuff.
+David: Yeah, that's really good.
+David: I appreciate it and yeah.
+Trey: So, but yeah, in terms of like a longer time and stuff, next week might be like for to actually go through it and give the talk and get feedback.
+Trey: You might need more than 30 minutes so.
+David: OK.
+David: Yeah.
+Scott: OK, that's fine.
+Trey: Yeah.
+Scott: We'll do that.
+David: No for that.
+Trey: OK, I'll let you all go.
+Trey: Thank you guys.
+Scott: I guess I'll see you in the side, dude.
+David: Yep, that sounds really OK and I added a of my my own stupid like I added a A teams link it to the meeting, I just didn't.
+David: I just hadn't done that.
+David: It's like my one computational task, so that's done now.
+David: So hopefully we can have that in the future.
+David: I'm sorry.
+Trey: No worries, alright.
+David: Yeah, just for one easier bit.
+David: OK, cool.
+David: Yeah, alright, bye.
+Trey: Catch you later by.

@@ -1,0 +1,26 @@
+This XML file does not appear to have any style information associated with it. The document tree is shown below.
+<md:EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="https://auth.toxpipe.niehs.nih.gov/realms/toxpipe">
+<md:IDPSSODescriptor WantAuthnRequestsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+<md:KeyDescriptor use="signing">
+<ds:KeyInfo>
+<ds:KeyName>DfNbyv-QizOKtP8fD68N8AMszv5VjxgktIV-G2P9B_U</ds:KeyName>
+<ds:X509Data>
+<ds:X509Certificate>MIICnTCCAYUCBgGKIwx4YTANBgkqhkiG9w0BAQsFADASMRAwDgYDVQQDDAd0b3hwaXBlMB4XDTIzMDgyMzE1MzcxNFoXDTMzMDgyMzE1Mzg1NFowEjEQMA4GA1UEAwwHdG94cGlwZTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKWP6sAJ3bBlw2fx7Kly7WVf1rA45szDVbb+j4OgcOr6dLo2TJCUdFJtwV8DqyBgFKWpcS2GI4JllnOnFSyD7UgWD/MGSM+tGbeEck+ZlO2umtU9NwEJAjJ/rxsutEKzLS3vn8H3ClYG9jC3Y9oT7X9OQ1lfjA8KFwDrGs3jTZ1pR1/aXcmMUoe7+jnzBUCrwZzK5zHTRfQF+hP4+OoUCo5FgSQzpDNuiWDU7owvZlAY8yNsfM0SNsjFelfDNUKrBXJWbrY/1ibrOaZ9we8+urCTp5Z4p671e9jTh5h9oEyCX0OygZ7EHuW9MmslrsGaQ6oA3L4eQFODBthhdygwbNcCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAdVPM31uJxxWb3KfARSmn0lZq6kVASAxMxQehF8R9mgD2NGA/kO5OaDqg85lQIqP5qhWNhIFNqsexyeLFqvacGm3TBZFIqcJ54H7y6Y2CxmKVe8OEtF4WPhr+LSfffeX32k6QC5NAZwVU139R9zKxxKR1r8Q7prdk6JG1uqj6VbZFfDNJL9EourTnkkEFT6gnixZxdpIO6FSDc5cv4/eOOoqkFptNWHIEEH2f+zvU3xO91holJxqjDTBLYPmH/TaDoPVaPnAo7v05NcpU7qHUBsEsfylFU0KoowVdDfsJzdsoVLo8KzzkSAag9dQ5ltXlW94H8ut6aP/UmTZGy2lD7Q==</ds:X509Certificate>
+</ds:X509Data>
+</ds:KeyInfo>
+</md:KeyDescriptor>
+<md:ArtifactResolutionService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://auth.toxpipe.niehs.nih.gov/realms/toxpipe/protocol/saml/resolve" index="0"/>
+<md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://auth.toxpipe.niehs.nih.gov/realms/toxpipe/protocol/saml"/>
+<md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://auth.toxpipe.niehs.nih.gov/realms/toxpipe/protocol/saml"/>
+<md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact" Location="https://auth.toxpipe.niehs.nih.gov/realms/toxpipe/protocol/saml"/>
+<md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://auth.toxpipe.niehs.nih.gov/realms/toxpipe/protocol/saml"/>
+<md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
+<md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+<md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat>
+<md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat>
+<md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://auth.toxpipe.niehs.nih.gov/realms/toxpipe/protocol/saml"/>
+<md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://auth.toxpipe.niehs.nih.gov/realms/toxpipe/protocol/saml"/>
+<md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://auth.toxpipe.niehs.nih.gov/realms/toxpipe/protocol/saml"/>
+<md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact" Location="https://auth.toxpipe.niehs.nih.gov/realms/toxpipe/protocol/saml"/>
+</md:IDPSSODescriptor>
+</md:EntityDescriptor>
