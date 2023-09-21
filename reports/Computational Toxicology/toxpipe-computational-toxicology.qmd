@@ -54,6 +54,8 @@ format:
 filters:
   - abstract-section
 ---
+
+<!--# -->
 # Abstract
 
 The Division of Translational Toxicology at NIEHS introduces ToxPipe, a pioneering project aiming to harness expert entrained AI-based systems and cloud computing to revolutionize the analysis and interpretation of toxicological properties of compounds. ToxPipe repurposes advanced AI models like JARVIS and Auto-GPT to facilitate the exploration of toxicologically-relevant data through natural language instructions, enabling a semi-autonomous approach to toxicological characterization and data integration. This project is grounded in the success of expert entrained AI models like Auto-GPT and JARVIS, which employ OpenAI’s GPT-based models as controllers to connect fine-tuned, expert AI models, allowing the execution of complex tasks through plain language interfaces. ToxPipe utilizes Azure Cloud to enhance the speed and efficiency of toxicological predictions, leveraging its pay-as-you-go model for cost-effective utilization of resources and direct access to crucial OpenAI models. The project also integrates Posit Connect for the deployment of Shiny web applications, Jupyter notebooks, and APIs, allowing seamless interaction with ToxPipe through a primary Shiny application and facilitating the development of additional applications using the ToxPipe API. The project leverages existing resources on BioWulf and NIEHS HPC clusters for heavy compute loads, exploring hybrid deployment models and reducing cloud costs. The utilization of these resources also allows easy integration of scientific tools and data already loaded on BioWulf. The implementation of ToxPipe is poised to significantly accelerate the research process in toxicology, serving as a blueprint for harnessing cloud computing in scientific discovery. The project’s success will be evaluated against a set of clearly defined metrics and performance indicators, including accuracy, speed, cost-effectiveness, and the quality and scope of ToxPipe generated products, aligning with NIH’s strategic goals in data science and research. In conclusion, ToxPipe represents a groundbreaking initiative in computational toxicology, combining expert entrained AI, cloud computing, and hybrid deployments to advance toxicological workflows and scientific knowledge discovery. The well-defined milestones and experienced team are set to ensure the project’s success and contribute to the evolution of toxicological research methodologies.
@@ -112,6 +114,10 @@ Summary of the main findings and future directions for the ToxPipe project.
 
 Acknowledging individuals or institutions that contributed to the project but are not listed as authors.
 
-# References
+# Declaration of Generative AI and AI-assisted technologies in the writing process
 
-List of all the references cited in the paper.
+During the preparation of this work the author(s) used ChatGPT (GPT-4) in order to generate an initial abstract draft from the contents of a funding proposal for this project.
+
+Additionally, ChatGPT (GPT-4) was used to generate an initial outline for this manuscript, which was then heavily edited by the author(s) and expanded upon.
+
+After using this tool/service, the author(s) reviewed and edited the content as needed and take(s) full responsibility for the content of the publication.
