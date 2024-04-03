@@ -13,3 +13,6 @@ docs/data/
 /.luarc.json
 reports/2023-09-12 NIEHS Council/.Rhistory
 .vscode/settings.json
+
+reports/
+images/
