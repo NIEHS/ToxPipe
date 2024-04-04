@@ -1,1 +1,0 @@
-The reports folder contains output such as presentations, articles, and other documents related to this project.
