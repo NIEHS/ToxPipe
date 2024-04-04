@@ -24,10 +24,9 @@ Architecture documentation is in [`docs/architecture`](docs/architecture/index.q
 
 Deployment information is contained in [`docs/deployment`](docs/deployment/index.md).
 
-## GitLab Repo is source of truth
+## GitHub Repo is source of truth
 
-Deployment to ehsdttlp30will be mananged from here. Build tools are all through GitLab. Gitlab was chosen due to GitLabs CI/CD capabilities. Azure Cloud is needed for OpenAI API access.
-
+Deployment will be mananged from here.
 
 ## Useful Links
 
@@ -52,6 +51,7 @@ Deployment to ehsdttlp30will be mananged from here. Build tools are all through 
 - `tools`: Convenience directory for your use. Should contain scripts to automate tasks in the project, for example, build scripts, rename scripts. Usually contains .sh, .cmd files for example.
 
 ## Additional Notes
+
 ### Azure Cloud
 
 Hosting inference endpoints, documents, databases, orchistrator agent, etc.

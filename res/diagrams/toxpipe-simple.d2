@@ -7,33 +7,10 @@ nih {
   style: {
     font-size: 100
   }
-  posit: Posit Connect {
+  posit: "" {
+    shape: image
     icon: ../images/logos/posit-connect-logo.svg
-    label.near: outside-top-center
-    shiny: ToxPipe Shiny Interface {
-      shape: image
-      icon: ../images/logos/shiny-hex.png
-    }
-    orchistrator: ToxPipe \nOrchistrator Agent
-    apps: Shiny User Applications {
-      shape: image
-      icon: ../images/logos/shiny-hex.png
-    }
-    flask: ToxPipe API {
-      shape: image
-      icon: ../images/logos/fastapi-logo.png
-    }
-    flask -> orchistrator: Forwards requests
-    shiny -> flask <- apps: Uses API
-    flask -> _._.azure.flask: Forwards requests
-
-    orchistrator -> _.biowulf
-    orchistrator -> _.storage
   }
-
-  user -> posit.shiny: Explores ToxPipe Data
-
-  user -> posit.apps
   user: Users/Developers {
     icon: ../images/logos/user.svg
     shape: image
@@ -46,15 +23,30 @@ nih {
       shape: image
     }
   }
-
-  biowulf: BioWulf {
+  chembiotox: ChemBioToxDB {
+    class: database
+    shape: image
+    icon: https://icons.terrastruct.com/dev/postgresql-words.svg
+  }
+  biowulf: "" {
     icon: https://hpc.nih.gov/images/BIOWULF_LOGO
-    training: Model Finetuning
     style.3d: false
     style.shadow: true
     style.multiple: false
-    style.fill: "#0324ab"
-    link: Overview.BioWulf
+    style.fill: "#232b5f"
+
+    training: Model Finetuning {
+      style.font-color: "#ffffff"
+      shape: image
+      icon: ../images/logos/fine_tuning.png
+    }
+  }
+  gpuBox: GPU Server {
+    toxpipe: ToxPipe {
+      style: {
+        font-size: 70
+      }
+    }
   }
 }
 
@@ -65,46 +57,38 @@ azure: {
   style: {
     font-size: 100
   }
-  flask: ToxPipe API {
-    class: container
-  }
-  toxpipe: ToxPipe {
-    style: {
-      font-size: 70
-    }
-    link: Overview.ToxPipe Azure
-  }
-  openaiApi: Azure OpenAI API {
+  openaiApi: "" {
     class: api
     shape: image
     icon: ../images/logos/openai-logos/SVGs/openai-lockup.svg
   }
-  chembiotox: ChemBioToxDB {
-    class: database
+  cosmosDB: Azure Cosmos DB {
     shape: image
-    icon: https://icons.terrastruct.com/dev/postgresql-words.svg
-  }
-  milvus: Vector DB {
-    shape: image
-    icon: ../images/logos/milvus-logo.jpg
+    icon: ../images/logos/azure_cosmosdb.png
   }
   storage: Storage {
     class: storage
-    documents: Documents {
+
+    documents: User-uplodaded\ndocuments {
       shape: image
       icon: ../images/documents-vector.svg
     }
-    models: Models {
-      class: models
+
+    ntpReports: NTP Reports {
+      shape: image
+      icon: ../images/technical_reports.jpg
+    }
+
+    models: Large Language Models {
+      shape: image
+      icon: ../images/logos/ai_model.png
+    }
+
+    pmc: "PMC Open Access" {
+      shape: image
+      icon: ../images/logos/pmc_long.png
     }
   }
-  toxpipe -> openaiApi: Queries GPT-4 and GPT-3.5
-  flask -> toxpipe: Routes requests
-
-  toxpipe -> storage
-
-  toxpipe -> chembiotox
-  toxpipe -> milvus
 }
 
 internet {
@@ -133,8 +117,6 @@ internet {
     shape: image
   }
 }
-
-azure -> internet
 
 # Example of a layer using imports for cleaner syntax
 # layers: {
