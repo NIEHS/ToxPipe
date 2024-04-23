@@ -1,16 +1,84 @@
-[NIEHS-STRIDES/ToxPipe Microsoft Teams Channel](https://teams.microsoft.com/l/channel/19%3a5aa8e5c5ac6a400da6b57916a96083ee%40thread.skype/ToxPipe?groupId=af61690e-7397-48d4-947c-8a0444e36e90&tenantId=14b77578-9773-42d5-8507-251ca2dc2b06)
+<a name="readme-top"></a>
 
-# ToxPipe
+<!--
+*** Thanks for checking out the Best-README-Template. If you have a suggestion
+*** that would make this better, please fork the repo and create a pull request
+*** or simply open an issue with the tag "enhancement".
+*** Don't forget to give the project a star!
+*** Thanks again! Now go create something AMAZING! :D
+-->
 
-Our research project aims to explore the use of expert entrained AI-based systems for the rapid analysis and interpretation of toxicological properties of various compounds. By leveraging cutting-edge semi-autonomous AI systems, ToxPipe will enable scientists and toxicologists to explore diverse types of toxicologically relevant data through natural language instructions. Further, through use of expert entrainment ToxPipe will provide context generation that will act as an expert guide to novel, contemporary data streams that were previously challenging to access and integrate into toxicological characterization.  Examples of success in the area of expert entrained AI models include Auto-GPT and JARVIS (aka HuggingGPT) both of which employ OpenAI’s GPT-based models as a controller to connect fine-tuned, expert AI models. These projects enable AI to solve complicated tasks using plain language as a generic interface. As a world leader in toxicological assessment and reporting, the Division of Translational Toxicology at NIEHS is ideally positioned to identify the diverse and relevant domain space training data and to critically evaluate the expert entrained AI model. We will also investigate the ethical considerations of using generative AI for these purposes.
+<!-- PROJECT LOGO -->
+<div align="center">
+  <img src="./res/toxpipe-logo-v2.png" alt="Logo" width="200" height="200">
+  <h1 align="center">ToxPipe: Semi-autonomous AI integration of diverse toxicological data streams</h1>
+</div>
 
-Following in the steps of [ChemCrow](https://arxiv.org/abs/2304.05376), ToxPipe will build and experiment with various language models as expert agents. The agents will be trained on a variety of toxicology data sets, and will be able to perform a variety of tasks in toxicology. The agents will be able to perform tasks such as:
+<!-- PROJECT SHIELDS -->
+<!--
+*** I'm using markdown "reference style" links for readability.
+*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
+*** See the bottom of this document for the declaration of the reference variables
+*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
+*** https://www.markdownguide.org/basic-syntax/#reference-style-links
+-->
 
-- Predicting toxicity of a compound given a set of conditions
-- Generate toxicological narratives
-- Answer questions about toxicology
+[![](https://img.shields.io/badge/Microsoft%20Teams-6264A7?logo=microsoftteams&logoColor=fff&style=plastic)](https://teams.microsoft.com/l/channel/19%3a5aa8e5c5ac6a400da6b57916a96083ee%40thread.skype/ToxPipe?groupId=af61690e-7397-48d4-947c-8a0444e36e90&tenantId=14b77578-9773-42d5-8507-251ca2dc2b06)
 
-ToxPipe aims to repurpose semi-autonomous AI agents to explore existing toxicological data and literature using in-context learning. Some of the tasks that we believe are possible with this system are generation of toxicological narratives with deep explanatory context, analysis of chemical structure, analysis of biological assay results, summarization of journal abstracts, biological database exploration using text-to-SQL AI models, and a variety of other tasks that currently require large amounts of human time and labor. By offloading these tasks to autonomous agents, it would allow toxicologists to repurpose their time towards higher-level cognitive tasks of directing the AI towards specific outputs.
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>🗂️ Table of Contents</summary>
+  <ol>
+    <li><a href="#-what-is-toxpipe">🤔 What is ToxPipe?</a></li>
+    <li><a href="#-approach">Approach</a></li>
+    <li><a href="#-why-toxpipe">🐚 Why ToxPipe?</a></li>
+    <li><a href="#-project-status">🚧 Project Status</a></li>
+      <a href="#-get-started">🚀 Get Started</a>
+      <ul>
+        <li><a href="#1-requirements">1. Requirements</a></li>
+        <li><a href="#2-build-and-setup">2. Build and Setup</a></li>
+        <li><a href="#3-run-the-application">3. Run the Application</a></li>
+        <li><a href="#4-individual-server-startup">4. Individual Server Startup</a></li>
+        <li><a href="#5-help">5. Help</a></li>
+      </ul>
+    </li>
+    <li><a href="#%EF%B8%8F-research-strategy">⭐️ Research Strategy</a></li>
+    <li><a href="#%EF%B8%8F-built-with">🛠️ Built With</a></li>
+  </ol>
+</details>
+
+## 🤔 What is ToxPipe?
+
+ToxPipe aims to explore the use of expert entrained AI-based systems for the rapid analysis and interpretation of toxicological properties of various compounds. By leveraging cutting-edge semi-autonomous AI systems, ToxPipe will enable scientists and toxicologists to explore diverse types of toxicologically relevant data through natural language instructions. Further, through use of expert entrainment ToxPipe will provide context generation that will act as a guide to novel, contemporary data streams that were previously challenging to access and integrate into toxicological characterization.
+
+ToxPipe is meant to be a platform for interacting with various toxicological data streams. It comprises multiple components and like any agentic retrieval augmented generation (RAG) system, requires managing agents, state, prompts, database connections, APIs, and other systems.
+
+<p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
+    <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
+        ↑ Back to Top ↑
+    </a>
+</p>
+
+## Approach
+
+Large language models (LLMs), such as [OpenAI’s GPT-based models](https://openai.com/blog/chatgpt), can be used to solve complicated tasks with natural language as a generic interface. By using techniques like retrieval augmented generation (RAG), LLMs can be given a set of instructions and can (semi-)autonomously explore various data sources. The LLMs will then generate responses or interpretations based on information stored inside the models along with the contextual data retrieved through RAG.
+
+ToxPipe aims to repurpose (semi-)autonomous AI agents, such as JARVIS and Auto-GPT, for AI-augmented exploration of existing toxicological data and literature. Some of the tasks that we believe are possible with autonomous agents and RAG are:
+
+- Generation of toxicological narratives with deep explanatory context
+- Analysis of chemical structure
+- Analysis of biological assay results
+- Summarization of journal abstracts
+- Biological database exploration using text-to-SQL AI models
+- A variety of other tasks that currently require large amounts of human time and labor.
+
+By offloading these tasks to ToxPipe, it would allow toxicologists to repurpose their time towards higher-level cognitive tasks of directing the AI towards specific outputs.
+
+<p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
+    <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
+        ↑ Back to Top ↑
+    </a>
+</p>
 
 ## System Architecture
 
@@ -23,10 +91,6 @@ Architecture documentation is in [`docs/architecture`](docs/architecture/index.q
 ## Deployment
 
 Deployment information is contained in [`docs/deployment`](docs/deployment/index.md).
-
-## GitHub Repo is source of truth
-
-Deployment will be mananged from here.
 
 ## Useful Links
 
@@ -50,12 +114,7 @@ Deployment will be mananged from here.
 - `test`: Unit tests, integration tests… go here.
 - `tools`: Convenience directory for your use. Should contain scripts to automate tasks in the project, for example, build scripts, rename scripts. Usually contains .sh, .cmd files for example.
 
-## Additional Notes
+## 🛠️ Built With
 
-### Azure Cloud
-
-Hosting inference endpoints, documents, databases, orchistrator agent, etc.
-
-### BioWulf and NIEHS HPC
-
-Will be used to train the expert models using apptainer, mlflow, and DeepSpeed.
+- [NIEHS LibreChat](https://github.com/NIEHS/LibreChat)
+- [NIEHS LLM Comparison](https://github.com/NIEHS/ToxPipe-Model-Comparison)
