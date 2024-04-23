@@ -10,7 +10,7 @@
 
 <!-- PROJECT LOGO -->
 <div align="center">
-  <img src="./res/toxpipe-logo-v2.png" alt="Logo" width="200" height="200">
+  <img src="./res/toxpipe-logo-v2.png" alt="ToxPipe Logo" width="200" height="200">
   <h1 align="center">ToxPipe: Semi-autonomous AI integration of diverse toxicological data streams</h1>
 </div>
 
@@ -29,21 +29,14 @@
 <details>
   <summary>🗂️ Table of Contents</summary>
   <ol>
-    <li><a href="#-what-is-toxpipe">🤔 What is ToxPipe?</a></li>
-    <li><a href="#-approach">Approach</a></li>
-    <li><a href="#-why-toxpipe">🐚 Why ToxPipe?</a></li>
-    <li><a href="#-project-status">🚧 Project Status</a></li>
-      <a href="#-get-started">🚀 Get Started</a>
-      <ul>
-        <li><a href="#1-requirements">1. Requirements</a></li>
-        <li><a href="#2-build-and-setup">2. Build and Setup</a></li>
-        <li><a href="#3-run-the-application">3. Run the Application</a></li>
-        <li><a href="#4-individual-server-startup">4. Individual Server Startup</a></li>
-        <li><a href="#5-help">5. Help</a></li>
-      </ul>
-    </li>
-    <li><a href="#%EF%B8%8F-research-strategy">⭐️ Research Strategy</a></li>
+    <li><a href="#what-is-toxpipe">What is ToxPipe?</a></li>
+    <li><a href="#approach">Approach</a></li>
+    <li><a href="#system-architecture">System Architecture</a></li>
+    <li><a href="#deployment">Deployment</a></li>
+    <li><a href="#useful-links">Useful Links</a></li>
+    <li><a href="#repo-structure">Repo Structure</a></li>
     <li><a href="#%EF%B8%8F-built-with">🛠️ Built With</a></li>
+    <li><a href="#funding-sources">Funding Sources</a></li>
   </ol>
 </details>
 
@@ -84,37 +77,63 @@ By offloading these tasks to ToxPipe, it would allow toxicologists to repurpose 
 
 The following diagram demonstrates an overall structure of ToxPipe. This model is subject to change as the project develops.
 
-![ToxPipe Overview](res/diagrams/overview.svg)
+![ToxPipe Overview](res/diagrams/toxpipe-simple.svg)
 
 Architecture documentation is in [`docs/architecture`](docs/architecture/index.qmd). Stack decisions are saved in [`docs/decisions`](docs/decisions/index.md). This is where we will document the reasoning behind our stack decisions.
+
+<p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
+    <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
+        ↑ Back to Top ↑
+    </a>
+</p>
 
 ## Deployment
 
 Deployment information is contained in [`docs/deployment`](docs/deployment/index.md).
 
+<p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
+    <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
+        ↑ Back to Top ↑
+    </a>
+</p>
+
 ## Useful Links
 
-- <https://github.com/Azure/azure-quickstart-templates>
-- <https://aztfmod.github.io/documentation/>
-- <https://github.com/microsoft/JARVIS>
-- <https://github.com/Azure/Azurite>
-- <https://github.com/mlflow/mlflow>
-- <https://github.com/microsoft/DeepSpeed>
-- <https://codeql.github.com/>
+- [ToxPipe | 2024 NCBI AIxML Codeathon]
+
+<p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
+    <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
+        ↑ Back to Top ↑
+    </a>
+</p>
 
 ## Repo Structure
 
 - `.build`: This folder should contain all scripts related to build process (PowerShell, Docker compose…).
-- `.config`: It should local configuration related to setup on local machine.
+- `.config`: It should contain local configuration related to setup on local machine.
 - `dep`: This is the directory where all your dependencies should be stored.
-- `doc`: The documentation folder
+- `doc`: The documentation folder.
 - `res`: For all static resources in your project. For example, images.
 - `samples`: Providing “Hello World” & Co code that supports the documentation.
 - `src`: The source code folder! However, in languages that use headers (or if you have a framework for your application) don’t put those files in here.
 - `test`: Unit tests, integration tests… go here.
 - `tools`: Convenience directory for your use. Should contain scripts to automate tasks in the project, for example, build scripts, rename scripts. Usually contains .sh, .cmd files for example.
 
+<p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
+    <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
+        ↑ Back to Top ↑
+    </a>
+</p>
+
 ## 🛠️ Built With
 
 - [NIEHS LibreChat](https://github.com/NIEHS/LibreChat)
 - [NIEHS LLM Comparison](https://github.com/NIEHS/ToxPipe-Model-Comparison)
+
+<p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
+    <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
+        ↑ Back to Top ↑
+    </a>
+</p>
+
+## Funding Sources
