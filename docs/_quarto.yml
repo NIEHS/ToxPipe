@@ -5,7 +5,7 @@ project:
     #- "!ignored.qmd"
     - "!about/"
     - "!presentations/"
-  output-dir: docs
+  output-dir: _site
 
 execute:
   freeze: auto
