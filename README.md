@@ -97,6 +97,11 @@ Deployment information is contained in [`docs/deployment`](docs/deployment/index
     </a>
 </p>
 
+## Related Repositories
+
+- [ToxPipe LLM Model Comparisons](https://github.com/NIEHS/toxpipe-model-comparison)
+- [LibreChat](https://github.com/NIEHS/LibreChat)
+
 ## Useful Links
 
 - [ToxPipe | 2024 NCBI AIxML Codeathon]
