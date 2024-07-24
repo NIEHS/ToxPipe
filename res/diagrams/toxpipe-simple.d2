@@ -1,64 +1,22 @@
 ...@classes.d2
 
-direction: right
+# direction: right
 
 nih {
   label: NIEHS Internal
-
-  posit: "" {
-    shape: image
-    icon: ../images/logos/posit-connect-logo.svg
-  }
 
   user: Users {
     shape: image
     icon: ../images/logos/user.svg
   }
 
-  user -> gpuBox.toxpipe.traefik
-
-  devs: Developers {
-    icon: ../images/logos/user.svg
-    shape: image
-  }
-
-  storage: Storage {
-    class: storage
-    models: Model Storage {
-      class: models
-      icon: ../images/matrix.svg
-      shape: image
-    }
-  }
-
-  # biowulf: "" {
-  #   icon: https://hpc.nih.gov/images/BIOWULF_LOGO
-  #   style.3d: false
-  #   style.shadow: true
-  #   style.multiple: false
-  #   style.fill: "#232b5f"
-
-  #   training: Model Finetuning {
-  #     style.font-color: "#ffffff"
-  #     # shape: image
-  #     # icon: ../images/logos/fine_tuning.png
-  #   }
-  # }
-
   gpuBox: GPU Server {
     class: [server]
     # icon: ../images/logos/
 
-
     toxpipe: ToxPipe {
       style: {
         font-size: 70
-      }
-
-      traefik {
-        class: [docker, reverseProxy]
-        shape: image
-        icon: ../images/logos/traefikproxy-wordmark.svg
       }
 
       dashy: Dashy {
@@ -117,7 +75,6 @@ nih {
         icon: ../images/logos/postgresql-wordmark.svg
       }
 
-      traefik -> dashy
       dashy -> librechat
       dashy -> litellm
       dashy -> langfuse
@@ -140,7 +97,7 @@ azure: "Azure" {
   direction: right
   # label: Azure Cloud
   # label.near: outside-top-center
-  icon: ../images/logos/azure.svg
+  # icon: ../images/logos/azure.svg
 
   openaiApi: "OpenAI Models" {
     class: api
@@ -154,131 +111,8 @@ azure: "Azure" {
 
     }
   }
-  # cosmosDB: Azure Cosmos DB {
-  #   # shape: image
-  #   # icon: ../images/logos/azure_cosmosdb.png
-  # }
-  # storage: Storage {
-  #   class: storage
-
-  #   documents: User-uplodaded\ndocuments {
-  #     shape: image
-  #     icon: ../images/documents-vector.svg
-  #   }
-
-  #   ntpReports: NTP Reports {
-  #     # shape: image
-  #     # icon: ../images/technical_reports.jpg
-  #   }
-
-  #   models: Large Language Models {
-  #     # shape: image
-  #     # icon: ../images/logos/ai_model.png
-  #   }
-
-  #   pmc: "PMC Open Access" {
-  #     # shape: image
-  #     # icon: ../images/logos/pmc_long.png
-  #   }
-  # }
 }
 
-aws: "Amazon Web Services" {
-  icon: ../images/logos/aws.svg
-  bedrock: AWS Bedrock {
-    style: {
-      font-size: 80
-    }
-    icon: ../images/logos/amazon_bedrock.svg
-    icon.near: "outside-top-left"
-    claude: Anthropic/nClaude Models {
-      direction: down
-      
-      opus: Claude 3 Opus {
-        shape: image
-        icon: ../images/logos/anthropic_opus.svg
-      }
-
-      sonnet: Claude 3 Sonnet {
-        shape: image
-        icon: ../images/logos/anthropic_sonnet.svg
-      }
-
-      haiku: Claude 3 Haiku {
-        shape: image
-        icon: ../images/logos/anthropic_haiku.svg
-      }
-
-      claude21: Claude 2.1 {
-        shape: image
-        icon: ../images/logos/anthropic_opus.svg
-        style.fill: "#c56c52"
-      }
-
-      claudeInstant: Claude Instant {
-        shape: image
-        icon: ../images/logos/anthropic_opus.svg
-        style.fill: "#c56c52"
-      }
-    }
-
-    mistral: Mistral AI Models {
-      icon: ../images/logos/mistral_ai.svg
-      icon.near: "outside-top-left"
-
-      mistralLarge: Mistral Large {
-        class: llm
-        shape: image
-        icon: ../images/logos/mistral_ai_icon.svg
-      }
-
-      mistral7bInstruct: Mistral 7B Instruct {
-        class: llm
-        shape: image
-        icon: ../images/logos/mistral_ai_icon.svg
-      }
-
-      mistral8x7bInstruct: Mistral 8x7B Instruct {
-        class: llm
-        shape: image
-        icon: ../images/logos/mistral_ai_icon.svg
-      }
-    }
-  }
-}
-
-aws.bedrock.claude -> nih.gpuBox.toxpipe.litellm
-aws.bedrock.mistral -> nih.gpuBox.toxpipe.litellm
-
-internet {
-  label: Internet
-
-  pubmed: "" {
-    class: api
-    icon: ../images/logos/pubmed-logo.png
-    shape: image
-  }
-  comptox: "Comptox\nDashboard" {
-    class: api
-    icon: ../images/logos/epa-logo.png
-    shape: image
-    link: https://comptox.epa.gov/dashboard/
-  }
-  google: "" {
-    icon: ../images/logos/google-logo.png
-    shape: image
-  }
-  pubchem: "" {
-    class: api
-    icon: ../images/logos/pubchem-logo.png
-    shape: image
-  }
-  semanticScholar: "" {
-    class: api
-    shape: image
-    icon: ../images/logos/semantic_scholar_logo.png
-  }
-}
 
 *.style.font-size: 100
 *.*.style.font-size: 60
@@ -286,9 +120,3 @@ internet {
 *.icon.near: "outside-top-left"
 
 *.style.border-radius: 20
-
-# Example of a layer using imports for cleaner syntax
-# layers: {
-#   serviceB: @serviceB.d2
-# }
-
