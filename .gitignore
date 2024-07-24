@@ -16,3 +16,5 @@ docs/data/
 reports/
 images/
 meetings/
+
+**/.env
