@@ -142,3 +142,7 @@ Deployment information is contained in [`docs/deployment`](docs/deployment/index
 </p>
 
 ## Funding Sources
+
+This work was funded by the National Institutes Health (NIH) under the following grants:
+
+- [NOT-OD-23-070: Notice of Special Interest (NOSI): Administrative Supplements to Support the Exploration of Cloud in NIH-supported Research](https://grants.nih.gov/grants/guide/notice-files/NOT-OD-23-070.html)
