@@ -19,3 +19,6 @@ meetings/
 
 **/.env
 __pycache__
+.venv
+
+.tool-versions

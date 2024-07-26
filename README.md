@@ -132,7 +132,9 @@ Deployment information is contained in [`docs/deployment`](docs/deployment/index
 
 ## 🛠️ Built With
 
-- [NIEHS LibreChat](https://github.com/NIEHS/LibreChat)
+![FastAPI Badge](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=fff&style=plastic)
+
+- [NIEHS Librechat](https://github.com/NIEHS/LibreChat)
 - [NIEHS LLM Comparison](https://github.com/NIEHS/ToxPipe-Model-Comparison)
 
 <p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
