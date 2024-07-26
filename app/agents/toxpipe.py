@@ -1,3 +1,4 @@
+import os
 from dotenv import load_dotenv
 from typing import List
 from langchain_core.prompts import ChatPromptTemplate
@@ -24,18 +25,15 @@ import concurrent.futures
 from .multi import *
 import pickle, copyreg, ssl
 
-from dotenv import load_dotenv
-import os
 import langfuse
 from langfuse import Langfuse
 from langfuse.callback import CallbackHandler
 from langfuse.decorators import langfuse_context, observe
 
-load_dotenv('./.env')
-
 from .prompts_chem import FORMAT_INSTRUCTIONS, QUESTION_PROMPT, REPHRASE_TEMPLATE, SUFFIX
 from .tools import make_tools
 
+load_dotenv()
 
 class InMemoryHistory(BaseChatMessageHistory, BaseModel):
     """In memory implementation of chat message history."""
