@@ -15,8 +15,12 @@ def make_tools(llm: BaseLanguageModel, verbose=True):
         Scholar2ResultLLM(llm=llm),
         SafetySummary(llm=llm),
         GeneExpression(llm=llm),
+        HallmarkGeneAnalyzer(llm=llm),
+        Rat2HumanGene(llm=llm),
+        Human2RatGene(llm=llm),
         QueryCBTFooDB(),
         QueryCBTCPD(),
+        QueryCBTChemicalVendors(),
         QueryCBTGRAS(),
         QueryCBTDiseases(),
         Query2DTXSID(),
@@ -28,5 +32,6 @@ def make_tools(llm: BaseLanguageModel, verbose=True):
         QueryCBTAlertsMulti(llm=llm),
         QueryCBTSEEM3(llm=llm),
         QueryCBTDrugBankTransporters(llm=llm),
+
     ]
     return all_tools

@@ -6,12 +6,16 @@ import re
 from time import sleep
 from typing import Optional
 
-from langchain.chat_models import ChatOpenAI
+from langchain_community.chat_models import ChatOpenAI
 from langchain.schema import HumanMessage
 from langchain.tools import BaseTool
 from rxn4chemistry import RXN4ChemistryWrapper  # type: ignore
 
 from .utils import is_smiles
+
+from dotenv import load_dotenv
+load_dotenv('../../.env')
+
 
 __all__ = ["RXNPredict", "RXNRetrosynthesis"]
 
@@ -34,7 +38,11 @@ class RXN4Chem(BaseTool):
         self.rxn4chem = RXN4ChemistryWrapper(
             api_key=self.rxn4chem_api_key, base_url=self.base_url
         )
-        self.rxn4chem.project_id = "655b7b760fb57c001f25dc91"
+        
+        try:
+            self.rxn4chem.project_id = os.environ.get("RXN4CHEM_PROJECT_ID")
+        except KeyError:
+            return {}
 
     @abc.abstractmethod
     def _run(self, smiles: str):  # type: ignore
@@ -82,8 +90,8 @@ class RXN4Chem(BaseTool):
 class RXNPredict(RXN4Chem):
     """Predict reaction."""
 
-    name = "ReactionPredict"
-    description = (
+    name: str = "ReactionPredict"
+    description: str = (
         "Predict the outcome of a chemical reaction. "
         "Takes as input the SMILES of the reactants separated by a dot '.', "
         "returns SMILES of the products."
@@ -126,8 +134,8 @@ class RXNPredict(RXN4Chem):
 class RXNRetrosynthesis(RXN4Chem):
     """Predict retrosynthesis."""
 
-    name = "ReactionRetrosynthesis"
-    description = (
+    name: str = "ReactionRetrosynthesis"
+    description: str = (
         "Obtain the synthetic route to a chemical compound. "
         "Takes as input the SMILES of the product, returns recipe."
     )

@@ -6,8 +6,8 @@ from .utils import *
 
 
 class MolSimilarity(BaseTool):
-    name = "MolSimilarity"
-    description = (
+    name: str = "MolSimilarity"
+    description: str = (
         "Input two molecule SMILES (separated by '.'), returns Tanimoto similarity."
     )
 
@@ -40,7 +40,7 @@ class MolSimilarity(BaseTool):
                 max(key for key in sim_score.keys() if key <= round(similarity, 1))
             ]
             message = f"The Tanimoto similarity between {smiles1} and {smiles2} is {round(similarity, 4)},\
-            indicating that the two molecules are {val}."
+            indicating that the two molecules are {val} (source: calculated with RDKit)."
         return message
 
     async def _arun(self, smiles_pair: str) -> str:
@@ -49,8 +49,8 @@ class MolSimilarity(BaseTool):
 
 
 class SMILES2Weight(BaseTool):
-    name = "SMILES2Weight"
-    description = "Input SMILES, returns molecular weight."
+    name: str = "SMILES2Weight"
+    description: str = "Input SMILES, returns molecular weight."
 
     def __init__(
         self,
@@ -62,7 +62,7 @@ class SMILES2Weight(BaseTool):
         if mol is None:
             return "Invalid SMILES string"
         mol_weight = rdMolDescriptors.CalcExactMolWt(mol)
-        return mol_weight
+        return f"{mol_weight} (source: calculated with RDKit)."
 
     async def _arun(self, smiles: str) -> str:
         """Use the tool asynchronously."""
@@ -70,8 +70,8 @@ class SMILES2Weight(BaseTool):
 
 
 class FuncGroups(BaseTool):
-    name = "FunctionalGroups"
-    description = "Input SMILES, return list of functional groups in the molecule."
+    name: str = "FunctionalGroups"
+    description: str = "Input SMILES, return list of functional groups in the molecule."
     dict_fgs: dict = None
 
     def __init__(
@@ -144,9 +144,9 @@ class FuncGroups(BaseTool):
                 if self._is_fg_in_mol(smiles, fg)
             ]
             if len(fgs_in_molec) > 1:
-                return f"This molecule contains {', '.join(fgs_in_molec[:-1])}, and {fgs_in_molec[-1]}."
+                return f"This molecule contains {', '.join(fgs_in_molec[:-1])}, and {fgs_in_molec[-1]} (source: calculated with RDKit)."
             else:
-                return f"This molecule contains {fgs_in_molec[0]}."
+                return f"This molecule contains {fgs_in_molec[0]} (source: calculated with RDKit)."
         except:
             return "Wrong argument. Please input a valid molecular SMILES."
 

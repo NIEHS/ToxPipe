@@ -18,8 +18,8 @@ def unique(l):
     return unique_list
 
 class Query2DTXSID(BaseTool):
-    name = "Query2DTXSID"
-    description = "Given a chemical name as input, returns the DSSTox substance ID or DTXSID for that chemical from the ChemBioTox database."
+    name: str = "Query2DTXSID"
+    description: str = "Given a chemical name as input, returns the DSSTox substance ID or DTXSID for that chemical from the ChemBioTox database."
 
     def __init__(
         self,
@@ -39,8 +39,8 @@ class Query2DTXSID(BaseTool):
         return(response)
     
 class SMILES2DTXSID(BaseTool):
-    name = "SMILES2DTXSID"
-    description = "Given a SMILES string as input, returns the DSSTox substance ID or DTXSID for that chemical from the ChemBioTox database. If no DTXSID exists, the tool will return the DTXSID of the most structurally similar chemical in the ChemBioTox database."
+    name: str = "SMILES2DTXSID"
+    description: str = "Given a SMILES string as input, returns the DSSTox substance ID or DTXSID for that chemical from the ChemBioTox database. If no DTXSID exists, the tool will return the DTXSID of the most structurally similar chemical in the ChemBioTox database."
 
     def __init__(
         self,
@@ -60,13 +60,13 @@ class SMILES2DTXSID(BaseTool):
                 if res[0]['similarity'] == 1:
                     response = f"The chemical {name} has the following DSSTox Substance ID in the ChemBioTox Database: {res[0]['dsstox_substance_id']}."
                 else:
-                    response = f"The chemical {name} does not map to a DSSTox Substance ID in the ChemBioTox Database, but is structurally similar to a chemical that does: {res[0]['dsstox_substance_id']} (Tanimoto similarity: {res[0]['similarity']})."
+                    response = f"The chemical {name} does not map to a DSSTox Substance ID in the ChemBioTox Database, but is structurally similar to a chemical that does: {res[0]['dsstox_substance_id']} (Tanimoto similarity: {res[0]['similarity']}; source: calculated with RDKit)."
         return(response)
 
 
 class QueryCBTFooDB(BaseTool):
-    name = "QueryCBTFooDB"
-    description = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with information about its usage in food or ingestible products from the ChemBioTox database. This can be useful if the user is looking for exposure, usage, or industrial information about a chemical."
+    name: str = "QueryCBTFooDB"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with information about its usage in food or ingestible products from the ChemBioTox database. This can be useful if the user is looking for exposure, usage, or industrial information about a chemical."
 
     def __init__(
         self,
@@ -80,15 +80,6 @@ class QueryCBTFooDB(BaseTool):
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-
-        """
-        print(res["anno_foodb_enzymes"])
-        print(res["anno_foodb_flavors"])
-        print(res["anno_foodb_foodcontent"])
-        print(res["anno_foodb_healtheffects"])
-        
-        print(res["anno_foodb_ontology"])
-        """
 
         
         # FooDB
@@ -110,7 +101,6 @@ class QueryCBTFooDB(BaseTool):
         foodb_ontology = res["anno_foodb_ontology"]
         foodb_ontology_list = []
         for i in foodb_ontology:
-            print(i)
             if 'definition' not in i:
                 continue
             foodb_ontology_list.append(i['term'])
@@ -127,8 +117,8 @@ class QueryCBTFooDB(BaseTool):
         raise NotImplementedError()
 
 class QueryCBTCPD(BaseTool):
-    name = "QueryCBTCPD"
-    description = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with information about its usage in commercial products from the ChemBioTox database. This can be useful if the user is looking for exposure, usage, or industrial information about a chemical."
+    name: str = "QueryCBTCPD"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with information about its usage in commercial products from the ChemBioTox database. This can be useful if the user is looking for exposure, usage, or industrial information about a chemical."
 
     def __init__(
         self,
@@ -162,9 +152,46 @@ class QueryCBTCPD(BaseTool):
         """Use the tool asynchronously."""
         raise NotImplementedError()
 
+
+class QueryCBTChemicalVendors(BaseTool):
+    name: str = "QueryCBTChemicalVendors"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, provides information about vendors/resources that carry and sell the chemical."
+
+    def __init__(
+        self,
+    ):
+        super().__init__()
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/vendors?dtxsid={dtxsid}")
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+
+        vendor_list = []
+        for i in res:
+            if 'Source Name' not in i:
+                continue
+            vendor_list.append(i['Source Name'])
+
+        vendor_list = unique(vendor_list)
+
+        response = f"The chemical {dtxsid} may be purchased from the following vendors (retrieved from PubChem): {';'.join(vendor_list)}"
+        if len(vendor_list) < 1:
+            response = f"The chemical {dtxsid} is not known to be purchasable from any vendors as listed in PubChem."
+
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+
+
 class QueryCBTGRAS(BaseTool):
-    name = "QueryCBTGRAS"
-    description = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with information about if it is generally recognized as safe from the ChemBioTox database"
+    name: str = "QueryCBTGRAS"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with information about if it is generally recognized as safe from the ChemBioTox database"
 
     def __init__(
         self,
@@ -198,8 +225,8 @@ class QueryCBTGRAS(BaseTool):
         raise NotImplementedError()
     
 class QueryCBTDiseases(BaseTool):
-    name = "QueryCBTDiseases"
-    description = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with information about if it is associated with diseases from the ChemBioTox database"
+    name: str = "QueryCBTDiseases"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with information about if it is associated with diseases from the ChemBioTox database"
 
     def __init__(
         self,
@@ -250,8 +277,8 @@ def format_leadscope(llm, response):
     return res
 
 class QueryCBTLeadscope(BaseTool):
-    name = "QueryCBTLeadscope"
-    description = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with predicted Leadscope QSAR models from the ChemBioTox database."
+    name: str = "QueryCBTLeadscope"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with predicted Leadscope QSAR models from the ChemBioTox database."
 
     llm: BaseLanguageModel = None
 
@@ -270,7 +297,6 @@ class QueryCBTLeadscope(BaseTool):
         leadscope = res
         leadscope_list = []
         for i in leadscope:
-            print(i)
             if 'short_description' not in i:
                 continue
             leadscope_list.append(i['short_description'])
@@ -308,8 +334,8 @@ def format_admet(llm, response):
     return res
 
 class QueryCBTADMET(BaseTool):
-    name = "QueryCBTADMET"
-    description = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with predicted ADMET QSAR models from the ChemBioTox database. This can be helpful for understanding the absorption, distribution, metabolism, excretion, pathways, transportation, and toxicity of a chemical."
+    name: str = "QueryCBTADMET"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with predicted ADMET QSAR models from the ChemBioTox database. This can be helpful for understanding the absorption, distribution, metabolism, excretion, pathways, transportation, and toxicity of a chemical."
 
     llm: BaseLanguageModel = None
 
@@ -348,8 +374,8 @@ class QueryCBTADMET(BaseTool):
         raise NotImplementedError()
     
 class QueryCBTMetabolites(BaseTool):
-    name = "QueryCBTMetabolites"
-    description = "Given a DSSTox substance ID or DTXSID as input, generate metabolites of the chemical from ADMET predictor with corresponding enzymes used in the metabolism."
+    name: str = "QueryCBTMetabolites"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, generate metabolites of the chemical from ADMET predictor with corresponding enzymes used in the metabolism."
 
     llm: BaseLanguageModel = None
 
@@ -391,8 +417,8 @@ class QueryCBTMetabolites(BaseTool):
 
 
 class QueryCBTSEEM3(BaseTool):
-    name = "QueryCBTSEEM3"
-    description = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with its SEEM3 exposure data. This can be helpful for finding the exposure, pathways, or transportation of a chemical."
+    name: str = "QueryCBTSEEM3"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with its SEEM3 exposure data. This can be helpful for finding the exposure, pathways, or transportation of a chemical."
 
     llm: BaseLanguageModel = None
 
@@ -431,8 +457,8 @@ class QueryCBTSEEM3(BaseTool):
         raise NotImplementedError()
     
 class QueryCBTDrugBankTransporters(BaseTool):
-    name = "QueryCBTDrugBankTransporters"
-    description = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with its DrugBank transporter data. This can be helpful for finding the pathway or transportation information for a chemical."
+    name: str = "QueryCBTDrugBankTransporters"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with its DrugBank transporter data. This can be helpful for finding the pathway or transportation information for a chemical."
 
     llm: BaseLanguageModel = None
 
@@ -475,8 +501,8 @@ class QueryCBTDrugBankTransporters(BaseTool):
     
 
 class QueryCBTAlerts(BaseTool):
-    name = "QueryCBTAlerts"
-    description = "Given a SMILES string as input, find structural alerts from the OChem, ChEMBL, and Saagar datasources within the ChemBioTox database."
+    name: str = "QueryCBTAlerts"
+    description: str = "Given a SMILES string as input, find structural alerts from the OChem, ChEMBL, and Saagar datasources within the ChemBioTox database."
 
     llm: BaseLanguageModel = None
 
@@ -531,8 +557,8 @@ def format_alerts(llm, response):
     return res
 
 class QueryCBTAlertsMulti(BaseTool):
-    name = "QueryCBTAlertsMulti"
-    description = "Given multiple SMILES strings that represent metabolites as input, separated by ';', find structural alerts from the OChem, ChEMBL, and Saagar datasources within the ChemBioTox database. Each metabolite's results will be separated by two newline characters: '\n\n'."
+    name: str = "QueryCBTAlertsMulti"
+    description: str = "Given multiple SMILES strings that represent metabolites as input, separated by ';', find structural alerts from the OChem, ChEMBL, and Saagar datasources within the ChemBioTox database. Each metabolite's results will be separated by two newline characters: '\n\n'."
 
     llm: BaseLanguageModel = None
 
@@ -582,8 +608,6 @@ class QueryCBTAlertsMulti(BaseTool):
                 alerts_list_saagar = sample(alerts_list_saagar, 10)
 
             alerts_list = alerts_list_ochem + alerts_list_chembl + alerts_list_saagar
-
-            print("here 1")
 
             #tmp_response = f"The metabolite given by the SMILES {metabolite} has the following chemical substructures of note: {';'.join(alerts_list)}."
             tmp_response = f"The metabolite given by the SMILES {metabolite} has the following chemical substructures of note:\n"

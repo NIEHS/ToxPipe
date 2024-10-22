@@ -7,8 +7,8 @@ from langchain.callbacks.manager import CallbackManagerForChainRun
 
 
 class ExceptionTool(BaseTool):
-    name = "_Exception"
-    description = "Exception tool"
+    name: str = "_Exception"
+    description: str = "Exception tool"
 
     def _run(self, query: str) -> str:
         return query

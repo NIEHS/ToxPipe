@@ -2,7 +2,7 @@ import re
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import langchain
-from langchain import LLMChain
+from langchain.chains import LLMChain
 from langchain.agents.agent import AgentOutputParser
 from langchain.schema import AgentAction, AgentFinish, OutputParserException
 

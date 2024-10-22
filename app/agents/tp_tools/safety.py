@@ -6,7 +6,8 @@ import molbloom
 import pandas as pd
 import requests
 import tiktoken
-from langchain import LLMChain, PromptTemplate
+from langchain.chains import LLMChain
+from langchain_core.prompts import PromptTemplate
 from langchain.llms import BaseLLM
 from langchain.tools import BaseTool
 from rdkit import Chem
@@ -16,6 +17,7 @@ from .utils import *
 from .utils import is_smiles, tanimoto
 
 from .prompts import safety_summary_prompt, summary_each_data
+from typing import ClassVar
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -69,8 +71,8 @@ def query2cas(query: str, url_cid: str, url_data: str):
 
 
 class PatentCheck(BaseTool):
-    name = "PatentCheck"
-    description = "Input SMILES, returns if molecule is patented"
+    name: str = "PatentCheck"
+    description: str = "Input SMILES, returns if molecule is patented"
 
     def _run(self, smiles: str) -> str:
         """Checks if compound is patented. Give this tool only one SMILES string"""
@@ -230,8 +232,8 @@ class MoleculeSafety:
 
 
 class SafetySummary(BaseTool):
-    name = "SafetySummary"
-    description = (
+    name: str = "SafetySummary"
+    description: str = (
         "Input CAS number, returns a summary of safety information."
         "The summary includes Operator safety, GHS information, "
         "Environmental risks, and Societal impact."
@@ -265,8 +267,8 @@ class SafetySummary(BaseTool):
 
 
 class ExplosiveCheck(BaseTool):
-    name = "ExplosiveCheck"
-    description = "Input CAS number, returns if molecule is explosive."
+    name: str = "ExplosiveCheck"
+    description: str = "Input CAS number, returns if molecule is explosive."
     mol_safety: MoleculeSafety = None
 
     def __init__(self):
@@ -293,8 +295,8 @@ class ExplosiveCheck(BaseTool):
 
 
 class SimilarControlChemCheck(BaseTool):
-    name = "SimilarityToControlChem"
-    description = "Input SMILES, returns similarity to controlled chemicals."
+    name: str = "SimilarityToControlChem"
+    description: str = "Input SMILES, returns similarity to controlled chemicals."
 
     def _run(self, smiles: str) -> str:
         """Checks max similarity between compound and controlled chemicals.
@@ -338,10 +340,10 @@ class SimilarControlChemCheck(BaseTool):
 
 
 class ControlChemCheck(BaseTool):
-    name = "ControlChemCheck"
-    #description = "Input CAS number, True if molecule is a controlled chemical."
-    description = "Input: a chemical identifier such as a CASRN (CAS number), chemical name, or SMILES. Output: a statement saying if the input molecule is or is not a controlled chemical."
-    similar_control_chem_check = SimilarControlChemCheck()
+    name: str = "ControlChemCheck"
+    #description: str = "Input CAS number, True if molecule is a controlled chemical."
+    description: str = "Input: a chemical identifier such as a CASRN (CAS number), chemical name, or SMILES. Output: a statement saying if the input molecule is or is not a controlled chemical."
+    similar_control_chem_check: ClassVar[BaseTool] = SimilarControlChemCheck()
 
     def _run(self, query: str) -> str:
         """Checks if compound is a controlled chemical. Input CAS number."""
@@ -388,10 +390,11 @@ class ControlChemCheck(BaseTool):
 
 
 class Query2SMILES(BaseTool):
-    name = "Name2SMILES"
-    description = "Input a molecule name, returns SMILES."
+    name: str = "Name2SMILES"
+    description: str = "Input a molecule name, returns SMILES."
     url: str = None
-    ControlChemCheck = ControlChemCheck()
+    #ControlChemCheck = ControlChemCheck()
+    ControlChemCheck: ClassVar[BaseTool] = ControlChemCheck()
 
     def __init__(
         self,
@@ -415,11 +418,12 @@ class Query2SMILES(BaseTool):
 
 
 class Query2CAS(BaseTool):
-    name = "Mol2CAS"
-    description = "Input molecule (name or SMILES), returns CAS number."
+    name: str = "Mol2CAS"
+    description: str = "Input molecule (name or SMILES), returns CAS number."
     url_cid: str = None
     url_data: str = None
-    ControlChemCheck = ControlChemCheck()
+    #ControlChemCheck = ControlChemCheck()
+    ControlChemCheck: ClassVar[BaseTool] = ControlChemCheck()
 
     def __init__(
         self,

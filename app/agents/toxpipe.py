@@ -1,39 +1,64 @@
-import os
 from dotenv import load_dotenv
 from typing import List
+
+from langchain.agents import AgentExecutor
+
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import AzureChatOpenAI
+from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from langchain.chains import LLMChain
 from langchain_core.runnables import RunnableParallel
 from langchain_core.chat_history import BaseChatMessageHistory, BaseMessage
 from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain.memory import ChatMessageHistory
+from langchain.globals import set_llm_cache
+from langchain_community.cache import InMemoryCache, SQLiteCache
+from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_community.chat_message_histories.redis import RedisChatMessageHistory
-from langchain_core.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 from langchain_core.runnables import (
     RunnableLambda,
     ConfigurableFieldSpec,
     RunnablePassthrough,
 )
+
+### File management ###
+from tempfile import TemporaryDirectory
+from langchain_community.agent_toolkits import FileManagementToolkit
+# Create temporary working directory
+working_directory = TemporaryDirectory()
+toolkit = FileManagementToolkit(
+    root_dir=str(working_directory.name)
+)  # If you don't provide a root_dir, operations will default to the current working directory
+tools = FileManagementToolkit(
+    root_dir=str(working_directory.name),
+    selected_tools=["read_file", "write_file", "list_directory"],
+).get_tools()
+read_tool, write_tool, list_tool = tools
+
+### Multiprocessing ###
 import concurrent.futures
 import pathos, multiprocess
 from pathos.multiprocessing import ProcessingPool, ThreadPool
 import dill
+
 from .agent_toxpipe import ChatZeroShotAgent
+
 from .executor_toxpipe import RetryAgentExecutor
 import concurrent.futures
 from .multi import *
 import pickle, copyreg, ssl
 
+import os
 import langfuse
 from langfuse import Langfuse
 from langfuse.callback import CallbackHandler
 from langfuse.decorators import langfuse_context, observe
 
+### Load environment variables ###
+from dotenv import load_dotenv
+load_dotenv('./.env')
+
 from .prompts_chem import FORMAT_INSTRUCTIONS, QUESTION_PROMPT, REPHRASE_TEMPLATE, SUFFIX
 from .tools import make_tools
-
-load_dotenv()
 
 class InMemoryHistory(BaseChatMessageHistory, BaseModel):
     """In memory implementation of chat message history."""
@@ -60,9 +85,7 @@ def _save_sslcontext(obj):
     return obj.__class__, (obj.protocol,)
 
 def _make_llm(model, api_version, temp):
-    llm = AzureChatOpenAI(
-        openai_api_version=api_version,
-        azure_deployment=model,
+    llm = ChatOpenAI(
         temperature=temp,
         model_name=model
     )
@@ -74,11 +97,12 @@ class ToxPipeAgent:
     """
     def __init__(
         self,
-        model=os.environ.get("AZURE_OPENAI_MODEL"),
+        model,
         api_version=os.environ.get("OPENAI_API_VERSION"),
         temp=0.1, # higher temperature creates more answer variance, but this is potentially better if we are doing a multi-agent approach
         max_iterations=40,
         n_agents=5, # number of parallel agents to run - set to 1 for no parallelism. Higher values better for more complicated queries to help reduce variance
+        summarize=True, # if True, will summarize output. Ignored and always treated as True if n_agents > 1.
         verbose=True
     ):
         langfuse_handler = CallbackHandler(
@@ -89,11 +113,16 @@ class ToxPipeAgent:
         #print(langfuse_handler.auth_check())
 
         self.llm = _make_llm(model, api_version, temp)
+        #set_llm_cache(InMemoryCache())
+        set_llm_cache(SQLiteCache(database_path=".langchain.db"))
+
         self.tools = make_tools(self.llm, verbose=verbose)
         self.n_agents = n_agents
+        self.summarize = summarize
 
         # Initialize agents
         self.agent_executor_chem = RetryAgentExecutor.from_agent_and_tools(
+        #self.agent_executor_chem = AgentExecutor.from_agent_and_tools(
             tools=self.tools,
             agent=ChatZeroShotAgent.from_llm_and_tools(
                 self.llm,
@@ -149,6 +178,9 @@ class ToxPipeAgent:
             i += 1
         res = "\n".join(res)
 
+        if self.summarize == False and n_agents == 1:
+            return res
+
         summary_prompt_template = """
         Previously, {n_agents} separate LLM agents were run to answer the following prompt from an end user:
 
@@ -172,6 +204,8 @@ class ToxPipeAgent:
             10. If they are available, you must include the source for ALL information returned in the summary. This includes the source for the raw results from each agent as well as the source for any additional information that you include in the summary.
             11. Maintain as much of the original information and formatting as possible from the raw results when creating the final response. This includes any lists, tables, sources, or other formatting that was present in the raw results.
             12. If asked to provide a list of chemicals, like metabolites, you must include the full list in the summary without summarizing or grouping the list.
+            13. When providing the sources for information, you must include each source's author(s), title, date of publication, journal of publication, and DOI, URL, or PMID if available in the final summary.
+            14. You MUST provide each agent's raw response WITHOUT SUMMARIZING above the final summary, noting which agent produced which result.
         """
         summary_prompt = ChatPromptTemplate.from_template(summary_prompt_template)
         summary_chain = summary_prompt | self.llm
