@@ -3,7 +3,13 @@ from datetime import datetime as dt
 from pathlib import Path
 import multiprocessing
 import langchain
+
 import paperscraper
+from paperscraper.pubmed import get_and_dump_pubmed_papers
+from paperscraper.arxiv import get_and_dump_arxiv_papers
+from paperscraper.pdf import save_pdf
+from paperscraper.xrxiv.xrxiv_query import XRXivQuery
+
 from langchain.base_language import BaseLanguageModel
 from langchain.tools import BaseTool
 from langchain_community.document_loaders import PyPDFLoader
@@ -19,6 +25,10 @@ from itertools import islice
 from operator import methodcaller as mc
 
 from time import time
+import uuid
+
+import pandas as pd
+from glob import glob
 
 from dotenv import load_dotenv
 load_dotenv('../../.env')
@@ -30,11 +40,43 @@ from paperscraper.get_dumps import biorxiv, medrxiv, chemrxiv
 #medrxiv()  #  Takes ~30min and should result in ~35 MB file
 #biorxiv()  # Takes ~1h and should result in ~350 MB file
 #chemrxiv()  #  Takes ~45min and should result in ~20 MB file
-
+from paperscraper.pdf import save_pdf_from_dump
 
 def paper_scraper(search: str, pdir: str = "query") -> dict:
     try:
-        return paperscraper.search_papers(search, limit=N_PAPERS, pdir=pdir, batch_size=4, semantic_scholar_api_key=os.environ.get("SEMANTIC_SCHOLAR_API_KEY"))
+        #return paperscraper.search_papers(search, limit=N_PAPERS, pdir=pdir, batch_size=4, semantic_scholar_api_key=os.environ.get("SEMANTIC_SCHOLAR_API_KEY"))
+        
+        query = [[search]]
+        uid = uuid.uuid4()
+        outpath = f"{os.environ.get('PAPERSCRAPER_DIR')}/pubmed_scraped_{uid}.jsonl"
+        paperpath = f"{os.environ.get('PAPERSCRAPER_DIR')}/{uid}/"
+        get_and_dump_pubmed_papers(query, output_filepath=outpath, start_date="2019/01/01")
+
+        #get_and_dump_arxiv_papers(query, output_filepath=outpath)
+
+        #querier = XRXivQuery(f"{os.environ.get('PAPERSCRAPER_DUMP_DIR')}/biorxiv_2024-10-24.jsonl")
+        #querier = XRXivQuery(f"{os.environ.get('PAPERSCRAPER_DUMP_DIR')}/chemrxiv_2024-10-24.jsonl")
+        #querier.search_keywords(query, output_filepath=outpath)
+        
+        # Grab PDFs of fetched papers
+        os.mkdir(paperpath)
+        paper_df = pd.read_json(path_or_buf=outpath, lines=True)
+
+        doi_list = []
+        path_list = []
+
+        for index, row in paper_df.head(5).iterrows():
+            doi = str(row['doi'])
+            if doi:
+                fpath = f"{paperpath}/{doi.replace('/', '_')}.pdf"
+                save_pdf(row.to_dict(), fpath)
+                if os.path.isfile(fpath):
+                    doi_list.append(doi)
+                    path_list.append(fpath)
+
+        papers = pd.DataFrame({'doi': doi_list, 'path': path_list})
+        return papers
+
     except KeyError:
         return {}
 
@@ -52,11 +94,6 @@ def paper_search(llm, query: str):
     ts = time()
     papers = paper_scraper(search, pdir=str(Path("query") / f'{search_id}_{search_name}')) # bottleneck
 
-    print("====papers====")
-    print(papers)
-
-    print("SCRAPE 4: ", time() - ts)
-
     return papers
 
 
@@ -70,10 +107,6 @@ def retrieve_summary(llm, embeddings, query: str, paths: List[str]):
 
     docs = [x for x in islice(ichain.from_iterable(map(vectorize, paths[:N_PAPERS])), N_PAPERS)]
 
-    print("===docs===")
-    print(docs)
-
-    print("SUMMARY 3: ", time() - ts)
 
     db = USearch.from_documents(docs, embeddings)
     chain = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=db.as_retriever())
@@ -110,9 +143,9 @@ def scholar2result_llm(llm, query: str):
     path_papers = []
     answer=['According to the following references:']
 
-    for path, data in papers.items():
-            path_papers.append(path)
-            answer.append(f'Citation:{data["citation"]} \n Path: {path} \n')
+    for index, row in papers.iterrows():
+            path_papers.append(row["path"])
+            answer.append(f'Citation:{row["doi"]} \n Path: {row["path"]} \n')
 
     #print(f"\nFound {len(path_papers)} papers")
     embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/paraphrase-MiniLM-L6-v2')
@@ -123,10 +156,6 @@ def scholar2result_llm(llm, query: str):
 
 
 class Scholar2ResultLLM(BaseTool):
-    #name = "LiteratureSearch"
-    #description = (
-    #    "Perform a comprehensive literature search to answer a specific question that requires a detailed, technical answer. Produces a summary of the search results including the most relevant papers and a summary of the information found alongside a source given as a DOI, URL, or PMID for each."
-    #)
     name: str = "LiteratureSearch"
     description: str = "Perform a comprehensive literature search to answer a specific question that requires a detailed, technical answer. Produces a summary of the search results including the most relevant papers and a summary of the information found alongside a source given as a DOI, URL, or PMID for each."
     
