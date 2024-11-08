@@ -42,6 +42,9 @@ from paperscraper.get_dumps import biorxiv, medrxiv, chemrxiv
 #chemrxiv()  #  Takes ~45min and should result in ~20 MB file
 from paperscraper.pdf import save_pdf_from_dump
 
+# Biopython entrez functionality
+#from Bio import Entrez
+
 def paper_scraper(search: str, pdir: str = "query") -> dict:
     try:
         #return paperscraper.search_papers(search, limit=N_PAPERS, pdir=pdir, batch_size=4, semantic_scholar_api_key=os.environ.get("SEMANTIC_SCHOLAR_API_KEY"))
@@ -50,7 +53,8 @@ def paper_scraper(search: str, pdir: str = "query") -> dict:
         uid = uuid.uuid4()
         outpath = f"{os.environ.get('PAPERSCRAPER_DIR')}/pubmed_scraped_{uid}.jsonl"
         paperpath = f"{os.environ.get('PAPERSCRAPER_DIR')}/{uid}/"
-        get_and_dump_pubmed_papers(query, output_filepath=outpath, start_date="2019/01/01")
+        get_and_dump_pubmed_papers(query, output_filepath=outpath, start_date="2014/01/01")
+        #get_and_dump_pubmed_papers(query, output_filepath=outpath)
 
         #get_and_dump_arxiv_papers(query, output_filepath=outpath)
 
@@ -65,16 +69,29 @@ def paper_scraper(search: str, pdir: str = "query") -> dict:
         doi_list = []
         path_list = []
 
-        for index, row in paper_df.head(5).iterrows():
-            doi = str(row['doi'])
-            if doi:
-                fpath = f"{paperpath}/{doi.replace('/', '_')}.pdf"
-                save_pdf(row.to_dict(), fpath)
-                if os.path.isfile(fpath):
-                    doi_list.append(doi)
-                    path_list.append(fpath)
+        for index, row in paper_df.head(100).iterrows():
+            try:
+                doi = str(row['doi'])
+                doi = doi.splitlines()[0]
+                row['doi'] = doi
+                if doi:
+                    fpath = f"{paperpath}/{doi.replace('/', '_')}.pdf"
+                    save_pdf(row.to_dict(), fpath)
+                    if os.path.isfile(fpath):
+                        doi_list.append(doi)
+                        path_list.append(fpath)
+                    else:
+                        txtfpath = f"{paperpath}/{doi.replace('/', '_')}.txt"
+                        abstract = str(row['abstract'])
+                        txtf = open(txtfpath, 'w', encoding='utf-8')
+                        txtf.write(abstract)
+                        txtf.close()
+            except:
+                print("Error parsing document")
 
+                
         papers = pd.DataFrame({'doi': doi_list, 'path': path_list})
+
         return papers
 
     except KeyError:
@@ -147,9 +164,13 @@ def scholar2result_llm(llm, query: str):
             path_papers.append(row["path"])
             answer.append(f'Citation:{row["doi"]} \n Path: {row["path"]} \n')
 
-    #print(f"\nFound {len(path_papers)} papers")
+    print(f"\nFound {len(path_papers)} papers")
     embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/paraphrase-MiniLM-L6-v2')
-    summary = retrieve_summary(llm, embeddings, query, path_papers)
+    summary = ""
+    try:
+        summary = retrieve_summary(llm, embeddings, query, path_papers)
+    except:
+        print("Problem generating summary")
     answer.append(f'Summary: {summary}')
 
     return "\n".join(answer)

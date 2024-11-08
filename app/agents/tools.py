@@ -19,19 +19,49 @@ def make_tools(llm: BaseLanguageModel, verbose=True):
         Rat2HumanGene(llm=llm),
         Human2RatGene(llm=llm),
         QueryCBTFooDB(),
-        QueryCBTCPD(),
+        #QueryCBTCPD(),
         QueryCBTChemicalVendors(),
         QueryCBTGRAS(),
-        QueryCBTDiseases(),
+        QueryCBTTox21Models(),
+        QueryCTDDiseases(),
+        QueryCTDGenes(),
         Query2DTXSID(),
         SMILES2DTXSID(),
-        QueryCBTLeadscope(llm=llm),
-        QueryCBTADMET(llm=llm),
-        QueryCBTMetabolites(llm=llm),
+
+        StructuralSimilarity(),
+
+        #QueryCBTLeadscope(llm=llm), # Proprietary
+        #QueryCBTADMET(llm=llm), # Proprietary
+        #QueryCBTMetabolites(llm=llm), # Proprietary
         QueryCBTAlerts(llm=llm),
         QueryCBTAlertsMulti(llm=llm),
         QueryCBTSEEM3(llm=llm),
         QueryCBTDrugBankTransporters(llm=llm),
+
+        QueryCBTVendors(llm=llm),
+        QueryCBTInVitroDB(llm=llm),
+        QueryCTDCC(llm=llm),
+        QueryCTDMF(llm=llm),
+        QueryPubChemProperties(llm=llm),
+        QueryPubChemBioassays(llm=llm),
+        QueryEPAProperties(llm=llm),
+        QueryCPD(llm=llm),
+        QueryFooDBFlavors(llm=llm),
+        QueryFooDBContent(llm=llm),
+
+        QueryHMDBBS(llm=llm),
+        QueryHMDBC(llm=llm),
+        QueryHMDBT(llm=llm),
+        QueryHMDBDiseases(llm=llm),
+
+        QuerySuperfund(llm=llm),
+
+        QueryT3DB(llm=llm),
+
+
+
+
+
 
     ]
     return all_tools

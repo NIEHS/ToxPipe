@@ -62,6 +62,38 @@ class SMILES2DTXSID(BaseTool):
                 else:
                     response = f"The chemical {name} does not map to a DSSTox Substance ID in the ChemBioTox Database, but is structurally similar to a chemical that does: {res[0]['dsstox_substance_id']} (Tanimoto similarity: {res[0]['similarity']}; source: calculated with RDKit)."
         return(response)
+    
+
+# Structural Similarity
+class StructuralSimilarity(BaseTool):
+    name: str = "StructuralSimilarity"
+    description: str = "Given a SMILES string as input, returns a list of structurally similar chemicals and their corresponding tanimoto similarities to the input chemical from the ChemBioTox database."
+
+    def __init__(
+        self,
+    ):
+        super().__init__()
+
+    def _run(self, smiles: str) -> str:
+        """Input a SMILES string, return its DSSTox substance ID (DTXSID) if available in ChemBioTox."""
+        smiles = smiles.rstrip()
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/similarity/structural?smiles={urllib.parse.quote_plus(smiles)}&fp=morgan")
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        response = f"The chemical given by the SMILES {smiles} does not have data for structurally similar chemicals in the ChemBioTox Database."
+
+        outp = []
+        if len(res) > 0:          
+            df = pd.json_normalize(res) 
+            df = df[df["similarity"] < 1.0][0:10] # only get top 10 similar
+            
+            for i, r in df.iterrows():
+                outp.append(f"{r['preferred_name']} ({r['similarity']})")
+
+        response = f"The chemical given by the SMILES {smiles} has the following similar chemicals, given as 'chemical name' (tanimoto similarity): {'; '.join(outp)}"                
+        return(response)
+
 
 
 class QueryCBTFooDB(BaseTool):
@@ -128,7 +160,7 @@ class QueryCBTCPD(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/cpd?dtxsid={dtxsid}")
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/cpdat?dtxsid={dtxsid}")
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -188,6 +220,51 @@ class QueryCBTChemicalVendors(BaseTool):
         """Use the tool asynchronously."""
         raise NotImplementedError()
 
+class QueryCBTTox21Models(BaseTool):
+    name: str = "QueryCBTTox21Models"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with predicted interactions from Tox21 assay models from the ChemBioTox database."
+
+    def __init__(
+        self,
+    ):
+        super().__init__()
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/models/tox21?dtxsid={dtxsid}")
+
+        print("===RES===")
+        print(res.json())
+
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+
+        tox21 = res
+
+        print("===tox21===")
+        print(tox21)
+
+        tox21_list = []
+        for i in tox21:
+            print("===i===")
+            print(i)
+            if 'activity_score' not in i and 'assay_model' not in i and 'ad' not in i and 'tc' not in i:
+                continue
+            tox21_list.append(f"{i['assay_model']} (activity_score: {i['activity_score']})")
+        
+        tox21_list = unique(tox21_list)
+
+        response = f"The chemical {dtxsid} is predicted to have the following interactions (calculated with Tox21 assay models): {';'.join(tox21_list)}."
+        if len(tox21_list) < 1:
+            response = f"The chemical {dtxsid} is not predicted to have any assay predictions in Tox21."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+
 
 class QueryCBTGRAS(BaseTool):
     name: str = "QueryCBTGRAS"
@@ -224,9 +301,9 @@ class QueryCBTGRAS(BaseTool):
         """Use the tool asynchronously."""
         raise NotImplementedError()
     
-class QueryCBTDiseases(BaseTool):
-    name: str = "QueryCBTDiseases"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with information about if it is associated with diseases from the ChemBioTox database"
+class QueryCTDDiseases(BaseTool):
+    name: str = "QueryCTDDiseases"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with information about if it is associated with diseases from CTD in the ChemBioTox database"
 
     def __init__(
         self,
@@ -236,27 +313,75 @@ class QueryCBTDiseases(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/ctd?dtxsid={dtxsid}")
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/diseases?dtxsid={dtxsid}")
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
         ctd_diseases = res['anno_ctd_diseases']
-        ctd_diseases_list = []
+        ctd_diseases_list_measured = []
+        ctd_diseases_list_inferred = []
         for i in ctd_diseases:
             if 'disease_name' not in i:
                 continue
-            ctd_diseases_list.append(i['disease_name'])
+            if 'inference_score' in i and 'inference_gene_symbol' in i:
+                ctd_diseases_list_inferred.append(f"{i['disease_name']} (inference score based on {i['inference_gene_symbol']}: {i['inference_score']})")
+            if 'direct_evidence' in i:
+                ctd_diseases_list_measured.append(f"{i['disease_name']} ({i['direct_evidence']})")
 
-        ctd_diseases_list = unique(ctd_diseases_list)
+        ctd_diseases_list_inferred = unique(ctd_diseases_list_inferred)
+        ctd_diseases_list_measured = unique(ctd_diseases_list_measured)
 
-        response = f"The chemical {dtxsid} is associated with the following diseases (retrieved from the CTD): {';'.join(ctd_diseases_list)}"
-        if len(ctd_diseases_list) < 1:
+        response1 = ""
+        response2 = ""
+        if len(ctd_diseases_list_measured) > 0:
+            response1 = f"The chemical {dtxsid} has direct evidence that shows an association with the following diseases (retrieved from the CTD): {';'.join(ctd_diseases_list_measured)}."
+        if len(ctd_diseases_list_inferred) > 0:
+            response2 = f"The chemical {dtxsid} has inferred association(s) with the following diseases (retrieved from the CTD): {';'.join(ctd_diseases_list_measured)}. Note that these are purely inferred associations and may not be accurate: see https://ctdbase.org/help/chemDiseaseDetailHelp.jsp for more information. Larger inference scores suggest stronger associations."
+
+        response = response1 + " " + response2
+
+        if len(ctd_diseases_list_measured) < 1 and len(ctd_diseases_list_inferred) < 1:
             response = f"The chemical {dtxsid} does not have any disease information in the CTD."
         return(response)
 
     async def _arun(self, dtxsid: str) -> str:
         """Use the tool asynchronously."""
         raise NotImplementedError()
+    
+class QueryCTDGenes(BaseTool):
+    name: str = "QueryCBTGenes"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with information about its gene interactions from CTD in the ChemBioTox database"
+
+    def __init__(
+        self,
+    ):
+        super().__init__()
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/genes?dtxsid={dtxsid}")
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        ctd_genes = res['anno_ctd_genes']
+        ctd_genes_list = []
+        for i in ctd_genes:
+            if 'interaction' not in i:
+                continue
+            ctd_genes_list.append(f"{i['interaction']}")
+
+        ctd_genes_list = unique(ctd_genes_list)
+
+        response = f"The chemical {dtxsid} has the following gene interactions (retrieved from the CTD): {';'.join(ctd_genes_list)}"
+        if len(ctd_genes_list) < 1:
+            response = f"The chemical {dtxsid} does not have any gene information in the CTD."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+    
 
 def format_leadscope(llm, response):
     model = llm
@@ -627,3 +752,573 @@ class QueryCBTAlertsMulti(BaseTool):
     async def _arun(self, dtxsid: str) -> str:
         """Use the tool asynchronously."""
         raise NotImplementedError()
+    
+
+
+
+
+### Chemical Vendors ###
+class QueryCBTVendors(BaseTool):
+    name: str = "QueryCBTVendors"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, returns a list of chemical vendors from which the chemical may be acquired."
+    llm: BaseLanguageModel = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/availability/vendors?dtxsid={dtxsid}")
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        exp = res
+        exp_list = []
+        for i in exp:
+            if 'source_name' not in i or 'url' not in i:
+                continue
+            exp_list.append(f"{i['source_name']}: {i['url']}")
+        exp_list = unique(exp_list)
+        response = f"The chemical {dtxsid} may be purchased from the following vendors: {'; '.join(exp_list)}"
+        if len(exp_list) < 1:
+            response = f"The chemical {dtxsid} does not have any vendor data in the ChemBioTox Database."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+    
+### Chemical Properties ###
+# Genra Properties - TODO
+# Genra Tests - TODO
+
+# InvitroDB
+class QueryCBTInVitroDB(BaseTool):
+    name: str = "QueryCBTInVitroDB"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, returns measured assay:function pairs from assays for the chemical from the InVitroDB data in ChemBioTox."
+    llm: BaseLanguageModel = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/invitrodb?dtxsid={dtxsid}")
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        exp = res
+        exp_list = []
+        for i in exp:
+            if 'assay_name' not in i or 'assay_endpoint_attribute' not in i or 'assay_endpoint_value' not in i:
+                continue
+            print("=============")
+            print(i['assay_endpoint_attribute'])
+            if i['assay_endpoint_attribute'] == 'assay_function_type':
+                exp_list.append(f"{i['assay_name']}:{i['assay_endpoint_value']})")
+
+        exp_list = unique(exp_list)
+        response = f"The chemical {dtxsid} has the following assay:function pairs in assays from InVitroDB: {'; '.join(exp_list)}"
+        if len(exp_list) < 1:
+            response = f"The chemical {dtxsid} does not have any InVitroDB data in the ChemBioTox Database."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+
+# CTD Cellular Components
+class QueryCTDCC(BaseTool):
+    name: str = "QueryCTDCC"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, returns cellular components from CTD data in ChemBioTox."
+    llm: BaseLanguageModel = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/cc?dtxsid={dtxsid}")
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        exp = res
+        exp_list = []
+        for i in exp:
+            if 'go_term_name' not in i or 'corrected_pvalue' not in i:
+                continue
+            exp_list.append(f"{i['go_term_name']} (pvalue: {i['corrected_pvalue']})")
+        exp_list = unique(exp_list)
+        response = f"The chemical {dtxsid} has the following cellular components in CTD: {'; '.join(exp_list)}"
+        if len(exp_list) < 1:
+            response = f"The chemical {dtxsid} does not have any cellular component data in the ChemBioTox Database."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+    
+# CTD Molecular Function
+class QueryCTDMF(BaseTool):
+    name: str = "QueryCTDMF"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, returns molecular function from CTD data in ChemBioTox."
+    llm: BaseLanguageModel = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/mf?dtxsid={dtxsid}")
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        exp = res
+        exp_list = []
+        for i in exp:
+            if 'go_term_name' not in i or 'corrected_pvalue' not in i:
+                continue
+            exp_list.append(f"{i['go_term_name']} (pvalue: {i['corrected_pvalue']})")
+        exp_list = unique(exp_list)
+        response = f"The chemical {dtxsid} has the following molecular functions in CTD: {'; '.join(exp_list)}"
+        if len(exp_list) < 1:
+            response = f"The chemical {dtxsid} does not have any molecular function data in the ChemBioTox Database."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+
+
+
+# Pubchem Bioassays
+class QueryPubChemBioassays(BaseTool):
+    name: str = "QueryPubChemBioassays"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, returns biological assays (bioassays) that were run on the given chemical from PubChem data in ChemBioTox."
+    llm: BaseLanguageModel = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/pubchem/bioassays?dtxsid={dtxsid}")
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        exp = res
+        exp_list = []
+        for i in exp:
+            if 'bioassay_name' not in i and 'source_name' not in i and 'activity_outcome' not in i:
+                continue
+            exp_list.append(f"{i['activity_outcome']} for assay {i['bioassay_name']} (from {i['source_name']})")
+        exp_list = unique(exp_list)
+        response = f"The chemical {dtxsid} was tested in the following assays from PubChem: {'; '.join(exp_list)}"
+        if len(exp_list) < 1:
+            response = f"The chemical {dtxsid} does not have any PubChem bioassay data in the ChemBioTox Database."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+
+
+# Pubchem Properties
+class QueryPubChemProperties(BaseTool):
+    name: str = "QueryPubChemProperties"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, returns attribute:value pairs that represent chemical properties from PubChem data in ChemBioTox."
+    llm: BaseLanguageModel = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/pubchem/properties?dtxsid={dtxsid}")
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        exp = res
+        exp_list = []
+        for i in exp:
+            if 'pubchem_attribute' not in i or 'pubchem_value' not in i:
+                continue
+            exp_list.append(f"{i['pubchem_attribute']}: {i['pubchem_value']}")
+        exp_list = unique(exp_list)
+        response = f"The chemical {dtxsid} has the following properties (represented as attribute:value pairs) from PubChem: {'; '.join(exp_list)}"
+        if len(exp_list) < 1:
+            response = f"The chemical {dtxsid} does not have any PubChem chemical property data in the ChemBioTox Database."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+    
+# EPA Properties
+class QueryEPAProperties(BaseTool):
+    name: str = "QueryEPAProperties"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, returns attribute:value pairs that represent chemical properties from EPA data in ChemBioTox."
+    llm: BaseLanguageModel = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/epa/properties?dtxsid={dtxsid}")
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        exp = res
+        exp_list = []
+        for i in exp:
+            if 'epa_attribute' not in i or 'epa_value' not in i:
+                continue
+            exp_list.append(f"{i['epa_attribute']}: {i['epa_value']}")
+        exp_list = unique(exp_list)
+        response = f"The chemical {dtxsid} has the following properties (represented as attribute:value pairs) from the EPA: {'; '.join(exp_list)}"
+        if len(exp_list) < 1:
+            response = f"The chemical {dtxsid} does not have any EPA chemical property data in the ChemBioTox Database."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+    
+
+### Commercial & Industrial Usage
+# CPDat
+class QueryCPD(BaseTool):
+    name: str = "QueryCPD"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, returns the chemical's commercial usage categories from CPDat in ChemBioTox."
+    llm: BaseLanguageModel = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/cpdat?dtxsid={dtxsid}")
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        exp = res
+        exp_list = []
+        for i in exp:
+            if 'gen_cat' not in i :
+                continue
+            to_append = f"{i['gen_cat']}"
+            if 'prod_fam' in i:
+                to_append = f"{to_append}: {i['prod_fam']}"
+            if 'prod_type' in i:
+                to_append = f"{to_append}: {i['prod_type']}"
+            exp_list.append(to_append)
+
+        exp_list = unique(exp_list)
+        response = f"The chemical {dtxsid} is used in the following products from the CPDat: {'; '.join(exp_list)}"
+        if len(exp_list) < 1:
+            response = f"The chemical {dtxsid} does not have any commercial product data in the ChemBioTox Database."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+    
+# FooDB Enzymes TODO
+
+# FooDB Flavors
+class QueryFooDBFlavors(BaseTool):
+    name: str = "QueryFooDBFlavors"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, returns the chemical's usage in food product flavors from FooDB in ChemBioTox."
+    llm: BaseLanguageModel = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/foodb/flavors?dtxsid={dtxsid}")
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        exp = res
+        exp_list = []
+        for i in exp:
+            if 'flavor_name' not in i and 'category' not in i:
+                continue
+            exp_list.append(f"{i['flavor_name']} {i['category']}")
+
+        exp_list = unique(exp_list)
+        response = f"The chemical {dtxsid} can have the following flavors (as reported by FooDB): {'; '.join(exp_list)}"
+        if len(exp_list) < 1:
+            response = f"The chemical {dtxsid} does not have any flavor data in the ChemBioTox Database."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+    
+# FooDB Content
+class QueryFooDBContent(BaseTool):
+    name: str = "QueryFooDBContent"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, returns which food products the chemical is present in from FooDB in ChemBioTox."
+    llm: BaseLanguageModel = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/foodb/content?dtxsid={dtxsid}")
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        exp = res
+        exp_list = []
+        for i in exp:
+            if 'name' not in i:
+                continue
+            exp_list.append(f"{i['name']}")
+
+        exp_list = unique(exp_list)
+        response = f"The chemical {dtxsid} may be found in the following food products (as reported by FooDB): {'; '.join(exp_list)}"
+        if len(exp_list) < 1:
+            response = f"The chemical {dtxsid} does not have any food product data in the ChemBioTox Database."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+    
+# FooDB Effects TODO
+
+# DrugBank TODO
+
+### Environmental Fate and Exposure ###
+# HMDB biospecimen locations
+class QueryHMDBBS(BaseTool):
+    name: str = "QueryHMDBBS"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, returns possible biospecimen locations from HMDB in ChemBioTox."
+    llm: BaseLanguageModel = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/locations/biospecimen?dtxsid={dtxsid}")
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        exp = res
+        exp_list = []
+        for i in exp:
+            if 'annotation' not in i:
+                continue
+            exp_list.append(f"{i['annotation']}")
+
+        exp_list = unique(exp_list)
+        response = f"The chemical {dtxsid} may be found in the following biospecimen locations (as reported by HMDB): {'; '.join(exp_list)}"
+        if len(exp_list) < 1:
+            response = f"The chemical {dtxsid} does not have any biospecimen location data in the ChemBioTox Database."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+    
+# HMDB cellular locations
+class QueryHMDBC(BaseTool):
+    name: str = "QueryHMDBC"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, returns possible cellular locations from HMDB in ChemBioTox."
+    llm: BaseLanguageModel = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/locations/cell?dtxsid={dtxsid}")
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        exp = res
+        exp_list = []
+        for i in exp:
+            if 'annotation' not in i:
+                continue
+            exp_list.append(f"{i['annotation']}")
+
+        exp_list = unique(exp_list)
+        response = f"The chemical {dtxsid} may be found in the following cellular locations (as reported by HMDB): {'; '.join(exp_list)}"
+        if len(exp_list) < 1:
+            response = f"The chemical {dtxsid} does not have any cellular location data in the ChemBioTox Database."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+    
+# HMDB tissue locations
+class QueryHMDBT(BaseTool):
+    name: str = "QueryHMDBT"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, returns possible tissue locations from HMDB in ChemBioTox."
+    llm: BaseLanguageModel = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/locations/tissue?dtxsid={dtxsid}")
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        exp = res
+        exp_list = []
+        for i in exp:
+            if 'annotation' not in i:
+                continue
+            exp_list.append(f"{i['annotation']}")
+
+        exp_list = unique(exp_list)
+        response = f"The chemical {dtxsid} may be found in the following tissue locations (as reported by HMDB): {'; '.join(exp_list)}"
+        if len(exp_list) < 1:
+            response = f"The chemical {dtxsid} does not have any tissue location data in the ChemBioTox Database."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+    
+# HMDB diseases
+class QueryHMDBDiseases(BaseTool):
+    name: str = "QueryHMDBDiseases"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, returns associated diseases from HMDB in ChemBioTox."
+    llm: BaseLanguageModel = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/diseases?dtxsid={dtxsid}")
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        exp = res["anno_hmdb_diseases"]
+        exp_list = []
+        for i in exp:
+            if 'annotation' not in i:
+                continue
+            exp_list.append(f"{i['annotation']}")
+
+        exp_list = unique(exp_list)
+        response = f"The chemical {dtxsid} may be associated with the following diseases (as reported by HMDB): {'; '.join(exp_list)}"
+        if len(exp_list) < 1:
+            response = f"The chemical {dtxsid} does not have any HMDB disease data in the ChemBioTox Database."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+
+# Superfund
+class QuerySuperfund(BaseTool):
+    name: str = "QuerySuperfund"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, returns the presence of the chemical in superfund sites as reported in ChemBioTox."
+    llm: BaseLanguageModel = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/superfund?dtxsid={dtxsid}")
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        exp = res
+        exp_list = []
+        for i in exp:
+            if 'rmedia_desc' not in i and 'site_name' not in i and 'city' not in i and 'zipcode' not in i:
+                continue
+            exp_list.append(f"Found in {i['rmedia_desc']} at site: {i['site_name']} in {i['city']}, {i['zipcode']}")
+
+        exp_list = unique(exp_list)
+        response = f"The chemical {dtxsid} may be found at the following superfund sites: {'; '.join(exp_list)}"
+        if len(exp_list) < 1:
+            response = f"The chemical {dtxsid} does not have any superfund site data in the ChemBioTox Database."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+    
+# T3DB
+class QueryT3DB(BaseTool):
+    name: str = "QueryT3DB"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, returns possible targets of the chemical as reported in the T3DB in ChemBioTox."
+    llm: BaseLanguageModel = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/t3db?dtxsid={dtxsid}")
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        exp = res
+        exp_list = []
+        for i in exp:
+            if 'target_name' not in i:
+                continue
+            exp_list.append(f"{i['target_name']}")
+
+        exp_list = unique(exp_list)
+        response = f"The chemical {dtxsid} has the following potential targets according to T3DB: {'; '.join(exp_list)}"
+        if len(exp_list) < 1:
+            response = f"The chemical {dtxsid} does not have any T3DB target data in the ChemBioTox Database."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+    
+# ToxRefDB TODO
+
+    

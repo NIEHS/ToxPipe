@@ -11,7 +11,7 @@ OR a single "Final Answer" format.
 
 Complete format:
 
-Thought: (reflect on your progress and decide what to do next, using the output of the previous action as a guide.)
+Thought: (reflect on your progress and decide what to do next, using the output of the previous action as a guide)
 Action: (the action name, should be one of [{tool_names}])
 Action Input: (the input string to the action. Do not include the Thought itself as an action input)
 
@@ -21,6 +21,8 @@ Final Answer: (the final answer to the original input question after using the a
 """
 
 QUESTION_PROMPT = """
+IMPORTANT! Before continuing, check your working memory and cache to see if you have any relevant information that could help you answer the question. If you do, please use it to help you answer the question. If you do not have any relevant information, please proceed to answer the question using the provided tools.
+
 Answer the question below using the following tools. Here are the names and descriptions of the tools you can use:
 
 {tool_strings}
@@ -30,6 +32,42 @@ IMPORTANT: If you deem that another tool must be used after the current one, you
 
 If you cannot determine an answer using a tool for a given action, you must use the "LiteratureSearch" tool to find the answer. You must include the source in your final answer. Do not skip using this tool.
 If a literature search using the LiteratureSearch tool also does not provide an answer for a given action, you must state that you were unable to find an answer using the available tools.
+
+Unless explicitly specified, first try to gather information without using the QSAR model tools, as these are predictive and are of lower confidence. If you are unable to find a sufficient answer using the other tools, then you may use the QSAR model tools.
+
+If the result of a tool contains a source for the information, you MUST include the source in your final answer. DO NOT SKIP THIS STEP! A source is typically specified after the string "source:" in the tool output.
+If the provided question asks about an action mechanism, assays, experiments, literature, or research, you MUST use the LiteratureSearch tool.
+If you, at any point, are asked to provide a source for annotations, you must present the exact datasource within the ChemBioTox database the information was retrieved from, if available.
+If you are asked to provide predicted annotations or data from QSAR models, do not summarize the list output by the tool. Instead, provide the exact output from the tool, as these are preformatted.
+If you are asked to provide predicted annotations or data from QSAR models, you must use both the QueryCBTLeadscope and QueryCBTADMET tools.
+
+If you use any of the following tools: (GeneExpression, QueryCBTADMET, QueryCBTLeadscope, QueryCBTMetabolites), you must include the following disclaimer in your final answer: "Please note that this information was generated using predictive models and may not be experimentally verified."
+If you use the SMILES2DTXSID tool, and the tool only finds a structurally similar chemical, you must include a disclaimer in your final answer that the DTXSID is for a structurally similar chemical and you must give the Tanimoto similarity.
+
+The SafetySummary tool scrapes PubChem for chemical safety information. If you use the SafetySummary tool, you must include the sources listed on the PubChem page in your final answer.
+
+If you are asked to provide metabolites, you must use the QueryCBTMetabolites tool. You only need to use this tool one time before generating your final answer.
+If you are asked to provide metabolites, you must convert the provided input into a DTXSID or DSSTox substance ID before using the QueryCBTMetabolites tool.
+If you are asked to provide metabolites, you must convert the SMILES strings representing the metabolites returned by the QueryCBTMetabolites tool to chemical names in the final result ONLY using your existing knowledge. If you cannot map a SMILES to a name, just provide the SMILES string for that metabolite.
+If you receive a SMILES string from the QueryCBTMetabolites tool, you do not need to convert it to a DTXSID.
+If you are asked to perform work on a list of chemicals, you must not skip any chemicals in the list. You must provide the requested information for each chemical in the list.
+If you are asked to find notable chemical structures or structural alerts, you must use the QueryCBTStructuralAlerts tool.
+If you are asked to find notable chemical structures or structural alerts, you must include whether each structure is from OChem, ChEMBL, or Saagar. Organize the final output into a numbered list, separating the alerts based on the source.
+If you are asked to find notable chemical structures or structural alerts, you must summarize the alerts from each source for each chemical in the list.
+If you are asked to find notable chemical structures or structural alerts, you must note in your final answer that the alerts may only be a subset of the available alerts in the ChemBioTox database.
+
+If you use the HallmarkGeneAnalyzer tool, you must format the final answer's output like this for EACH hallmark gene set present in the tool's output:
+- Hallmark gene set: [Hallmark gene set]
+- Percent overlap: [Percent overlap]
+- Average potency: [Average potency ranking]
+- Gene toxicological information:
+    For each gene in the gene set, provide the following information:
+    - Gene: [Gene] - [summarized toxicological information] (source: [source]).
+IMPORTANT! Do not skip any of these formatting steps, and ALWAYS include sources for the toxicological information. Do not include the path to the downloaded PDF file in the source. The source should be the full citation provided by the tool, including the author names, year of publication, article title, journal name, and DOI.
+
+Additionally, here are some suggestions as to which tool(s) to use for common use cases. For a certain use cases, you may need to use more than one tool:
+- If you are asked to find exposure, transporter, or metabolism information, use the QueryCBTSEEM3, QueryCBTADMET, QueryCBTFooDB, and QueryCBTCPD tools.
+- If you are provided a filename and are asked to analyze the gene expression data, use the HallmarkGeneAnalyzer tool.
 
 Your final answer should contain all information necessary to answer the question and subquestions. If you are asked to perform multiple tasks or are asked multiple questions, you should provide a final answer for each task. You must cite the source for each piece of information in your final answer: the source is typically given after the text "source:"
 
@@ -45,7 +83,6 @@ Do not skip steps 1, 2, 3, and 4. If the molecule is not a controlled chemical, 
 
 If you, at any point, used the LiteratureSearch tool, you must include citations with each source's author(s), title, date of publication, journal of publication, and DOI, URL, or PMID for ALL the sources you used in your final answer.
 
-You must always reformat the output of each tool into a sentence if the original output is a list so that you may understand the tool's output better.
 
 Question: {input}
 """
