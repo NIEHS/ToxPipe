@@ -20,6 +20,10 @@ from langchain_core.runnables import (
     RunnablePassthrough,
 )
 
+from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
+from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig, pipeline
+import torch
+
 ### File management ###
 from tempfile import TemporaryDirectory
 from langchain_community.agent_toolkits import FileManagementToolkit
@@ -99,11 +103,11 @@ class ToxPipeAgent:
         self,
         model,
         api_version=os.environ.get("OPENAI_API_VERSION"),
-        temp=0.1, # higher temperature creates more answer variance, but this is potentially better if we are doing a multi-agent approach
-        max_iterations=40,
-        n_agents=5, # number of parallel agents to run - set to 1 for no parallelism. Higher values better for more complicated queries to help reduce variance
-        summarize=True, # if True, will summarize output. Ignored and always treated as True if n_agents > 1.
-        verbose=True
+        temp=0.0, # higher temperature creates more answer variance, but this is potentially better if we are doing a multi-agent approach
+        max_iterations=10,
+        n_agents=1, # number of parallel agents to run - set to 1 for no parallelism. Higher values better for more complicated queries to help reduce variance
+        summarize=False, # if True, will summarize output. Ignored and always treated as True if n_agents > 1.
+        verbose=False
     ):
         langfuse_handler = CallbackHandler(
             secret_key=os.environ.get("LANGFUSE_SECRET_API_KEY"),
@@ -112,8 +116,34 @@ class ToxPipeAgent:
         )
         #print(langfuse_handler.auth_check())
 
+        ### COMPAT W/ LLAMA ###
+        '''
+        model_name = f"{model}"
+        tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True) 
+        model = AutoModelForCausalLM.from_pretrained(
+            model_name, torch_dtype=torch.float16, trust_remote_code=True, device_map="auto"
+        )
+        
+        generation_config = GenerationConfig.from_pretrained(model_name)
+        generation_config.max_new_tokens = 1024
+        generation_config.temperature = temp
+        generation_config.top_p = 0.95
+        generation_config.do_sample = True
+        generation_config.repetition_penalty = 1.15
+        
+        text_pipeline = pipeline(
+            "text-generation",
+            model=model,
+            tokenizer=tokenizer,
+            generation_config=generation_config,
+        )
+        
+        llm = HuggingFacePipeline(pipeline=text_pipeline, model_kwargs={"temperature": 0})
+        self.llm = llm
+        '''
+        #########################
+
         self.llm = _make_llm(model, api_version, temp)
-        #set_llm_cache(InMemoryCache())
         set_llm_cache(SQLiteCache(database_path=".langchain.db"))
 
         self.tools = make_tools(self.llm, verbose=verbose)
@@ -122,7 +152,6 @@ class ToxPipeAgent:
 
         # Initialize agents
         self.agent_executor_chem = RetryAgentExecutor.from_agent_and_tools(
-        #self.agent_executor_chem = AgentExecutor.from_agent_and_tools(
             tools=self.tools,
             agent=ChatZeroShotAgent.from_llm_and_tools(
                 self.llm,
