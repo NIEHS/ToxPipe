@@ -19,7 +19,6 @@ def make_tools(llm: BaseLanguageModel, verbose=True):
         Rat2HumanGene(llm=llm),
         Human2RatGene(llm=llm),
         QueryCBTFooDB(),
-        #QueryCBTCPD(),
         QueryCBTChemicalVendors(),
         QueryCBTGRAS(),
         QueryCBTTox21Models(),
@@ -46,8 +45,18 @@ def make_tools(llm: BaseLanguageModel, verbose=True):
         QueryPubChemBioassays(llm=llm),
         QueryEPAProperties(llm=llm),
         QueryCPD(llm=llm),
+        QueryFooDBEnzymes(llm=llm),
         QueryFooDBFlavors(llm=llm),
         QueryFooDBContent(llm=llm),
+        QueryFooDBEffects(llm=llm),
+
+        QueryDrugBankCarriers(llm=llm),
+        QueryDrugBankEnzymes(llm=llm),
+        QueryDrugBankTargets(llm=llm),
+        QueryDrugBankTransporters(llm=llm),
+
+        QueryToxRefDBNonNP(llm=llm),
+        QueryToxRefDBNP(llm=llm),
 
         QueryHMDBBS(llm=llm),
         QueryHMDBC(llm=llm),
