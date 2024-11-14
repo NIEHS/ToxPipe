@@ -304,11 +304,10 @@ class QueryCBTGRAS(BaseTool):
 class QueryCTDDiseases(BaseTool):
     name: str = "QueryCTDDiseases"
     description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with information about if it is associated with diseases from CTD in the ChemBioTox database"
-
-    def __init__(
-        self,
-    ):
+    llm: BaseLanguageModel = None
+    def __init__(self, llm):
         super().__init__()
+        self.llm = llm
 
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
@@ -351,11 +350,11 @@ class QueryCTDDiseases(BaseTool):
 class QueryCTDGenes(BaseTool):
     name: str = "QueryCBTGenes"
     description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with information about its gene interactions from CTD in the ChemBioTox database"
+    llm: BaseLanguageModel = None
 
-    def __init__(
-        self,
-    ):
+    def __init__(self, llm):
         super().__init__()
+        self.llm = llm
 
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
@@ -835,6 +834,42 @@ class QueryCBTInVitroDB(BaseTool):
         raise NotImplementedError()
 
 # CTD Cellular Components
+class QueryCTDBP(BaseTool):
+    name: str = "QueryCTDBP"
+    description: str = "Given a DSSTox substance ID or DTXSID as input, returns biological process data from CTD data in ChemBioTox."
+    llm: BaseLanguageModel = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/bp?dtxsid={dtxsid}")
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        exp = res['anno_ctd_bioprocess']
+
+        exp_list = []
+        for i in exp:
+            if 'go_term_name' in i and 'corrected_pvalue' in i:
+                exp_list.append(f"{i['go_term_name']} (pvalue: {i['corrected_pvalue']})")
+            else:
+                continue
+        exp_list = unique(exp_list)
+        response = f"The chemical {dtxsid} may be associated with the following biological processes in CTD: {'; '.join(exp_list)}"
+        if len(exp_list) < 1:
+            response = f"The chemical {dtxsid} does not have any biological process data in the ChemBioTox Database."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+
+
+# CTD Cellular Components
 class QueryCTDCC(BaseTool):
     name: str = "QueryCTDCC"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns cellular components from CTD data in ChemBioTox."
@@ -851,14 +886,15 @@ class QueryCTDCC(BaseTool):
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        exp = res
+        exp = res['anno_ctd_cellcomp']
         exp_list = []
         for i in exp:
-            if 'go_term_name' not in i or 'corrected_pvalue' not in i:
+            if 'go_term_name' in i and 'corrected_pvalue' in i:
+                exp_list.append(f"{i['go_term_name']} (pvalue: {i['corrected_pvalue']})")
+            else:
                 continue
-            exp_list.append(f"{i['go_term_name']} (pvalue: {i['corrected_pvalue']})")
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} has the following cellular components in CTD: {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} may have the following cellular components in CTD: {'; '.join(exp_list)}"
         if len(exp_list) < 1:
             response = f"The chemical {dtxsid} does not have any cellular component data in the ChemBioTox Database."
         return(response)
@@ -884,14 +920,15 @@ class QueryCTDMF(BaseTool):
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        exp = res
+        exp = res['anno_ctd_molfunct']
         exp_list = []
         for i in exp:
-            if 'go_term_name' not in i or 'corrected_pvalue' not in i:
+            if 'go_term_name' in i and 'corrected_pvalue' in i:
+                exp_list.append(f"{i['go_term_name']} (pvalue: {i['corrected_pvalue']})")
+            else:
                 continue
-            exp_list.append(f"{i['go_term_name']} (pvalue: {i['corrected_pvalue']})")
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} has the following molecular functions in CTD: {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} may have the following molecular functions in CTD: {'; '.join(exp_list)}"
         if len(exp_list) < 1:
             response = f"The chemical {dtxsid} does not have any molecular function data in the ChemBioTox Database."
         return(response)
