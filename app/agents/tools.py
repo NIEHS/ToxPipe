@@ -22,8 +22,6 @@ def make_tools(llm: BaseLanguageModel, verbose=True):
         QueryCBTChemicalVendors(),
         QueryCBTGRAS(),
         QueryCBTTox21Models(),
-        QueryCTDDiseases(),
-        QueryCTDGenes(),
         Query2DTXSID(),
         SMILES2DTXSID(),
 
@@ -39,8 +37,11 @@ def make_tools(llm: BaseLanguageModel, verbose=True):
 
         QueryCBTVendors(llm=llm),
         QueryCBTInVitroDB(llm=llm),
+        QueryCTDDiseases(llm=llm),
+        QueryCTDGenes(llm=llm),
         QueryCTDCC(llm=llm),
         QueryCTDMF(llm=llm),
+        QueryCTDBP(llm=llm),
         QueryPubChemProperties(llm=llm),
         QueryPubChemBioassays(llm=llm),
         QueryEPAProperties(llm=llm),
