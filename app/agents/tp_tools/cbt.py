@@ -413,7 +413,10 @@ class QueryCBTLeadscope(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/leadscope?dtxsid={dtxsid}&positives=TRUE")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/models/leadscope?dtxsid={dtxsid}&positives=TRUE",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -421,17 +424,18 @@ class QueryCBTLeadscope(BaseTool):
         leadscope = res
         leadscope_list = []
         for i in leadscope:
-            if 'short_description' not in i:
+            if 'model_name' in i and 'short_description' in i:
+                leadscope_list.append(f"{i['model_name']} ({i['short_description']})")
+            else:
                 continue
-            leadscope_list.append(i['short_description'])
-
+            
         leadscope_list = unique(leadscope_list)
 
-        response = f"The chemical {dtxsid} has the following positive predictions for the following Leadscope models: {';'.join(leadscope_list)}"
+        response = f"The chemical {dtxsid} predicted to be active for the following Leadscope QSAR models: {';'.join(leadscope_list)}"
         if len(leadscope_list) < 1:
             response = f"The chemical {dtxsid} does not have any positive predictions for Leadscope models."
-        else:
-            response = format_leadscope(self.llm, response)
+        #else:
+        #    response = format_leadscope(self.llm, response)
 
         return(response)
         
@@ -470,7 +474,10 @@ class QueryCBTADMET(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/admet?dtxsid={dtxsid}&positives=TRUE")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/models/admet/qsar?dtxsid={dtxsid}&positives=TRUE",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -478,17 +485,18 @@ class QueryCBTADMET(BaseTool):
         admet = res
         admet_list = []
         for i in admet:
-            if 'description' not in i:
+            if 'model_name' in i:
+                admet_list.append(i['model_name'])
+            else:
                 continue
-            admet_list.append(i['description'])
 
         admet_list = unique(admet_list)
 
-        response = f"The chemical {dtxsid} has the following positive predictions for the following ADMET models: {';'.join(admet_list)}"
+        response = f"The chemical {dtxsid} is predicted to be active for the following ADMET QSAR models: {';'.join(admet_list)}"
         if len(admet_list) < 1:
             response = f"The chemical {dtxsid} does not have any positive predictions for ADMET models."
-        else:
-            response = format_admet(self.llm, response)
+        #else:
+        #    response = format_admet(self.llm, response)
 
         return(response)
         
@@ -510,8 +518,15 @@ class QueryCBTMetabolites(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/metabolites?dtxsid={dtxsid}&enzyme=both&maxlevel=3")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/models/admet/metabolites?dtxsid={dtxsid}&enzyme=both&maxlevel=3",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
+
+        print("===RES===")
+        print(res)
+
         if len(res) < 1:
             return(f"There was a problem completing the request.")
         

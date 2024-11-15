@@ -27,9 +27,9 @@ def make_tools(llm: BaseLanguageModel, verbose=True):
 
         StructuralSimilarity(),
 
-        #QueryCBTLeadscope(llm=llm), # Proprietary
-        #QueryCBTADMET(llm=llm), # Proprietary
-        #QueryCBTMetabolites(llm=llm), # Proprietary
+        QueryCBTLeadscope(llm=llm), # Proprietary
+        QueryCBTADMET(llm=llm), # Proprietary
+        QueryCBTMetabolites(llm=llm), # Proprietary
         QueryCBTAlerts(llm=llm),
         QueryCBTAlertsMulti(llm=llm),
         QueryCBTSEEM3(llm=llm),
