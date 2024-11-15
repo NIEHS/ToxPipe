@@ -1,21 +1,19 @@
 ---
 title: "{{< iconify material-design architecture >}} Architecture"
-date: 2024-10-25
+date-modified: 2024-10-25
 ---
 
-<!-- TODO: Add image -->
-
-![](../res/diagrams/toxpipe-simple-drawio.svg)
+{{< include _toxpipe-simple.html >}}
 
 ## Overview
 
 ToxPipe is a platform for interacting with toxicological data using large language models (LLMs). It is comprised of various components that can function independently. The primary components are access to LLMs, either through a cloud provider or locally installed, a web interface for chatting with LLMs, databases for storing chats and research data, and agents that perform various actions on the data.
 
-## Librechat
+## ![](../res/images/logos/librechat-logo.svg){height=1em} Librechat
 
 LibreChat is a platform for interacting with LLMs. It is comprised of a frontend, a backend, and a database. The frontend is a web interface that allows users to interact with LLMs through a chat window. The backend is an API that serves the frontend. The database stores chats between users and LLMs.
 
-### MongoDB
+### ![](../res/images/logos/mongodb.svg){height=1em} MongoDB
 
 MongoDB is a document-oriented database that stores chats between users and LLMs.
 
@@ -27,11 +25,11 @@ LibreChat RAG is a platform for ingesting and processing documents for retrieval
 
 PostgreSQL is a relational database management system (DBMS) that stores documents for retrieval through the Librechat interface.
 
-## LiteLLM
+## 🚅 LiteLLM
 
 LiteLLM is an LLM proxy that serves as a lightweight wrapper around LLMs that can be used in Librechat or in other contexts. It provides access to LLMs through a REST API, allowing them to be accessed from anywhere.
 
-## Langfuse
+## ![](../res/images/logos/langfuse_logo.svg){height=1em} Langfuse
 
 Langfuse is an open-source LLM engineering platform that helps teams collaboratively debug, analyze, and iterate on their LLM applications.
 
