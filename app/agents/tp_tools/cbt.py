@@ -95,6 +95,39 @@ class StructuralSimilarity(BaseTool):
         return(response)
 
 
+# Functional Similarity - Proprietary
+class FunctionalSimilarity(BaseTool):
+    name: str = "FunctionalSimilarity"
+    description: str = "Given a DSSTox Substance ID as input, returns a list of functionally similar chemicals and their corresponding similarities to the input chemical from the ChemBioTox database. Similarities are calculated by cosine distance with distances closer to zero being more similar. Function is based off of predictive models and may not accurately represent the behavior of the chemicals in question."
+
+    def __init__(
+        self,
+    ):
+        super().__init__()
+
+    def _run(self, dtxsid: str) -> str:
+        """Input a SMILES string, return its DSSTox substance ID (DTXSID) if available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/similarity/functional?dtxsid={dtxsid}&fp=leadscope&threshold=0.1&n=10",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        response = f"The chemical given by the DSSTox Substance ID {dtxsid} does not have data for structurally similar chemicals in the ChemBioTox Database."
+
+        outp = []
+        if len(res) > 0:          
+            df = pd.json_normalize(res) 
+            #df = df[df["similarity"] > 0][0:10] # only get top 10 similar
+            
+            for i, r in df.iterrows():
+                outp.append(f"{r['similar_preferred_name']} ({r['functional_similarity']})")
+
+        response = f"The chemical given by the DSSTox Substance ID {dtxsid} has the following similar chemicals, given as 'chemical name' (cosine distance): {'; '.join(outp)}"                
+        return(response)
+
 
 class QueryCBTFooDB(BaseTool):
     name: str = "QueryCBTFooDB"
@@ -234,22 +267,14 @@ class QueryCBTTox21Models(BaseTool):
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/models/tox21?dtxsid={dtxsid}")
 
-        print("===RES===")
-        print(res.json())
-
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
 
         tox21 = res
 
-        print("===tox21===")
-        print(tox21)
-
         tox21_list = []
         for i in tox21:
-            print("===i===")
-            print(i)
             if 'activity_score' not in i and 'assay_model' not in i and 'ad' not in i and 'tc' not in i:
                 continue
             tox21_list.append(f"{i['assay_model']} (activity_score: {i['activity_score']})")
@@ -522,10 +547,8 @@ class QueryCBTMetabolites(BaseTool):
             f"{os.environ.get('CBT_API_ENDPOINT')}/models/admet/metabolites?dtxsid={dtxsid}&enzyme=both&maxlevel=3",
             headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
         )
-        res = res.json()
 
-        print("===RES===")
-        print(res)
+        res = res.json()
 
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -974,8 +997,6 @@ class QueryPubChemBioassays(BaseTool):
         exp = res
         exp_list = []
 
-        print(exp)
-
         for i in exp:
             if 'bioassay_name' in i and 'source_name' in i and 'activity_outcome' in i and 'activity_name' in i  and 'activity_value' in i :
                 qual = "="
@@ -1399,9 +1420,6 @@ class QueryHMDBBS(BaseTool):
         res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/locations/biospecimen?dtxsid={dtxsid}")
         res = res.json()
 
-        print("===RES===")
-        print(res)
-
         if len(res) < 1:
             return(f"There was a problem completing the request.")
         exp = res['anno_hmdb_biospecimenlocations']
@@ -1503,6 +1521,7 @@ class QueryHMDBDiseases(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/diseases?dtxsid={dtxsid}")
+
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")

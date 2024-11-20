@@ -26,7 +26,7 @@ def make_tools(llm: BaseLanguageModel, verbose=True):
         SMILES2DTXSID(),
 
         StructuralSimilarity(),
-
+        FunctionalSimilarity(), # Proprietary
         QueryCBTLeadscope(llm=llm), # Proprietary
         QueryCBTADMET(llm=llm), # Proprietary
         QueryCBTMetabolites(llm=llm), # Proprietary

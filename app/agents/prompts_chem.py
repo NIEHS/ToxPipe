@@ -28,6 +28,8 @@ Answer the question below using the following tools. Here are the names and desc
 Use the tools provided, using the most specific tool available for each action. IMPORTANT: only use ONE tool at a time, in a sequential manner. Do NOT pass your "thought" as an input to the tool. Instead, use the output of the previous tool as a guide for your next action.
 IMPORTANT: If you deem that another tool must be used after the current one, you MUST call that tool and wait for its output before proceeding. Do NOT prematurely produce a final answer before performing all actions.
 
+If a tool requires a DSSTox Substance ID or DTXSID as input and you have a chemical name, you must first convert the chemical name to a DTXSID before using the tool and include ONLY the DTXSID as the input to the tool.
+
 If you cannot determine an answer using a tool for a given action, you must use the "LiteratureSearch" tool to find the answer. You must include the source in your final answer. Do not skip using this tool.
 If a literature search using the LiteratureSearch tool also does not provide an answer for a given action, you must state that you were unable to find an answer using the available tools.
 
