@@ -3,6 +3,7 @@ import numpy as np
 import re
 import langchain
 from langchain.base_language import BaseLanguageModel
+from langchain.llms import BaseLLM
 from langchain.tools import BaseTool
 from langchain_core.prompts import ChatPromptTemplate
 import concurrent.futures
@@ -29,7 +30,7 @@ class GeneExpression(BaseTool):
     description: str = (
         "Given a gene and tissue, query the LLM to find the gene expression."
     )
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -51,7 +52,7 @@ class Rat2HumanGene(BaseTool):
     description: str = (
         "Given a rat gene, convert to a human gene. A result of nan indicates that there is no equivalent human gene for the given rat gene."
     )
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -72,7 +73,7 @@ class Human2RatGene(BaseTool):
     description: str = (
         "Given a human gene, convert to a rat gene. A result of nan indicates that there is no equivalent rat gene for the given human gene."
     )
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -203,7 +204,7 @@ class HallmarkGeneAnalyzer(BaseTool):
     description: str = (
         "Given a ranked list of genes as input, with each entry formatted as [rank].[gene] and separated by a comma, analyzes the genes with respect to the Hallmark gene set."
     )
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()

@@ -107,7 +107,8 @@ class ToxPipeAgent:
         max_iterations=10,
         n_agents=1, # number of parallel agents to run - set to 1 for no parallelism. Higher values better for more complicated queries to help reduce variance
         summarize=False, # if True, will summarize output. Ignored and always treated as True if n_agents > 1.
-        verbose=False
+        verbose=False,
+        auth=False
     ):
         langfuse_handler = CallbackHandler(
             secret_key=os.environ.get("LANGFUSE_SECRET_API_KEY"),
@@ -146,7 +147,7 @@ class ToxPipeAgent:
         self.llm = _make_llm(model, api_version, temp)
         set_llm_cache(SQLiteCache(database_path=".langchain.db"))
 
-        self.tools = make_tools(self.llm, verbose=verbose)
+        self.tools = make_tools(self.llm, verbose=verbose, auth=auth)
         self.n_agents = n_agents
         self.summarize = summarize
 

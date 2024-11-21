@@ -11,6 +11,7 @@ from paperscraper.pdf import save_pdf
 from paperscraper.xrxiv.xrxiv_query import XRXivQuery
 
 from langchain.base_language import BaseLanguageModel
+from langchain.llms import BaseLLM
 from langchain.tools import BaseTool
 from langchain_community.document_loaders import PyPDFLoader
 from pypdf.errors import PdfReadError
@@ -178,9 +179,8 @@ def scholar2result_llm(llm, query: str):
 
 class Scholar2ResultLLM(BaseTool):
     name: str = "LiteratureSearch"
-    description: str = "Perform a comprehensive literature search to answer a specific question that requires a detailed, technical answer. Produces a summary of the search results including the most relevant papers and a summary of the information found alongside a source given as a DOI, URL, or PMID for each."
-    
-    llm: BaseLanguageModel = None
+    description: str = "Perform a comprehensive literature search to answer a specific question that requires a detailed, technical answer. Produces a summary of the search results including the most relevant papers and a summary of the information found alongside a source given as a DOI, URL, or PMID for each."    
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
