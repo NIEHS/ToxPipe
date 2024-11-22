@@ -12,7 +12,7 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
         FuncGroups(),
         ExplosiveCheck(),
         ControlChemCheck(),
-        Scholar2ResultLLM(llm=llm),
+        Scholar2ResultLLM(llm=llm), # Note: very slow
         SafetySummary(llm=llm),
         GeneExpression(llm=llm),
         HallmarkGeneAnalyzer(llm=llm),

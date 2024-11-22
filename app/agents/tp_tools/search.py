@@ -52,8 +52,10 @@ def paper_scraper(search: str, pdir: str = "query") -> dict:
         
         query = [[search]]
         uid = uuid.uuid4()
+        os.mkdir(os.environ.get('PAPERSCRAPER_DIR'))
         outpath = f"{os.environ.get('PAPERSCRAPER_DIR')}/pubmed_scraped_{uid}.jsonl"
         paperpath = f"{os.environ.get('PAPERSCRAPER_DIR')}/{uid}/"
+        os.mkdir(paperpath)
         get_and_dump_pubmed_papers(query, output_filepath=outpath, start_date="2014/01/01")
         #get_and_dump_pubmed_papers(query, output_filepath=outpath)
 
@@ -64,7 +66,6 @@ def paper_scraper(search: str, pdir: str = "query") -> dict:
         #querier.search_keywords(query, output_filepath=outpath)
         
         # Grab PDFs of fetched papers
-        os.mkdir(paperpath)
         paper_df = pd.read_json(path_or_buf=outpath, lines=True)
 
         doi_list = []
