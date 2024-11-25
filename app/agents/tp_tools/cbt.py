@@ -6,7 +6,7 @@ import json
 import time
 import urllib.parse
 from langchain.tools import BaseTool
-from langchain.base_language import BaseLanguageModel
+from langchain.llms import BaseLLM
 from langchain_core.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
 from random import sample
@@ -94,6 +94,39 @@ class StructuralSimilarity(BaseTool):
         response = f"The chemical given by the SMILES {smiles} has the following similar chemicals, given as 'chemical name' (tanimoto similarity): {'; '.join(outp)}"                
         return(response)
 
+
+# Functional Similarity - Proprietary
+class FunctionalSimilarity(BaseTool):
+    name: str = "FunctionalSimilarity"
+    description: str = "Given a DSSTox Substance ID as input, returns a list of functionally similar chemicals and their corresponding similarities to the input chemical from the ChemBioTox database. Similarities are calculated by cosine distance with distances closer to zero being more similar. Function is based off of predictive models and may not accurately represent the behavior of the chemicals in question."
+
+    def __init__(
+        self,
+    ):
+        super().__init__()
+
+    def _run(self, dtxsid: str) -> str:
+        """Input a SMILES string, return its DSSTox substance ID (DTXSID) if available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/similarity/functional?dtxsid={dtxsid}&fp=leadscope&threshold=0.1&n=10",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        response = f"The chemical given by the DSSTox Substance ID {dtxsid} does not have data for structurally similar chemicals in the ChemBioTox Database."
+
+        outp = []
+        if len(res) > 0:          
+            df = pd.json_normalize(res) 
+            #df = df[df["similarity"] > 0][0:10] # only get top 10 similar
+            
+            for i, r in df.iterrows():
+                outp.append(f"{r['similar_preferred_name']} ({r['functional_similarity']})")
+
+        response = f"The chemical given by the DSSTox Substance ID {dtxsid} has the following similar chemicals, given as 'chemical name' (cosine distance): {'; '.join(outp)}"                
+        return(response)
 
 
 class QueryCBTFooDB(BaseTool):
@@ -234,22 +267,14 @@ class QueryCBTTox21Models(BaseTool):
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/models/tox21?dtxsid={dtxsid}")
 
-        print("===RES===")
-        print(res.json())
-
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
 
         tox21 = res
 
-        print("===tox21===")
-        print(tox21)
-
         tox21_list = []
         for i in tox21:
-            print("===i===")
-            print(i)
             if 'activity_score' not in i and 'assay_model' not in i and 'ad' not in i and 'tc' not in i:
                 continue
             tox21_list.append(f"{i['assay_model']} (activity_score: {i['activity_score']})")
@@ -304,7 +329,7 @@ class QueryCBTGRAS(BaseTool):
 class QueryCTDDiseases(BaseTool):
     name: str = "QueryCTDDiseases"
     description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with information about if it is associated with diseases from CTD in the ChemBioTox database"
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
     def __init__(self, llm):
         super().__init__()
         self.llm = llm
@@ -350,7 +375,7 @@ class QueryCTDDiseases(BaseTool):
 class QueryCTDGenes(BaseTool):
     name: str = "QueryCBTGenes"
     description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with information about its gene interactions from CTD in the ChemBioTox database"
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -404,7 +429,7 @@ class QueryCBTLeadscope(BaseTool):
     name: str = "QueryCBTLeadscope"
     description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with predicted Leadscope QSAR models from the ChemBioTox database."
 
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -465,7 +490,7 @@ class QueryCBTADMET(BaseTool):
     name: str = "QueryCBTADMET"
     description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with predicted ADMET QSAR models from the ChemBioTox database. This can be helpful for understanding the absorption, distribution, metabolism, excretion, pathways, transportation, and toxicity of a chemical."
 
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -509,7 +534,7 @@ class QueryCBTMetabolites(BaseTool):
     name: str = "QueryCBTMetabolites"
     description: str = "Given a DSSTox substance ID or DTXSID as input, generate metabolites of the chemical from ADMET predictor with corresponding enzymes used in the metabolism."
 
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -522,10 +547,8 @@ class QueryCBTMetabolites(BaseTool):
             f"{os.environ.get('CBT_API_ENDPOINT')}/models/admet/metabolites?dtxsid={dtxsid}&enzyme=both&maxlevel=3",
             headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
         )
-        res = res.json()
 
-        print("===RES===")
-        print(res)
+        res = res.json()
 
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -559,7 +582,7 @@ class QueryCBTSEEM3(BaseTool):
     name: str = "QueryCBTSEEM3"
     description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with its SEEM3 exposure data. This can be helpful for finding the exposure, pathways, or transportation of a chemical."
 
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -599,7 +622,7 @@ class QueryCBTDrugBankTransporters(BaseTool):
     name: str = "QueryCBTDrugBankTransporters"
     description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with its DrugBank transporter data. This can be helpful for finding the pathway or transportation information for a chemical."
 
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -643,7 +666,7 @@ class QueryCBTAlerts(BaseTool):
     name: str = "QueryCBTAlerts"
     description: str = "Given a SMILES string as input, find structural alerts from the OChem, ChEMBL, and Saagar datasources within the ChemBioTox database."
 
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -699,7 +722,7 @@ class QueryCBTAlertsMulti(BaseTool):
     name: str = "QueryCBTAlertsMulti"
     description: str = "Given multiple SMILES strings that represent metabolites as input, separated by ';', find structural alerts from the OChem, ChEMBL, and Saagar datasources within the ChemBioTox database. Each metabolite's results will be separated by two newline characters: '\n\n'."
 
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -775,7 +798,7 @@ class QueryCBTAlertsMulti(BaseTool):
 class QueryCBTVendors(BaseTool):
     name: str = "QueryCBTVendors"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns a list of chemical vendors from which the chemical may be acquired."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -812,7 +835,7 @@ class QueryCBTVendors(BaseTool):
 class QueryCBTInVitroDB(BaseTool):
     name: str = "QueryCBTInVitroDB"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns measured assay:activity pairs from assays for the chemical from the InVitroDB data in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -852,7 +875,7 @@ class QueryCBTInVitroDB(BaseTool):
 class QueryCTDBP(BaseTool):
     name: str = "QueryCTDBP"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns biological process data from CTD data in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -888,7 +911,7 @@ class QueryCTDBP(BaseTool):
 class QueryCTDCC(BaseTool):
     name: str = "QueryCTDCC"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns cellular components from CTD data in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -922,7 +945,7 @@ class QueryCTDCC(BaseTool):
 class QueryCTDMF(BaseTool):
     name: str = "QueryCTDMF"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns molecular function from CTD data in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -958,7 +981,7 @@ class QueryCTDMF(BaseTool):
 class QueryPubChemBioassays(BaseTool):
     name: str = "QueryPubChemBioassays"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns biological assays (bioassays) that were run on the given chemical from PubChem data in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -973,8 +996,6 @@ class QueryPubChemBioassays(BaseTool):
             return(f"There was a problem completing the request.")
         exp = res
         exp_list = []
-
-        print(exp)
 
         for i in exp:
             if 'bioassay_name' in i and 'source_name' in i and 'activity_outcome' in i and 'activity_name' in i  and 'activity_value' in i :
@@ -1001,7 +1022,7 @@ class QueryPubChemBioassays(BaseTool):
 class QueryPubChemProperties(BaseTool):
     name: str = "QueryPubChemProperties"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns attribute:value pairs that represent chemical properties from PubChem data in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -1034,7 +1055,7 @@ class QueryPubChemProperties(BaseTool):
 class QueryEPAProperties(BaseTool):
     name: str = "QueryEPAProperties"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns attribute:value pairs that represent chemical properties from EPA data in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -1069,7 +1090,7 @@ class QueryEPAProperties(BaseTool):
 class QueryCPD(BaseTool):
     name: str = "QueryCPD"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns the chemical's commercial usage categories from CPDat in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -1108,7 +1129,7 @@ class QueryCPD(BaseTool):
 class QueryFooDBEnzymes(BaseTool):
     name: str = "QueryFooDBEnzymes"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns enzymes that the chemical may interact with from FooDB in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -1142,7 +1163,7 @@ class QueryFooDBEnzymes(BaseTool):
 class QueryFooDBFlavors(BaseTool):
     name: str = "QueryFooDBFlavors"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns the chemical's usage in food product flavors from FooDB in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -1176,7 +1197,7 @@ class QueryFooDBFlavors(BaseTool):
 class QueryFooDBContent(BaseTool):
     name: str = "QueryFooDBContent"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns which food products the chemical is present in from FooDB in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -1211,7 +1232,7 @@ class QueryFooDBContent(BaseTool):
 class QueryFooDBEffects(BaseTool):
     name: str = "QueryFooDBEffects"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns the chemical's health effects from FooDB in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -1248,7 +1269,7 @@ class QueryFooDBEffects(BaseTool):
 class QueryDrugBankCarriers(BaseTool):
     name: str = "QueryDrugBankCarriers"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns the chemical's carriers from DrugBank in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -1283,7 +1304,7 @@ class QueryDrugBankCarriers(BaseTool):
 class QueryDrugBankEnzymes(BaseTool):
     name: str = "QueryDrugBankEnzymes"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns the chemical's associated enzymes from DrugBank in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -1317,7 +1338,7 @@ class QueryDrugBankEnzymes(BaseTool):
 class QueryDrugBankTargets(BaseTool):
     name: str = "QueryDrugBankTargets"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns the chemical's associated targets from DrugBank in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -1351,7 +1372,7 @@ class QueryDrugBankTargets(BaseTool):
 class QueryDrugBankTransporters(BaseTool):
     name: str = "QueryDrugBankTransporters"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns the chemical's associated transporters from DrugBank in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -1387,7 +1408,7 @@ class QueryDrugBankTransporters(BaseTool):
 class QueryHMDBBS(BaseTool):
     name: str = "QueryHMDBBS"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns possible biospecimen locations from HMDB in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -1398,9 +1419,6 @@ class QueryHMDBBS(BaseTool):
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/locations/biospecimen?dtxsid={dtxsid}")
         res = res.json()
-
-        print("===RES===")
-        print(res)
 
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -1425,7 +1443,7 @@ class QueryHMDBBS(BaseTool):
 class QueryHMDBC(BaseTool):
     name: str = "QueryHMDBC"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns possible cellular locations from HMDB in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -1459,7 +1477,7 @@ class QueryHMDBC(BaseTool):
 class QueryHMDBT(BaseTool):
     name: str = "QueryHMDBT"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns possible tissue locations from HMDB in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -1493,7 +1511,7 @@ class QueryHMDBT(BaseTool):
 class QueryHMDBDiseases(BaseTool):
     name: str = "QueryHMDBDiseases"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns associated diseases from HMDB in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -1503,6 +1521,7 @@ class QueryHMDBDiseases(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/diseases?dtxsid={dtxsid}")
+
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -1527,7 +1546,7 @@ class QueryHMDBDiseases(BaseTool):
 class QuerySuperfund(BaseTool):
     name: str = "QuerySuperfund"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns the presence of the chemical in superfund sites as reported in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -1566,7 +1585,7 @@ class QuerySuperfund(BaseTool):
 class QueryT3DB(BaseTool):
     name: str = "QueryT3DB"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns possible targets of the chemical as reported in the T3DB in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -1601,7 +1620,7 @@ class QueryT3DB(BaseTool):
 class QueryToxRefDBNonNP(BaseTool):
     name: str = "QueryToxRefDBNonNP"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns its non-neoplastic annotations as reported in the ToxRefDB in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
@@ -1636,7 +1655,7 @@ class QueryToxRefDBNonNP(BaseTool):
 class QueryToxRefDBNP(BaseTool):
     name: str = "QueryToxRefDBNP"
     description: str = "Given a DSSTox substance ID or DTXSID as input, returns its neoplastic (cancer) annotations as reported in the ToxRefDB in ChemBioTox."
-    llm: BaseLanguageModel = None
+    llm: BaseLLM = None
 
     def __init__(self, llm):
         super().__init__()
