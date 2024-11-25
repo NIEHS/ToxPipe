@@ -211,22 +211,19 @@ class MoleculeSafety:
         prompt_short = PromptTemplate(
             template=summary_each_data, input_variables=["data", "approx_length"]
         )
-        llm_chain_short = LLMChain(prompt=prompt_short, llm=self.llm)
+        #llm_chain_short = LLMChain(prompt=prompt_short, llm=self.llm)
+        chain = prompt_short | self.llm
 
         llm_output = []
         for info in safety_data:
             if self._num_tokens(str(info)) > approx_length:
                 trunc_info = str(info)[:approx_length]
                 llm_output.append(
-                    llm_chain_short.run(
-                        {"data": str(trunc_info), "approx_length": approx_length}
-                    )
+                    llm_chain_short = chain.invoke({"data": str(trunc_info), "approx_length": approx_length})
                 )
             else:
                 llm_output.append(
-                    llm_chain_short.run(
-                        {"data": str(info), "approx_length": approx_length}
-                    )
+                    llm_chain_short = chain.invoke({"data": str(info), "approx_length": approx_length})
                 )
         return llm_output
 
@@ -250,7 +247,8 @@ class SafetySummary(BaseTool):
         prompt = PromptTemplate(
             template=safety_summary_prompt, input_variables=["data"]
         )
-        self.llm_chain = LLMChain(prompt=prompt, llm=self.llm)
+        #self.llm_chain = LLMChain(prompt=prompt, llm=self.llm)
+        self.llm_chain = prompt | self.llm
 
     def _run(self, cas: str) -> str:
         if is_smiles(cas):
@@ -260,7 +258,8 @@ class SafetySummary(BaseTool):
             return "Molecule not found in Pubchem."
 
         data = self.mol_safety.get_safety_summary(cas)
-        return self.llm_chain.run(" ".join(data))
+        #return self.llm_chain.run(" ".join(data))
+        return self.llm_chain.invoke(" ".join(data))
 
     async def _arun(self, cas_number):
         raise NotImplementedError("Async not implemented.")

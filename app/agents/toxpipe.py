@@ -1,28 +1,18 @@
 from dotenv import load_dotenv
 from typing import List
 
-from langchain.agents import AgentExecutor
+from langchain.agents import AgentExecutor, create_react_agent
 
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import AzureChatOpenAI, ChatOpenAI
-from langchain.chains import LLMChain
-from langchain_core.runnables import RunnableParallel
+from langchain_openai import ChatOpenAI
 from langchain_core.chat_history import BaseChatMessageHistory, BaseMessage
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain.globals import set_llm_cache
-from langchain_community.cache import InMemoryCache, SQLiteCache
-from langchain_community.chat_message_histories import ChatMessageHistory
-from langchain_community.chat_message_histories.redis import RedisChatMessageHistory
+from langchain_community.cache import SQLiteCache
 from pydantic import BaseModel, Field
 from langchain_core.runnables import (
-    RunnableLambda,
-    ConfigurableFieldSpec,
-    RunnablePassthrough,
+    ConfigurableFieldSpec
 )
-
-from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
-from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig, pipeline
-import torch
 
 ### File management ###
 from tempfile import TemporaryDirectory
@@ -40,28 +30,18 @@ read_tool, write_tool, list_tool = tools
 
 ### Multiprocessing ###
 import concurrent.futures
-import pathos, multiprocess
-from pathos.multiprocessing import ProcessingPool, ThreadPool
-import dill
-
-from .agent_toxpipe import ChatZeroShotAgent
-
 from .executor_toxpipe import RetryAgentExecutor
 import concurrent.futures
 from .multi import *
-import pickle, copyreg, ssl
 
 import os
-import langfuse
-from langfuse import Langfuse
-from langfuse.callback import CallbackHandler
-from langfuse.decorators import langfuse_context, observe
 
 ### Load environment variables ###
 from dotenv import load_dotenv
 load_dotenv('./.env')
 
-from .prompts_chem import FORMAT_INSTRUCTIONS, QUESTION_PROMPT, REPHRASE_TEMPLATE, SUFFIX
+#from .prompts_chem import FORMAT_INSTRUCTIONS, QUESTION_PROMPT, REPHRASE_TEMPLATE, SUFFIX, 
+from .prompts_chem import PROMPT
 from .tools import make_tools
 
 class InMemoryHistory(BaseChatMessageHistory, BaseModel):
@@ -110,40 +90,6 @@ class ToxPipeAgent:
         verbose=False,
         auth=False
     ):
-        langfuse_handler = CallbackHandler(
-            secret_key=os.environ.get("LANGFUSE_SECRET_API_KEY"),
-            public_key=os.environ.get("LANGFUSE_PUBLIC_API_KEY"),
-            host=os.environ.get("LANGFUSE_HOST")
-        )
-        #print(langfuse_handler.auth_check())
-
-        ### COMPAT W/ LLAMA ###
-        '''
-        model_name = f"{model}"
-        tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True) 
-        model = AutoModelForCausalLM.from_pretrained(
-            model_name, torch_dtype=torch.float16, trust_remote_code=True, device_map="auto"
-        )
-        
-        generation_config = GenerationConfig.from_pretrained(model_name)
-        generation_config.max_new_tokens = 1024
-        generation_config.temperature = temp
-        generation_config.top_p = 0.95
-        generation_config.do_sample = True
-        generation_config.repetition_penalty = 1.15
-        
-        text_pipeline = pipeline(
-            "text-generation",
-            model=model,
-            tokenizer=tokenizer,
-            generation_config=generation_config,
-        )
-        
-        llm = HuggingFacePipeline(pipeline=text_pipeline, model_kwargs={"temperature": 0})
-        self.llm = llm
-        '''
-        #########################
-
         self.llm = _make_llm(model, api_version, temp)
         set_llm_cache(SQLiteCache(database_path=".langchain.db"))
 
@@ -151,49 +97,46 @@ class ToxPipeAgent:
         self.n_agents = n_agents
         self.summarize = summarize
 
+        cza_agent = create_react_agent(
+            self.llm,
+            self.tools,
+            prompt=PROMPT
+        )
+
+
         # Initialize agents
         self.agent_executor_chem = RetryAgentExecutor.from_agent_and_tools(
+            agent=cza_agent,
             tools=self.tools,
-            agent=ChatZeroShotAgent.from_llm_and_tools(
-                self.llm,
-                self.tools,
-                suffix=SUFFIX,
-                format_instructions=FORMAT_INSTRUCTIONS,
-                question_prompt=QUESTION_PROMPT,
-            ),
-            verbose=True,
+            verbose=verbose,
             max_iterations=max_iterations,
         )
 
+        # Wrap previously-defined agent(s) with a way to track message history
         self.agent_with_chat_history = RunnableWithMessageHistory(
             self.agent_executor_chem,
             get_session_history=get_session_history,
             input_messages_key="input",
             history_messages_key="history",
             history_factory_config=[
-        ConfigurableFieldSpec(
-            id="user_id",
-            annotation=str,
-            name="User ID",
-            description="Unique identifier for the user.",
-            default="",
-            is_shared=True,
-        ),
-        ConfigurableFieldSpec(
-            id="conversation_id",
-            annotation=str,
-            name="Conversation ID",
-            description="Unique identifier for the conversation.",
-            default="",
-            is_shared=True,
-        ),
-    ],
+                ConfigurableFieldSpec(
+                    id="user_id",
+                    annotation=str,
+                    name="User ID",
+                    description="Unique identifier for the user.",
+                    default="",
+                    is_shared=True,
+                ),
+                ConfigurableFieldSpec(
+                    id="conversation_id",
+                    annotation=str,
+                    name="Conversation ID",
+                    description="Unique identifier for the conversation.",
+                    default="",
+                    is_shared=True,
+                ),
+            ],
         )
-
-
-        rephrase = ChatPromptTemplate.from_template(REPHRASE_TEMPLATE)
-        self.rephrase_chain = LLMChain(prompt=rephrase, llm=self.llm, callbacks=[langfuse_handler])
-
 
     def run(self, prompt):
         n_agents = self.n_agents
@@ -201,12 +144,16 @@ class ToxPipeAgent:
         res = []
         with concurrent.futures.ThreadPoolExecutor(max_workers=n_agents) as executor:
             for i in range(0, n_agents):
+                print("====here1=====")
                 proc.append(executor.submit(run_parallel, self, prompt, i))
+                print("====here2=====")
         i = 0    
         for future in concurrent.futures.as_completed(proc):
-            res.append(f"{i}) {future.result()}")
+            #res.append(f"{i}) {future.result()}")
+            res.append(f"{future.result()}")
             i += 1
-        res = "\n".join(res)
+        #res = "\n".join(res)
+        res = "\n\n".join(res)
 
         if self.summarize == False and n_agents == 1:
             return res
