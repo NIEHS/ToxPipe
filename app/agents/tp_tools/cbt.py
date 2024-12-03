@@ -17,6 +17,7 @@ def unique(l):
     unique_list = (list(ls))
     return unique_list
 
+
 class Query2DTXSID(BaseTool):
     name: str = "Query2DTXSID"
     description: str = "Given a chemical name as input, returns the DSSTox substance ID or DTXSID for that chemical from the ChemBioTox database."
@@ -37,6 +38,61 @@ class Query2DTXSID(BaseTool):
         if len(res) > 0:
             response = f"The chemical {name} has the following DSSTox Substance ID in the ChemBioTox Database: {res[0]['dsstox_substance_id']}."
         return(response)
+
+class Name2DTXSID(BaseTool):
+    name: str = "Name2DTXSID"
+    description: str = "Given a chemical name as input, returns the DSSTox substance ID or DTXSID for that chemical from the ChemBioTox database."
+
+    def __init__(
+        self,
+    ):
+        super().__init__()
+
+    def _run(self, name: str) -> str:
+        """Input a chemical name, return its DSSTox substance ID (DTXSID) available in ChemBioTox."""
+        name = name.rstrip()
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/name2dtxsid?name={name}")
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        response = f"The chemical {name} does not map to a DSSTox Substance ID in the ChemBioTox Database."
+        if len(res) > 0:
+            response = f"The chemical {name} has the following DSSTox Substance ID in the ChemBioTox Database: {res[0]['dsstox_substance_id']}."
+        return(response)
+    
+class Name2SMILES(BaseTool):
+    name: str = "Name2SMILES"
+    description: str = "Input a chemical name and return the corresponding SMILES string."
+
+    def __init__(
+        self,
+    ):
+        super().__init__()
+
+    def _run(self, name: str) -> str:
+        """Input a chemical name, return its corresponding SMILES string available in ChemBioTox."""
+        name = name.rstrip()
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/name2dtxsid?name={name}")
+        res = res.json()
+
+        if len(res) < 1:
+            response = f"The chemical {name} does not map to a DSSTox Substance ID in the ChemBioTox Database and thus cannot map to a SMILES string."
+            return(response)
+
+        dtxsid = res[0]["dsstox_substance_id"]
+        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/dtxsid2smiles?dtxsid={dtxsid}")
+        res = res.json()
+
+        if len(res) < 1:
+            response = f"The chemical {name} does not have a corresponding SMILES string in the ChemBioTox database."
+            return(response)
+        
+        response = f"The chemical {name} has a corresponding SMILES string of {res[0]['canonical_smiles']} in the ChemBioTox database."
+        return(response)
+
+    async def _arun(self, query: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
     
 class SMILES2DTXSID(BaseTool):
     name: str = "SMILES2DTXSID"

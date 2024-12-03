@@ -4,7 +4,7 @@ from .tp_tools import *
 
 def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
     all_tools = [
-        Query2SMILES(),
+        Name2SMILES(),
         Query2CAS(),
         PatentCheck(),
         MolSimilarity(),
@@ -13,7 +13,7 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
         ExplosiveCheck(),
         ControlChemCheck(),
         Scholar2ResultLLM(llm=llm), # Note: very slow
-        SafetySummary(llm=llm),
+        #SafetySummary(llm=llm),
         GeneExpression(llm=llm),
         HallmarkGeneAnalyzer(llm=llm),
         Rat2HumanGene(llm=llm),
@@ -22,6 +22,7 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
         QueryCBTChemicalVendors(),
         QueryCBTGRAS(),
         QueryCBTTox21Models(),
+        Name2DTXSID(),
         Query2DTXSID(),
         SMILES2DTXSID(),
 
