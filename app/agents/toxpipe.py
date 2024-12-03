@@ -1,18 +1,22 @@
 from dotenv import load_dotenv
 from typing import List
 
-from langchain.agents import AgentExecutor, create_react_agent
+#from langchain.agents import AgentExecutor, create_react_agent
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.prebuilt import create_react_agent
 
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
+
+from langchain_openai import ChatOpenAI, AzureChatOpenAI
+from langchain_anthropic import ChatAnthropic
+from langchain_ollama.chat_models import ChatOllama
+from langchain_mistralai.chat_models import ChatMistralAI
+from langchain_google_genai.chat_models import ChatGoogleGenerativeAI
+
 from langchain_core.chat_history import BaseChatMessageHistory, BaseMessage
-from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain.globals import set_llm_cache
 from langchain_community.cache import SQLiteCache
-from pydantic import BaseModel, Field
-from langchain_core.runnables import (
-    ConfigurableFieldSpec
-)
+from pydantic import BaseModel, Field, SecretStr
 
 ### File management ###
 from tempfile import TemporaryDirectory
@@ -30,11 +34,11 @@ read_tool, write_tool, list_tool = tools
 
 ### Multiprocessing ###
 import concurrent.futures
-from .executor_toxpipe import RetryAgentExecutor
 import concurrent.futures
 from .multi import *
 
 import os
+import uuid
 
 ### Load environment variables ###
 from dotenv import load_dotenv
@@ -43,6 +47,12 @@ load_dotenv('./.env')
 #from .prompts_chem import FORMAT_INSTRUCTIONS, QUESTION_PROMPT, REPHRASE_TEMPLATE, SUFFIX, 
 from .prompts_chem import PROMPT
 from .tools import make_tools
+
+from typing import Sequence
+
+from langchain_core.messages import BaseMessage
+from langgraph.graph.message import add_messages
+from typing_extensions import Annotated, TypedDict
 
 class InMemoryHistory(BaseChatMessageHistory, BaseModel):
     """In memory implementation of chat message history."""
@@ -69,11 +79,71 @@ def _save_sslcontext(obj):
     return obj.__class__, (obj.protocol,)
 
 def _make_llm(model, api_version, temp):
+    # Change depending on model type
+    ANTHROPIC_MODELS = ['claude-3-5-sonnet', 'claude-3-sonnet', 'claude-3-haiku', 'claude-3-opus'] # haiku and opus work better
+    OLLAMA_MODELS = ['llama3-1-70b', 'llama3-1-8b', 'openbiollm-llama3-70b', 'llama2-13b'] # These have trouble with tools
+    OPENAI_MODELS = ['azure-gpt-4o', 'azure-gpt-3.5-turbo', 'azure-gpt-4o-mini', 'azure-gpt-3.5-turbo-16k', 'azure-gpt-4-turbo-20240409', 'azure-gpt-4'] # These all work pretty well
+    MISTRALAI_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', 'mixtral-8x7b-instruct'] # mistral-large-2 and mixtral-8x7b-instruct has issues accessing tools
+    GOOGLE_MODELS = ['gemini-1.5-pro'] # TODO - VertexAIException BadRequestError - "Unable to submit request because one or more function parameters didn\'t specify the schema type field. Learn more: https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling
+    AMAZON_MODELS = ['amazon-titan-text-premier']
+    COHERE_MODELS = ['cohere-command-r-plus']
+
+    # Recommended: 'azure-gpt-4o', 'azure-gpt-3.5-turbo', 'azure-gpt-4o-mini', 'azure-gpt-3.5-turbo-16k', 'azure-gpt-4-turbo-20240409', 'azure-gpt-4', 'claude-3-haiku', 'claude-3-opus', 'mistral-large', 'mistral-7b-instruct', 'amazon-titan-text-premier', 'cohere-command-r-plus'
+
+
     llm = ChatOpenAI(
         temperature=temp,
         model_name=model
     )
+
+    if model in ANTHROPIC_MODELS:
+        llm = ChatAnthropic(
+            temperature=temp,
+            model_name=model
+        )
+    elif model in OLLAMA_MODELS:
+        """llm = ChatOllama(
+            temperature=temp,
+            model=model,
+            base_url=os.environ.get('OLLAMA_HOST')
+        )"""
+        llm = ChatOpenAI(
+            temperature=temp,
+            model_name=model
+        )
+    elif model in OPENAI_MODELS:
+        llm = ChatOpenAI(
+            temperature=temp,
+            model_name=model
+        )
+    elif model in MISTRALAI_MODELS:
+        """
+        llm = ChatMistralAI(
+            temperature=temp,
+            model=model,
+            endpoint=os.environ.get('OPENAI_BASE_URL'),
+            mistral_api_key=SecretStr(os.environ.get('OPENAI_API_KEY'))
+        )
+        """
+        llm = ChatOpenAI(
+            temperature=temp,
+            model_name=model
+        )
+    elif model in GOOGLE_MODELS:
+        """llm = ChatGoogleGenerativeAI(
+            temperature=temp,
+            model=model,
+            client_options={'api_endpoint': f"{os.environ.get('GOOGLE_BASE_URL')}",}
+        )"""
+        llm = ChatOpenAI(
+            temperature=temp,
+            model_name=model
+        )
+
     return llm
+
+class State(TypedDict):
+    messages: Annotated[Sequence[BaseMessage], add_messages]
 
 class ToxPipeAgent:
     """
@@ -81,6 +151,7 @@ class ToxPipeAgent:
     """
     def __init__(
         self,
+        name,
         model,
         api_version=os.environ.get("OPENAI_API_VERSION"),
         temp=0.0, # higher temperature creates more answer variance, but this is potentially better if we are doing a multi-agent approach
@@ -97,71 +168,37 @@ class ToxPipeAgent:
         self.n_agents = n_agents
         self.summarize = summarize
 
-        cza_agent = create_react_agent(
-            self.llm,
-            self.tools,
-            prompt=PROMPT
-        )
+        memory = MemorySaver() # Initialize per-thread message persistence
+        self.thread_id = name
 
+        # Initialize agent to add tools to model
+        agent_executor = create_react_agent(self.llm, self.tools, state_modifier=PROMPT, checkpointer=memory) # state_modifier=PROMPT adds the prompt instructions to the agent
+        self.agent_with_chat_history = agent_executor
 
-        # Initialize agents
-        self.agent_executor_chem = RetryAgentExecutor.from_agent_and_tools(
-            agent=cza_agent,
-            tools=self.tools,
-            verbose=verbose,
-            max_iterations=max_iterations,
-        )
+        self.config = {"configurable": {"thread_id": self.thread_id}}
+        
 
-        # Wrap previously-defined agent(s) with a way to track message history
-        self.agent_with_chat_history = RunnableWithMessageHistory(
-            self.agent_executor_chem,
-            get_session_history=get_session_history,
-            input_messages_key="input",
-            history_messages_key="history",
-            history_factory_config=[
-                ConfigurableFieldSpec(
-                    id="user_id",
-                    annotation=str,
-                    name="User ID",
-                    description="Unique identifier for the user.",
-                    default="",
-                    is_shared=True,
-                ),
-                ConfigurableFieldSpec(
-                    id="conversation_id",
-                    annotation=str,
-                    name="Conversation ID",
-                    description="Unique identifier for the conversation.",
-                    default="",
-                    is_shared=True,
-                ),
-            ],
-        )
-
-    def run(self, prompt):
+    def run(self, input):
         n_agents = self.n_agents
         proc = []
         res = []
         with concurrent.futures.ThreadPoolExecutor(max_workers=n_agents) as executor:
             for i in range(0, n_agents):
-                print("====here1=====")
-                proc.append(executor.submit(run_parallel, self, prompt, i))
-                print("====here2=====")
+                proc.append(executor.submit(run_parallel, self, input, i))
         i = 0    
         for future in concurrent.futures.as_completed(proc):
-            #res.append(f"{i}) {future.result()}")
-            res.append(f"{future.result()}")
+            fr = f"{future.result()}"
+            res.append(fr)
             i += 1
-        #res = "\n".join(res)
         res = "\n\n".join(res)
 
         if self.summarize == False and n_agents == 1:
             return res
 
         summary_prompt_template = """
-        Previously, {n_agents} separate LLM agents were run to answer the following prompt from an end user:
+        Previously, {n_agents} separate LLM agents were run to answer the following input from an end user:
 
-        {prompt}
+        {input}
 
         The following are the raw results from each agent:
 
@@ -169,7 +206,7 @@ class ToxPipeAgent:
 
         Using these responses, reformat the responses into a single response to be returned to the end user.
         IMPORTANT: you MUST follow the following steps when formulating your final response:
-            1. This summary should contain the most relevant information from the raw results that answers the original prompt. Try to only include information that is relevant to the original prompt and avoid including any irrelevant information.
+            1. This summary should contain the most relevant information from the raw results that answers the original input. Try to only include information that is relevant to the original input and avoid including any irrelevant information.
             2. If there are any discrepancies between the raw results, try to resolve them in the summary.
             3. If there are any contradictions between the raw results, try to explain why these contradictions exist and what the implications are for the end user.
             4. If there are any uncertainties in the raw results, try to explain why these uncertainties exist and what the implications are for the end user.
@@ -186,6 +223,6 @@ class ToxPipeAgent:
         """
         summary_prompt = ChatPromptTemplate.from_template(summary_prompt_template)
         summary_chain = summary_prompt | self.llm
-        summary = summary_chain.invoke({"n_agents": n_agents, "prompt": prompt, "res": res})
+        summary = summary_chain.invoke({"n_agents": n_agents, "input": input, "res": res})
 
         return summary.content

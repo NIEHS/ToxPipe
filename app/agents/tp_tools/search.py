@@ -52,10 +52,12 @@ def paper_scraper(search: str, pdir: str = "query") -> dict:
         
         query = [[search]]
         uid = uuid.uuid4()
-        os.mkdir(os.environ.get('PAPERSCRAPER_DIR'))
+        if os.path.isdir(os.environ.get('PAPERSCRAPER_DIR')) == False:
+            os.mkdir(os.environ.get('PAPERSCRAPER_DIR'))
         outpath = f"{os.environ.get('PAPERSCRAPER_DIR')}/pubmed_scraped_{uid}.jsonl"
         paperpath = f"{os.environ.get('PAPERSCRAPER_DIR')}/{uid}/"
-        os.mkdir(paperpath)
+        if os.path.isdir(paperpath) == False:
+            os.mkdir(paperpath)
         get_and_dump_pubmed_papers(query, output_filepath=outpath, start_date="2014/01/01")
         #get_and_dump_pubmed_papers(query, output_filepath=outpath)
 

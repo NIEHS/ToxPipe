@@ -1,7 +1,8 @@
-def run_parallel(self=None, prompt="", user_id=""):
-    outputs = self.agent_with_chat_history.invoke({"input": prompt},  config={"configurable": {"conversation_id": f"{user_id}", "user_id": f"{user_id}"}},)
+from langchain_core.messages import HumanMessage
 
-    #print("===OUTPUTS===")
-    #print(outputs)
-
-    return([outputs["output"]])
+def run_parallel(self=None, input="", user_id=""):
+    chain = self.agent_with_chat_history
+    outputs = chain.invoke({"messages": [HumanMessage(content=input)]}, self.config,)
+    outputs = outputs["messages"][-1].content # Just get last message in the chain - this is the LLM's final answer
+    outputs = outputs.replace("Final Answer: ", "") # Strip "Final Answer: " if it appears in the final response
+    return(outputs)

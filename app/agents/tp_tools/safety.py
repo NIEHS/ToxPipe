@@ -219,11 +219,11 @@ class MoleculeSafety:
             if self._num_tokens(str(info)) > approx_length:
                 trunc_info = str(info)[:approx_length]
                 llm_output.append(
-                    llm_chain_short = chain.invoke({"data": str(trunc_info), "approx_length": approx_length})
+                    chain.invoke({"data": str(trunc_info), "approx_length": approx_length})
                 )
             else:
                 llm_output.append(
-                    llm_chain_short = chain.invoke({"data": str(info), "approx_length": approx_length})
+                    chain.invoke({"data": str(info), "approx_length": approx_length})
                 )
         return llm_output
 
@@ -259,7 +259,7 @@ class SafetySummary(BaseTool):
 
         data = self.mol_safety.get_safety_summary(cas)
         #return self.llm_chain.run(" ".join(data))
-        return self.llm_chain.invoke(" ".join(data))
+        return self.llm_chain.invoke(" ".join(str(data)))
 
     async def _arun(self, cas_number):
         raise NotImplementedError("Async not implemented.")
@@ -388,8 +388,8 @@ class ControlChemCheck(BaseTool):
         raise NotImplementedError()
 
 
-class Query2SMILES(BaseTool):
-    name: str = "Name2SMILES"
+class _Name2SMILES(BaseTool):
+    name: str = "_Name2SMILES"
     description: str = "Input a molecule name, returns SMILES."
     url: str = None
     #ControlChemCheck = ControlChemCheck()
@@ -404,6 +404,12 @@ class Query2SMILES(BaseTool):
     def _run(self, query: str) -> str:
         """This function queries the given molecule name and returns a SMILES string from the record"""
         """Useful to get the SMILES string of one molecule by searching the name of a molecule. Only query with one specific name."""
+
+        print("=======query")
+        print(query)
+        print("========url")
+        print(self.url)
+
         smi = query2smiles(query, self.url)
         # check if smiles is controlled
         msg = "Note: " + self.ControlChemCheck._run(smi)
