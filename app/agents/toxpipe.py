@@ -168,6 +168,8 @@ class ToxPipeAgent:
         self.n_agents = n_agents
         self.summarize = summarize
 
+        self.max_iterations = max_iterations
+
         memory = MemorySaver() # Initialize per-thread message persistence
         self.thread_id = name
 
@@ -175,7 +177,7 @@ class ToxPipeAgent:
         agent_executor = create_react_agent(self.llm, self.tools, state_modifier=PROMPT, checkpointer=memory) # state_modifier=PROMPT adds the prompt instructions to the agent
         self.agent_with_chat_history = agent_executor
 
-        self.config = {"configurable": {"thread_id": self.thread_id}}
+        self.config = {"configurable": {"thread_id": self.thread_id}, "recursion_limit": self.max_iterations}
         
 
     def run(self, input):
