@@ -542,7 +542,7 @@ def format_admet(llm, response):
     res = chain.invoke({"response": response})
     return res
 
-class QueryCBTADMET(BaseTool):
+class QueryCBTADMET(BaseTool): # proprietary
     name: str = "QueryCBTADMET"
     description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with predicted ADMET QSAR models from the ChemBioTox database. This can be helpful for understanding the absorption, distribution, metabolism, excretion, pathways, transportation, and toxicity of a chemical."
 
