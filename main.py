@@ -20,10 +20,6 @@ async def create(request: Request, model: str = "azure-gpt-4o", temp: float = 0,
 
 @app.get("/agent/query/")
 async def query(request: Request, agentid: uuid.UUID, q: str):    
-
-    print("===AGENT_DICT===")
-    print(AGENT_DICT)
-
     if agentid not in AGENT_DICT:
         return {"response": f"Error: agent {agentid} not found. Did you initialize the agent?"}
     tpa = AGENT_DICT[agentid]
