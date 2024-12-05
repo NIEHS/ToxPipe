@@ -11,11 +11,11 @@ app = FastAPI()
 AGENT_DICT = {}
 
 @app.get("/agent/create/")
-async def create(request: Request, model: str = "azure-gpt-4o", temp: float = 0, max_iterations: int = 10, n_threads: int = 1, summarize: bool = False):
+async def create(request: Request, model: str = "azure-gpt-4o", temp: float = 0, max_iterations: int = 10, step_timeout: float = 0, n_threads: int = 1, summarize: bool = False):
     agent_name = uuid.uuid4()
-    tpa = tp.ToxPipeAgent(name=agent_name, model=model, temp=temp, max_iterations=max_iterations, n_agents=n_threads, summarize=summarize, verbose=True, auth=False)
+    tpa = tp.ToxPipeAgent(name=agent_name, model=model, temp=temp, max_iterations=max_iterations, step_timeout=step_timeout, n_agents=n_threads, summarize=summarize, verbose=True, auth=False)
     AGENT_DICT[agent_name] = tpa
-    return {"agentid": agent_name, "model": model, "temp": temp, "max_iterations": max_iterations, "n_threads":n_threads, "summarize":summarize, "date_created":datetime.datetime.now()}
+    return {"agentid": agent_name, "model": model, "temp": temp, "max_iterations": max_iterations, "step_timeout":step_timeout, "n_threads":n_threads, "summarize":summarize, "date_created":datetime.datetime.now()}
 
 
 @app.get("/agent/query/")

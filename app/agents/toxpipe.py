@@ -1,24 +1,16 @@
-from dotenv import load_dotenv
-from typing import List
-
-#from langchain.agents import AgentExecutor, create_react_agent
-from langgraph.checkpoint.memory import MemorySaver
+# LangChain/Graph agent creation
 from langgraph.prebuilt import create_react_agent
-
 from langchain_core.prompts import ChatPromptTemplate
-
-from langchain_openai import ChatOpenAI, AzureChatOpenAI
+from langgraph.graph.message import add_messages
+# Model interface
+from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
-from langchain_ollama.chat_models import ChatOllama
-from langchain_mistralai.chat_models import ChatMistralAI
-from langchain_google_genai.chat_models import ChatGoogleGenerativeAI
-
-from langchain_core.chat_history import BaseChatMessageHistory, BaseMessage
+# Memory & Cache
+from langchain_core.messages import BaseMessage
+from langgraph.checkpoint.memory import MemorySaver
 from langchain.globals import set_llm_cache
 from langchain_community.cache import SQLiteCache
-from pydantic import BaseModel, Field, SecretStr
-
-### File management ###
+# File management & Tools
 from tempfile import TemporaryDirectory
 from langchain_community.agent_toolkits import FileManagementToolkit
 # Create temporary working directory
@@ -31,52 +23,19 @@ tools = FileManagementToolkit(
     selected_tools=["read_file", "write_file", "list_directory"],
 ).get_tools()
 read_tool, write_tool, list_tool = tools
-
-### Multiprocessing ###
-import concurrent.futures
+from .tools import make_tools
+# Multiprocessing
 import concurrent.futures
 from .multi import *
-
-import os
-import uuid
-
-### Load environment variables ###
+# Load environment variables
 from dotenv import load_dotenv
 load_dotenv('./.env')
-
-#from .prompts_chem import FORMAT_INSTRUCTIONS, QUESTION_PROMPT, REPHRASE_TEMPLATE, SUFFIX, 
+# Prompts
 from .prompts_chem import PROMPT
-from .tools import make_tools
-
+# Other
 from typing import Sequence
-
-from langchain_core.messages import BaseMessage
-from langgraph.graph.message import add_messages
 from typing_extensions import Annotated, TypedDict
-
-class InMemoryHistory(BaseChatMessageHistory, BaseModel):
-    """In memory implementation of chat message history."""
-
-    messages: List[BaseMessage] = Field(default_factory=list)
-
-    def add_messages(self, messages: List[BaseMessage]) -> None:
-        """Add a list of messages to the store"""
-        self.messages.extend(messages)
-
-    def clear(self) -> None:
-        self.messages = []
-
-# Chat history
-store = {}
-def get_session_history(
-    user_id: str, conversation_id: str
-) -> BaseChatMessageHistory:
-    if (user_id, conversation_id) not in store:
-        store[(user_id, conversation_id)] = InMemoryHistory()
-    return store[(user_id, conversation_id)]
-
-def _save_sslcontext(obj):
-    return obj.__class__, (obj.protocol,)
+import os
 
 def _make_llm(model, api_version, temp):
     # Change depending on model type
@@ -90,7 +49,7 @@ def _make_llm(model, api_version, temp):
 
     # Recommended: 'azure-gpt-4o', 'azure-gpt-3.5-turbo', 'azure-gpt-4o-mini', 'azure-gpt-3.5-turbo-16k', 'azure-gpt-4-turbo-20240409', 'azure-gpt-4', 'claude-3-haiku', 'claude-3-opus', 'mistral-large', 'mistral-7b-instruct', 'amazon-titan-text-premier', 'cohere-command-r-plus'
 
-
+    # Default - just use OpenAI API
     llm = ChatOpenAI(
         temperature=temp,
         model_name=model
@@ -102,11 +61,6 @@ def _make_llm(model, api_version, temp):
             model_name=model
         )
     elif model in OLLAMA_MODELS:
-        """llm = ChatOllama(
-            temperature=temp,
-            model=model,
-            base_url=os.environ.get('OLLAMA_HOST')
-        )"""
         llm = ChatOpenAI(
             temperature=temp,
             model_name=model
@@ -117,24 +71,11 @@ def _make_llm(model, api_version, temp):
             model_name=model
         )
     elif model in MISTRALAI_MODELS:
-        """
-        llm = ChatMistralAI(
-            temperature=temp,
-            model=model,
-            endpoint=os.environ.get('OPENAI_BASE_URL'),
-            mistral_api_key=SecretStr(os.environ.get('OPENAI_API_KEY'))
-        )
-        """
         llm = ChatOpenAI(
             temperature=temp,
             model_name=model
         )
     elif model in GOOGLE_MODELS:
-        """llm = ChatGoogleGenerativeAI(
-            temperature=temp,
-            model=model,
-            client_options={'api_endpoint': f"{os.environ.get('GOOGLE_BASE_URL')}",}
-        )"""
         llm = ChatOpenAI(
             temperature=temp,
             model_name=model
@@ -155,7 +96,8 @@ class ToxPipeAgent:
         model,
         api_version=os.environ.get("OPENAI_API_VERSION"),
         temp=0.0, # higher temperature creates more answer variance, but this is potentially better if we are doing a multi-agent approach
-        max_iterations=10,
+        max_iterations=10, # maximum number of agent recursions in chain
+        step_timeout=0, # maximum time in seconds to take per recursion
         n_agents=1, # number of parallel agents to run - set to 1 for no parallelism. Higher values better for more complicated queries to help reduce variance
         summarize=False, # if True, will summarize output. Ignored and always treated as True if n_agents > 1.
         verbose=False,
@@ -175,6 +117,8 @@ class ToxPipeAgent:
 
         # Initialize agent to add tools to model
         agent_executor = create_react_agent(self.llm, self.tools, state_modifier=PROMPT, checkpointer=memory) # state_modifier=PROMPT adds the prompt instructions to the agent
+        if step_timeout > 0:
+            agent_executor.step_timeout = step_timeout
         self.agent_with_chat_history = agent_executor
 
         self.config = {"configurable": {"thread_id": self.thread_id}, "recursion_limit": self.max_iterations}
