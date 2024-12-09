@@ -30,7 +30,10 @@ class Query2DTXSID(BaseTool):
     def _run(self, name: str) -> str:
         """Input a chemical name, return its DSSTox substance ID (DTXSID) available in ChemBioTox."""
         name = name.rstrip()
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/name2dtxsid?name={name}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/name2dtxsid?name={name}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -51,7 +54,10 @@ class Name2DTXSID(BaseTool):
     def _run(self, name: str) -> str:
         """Input a chemical name, return its DSSTox substance ID (DTXSID) available in ChemBioTox."""
         name = name.rstrip()
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/name2dtxsid?name={name}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/name2dtxsid?name={name}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -72,7 +78,10 @@ class Name2SMILES(BaseTool):
     def _run(self, name: str) -> str:
         """Input a chemical name, return its corresponding SMILES string available in ChemBioTox."""
         name = name.rstrip()
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/name2dtxsid?name={name}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/name2dtxsid?name={name}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
 
         if len(res) < 1:
@@ -80,7 +89,10 @@ class Name2SMILES(BaseTool):
             return(response)
 
         dtxsid = res[0]["dsstox_substance_id"]
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/dtxsid2smiles?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/dtxsid2smiles?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
 
         if len(res) < 1:
@@ -106,7 +118,10 @@ class SMILES2DTXSID(BaseTool):
     def _run(self, name: str) -> str:
         """Input a SMILES string, return its DSSTox substance ID (DTXSID) if available in ChemBioTox."""
         name = name.rstrip()
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/smiles2dtxsid?smiles={urllib.parse.quote_plus(name)}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/smiles2dtxsid?smiles={urllib.parse.quote_plus(name)}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -133,7 +148,10 @@ class StructuralSimilarity(BaseTool):
     def _run(self, smiles: str) -> str:
         """Input a SMILES string, return its DSSTox substance ID (DTXSID) if available in ChemBioTox."""
         smiles = smiles.rstrip()
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/similarity/structural?smiles={urllib.parse.quote_plus(smiles)}&fp=morgan")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/similarity/structural?smiles={urllib.parse.quote_plus(smiles)}&fp=morgan",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -197,7 +215,10 @@ class QueryCBTFooDB(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/foodb?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/foodb?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -249,7 +270,10 @@ class QueryCBTCPD(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/cpdat?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/cpdat?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -286,7 +310,10 @@ class QueryCBTChemicalVendors(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/vendors?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/vendors?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -321,7 +348,10 @@ class QueryCBTTox21Models(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/models/tox21?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/models/tox21?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
 
         res = res.json()
         if len(res) < 1:
@@ -359,7 +389,10 @@ class QueryCBTGRAS(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/gras?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/gras?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -393,7 +426,10 @@ class QueryCTDDiseases(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/diseases?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/diseases?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -440,7 +476,10 @@ class QueryCTDGenes(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/genes?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/genes?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -648,7 +687,10 @@ class QueryCBTSEEM3(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
 
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/seem3?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/seem3?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
 
         if len(res) < 1:
@@ -688,7 +730,10 @@ class QueryCBTDrugBankTransporters(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
 
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/drugbank?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/drugbank?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
 
         res = res.json()
 
@@ -731,7 +776,10 @@ class QueryCBTAlerts(BaseTool):
     def _run(self, smiles: str) -> str:
         """Input SMILES, return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         smiles = re.sub(r'\s+', '', smiles)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/alerts?smiles={urllib.parse.quote_plus(smiles)}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/alerts?smiles={urllib.parse.quote_plus(smiles)}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -789,7 +837,10 @@ class QueryCBTAlertsMulti(BaseTool):
         response_list = []
         smiles = re.sub(r'\s+', '', smiles)
         for metabolite in smiles.split(';'):
-            res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/alerts?smiles={urllib.parse.quote_plus(metabolite)}")
+            res = requests.get(
+                f"{os.environ.get('CBT_API_ENDPOINT')}/alerts?smiles={urllib.parse.quote_plus(metabolite)}",
+                headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            )
             res = res.json()
             if len(res) < 1:
                 return(f"There was a problem completing the request.")
@@ -863,7 +914,10 @@ class QueryCBTVendors(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/availability/vendors?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/availability/vendors?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -900,7 +954,10 @@ class QueryCBTInVitroDB(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/invitrodb?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/invitrodb?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -940,7 +997,10 @@ class QueryCTDBP(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/bp?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/bp?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -976,7 +1036,10 @@ class QueryCTDCC(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/cc?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/cc?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -1010,7 +1073,10 @@ class QueryCTDMF(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/mf?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/mf?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -1046,7 +1112,10 @@ class QueryPubChemBioassays(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/pubchem/bioassays?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/pubchem/bioassays?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -1087,7 +1156,10 @@ class QueryPubChemProperties(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/pubchem/properties?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/pubchem/properties?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -1120,7 +1192,10 @@ class QueryEPAProperties(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/epa/properties?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/epa/properties?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -1155,7 +1230,10 @@ class QueryCPD(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/cpdat?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/cpdat?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -1194,7 +1272,10 @@ class QueryFooDBEnzymes(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/foodb/enzymes?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/foodb/enzymes?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -1228,7 +1309,10 @@ class QueryFooDBFlavors(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/foodb/flavors?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/foodb/flavors?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -1262,7 +1346,10 @@ class QueryFooDBContent(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/foodb/content?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/foodb/content?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -1297,7 +1384,10 @@ class QueryFooDBEffects(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/foodb/effects?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/foodb/effects?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -1334,7 +1424,10 @@ class QueryDrugBankCarriers(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/drugbank/carriers?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/drugbank/carriers?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -1369,7 +1462,10 @@ class QueryDrugBankEnzymes(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/drugbank/enzymes?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/drugbank/enzymes?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -1403,7 +1499,10 @@ class QueryDrugBankTargets(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/drugbank/targets?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/drugbank/targets?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -1437,7 +1536,10 @@ class QueryDrugBankTransporters(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/drugbank/transporters?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/drugbank/transporters?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -1473,7 +1575,10 @@ class QueryHMDBBS(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/locations/biospecimen?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/locations/biospecimen?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
 
         if len(res) < 1:
@@ -1508,7 +1613,10 @@ class QueryHMDBC(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/locations/cell?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/locations/cell?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -1542,7 +1650,10 @@ class QueryHMDBT(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/locations/tissue?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/locations/tissue?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -1576,7 +1687,10 @@ class QueryHMDBDiseases(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/diseases?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/diseases?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
 
         res = res.json()
         if len(res) < 1:
@@ -1611,7 +1725,10 @@ class QuerySuperfund(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/superfund?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/superfund?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
 
         if len(res) < 1:
@@ -1650,7 +1767,10 @@ class QueryT3DB(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/t3db?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/t3db?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
 
         if len(res) < 1:
@@ -1685,7 +1805,10 @@ class QueryToxRefDBNonNP(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/toxrefdb/neoplasticity?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/toxrefdb/neoplasticity?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
 
         if len(res) < 1:
@@ -1720,7 +1843,10 @@ class QueryToxRefDBNP(BaseTool):
     def _run(self, dtxsid: str) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(f"{os.environ.get('CBT_API_ENDPOINT')}/toxrefdb/neoplasticity?dtxsid={dtxsid}")
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/toxrefdb/neoplasticity?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
         res = res.json()
 
         if len(res) < 1:
