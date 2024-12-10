@@ -112,12 +112,26 @@ Our evaluation framework consisted of three distinct levels designed to assess m
 
 ## Implementation Stack 
 
-The details of what’s included ... all the acronyms... 
+The primary user interface for ToxPipe is presented in the form of a Dashy dashboard. This dashboard showcases the primary applications available within the ToxPipe platform. Dashy also offers additional functionality, including uptime indicators, end-user customization options, and administrative views. As the gateway to the rest of the application stack, the Dashy management homepage makes it easy for users to view relevant information quickly and efficiently.
 
-A web interface was implemented using Librechat (Avila, 2024). 
+To facilitate more direct interactions with Large Language Models (LLMs), ToxPipe incorporates LibreChat as a web-based chat interface (Avila, 2024). LibreChat is modeled after the familiar OpenAI ChatGPT interface but is released under an MIT open-source license, making it freely available for use and modification. LibreChat includes most features available in the ChatGPT interface while adding some of its own unique capabilities. These additional features make it particularly easy to deploy and share AI agents and assistants within the ToxPipe ecosystem.
 
-The agentic API can be accessed after deployment.
+Many LLM providers have their own API schemas with slight differences, which can create complexity in integration and management. To address this issue, ToxPipe integrates LiteLLM as an LLM proxy to reduce complexity within the ecosystem. Instead of integrating all the model providers independently, all LLM calls are written against the Azure OpenAI API and routed through LiteLLM. This approach simplifies developer onboarding for novel use cases and provides administrators with fine-tuned controls on model usage and budgeting. By standardizing the API interface, LiteLLM allows for greater flexibility in model selection and easier management of multiple LLM providers.
 
+Langfuse is incorporated into ToxPipe as an LLM logging, monitoring, and debugging platform. With Langfuse, developers can get a comprehensive overview of LLM output for their own projects. They can follow traces for individual conversations or workflows, as well as analyze token usage, latency, and other metrics that are crucial in LLM-based development. This level of insight allows for better optimization of LLM interactions and helps in identifying and resolving issues quickly.
+
+Evaluations of LLM performance and output quality within ToxPipe were completed using promptfoo. This tool allows for systematic testing and comparison of different prompts and model configurations, ensuring that the LLMs are performing as expected and delivering high-quality results across various use cases.
+
+To enhance flexibility and performance, locally hosted models were deployed using Ollama and routed through LiteLLM. This setup allows ToxPipe to leverage the benefits of on-premises models while maintaining a consistent interface for developers and users. Ollama simplifies the deployment and management of local models, while LiteLLM ensures seamless integration with the broader ToxPipe ecosystem.
+For data storage and retrieval, ToxPipe utilizes a combination of vector databases and traditional relational databases. Weaviate serves as the primary vector database, enabling efficient storage and retrieval of high-dimensional embeddings generated from toxicological data and documents. This allows for semantic search capabilities, enhancing the system's ability to find relevant information quickly. PostgreSQL is employed as the relational database, storing structured data such as chemical properties, experimental results, and metadata.
+
+To facilitate data integration and API management, ToxPipe incorporates NocoDB, a no-code platform that provides a user-friendly interface for database management and API creation. This allows for easy creation of custom tables, views, and APIs without extensive coding, enhancing the flexibility and extensibility of the ToxPipe ecosystem.
+
+For workflow automation and integration of various components, n8n is utilized. This powerful workflow automation tool enables the creation of complex, multi-step processes that can incorporate data from various sources, trigger actions based on specific events, and automate repetitive tasks within the ToxPipe environment.
+
+Some workflows within ToxPipe were implemented using Langflow, a visual LLM-based workflow manager. Langflow allows users to quickly prototype workflows ranging from simple, linear processes to complex, branching, multi-agent flows. These workflows can incorporate various components such as storage solutions, APIs, search engines, and more. The visual interface of Langflow makes it accessible to both technical and non-technical users, enabling rapid development and iteration of LLM-powered applications.
+
+The agentic API, which serves as a programmatic interface to ToxPipe's advanced AI capabilities, can be accessed after deployment. This API allows developers to integrate ToxPipe's functionalities into their own applications and services, extending the platform's capabilities beyond its native interface.
 
 ## Documentation
 

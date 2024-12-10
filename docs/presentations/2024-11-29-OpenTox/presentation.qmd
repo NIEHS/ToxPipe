@@ -1,0 +1,126 @@
+---
+title: "ToxPipe: Semi-autonomous AI integration of diverse toxicological data streams | Opportunities to use LLMs to support the DTT and NTP mission"
+author: "Trey Saddler"
+institute: "Predictive Toxicology Branch - Division of Translational Toxicology"
+title-slide-attributes:
+    # data-background-image: ""
+    data-background-size: contain
+    data-background-opacity: "0.75"
+format:
+  revealjs:
+    controls: true
+    controls-layout: bottom-right
+    fig-responsive: true
+    theme: ../../res/css/ntp-orig.scss
+    preview-links: auto
+    navigation-mode: vertical
+    progress: true
+    width: 1920
+    height: 1080
+    slideNumber: true
+    # All presentations have a “normal” size, that is, the resolution at which they are authored. This default “normal” size is 1050 x 700, which is used to match as nearly as possible the aspect ratio of most laptops.
+---
+
+# Agenda
+
+-   Intro
+-   The Current State of AI, Machine Learning, and Large Language Models in Science
+-   AI Basics
+-   ToxPipe
+-   Addressing Concerns: Security, Privacy, and Accuracy
+-   Future Plans for ToxPipe
+-   Conclusion
+
+::: notes
+Notes about the agenda.
+:::
+
+
+# Introduction to ToxPipe (15 minutes)
+
+-   The problem ToxPipe aims to solve in the context of GxE interactions and multi-omic integration
+-   How ToxPipe works: semi-autonomous AI agents and data-augmented prompt engineering
+-   Demonstration of ToxPipe in action: generating toxicological narratives and answering general toxicological questions by integrating various data sources, including PubMed, PubChem, EPA Comptox Dashboard, and other toxicological databases and data sets
+-   How ToxPipe can aid in understanding and predicting GxE interactions
+
+# Generative AI and production challenges
+
+-   Creating an app is easy
+-   Creating a production-ready app is hard
+-   \[Demonstrate the various frontend apps tried\]
+
+::: notes
+Notes go here.
+:::
+
+# DTT/NIEHS Use Cases
+
+-   Kamel/Dhruv's work
+
+# ChemBioTox
+
+-   Question answering - ChemBioTox
+    -   Comprehensive reports on Toxicity
+
+# DTT/NIEHS Use Cases
+-   Systematic Review
+-   Image Segmentation
+
+::: notes
+-   Notes go here.
+:::
+
+# Addressing Concerns: Security, Privacy, and Accuracy (10 minutes)
+
+-   Explanation of the security measures in place for ToxPipe
+-   How ToxPipe ensures user privacy
+-   The steps taken to ensure the accuracy of ToxPipe's outputs, especially in the context of GxE interactions and multi-omic data
+-   How ToxPipe handles errors and inaccuracies
+-   The role of human oversight in ToxPipe's operations
+-   "Here's what we have done to address these concerns with our implementation"
+
+::: notes
+-   Insert notes here
+:::
+
+
+
+# Future Plans for ToxPipe
+
+TODO
+
+::: notes
+-   Insert notes here
+:::
+
+# Incorporate additional Data Sources
+
+-   EPA Comptox Dashboard
+-   Tox21
+-   PubMed
+
+::: notes
+-   Insert notes here
+:::
+
+# Use Cases
+
+Here are some use cases
+
+::: notes
+As a brief introduction, I wanted to talk about some of the ways that we’ve been using AI and LLMs at NIEHS.
+Many people are familiar with coding assistants like GitHub Copilot. We have a small cohort of initial users testing out the capabilities of Copilot with favorable reviews.
+I’ve also been introducing developers to the Continue.dev Visual Studio Code plugin, which is an Apache 2.0 licensed coding assistant.
+Continue has features such as importing documentation from web pages, selective context injection, and use of local or custom LLM endpoints.
+
+:::
+
+# Conclusion
+
+- Recap of the key points from the presentation
+- The potential impact of ToxPipe on the field of environmental health sciences, particularly in understanding GxE interactions
+- Call to action: how the audience can get involved or support ToxPipe
+
+# Q&A Session
+
+- Open the floor for questions and discussion
