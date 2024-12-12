@@ -3,6 +3,7 @@ from datetime import datetime as dt
 from pathlib import Path
 import multiprocessing
 import langchain
+import requests 
 
 import paperscraper
 from paperscraper.pubmed import get_and_dump_pubmed_papers
@@ -46,10 +47,28 @@ from paperscraper.pdf import save_pdf_from_dump
 # Biopython entrez functionality
 #from Bio import Entrez
 
+def search_papers(search, limit, pdir, semantic_scholar_api_key=os.environ.get("SEMANTIC_SCHOLAR_API_KEY")):
+    try:
+        res = requests.get(
+            f"http://api.semanticscholar.org/graph/v1/paper/search?query={search}&limit={limit}",
+            headers={'x-api-key': semantic_scholar_api_key}
+        )
+        res = res.json()
+
+        print("===RES===")
+        print(res)
+        exit()
+
+    except Exception:
+        return {}
+
 def paper_scraper(search: str, pdir: str = "query") -> dict:
     try:
         #return paperscraper.search_papers(search, limit=N_PAPERS, pdir=pdir, batch_size=4, semantic_scholar_api_key=os.environ.get("SEMANTIC_SCHOLAR_API_KEY"))
+        #return search_papers(search, limit=N_PAPERS, pdir=pdir, semantic_scholar_api_key=os.environ.get("SEMANTIC_SCHOLAR_API_KEY"))
         
+        print("!!! SCRAPING !!!")
+
         query = [[search]]
         uid = uuid.uuid4()
         if os.path.isdir(os.environ.get('PAPERSCRAPER_DIR')) == False:
