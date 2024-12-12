@@ -8,7 +8,24 @@ from langchain.tools.render import render_text_description
 import json
 import datetime
 import uuid
-app = FastAPI()
+
+tags_metadata = [
+    {
+        "name": "agent",
+        "description": "Endpoints for creating and query agents.",
+    },
+    {
+        "name": "models",
+        "description": "Endpoints for viewing supported models and tools available to them.",
+    },
+]
+
+app = FastAPI(
+    title="ToxPipe Agentic API",
+    description="An API for creating custom LLM agents for performing chat completions with specialized tool access. Part of the ToxPipe ecosystem.",
+    version="0.0.1",
+    openapi_tags=tags_metadata,
+)
 
 AGENT_DICT = {}
 ANTHROPIC_MODELS = ['claude-3-5-sonnet', 'claude-3-sonnet', 'claude-3-haiku', 'claude-3-opus'] # haiku and opus work better
@@ -22,8 +39,8 @@ COHERE_MODELS = ['cohere-command-r-plus']
 # Must be False for public API, True for Private API. When in doubt, set to False.
 AUTH_MODE = False
 
-@app.get("/agent/create/")
-async def create(request: Request, response: Response, model: str = "azure-gpt-4o", temp: float = 0, max_iterations: int = 10, step_timeout: float = 0, n_threads: int = 1, summarize: bool = False):
+@app.get("/agent/create/", tags=["agent"])
+async def create_agent(request: Request, response: Response, model: str = "azure-gpt-4o", temp: float = 0, max_iterations: int = 10, step_timeout: float = 0, n_threads: int = 1, summarize: bool = False):
 
     # Input validation
     if model not in ANTHROPIC_MODELS and model not in OLLAMA_MODELS and model not in OPENAI_MODELS and model not in MISTRALAI_MODELS and model not in GOOGLE_MODELS and model not in AMAZON_MODELS and model not in COHERE_MODELS:
@@ -42,8 +59,8 @@ async def create(request: Request, response: Response, model: str = "azure-gpt-4
     return {"agentid": agent_name, "model": model, "temp": temp, "max_iterations": max_iterations, "step_timeout":step_timeout, "n_threads":n_threads, "summarize":summarize, "date_created":datetime.datetime.now()}
 
 
-@app.get("/agent/query/")
-async def query(request: Request, response: Response, agentid: uuid.UUID, q: str):    
+@app.get("/agent/query/", tags=["agent"])
+async def query_agent(request: Request, response: Response, agentid: uuid.UUID, q: str):    
     if agentid not in AGENT_DICT:
         response.status_code = 400
         return {"response": f"Error: agent {agentid} not found. Did you initialize the agent?"}
@@ -51,12 +68,12 @@ async def query(request: Request, response: Response, agentid: uuid.UUID, q: str
     res = tpa.run(q)
     return {"response": res}
 
-@app.get("/models")
-async def query(request: Request, response: Response):
+@app.get("/models", tags=["models"])
+async def view_supported_models(request: Request, response: Response):
     return {"ANTHROPIC_MODELS": ANTHROPIC_MODELS, "OLLAMA_MODELS": OLLAMA_MODELS, "OPENAI_MODELS": OPENAI_MODELS, "MISTRALAI_MODELS": MISTRALAI_MODELS, "GOOGLE_MODELS": GOOGLE_MODELS, "AMAZON_MODELS": AMAZON_MODELS, "COHERE_MODELS": COHERE_MODELS}
 
-@app.get("/models/tools")
-async def query(request: Request, response: Response):
+@app.get("/models/tools", tags=["models"])
+async def view_available_tools(request: Request, response: Response):
     tools = render_text_description(tl.make_tools(llm=None, auth=AUTH_MODE))
 
     tools = str(tools).split("\n")
