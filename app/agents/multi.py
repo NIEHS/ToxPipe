@@ -16,5 +16,8 @@ def run_parallel(self=None, input="", user_id=""):
         last = "Agent stopped due to a step timeout."
 
     outputs = last.replace("Final Answer: ", "") # Strip "Final Answer: " if it appears in the final response
+    outputs = outputs.replace("<result>", "").replace("</result>", "") # Strip <result> and </result> - this happens with Anthropic models
+    outputs = outputs.strip() # Strip leading & trailing whitespace from final answer
+    
 
     return(outputs)

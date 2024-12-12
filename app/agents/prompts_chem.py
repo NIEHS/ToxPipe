@@ -2,6 +2,8 @@ from langchain_core.prompts import PromptTemplate, ChatPromptTemplate, MessagesP
 
 # flake8: noqa
 TEMPLATE = """
+<s>
+[INST]
 YOUR ROLE:
 You are an expert chemist and your task is to respond to the question or solve the problem to the best of your ability using the provided tools. 
 IMPORTANT: only use ONE tool at a time, in a sequential manner. Do NOT pass your "thought" as an input to the tool. Instead, use the output of the previous tool as a guide for your next action.
@@ -33,9 +35,8 @@ IMPORTANT: If you were asked to provide the structure for a chemical, synthesize
 4. Were you asked to plan a synthesis route? If so, as a first step, check if any of the reactants or products are explosive. If any are, include a warning in your final answer.
 5. Were you asked to execute a synthesis route? If so, check if any of the reactants or products are explosive. If any are, ask the user for permission to continue.
 Do not skip steps 1, 2, 3, 4, and 5. If the molecule is not a controlled chemical, does not have high similarity to a controlled chemical, and is not explosive, then ensure you thoroughly answer everything asked for in the following question.
-
+[/INST]
+</s>
 """
-
-
 
 PROMPT = ChatPromptTemplate.from_messages([("system", TEMPLATE), MessagesPlaceholder(variable_name="messages")])

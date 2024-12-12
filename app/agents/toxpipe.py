@@ -1,9 +1,11 @@
 # LangChain/Graph agent creation
-from langgraph.prebuilt import create_react_agent
-from langchain_core.prompts import ChatPromptTemplate
+#from langgraph.prebuilt import create_react_agent
+from .toxpipe_agent_executor import create_react_agent
+from langchain_core.prompts import ChatPromptTemplate, PromptTemplate, MessagesPlaceholder
 from langgraph.graph.message import add_messages
+from langchain_core.output_parsers import JsonOutputParser
 # Model interface
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI, AzureChatOpenAI
 from langchain_anthropic import ChatAnthropic
 # Memory & Cache
 from langchain_core.messages import BaseMessage
@@ -31,56 +33,20 @@ from .multi import *
 from dotenv import load_dotenv
 load_dotenv('./.env')
 # Prompts
-from .prompts_chem import PROMPT
+from .prompts_chem import PROMPT, TEMPLATE
 # Other
 from typing import Sequence
 from typing_extensions import Annotated, TypedDict
 import os
 
+# Handle models that have issues reading tools via LangChain's tool API. We will have to add these manually as a prompt.
+BAD_TOOL_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', 'mixtral-8x7b-instruct']
+
 def _make_llm(model, api_version, temp):
-    # Change depending on model type
-    ANTHROPIC_MODELS = ['claude-3-5-sonnet', 'claude-3-sonnet', 'claude-3-haiku', 'claude-3-opus'] # haiku and opus work better
-    OLLAMA_MODELS = ['llama3-1-70b', 'llama3-1-8b', 'openbiollm-llama3-70b', 'llama2-13b'] # These have trouble with tools
-    OPENAI_MODELS = ['azure-gpt-4o', 'azure-gpt-3.5-turbo', 'azure-gpt-4o-mini', 'azure-gpt-3.5-turbo-16k', 'azure-gpt-4-turbo-20240409', 'azure-gpt-4'] # These all work pretty well
-    MISTRALAI_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', 'mixtral-8x7b-instruct'] # mistral-large-2 and mixtral-8x7b-instruct has issues accessing tools
-    GOOGLE_MODELS = ['gemini-1.5-pro'] # TODO - VertexAIException BadRequestError - "Unable to submit request because one or more function parameters didn\'t specify the schema type field. Learn more: https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling
-    AMAZON_MODELS = ['amazon-titan-text-premier']
-    COHERE_MODELS = ['cohere-command-r-plus']
-
-    # Recommended: 'azure-gpt-4o', 'azure-gpt-3.5-turbo', 'azure-gpt-4o-mini', 'azure-gpt-3.5-turbo-16k', 'azure-gpt-4-turbo-20240409', 'azure-gpt-4', 'claude-3-haiku', 'claude-3-opus', 'mistral-large', 'mistral-7b-instruct', 'amazon-titan-text-premier', 'cohere-command-r-plus'
-
-    # Default - just use OpenAI API
-    llm = ChatOpenAI(
+    llm = AzureChatOpenAI(
         temperature=temp,
         model_name=model
     )
-
-    if model in ANTHROPIC_MODELS:
-        llm = ChatAnthropic(
-            temperature=temp,
-            model_name=model
-        )
-    elif model in OLLAMA_MODELS:
-        llm = ChatOpenAI(
-            temperature=temp,
-            model_name=model
-        )
-    elif model in OPENAI_MODELS:
-        llm = ChatOpenAI(
-            temperature=temp,
-            model_name=model
-        )
-    elif model in MISTRALAI_MODELS:
-        llm = ChatOpenAI(
-            temperature=temp,
-            model_name=model
-        )
-    elif model in GOOGLE_MODELS:
-        llm = ChatOpenAI(
-            temperature=temp,
-            model_name=model
-        )
-
     return llm
 
 class State(TypedDict):
@@ -104,23 +70,26 @@ class ToxPipeAgent:
         auth=False
     ):
         self.llm = _make_llm(model, api_version, temp)
-        set_llm_cache(SQLiteCache(database_path=".langchain.db"))
-
+        set_llm_cache(SQLiteCache(database_path=".langchain.db")) # set cache to avoid making the same API calls over and over again
         self.tools = make_tools(self.llm, verbose=verbose, auth=auth)
         self.n_agents = n_agents
         self.summarize = summarize
-
         self.max_iterations = max_iterations
-
         memory = MemorySaver() # Initialize per-thread message persistence
         self.thread_id = name
 
+        manual_tool_support = []
+
+        # If we use a model that doesn't fully support tools, then we need to manually add the tools as part of the prompt
+        if model in BAD_TOOL_MODELS:
+            manual_tool_support = self.tools
+
         # Initialize agent to add tools to model
-        agent_executor = create_react_agent(self.llm, self.tools, state_modifier=PROMPT, checkpointer=memory) # state_modifier=PROMPT adds the prompt instructions to the agent
+        agent_executor = create_react_agent(self.llm, self.tools, state_modifier=PROMPT, checkpointer=memory, manual_tool_support=manual_tool_support, debug=verbose) # state_modifier=PROMPT adds the prompt instructions to the agent
         if step_timeout > 0:
             agent_executor.step_timeout = step_timeout
-        self.agent_with_chat_history = agent_executor
 
+        self.agent_with_chat_history = agent_executor
         self.config = {"configurable": {"thread_id": self.thread_id}, "recursion_limit": self.max_iterations}
         
 
