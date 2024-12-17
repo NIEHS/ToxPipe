@@ -1,0 +1,112 @@
+author:
+  - name: Trey Saddler
+    degrees:
+      - B.S.
+    orcid: 0000-0001-5154-1462
+    corresponding: false
+    email: trey.saddler@nih.gov
+    roles:
+      - Investigation
+      - Project administration
+      - Software
+      - Visualization
+    affiliations:
+      - ref: niehs-dtt-ptb
+
+  - name: Parker Combs
+    degrees:
+      - B.S.
+    orcid: 0000-0001-5684-7591
+    corresponding: false
+    email: parker.combs@nih.gov
+    roles: []
+    affiliations:
+      - ref: niehs-dtt-ptb
+
+  - name: Amlan Talukder
+    degrees:
+      - Ph.D.
+    orcid: 0000-0002-0001-0002
+    corresponding: false
+    email: amulan.talukder@nih.gov
+    roles:
+      - Methodology
+    affiliations:
+      - ref: niehs-ods
+
+  - name: Jonathan Fleming
+    degrees:
+      - Ph.D.
+    orcid: 0000-0001-0001-0001
+    corresponding: false
+    email: jonathan.fleming@nih.gov
+    roles:
+      - Methodology
+    affiliations:
+      - ref: niehs-dtt-ptb
+  
+  - name: Kirk Porter
+    # degrees:
+    #   - Ph.D.
+    orcid: 0000-0001-0001-0001
+    corresponding: false
+    email: kirk.porter@nih.gov
+    roles:
+      - Data Management
+    affiliations:
+      - ref: niehs-dtt-ptb
+
+  - name: Jeremy Erickson
+    degrees:
+      - Ph.D.
+    orcid: 0000-0001-0001-0001
+    corresponding: false
+    email: jeremy.erickson@nih.gov
+    roles:
+      - Methodology
+    affiliations:
+      - ref: niehs-dtt-ptb
+    
+  - name: Charles Schmitt
+    degrees:
+      - Ph.D.
+    orcid: 0000-0001-0001-0001
+    corresponding: false
+    email: charles.schmitt@nih.gov
+    roles:
+      - Methodology
+    affiliations:
+      - ref: niehs-ods
+
+  - name: David Reif
+    degrees:
+      - Ph.D.
+    orcid: 0000-0001-7815-6767
+    corresponding: false
+    email: david.reif@nih.gov
+    roles:
+       - Methodology
+    affiliations:
+      - ref: niehs-dtt-ptb
+
+  - name: Scott Auerbach
+    degrees:
+      - Ph.D.
+    # orcid: 0000-0002-0001-0002
+    corresponding: true
+    email: scott.auerbach@nih.gov
+    roles:
+      - Project administration
+    affiliations:
+      - ref: niehs-dtt-ptb
+
+affiliations:
+  - id: niehs-dtt-ptb
+    name: Division of Translational Toxicology, NIEHS
+    department: Predictive Toxicology Branch
+    group: Toxicoinformatics Group
+
+  - id: niehs-ods
+    name: National Institute of Environmental Health Sciences (NIEHS)
+    department: Office of Data Science
+    # group: Data Science

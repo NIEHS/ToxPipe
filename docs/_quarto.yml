@@ -3,6 +3,9 @@ project:
   render:
     - "*.qmd"
   output-dir: _site
+  preview:
+    port: 4200
+    browser: false
 
 execute:
   freeze: auto
