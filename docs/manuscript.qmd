@@ -34,7 +34,86 @@ The rapid pace of data generation in toxicology creates a need for real-time pro
 
 These challenges underscore the need for innovative approaches that can handle the volume, variety, and velocity of modern toxicological data. The following sections will explore how AI, particularly large language models and advanced data integration techniques, are being leveraged to address these challenges and revolutionize toxicological research and risk assessment.
 
+The application of AI in toxicology has rapidly evolved in recent years, moving beyond simple predictive models to more sophisticated, data-driven approaches. Machine learning algorithms, particularly deep learning models, have shown promise in various toxicological applications. For instance, convolutional neural networks have been used to predict chemical toxicity from molecular structures, while recurrent neural networks have been applied to analyze time-series toxicological data. These advancements have enabled more accurate predictions of toxicological endpoints and have improved our understanding of complex dose-response relationships.
 
+Large Language Models (LLMs) represent the latest frontier in AI applications for toxicology. These models, trained on vast amounts of text data, have demonstrated remarkable capabilities in natural language understanding and generation. In the context of toxicology, LLMs offer the potential to process and interpret unstructured text data from scientific literature, regulatory documents, and clinical reports, extracting valuable insights that might otherwise remain hidden in the vast sea of available information.
+
+Retrieval-Augmented Generation (RAG) is an innovative approach that combines the strengths of large language models with information retrieval systems. In the context of toxicology, RAG allows AI models to access and incorporate relevant information from extensive databases or document collections when generating responses or analyses. This approach addresses one of the key limitations of traditional LLMs: their reliance on pre-trained knowledge that may become outdated.
+
+RAG enables toxicologists to leverage the latest research findings, regulatory updates, and experimental data in real-time, enhancing the accuracy and relevance of AI-generated insights. For example, when queried about a specific chemical's toxicity profile, a RAG-enabled system can retrieve the most up-to-date information from toxicological databases, recent publications, and regulatory documents, synthesizing this information to provide a comprehensive and current assessment.
+
+Despite these advancements, current AI approaches in toxicology face several limitations:
+
+- Data quality and bias: AI models are only as good as the data they are trained on. Inconsistencies, gaps, or biases in toxicological datasets can lead to unreliable or skewed predictions.
+- Interpretability: Many advanced AI models, particularly deep learning models, operate as "black boxes," making it challenging to understand the reasoning behind their predictions. This lack of transparency can be problematic in regulatory and clinical settings where decision-making processes need to be clearly justified.
+- Domain specificity: General-purpose AI models often lack the specialized knowledge required for nuanced toxicological assessments. Adapting these models to the specific terminology, concepts, and reasoning patterns used in toxicology remains a challenge.
+- Integration of multi-modal data: While progress has been made, effectively integrating diverse data types (e.g., chemical structures, genomic data, and clinical outcomes) into a single AI framework remains challenging.
+- Handling of uncertainty: Toxicological assessments often involve significant uncertainties. Current AI models may struggle to accurately represent and communicate these uncertainties in their outputs.
+
+ToxPipe is an innovative AI-driven platform designed to address the current challenges and limitations in toxicological data analysis. At its core, ToxPipe leverages state-of-the-art LLMs, enhanced with domain-specific knowledge in toxicology. The platform's architecture is modular and scalable, allowing for easy integration of new data sources and analytical tools as they become available.
+
+Key components of ToxPipe include:
+
+- A natural language interface that allows toxicologists to query complex toxicological questions in plain language.
+- A sophisticated data integration layer that harmonizes information from diverse sources, including scientific literature, regulatory databases, and experimental results.
+- An AI-driven analysis engine that combines LLMs with specialized toxicological knowledge and reasoning capabilities.
+- A visualization module that presents results in an intuitive, interpretable format for researchers and decision-makers.
+
+ToxPipe's capabilities are built upon three key technological pillars:
+
+- Large Language Models (LLMs): ToxPipe utilizes advanced LLMs that have been fine-tuned on toxicological literature and data, enabling them to understand and generate domain-specific content with high accuracy.
+- Retrieval-Augmented Generation (RAG): By incorporating RAG, ToxPipe ensures that its analyses are always based on the most current and relevant information available. This feature allows the system to dynamically retrieve and incorporate new data as it becomes available, ensuring up-to-date and comprehensive toxicological assessments.
+- Agentic workflows: ToxPipe implements an innovative agentic approach, where the AI system can autonomously plan and execute multi-step analytical processes. This feature allows ToxPipe to break down complex toxicological queries into manageable sub-tasks, execute these tasks using the most appropriate tools and data sources, and synthesize the results into coherent, actionable insights.
+
+Recognizing the sensitive nature of much toxicological data, ToxPipe has been designed with robust privacy and security measures. The platform employs end-to-end encryption, granular access controls, and audit trails to ensure data integrity and confidentiality. Furthermore, ToxPipe can be deployed in on-premises environments, allowing organizations to maintain full control over their data while still leveraging the power of advanced AI analytics.
+
+The primary objective of this study is to rigorously assess ToxPipe's capabilities in integrating and interpreting diverse toxicological datasets. We aim to evaluate the platform's ability to:
+
+- Seamlessly combine information from multiple sources, including scientific literature, regulatory reports, and experimental data.
+- Accurately interpret complex toxicological concepts and relationships.
+- Generate coherent and relevant responses to a wide range of toxicology-related queries.
+
+To achieve this, we will subject ToxPipe to a series of increasingly complex tasks, ranging from basic information retrieval to advanced data synthesis and hypothesis generation.
+
+A crucial aspect of our evaluation is to benchmark ToxPipe's performance against both traditional computational methods and human expert assessments. This comparison will help us understand:
+
+- The efficiency gains offered by ToxPipe in terms of speed and scale of analysis.
+- The accuracy and reliability of ToxPipe's outputs compared to established methodologies.
+- The potential of ToxPipe to augment and enhance human expert analysis rather than replace it.
+
+We will employ a range of quantitative metrics, including precision, recall, and F1 scores, as well as qualitative assessments by toxicology experts to provide a comprehensive evaluation of ToxPipe's performance.
+
+To push the boundaries of what's possible with AI in toxicology, we will evaluate ToxPipe's performance on a set of challenging, open-ended toxicological problems. These will include:
+
+- Analyzing the potential toxicological implications of newly synthesized chemicals with limited available data.
+- Identifying potential interactions between multiple chemicals in complex mixtures.
+- Predicting long-term health effects based on short-term exposure data.
+- Synthesizing information across species and exposure routes to inform human health risk assessments.
+
+Through these assessments, we aim to understand both the current capabilities and the future potential of AI-driven systems like ToxPipe in advancing toxicological research and risk assessment.
+
+The development and validation of ToxPipe have far-reaching implications for the field of toxicology:
+
+- Accelerated research: By automating the integration and initial analysis of vast amounts of toxicological data, ToxPipe can significantly speed up the research process, allowing scientists to focus on hypothesis generation and testing.
+- Enhanced risk assessment: ToxPipe's ability to quickly synthesize information from diverse sources can lead to more comprehensive and timely risk assessments, potentially identifying hazards that might be missed by traditional approaches.
+- Improved reproducibility: The systematic, AI-driven approach of ToxPipe can help standardize data analysis procedures, potentially improving the reproducibility of toxicological studies.
+- Bridging data gaps: ToxPipe's advanced analytical capabilities may help researchers make more informed predictions about chemicals with limited toxicological data, supporting efforts to reduce animal testing.
+
+Beyond research, ToxPipe has the potential to impact regulatory processes and public health initiatives:
+
+- Regulatory efficiency: By rapidly processing and synthesizing large volumes of toxicological data, ToxPipe could help streamline regulatory review processes, potentially accelerating the assessment of new chemicals and pharmaceuticals.
+- Emergency response: In cases of chemical spills or exposures, ToxPipe could provide quick, comprehensive toxicological profiles to support rapid decision-making and intervention.
+- Environmental monitoring: ToxPipe could be used to continuously analyze emerging data on environmental contaminants, helping to identify potential threats to public health more quickly.
+- Consumer safety: By enhancing our ability to predict and understand chemical toxicity, ToxPipe could contribute to the development of safer consumer products and more effective risk communication strategies.
+
+Finally, this study contributes to the broader field of AI applications in scientific research:
+
+- Domain-specific AI: ToxPipe demonstrates the potential of highly specialized AI systems tailored to the unique needs and challenges of a scientific domain.
+- Interpretable AI: Through its use of natural language interfaces and explainable AI techniques, ToxPipe addresses the critical need for transparency and interpretability in AI-driven scientific analysis.
+- Human-AI collaboration: By design, ToxPipe aims to augment rather than replace human expertise, providing a model for effective human-AI collaboration in complex scientific domains.
+- Ethical AI in science: The development of ToxPipe, with its emphasis on data privacy and security, offers insights into the responsible deployment of AI in sensitive scientific and regulatory contexts.
+
+In conclusion, this study of ToxPipe not only promises to advance the field of toxicology but also provides valuable insights into the broader potential of AI to transform scientific research and decision-making processes. The following sections will detail our methodology, present our results, and discuss their implications for the future of toxicological research and risk assessment.
 
 ## Data & Methods {#sec-data-methods}
 
@@ -44,7 +123,9 @@ To ensure data privacy and enable customized model interactions, we developed a 
 
 Our evaluation framework consisted of three distinct levels designed to assess model performance under different conditions. Level 1, or zero-shot evaluation, involved querying the models without additional context or information, aiming to assess their baseline knowledge and capabilities in toxicology. Level 2 implemented Retrieval Augmented Generation (RAG), where models were provided with relevant information through an advanced search mechanism. This level utilized semantic search and reranking to enhance context, evaluating the models' ability to leverage provided information effectively. Level 3 introduced an agentic approach, equipping models with the ability to choose tools and data sources. This level implemented an agent-based framework allowing for multi-step reasoning, aimed at assessing more advanced problem-solving capabilities in toxicological contexts.
 
-### Implementation Stack 
+### Implementation Stack
+
+![ToxPipe architecture diagram](res/diagrams/toxpipe-simple.svg){#fig-toxpipe-architecture}
 
 The primary user interface for ToxPipe is presented in the form of a Dashy dashboard. This dashboard showcases the primary applications available within the ToxPipe platform. Dashy also offers additional functionality, including uptime indicators, end-user customization options, and administrative views. As the gateway to the rest of the application stack, the Dashy management homepage makes it easy for users to view relevant information quickly and efficiently.
 
@@ -62,6 +143,12 @@ Some workflows within ToxPipe were implemented using Langflow, a visual LLM-base
 
 The agentic API, which serves as a programmatic interface to ToxPipe's advanced AI capabilities, can be accessed after deployment. This API allows developers to integrate ToxPipe's functionalities into their own applications and services, extending the platform's capabilities beyond its native interface.
 
+In summary, ToxPipe combines a user-friendly dashboard (Dashy) with powerful LLM interaction tools (LibreChat), efficient LLM management (LiteLLM), comprehensive monitoring (Langfuse), local model deployment (Ollama), visual workflow creation (Langflow), and an extensible API. This integrated ecosystem provides a robust platform for developing, deploying, and managing AI-powered applications in the field of toxicology and beyond.
+
+The public agentic API may be accessed at https://rstudio.niehs.nih.gov/toxpipe-api/. The agentic API provides an interface for end users to query LLMs with access to additional tools that provide curated information not included in the base models’ training knowledge. These tools provide LLMs with access to functions for manipulating and analyzing molecules (provided by RDKit), 
+
+This API was originally developed as a fork of the open-source tool ChemCrow, which is built using the LangChain ecosystem (Bran et al., 2023) TODO: how to cite LangChain?. It has since been expanded to take advantage of a newer version of LangChain 
+
 ### Documentation
 
 The development of reproducible ....
@@ -69,6 +156,7 @@ The development of reproducible ....
 ### Data connections/sources
 
 Our data sources encompassed NTP technical reports, published scientific literature, chemical databases, and proprietary toxicology resources.
+
 Evaluation
 
 ToxPipe was tested by .... evaluation against a set of clearly defined metrics and performance indicators, including both objective measures and comparison against subject-matter experts.	 The testing is formally documented at https://github.com/NIEHS/ToxPipe-Model-Comparison.
