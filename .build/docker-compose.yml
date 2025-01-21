@@ -1,39 +1,109 @@
-version: "3.8"
-
 services:
-  dashy:
-    # container_name: dashy
-    image: lissy93/dashy
-    # volumes:
-      # - /path/to/my-config.yml:/app/public/conf.yml
-      # - /path/to/item-icons:/app/public/item-icons
-    networks:
-      - autonomous
-    ports:
-      - "4000:80"
-    environment:
-      - NODE_ENV=production
+
+  # Reverse proxy
+  # traefik:
+  #   image: traefik:2.11.2
+  #   container_name: traefik
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #     - "8080:8080"
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - .config/traefik/config.yml:/etc/traefik/config.yml:ro 
+  #     - .config/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     # - /toxpipe/tmp:/tmp
+  #     # - /root/tls:/tls
+
+  # # Dashboard
+  # dashy:
+  #   image: lissy93/dashy
+  #   container_name: dashy
+  #   restart: unless-stopped
+  #   ports:
+  #     - "4000:80"
+  #   volumes:
+  #     - .config/dashy/conf.yml:/app/public/conf.yml
+  #     # - /path/to/item-icons:/app/public/item-icons
+  #   environment:
+  #     - NODE_ENV=production
+
+  #   healthcheck:
+  #     test: ['CMD', 'node', '/app/services/healthcheck']
+  #     interval: 10s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 10s
+
+  api:
+    image: ghcr.io/danny-avila/librechat-dev:latest
+    container_name: librechat
     restart: unless-stopped
-    labels:
-      traefik.docker.network: "autonomous"
-      traefik.enable: "true"
-      traefik.http.routers.dashy.entrypoints: "https"
-      traefik.http.routers.dashy.service: "dashy@docker"
-      traefik.http.routers.dashy.rule: "Host(`toxpipe.niehs.nih.gov`)"
-      traefik.http.routers.dashy.tls: "true"
-      traefik.http.routers.dashy.priority: 1
-      # traefik.http.services.dashy.loadbalancer.server.port: 4000
-      traefik.http.services.dashy.loadbalancer.server.scheme: "http"
+    ports:
+      - "${LIBRECHAT_PORT}:${LIBRECHAT_PORT}"
+    depends_on:
+      - mongodb
+      - rag_api
+    user: "${UID}:${GID}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - HOST=0.0.0.0
+      - MONGO_URI=mongodb://mongodb:27017/LibreChat
+      - MEILI_HOST=http://meilisearch:7700
+      - RAG_PORT=${RAG_PORT:-8000}
+      - RAG_API_URL=http://rag_api:${RAG_PORT:-8000}
+    volumes:
+      - type: bind
+        source: ./.env
+        target: /app/.env
+      - ./images:/app/client/public/images
+      - ./logs:/app/api/logs
 
-    healthcheck:
-      test: ['CMD', 'node', '/app/services/healthcheck']
-      interval: 10s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-  
+  mongodb:
+    image: mongo
+    container_name: chat-mongodb
+    restart: unless-stopped
+    user: "${UID}:${GID}"
+    volumes:
+      - ./data-node:/data/db
+    command: mongod --noauth
 
-networks:
-  autonomous:
-    driver: overlay
-    external: true
+  meilisearch:
+    image: getmeili/meilisearch:v1.7.3
+    container_name: chat-meilisearch
+    restart: unless-stopped
+    user: "${UID}:${GID}"
+    environment:
+      - MEILI_HOST=http://meilisearch:7700
+      - MEILI_NO_ANALYTICS=true
+    volumes:
+      - ./meili_data_v1.7:/meili_data
+
+  vectordb:
+    image: ankane/pgvector:latest
+    container_name: vectordb
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mydatabase
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+    volumes:
+      - pgdata2:/var/lib/postgresql/data
+
+  rag_api:
+    image: ghcr.io/danny-avila/librechat-rag-api-dev-lite:latest
+    container_name: rag_api
+    restart: unless-stopped
+    environment:
+      - DB_HOST=vectordb
+      - RAG_PORT=${RAG_PORT:-8000}
+    depends_on:
+      - vectordb
+    env_file:
+      - .env
+
+volumes:
+  pgdata2:

@@ -1,0 +1,202 @@
+services:
+
+  # Reverse proxy
+  traefik:
+    image: traefik:2.11.2
+    container_name: traefik
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      # - "8080:8080" # Admin port
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - .config/traefik/config.yml:/etc/traefik/config.yml:ro 
+      - .config/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # - /toxpipe/tmp:/tmp
+      # - /root/tls:/tls
+
+  # Dashboard
+  dashy:
+    image: lissy93/dashy
+    container_name: dashy
+    ports:
+      - "4000:80"
+    # volumes:
+      # - /path/to/my-config.yml:/app/public/conf.yml
+      # - /path/to/item-icons:/app/public/item-icons
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  # USE LIBRECHAT CONFIG FILE
+  api:
+    container_name: librechat
+    image: ghcr.io/danny-avila/librechat-dev:latest
+    # If building from source, comment the line above and uncomment the lines below
+    # image: librechat
+    # build:
+    #   context: .
+    #   target: node
+    volumes:
+      - .config/librechat/librechat.yaml:/app/librechat.yaml
+
+# USE RAG API IMAGE WITH LOCAL EMBEDDINGS SUPPORT
+  rag_api:
+    image: ghcr.io/danny-avila/librechat-rag-api-dev:latest
+    container_name: rag-api
+    environment:
+      - AZURE_OPENAI_ENDPOINT=https://your-endpoint.openai.azure.com
+      - OPENAI_API_VERSION=2024-02-01
+
+  vectordb:
+    image: pgvector/pgvector:pg16
+    container_name: vectordb
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - librechat-pg:/var/lib/postgresql/data
+
+  # Budgeting, tracing, and logging service
+  langfuse-server:
+    container_name: langfuse
+    image: ghcr.io/langfuse/langfuse:latest
+    depends_on:
+      - langfuse-db
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@langfuse-db:5432/postgres
+      # - NEXTAUTH_SECRET=S/abcd1234
+      # - SALT=S/abcd1234
+      # - NEXTAUTH_URL=https://langfuse.your-url.com
+      # - TELEMETRY_ENABLED=${TELEMETRY_ENABLED:-true}
+      - NEXT_PUBLIC_SIGN_UP_DISABLED=${NEXT_PUBLIC_SIGN_UP_DISABLED:-false}
+      - LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES=${LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES:-false}
+      - AUTH_DISABLE_USERNAME_PASSWORD=true
+      - AUTH_AZURE_AD_CLIENT_ID=${LANGFUSE_AZURE_AD_CLIENT_ID}
+      - AUTH_AZURE_AD_CLIENT_SECRET=${LANGFUSE_AZURE_AD_CLIENT_SECRET}
+      - AUTH_AZURE_AD_TENANT_ID=${LANGFUSE_AZURE_AD_TENANT_ID}
+      - AUTH_AZURE_ALLOW_ACCOUNT_LINKING=true
+
+  # Run local models
+  ollama:
+    container_name: ollama
+    image: ollama/ollama:latest
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           capabilities: [compute, utility]
+    ports:
+      - "11434:11434"
+    volumes:
+      # - /data/models:/root/models
+      - ollama:/root/.ollama
+
+  # ADD LITELLM BASIC - NEED TO CONFIGURE litellm-config.yaml, ONLY NEED ENV TO ENABLE REDIS FOR CACHING OR LANGFUSE FOR MONITORING
+  litellm:
+    container_name: litellm
+    image: ghcr.io/berriai/litellm:main-latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - .config/litellm/litellm-config.yaml:/app/config.yaml
+      - ./api/data/auth.json:/app/application_default_credentials.json
+    depends_on:
+      - litellm-db
+    restart: unless-stopped
+    command: [ "--config", "/app/config.yaml", "--port", "8000", "--num_workers", "8" ]
+    environment:
+      UI_USERNAME: admin
+      UI_PASSWORD: password
+      GOOGLE_APPLICATION_CREDENTIALS: /app/application_default_credentials.json
+      OPENAI_API_KEY: ollama ## needs to be set if ollama's openai api compatibility is used
+      DATABASE_URL: postgresql://postgres:postgres@litellm-db:5432/postgres
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: redis-password
+      LANGFUSE_PUBLIC_KEY: pk-lf-abcd-1234
+      LANGFUSE_SECRET_KEY: sk-lf-abcd-1234
+      LANGFUSE_HOST: http://langfuse-server:3000
+      #LITELLM_LOG: DEBUG
+
+  # ADD LITELLM CACHING
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    command:
+    - sh
+    - -c # this is to evaluate the $REDIS_PASSWORD from the env
+    - redis-server --appendonly yes --requirepass $$REDIS_PASSWORD ## $$ because of docker-compose
+    environment:
+      REDIS_PASSWORD: redis-password
+    volumes:
+      - .data/redis:/data
+
+# langfuse and litellm db's separated because litellm crashing takes down langfuse db
+  langfuse-db:
+    image: postgres:16.4
+    container_name: langfuse-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - 5435:5432
+    volumes:
+      - langfuse-pg:/var/lib/postgresql/data
+      # - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+  
+  litellm-db:
+    image: postgres:16.4
+    container_name: litellm-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - 5434:5432
+    volumes:
+      - litellm-pg:/var/lib/postgresql/data
+
+  # Live Docker log monitoring
+  dozzle:
+    container_name: dozzle
+    image: amir20/dozzle:latest
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - 8888:8080
+
+# Mongo express for admin viewing of mongodb
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: password
+    ports:
+      - '8081:8081'
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
+volumes:
+  librechat-pg:
+  langfuse-pg:
+  litellm-pg:
+  ollama:

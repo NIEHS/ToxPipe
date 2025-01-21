@@ -5,13 +5,45 @@ date-modified: 2024-10-27
 
 ## Introduction
 
+Deployment of ToxPipe is meant to be as simple as possible, but there are still many different components that need to be configured if you would like to deploy the entire stack.
 
+## Clone the repository
 
-## Configuration
+First, clone the ToxPipe repository by running:
 
+```{bash}
+git clone https://github.com/NIEHS/ToxPipe
+```
 
+Then change into the newly cloned repository folder in order to start configuring the project.
 
-## Cloning
+```{bash}
+cd ToxPipe
+```
+
+## Initial Configuration
+
+All of the configuration files that are needed are stored in the `.config` folder.
+
+You should first copy and paste the file `.config/.env.example` to `.config/.env` and edit any values in the newly created `.env` file.
+
+Additional configuration information will follow in subsequent sections.
+
+## Deployment
+
+The simplest component to deploy is the ToxPipe Agent. This can be deployed manually by running the Python application, or deployed persistently using the preconfigured Docker image.
+
+```{bash}
+python3 main.py
+```
+
+If you would like to run the agent persistently, then go ahead and spin up a Docker container.
+
+```{bash}
+docker run NIEHS/ToxPipe
+```
+
+## Git submodules
 
 Now, the submodule has been added to your repository. When other people clone your repository, they can initialize and update the submodule using:
 

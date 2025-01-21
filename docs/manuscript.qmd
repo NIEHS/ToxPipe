@@ -129,7 +129,7 @@ Our evaluation framework consisted of three distinct levels designed to assess m
 
 The primary user interface for ToxPipe is presented in the form of a Dashy dashboard. This dashboard showcases the primary applications available within the ToxPipe platform. Dashy also offers additional functionality, including uptime indicators, end-user customization options, and administrative views. As the gateway to the rest of the application stack, the Dashy management homepage makes it easy for users to view relevant information quickly and efficiently.
 
-To facilitate more direct interactions with Large Language Models (LLMs), ToxPipe incorporates LibreChat as a web-based chat interface (Avila, 2024). LibreChat is modeled after the familiar OpenAI ChatGPT interface but is released under an MIT open-source license, making it freely available for use and modification. LibreChat includes most features available in the ChatGPT interface while adding some of its own unique capabilities. These additional features make it particularly easy to deploy and share AI agents and assistants within the ToxPipe ecosystem.
+To facilitate more direct interactions with Large Language Models (LLMs), ToxPipe incorporates LibreChat as a web-based chat interface @LibreChat2024. LibreChat is modeled after the familiar OpenAI ChatGPT interface but is released under an MIT open-source license, making it freely available for use and modification. LibreChat includes most features available in the ChatGPT interface while adding some of its own unique capabilities. These additional features make it particularly easy to deploy and share AI agents and assistants within the ToxPipe ecosystem.
 
 Many LLM providers have their own API schemas with slight differences, which can create complexity in integration and management. To address this issue, ToxPipe integrates LiteLLM as an LLM proxy to reduce complexity within the ecosystem. Instead of integrating all the model providers independently, all LLM calls are written against the Azure OpenAI API and routed through LiteLLM. This approach simplifies developer onboarding for novel use cases and provides administrators with fine-tuned controls on model usage and budgeting. By standardizing the API interface, LiteLLM allows for greater flexibility in model selection and easier management of multiple LLM providers.
 
@@ -157,13 +157,13 @@ The development of reproducible ....
 
 Our data sources encompassed NTP technical reports, published scientific literature, chemical databases, and proprietary toxicology resources.
 
-Evaluation
+### Evaluation
 
 ToxPipe was tested by .... evaluation against a set of clearly defined metrics and performance indicators, including both objective measures and comparison against subject-matter experts.	 The testing is formally documented at https://github.com/NIEHS/ToxPipe-Model-Comparison.
 
 Can it pass the DABT?....
 
-For process spinning off multiple agents, the evaluation metrics used include a "confidence rating", defined as the number of agents that returned that piece of information divided by the total number of agents, {n_agents} and formatted as a percentage.
+For process of spinning off multiple agents, the evaluation metrics used include a "confidence rating", defined as the number of agents that returned that piece of information divided by the total number of agents, {n_agents} and formatted as a percentage.
 
 For all ToxPipe generated information, we estimate both F1 scores and plot Precision-Recall Area Under the Curve (PR AUC) to compare results to those vetted by subject matter experts. The precision, or positive predictive value, is the fraction of relevant instances among retrieved instances. The recall, or sensitivity, is the fraction of relevant instances that were retrieved. The F1 score is the harmonic mean between precision and recall. The PR AUC curve visualizes the tradeoff between the two quantities Details of calculations for each example task are given below.
 
