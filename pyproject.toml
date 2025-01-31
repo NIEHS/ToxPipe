@@ -1,0 +1,32 @@
+[project]
+name = "toxpipe"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "dill>=0.3.9",
+    "fastapi==0.115.4",
+    "langchain-community==0.3.5",
+    "langchain==0.3.7",
+    "langchain-core==0.3.15",
+    "langchain-openai==0.2.6",
+    "langfuse==2.53.8",
+    "multiprocess==0.70.17",
+    "paperscraper==0.2.13",
+    "pathos==0.3.3",
+    "pydantic==2.9.2",
+    "pypdf==5.1.0",
+    "python-dotenv>=1.0.1",
+    "rdkit==2024.3.5",
+    "requests==2.32.3",
+    "rxn4chemistry==1.14.0",
+    "tiktoken==0.8.0",
+    "toolz==1.0.0",
+    "torch==2.5.0",
+    "transformers==4.45.2",
+    "molbloom",
+]
+
+[tool.uv.sources]
+molbloom = { git = "https://github.com/whitead/molbloom" }
