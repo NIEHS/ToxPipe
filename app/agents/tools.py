@@ -27,12 +27,11 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
 
         StructuralSimilarity(),
 
-        QueryCBTAlerts(llm=llm),
-        QueryCBTAlertsMulti(llm=llm),
+        #QueryCBTAlerts(llm=llm), # These are really hard for the LLM to parse in a meaningful way right now
+        #QueryCBTAlertsMulti(llm=llm),
         QueryCBTSEEM3(llm=llm),
         QueryCBTDrugBankTransporters(llm=llm),
 
-        QueryCBTVendors(llm=llm),
         QueryCBTInVitroDB(llm=llm),
         QueryCTDDiseases(llm=llm),
         QueryCTDGenes(llm=llm),
@@ -64,6 +63,8 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
         QuerySuperfund(llm=llm),
 
         QueryT3DB(llm=llm),
+
+        QueryToxRefDBStudies(llm=llm)
 
     ]
 

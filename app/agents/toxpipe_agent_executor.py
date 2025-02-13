@@ -30,6 +30,7 @@ from .prompts_chem import PROMPT, TEMPLATE
 from langchain.tools.render import render_text_description
 from operator import itemgetter
 import json
+import re
 
 
 # We create the AgentState that we will pass around
@@ -625,7 +626,22 @@ def create_react_agent(
             chosen_tool = tool_map[model_output["name"]]
             return itemgetter("arguments") | chosen_tool
 
-        model_runnable = model_runnable | JsonOutputParser() | tool_chain
+        def extract_json(model_output):
+            try:
+                s = str(model_output.content).replace("\n", " ")
+                pattern = r"\{(.*?)\}"
+                json_blocks = re.findall(pattern, s)
+                json_blocks = ["{"+i.strip()+"}"+"}" for i in json_blocks][0]
+                js = json.loads(json_blocks)
+
+                tool_output = tool_chain(js)
+
+                model_output = tool_output
+            except Exception as e:
+                return model_output    
+            return model_output# | JsonOutputParser() | tool_chain
+
+        model_runnable = model_runnable | extract_json
 
     # Define the function that calls the model
     def call_model(state: AgentState, config: RunnableConfig) -> AgentState:

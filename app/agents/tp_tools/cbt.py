@@ -20,7 +20,7 @@ def unique(l):
 
 class Query2DTXSID(BaseTool):
     name: str = "Query2DTXSID"
-    description: str = "Given a chemical name as input, returns the DSSTox substance ID or DTXSID for that chemical from the ChemBioTox database."
+    description: str = "Input a chemical name to return the DTXSID for that chemical from the ChemBioTox database."
 
     def __init__(
         self,
@@ -44,7 +44,7 @@ class Query2DTXSID(BaseTool):
 
 class Name2DTXSID(BaseTool):
     name: str = "Name2DTXSID"
-    description: str = "Given a chemical name as input, returns the DSSTox substance ID or DTXSID for that chemical from the ChemBioTox database."
+    description: str = "Input a chemical name to return the DTXSID for that chemical from the ChemBioTox database."
 
     def __init__(
         self,
@@ -108,7 +108,7 @@ class Name2SMILES(BaseTool):
     
 class SMILES2DTXSID(BaseTool):
     name: str = "SMILES2DTXSID"
-    description: str = "Given a SMILES string as input, returns the DSSTox substance ID or DTXSID for that chemical from the ChemBioTox database. If no DTXSID exists, the tool will return the DTXSID of the most structurally similar chemical in the ChemBioTox database."
+    description: str = "Input a SMILES string to return the DTXSID for that chemical from the ChemBioTox database. If no DTXSID exists, the tool will return the DTXSID of the most structurally similar chemical in the ChemBioTox database."
 
     def __init__(
         self,
@@ -138,7 +138,7 @@ class SMILES2DTXSID(BaseTool):
 # Structural Similarity
 class StructuralSimilarity(BaseTool):
     name: str = "StructuralSimilarity"
-    description: str = "Given a SMILES string as input, returns a list of structurally similar chemicals and their corresponding tanimoto similarities to the input chemical from the ChemBioTox database."
+    description: str = "Input a SMILES string to return a list of structurally similar chemicals and their corresponding Tanimoto similarities to the input chemical from the ChemBioTox database."
 
     def __init__(
         self,
@@ -172,7 +172,7 @@ class StructuralSimilarity(BaseTool):
 # Functional Similarity - Proprietary
 class FunctionalSimilarity(BaseTool):
     name: str = "FunctionalSimilarity"
-    description: str = "Given a DSSTox Substance ID as input, returns a list of functionally similar chemicals and their corresponding similarities to the input chemical from the ChemBioTox database. Similarities are calculated by cosine distance with distances closer to zero being more similar. Function is based off of predictive models and may not accurately represent the behavior of the chemicals in question."
+    description: str = "Input a DTXSID to return a list of functionally similar chemicals and their corresponding similarities to the input chemical from the ChemBioTox database. Similarities are calculated by cosine distance with distances closer to zero being more similar. Function is based off of predictive models and may not accurately represent the behavior of the chemicals in question."
 
     def __init__(
         self,
@@ -205,7 +205,7 @@ class FunctionalSimilarity(BaseTool):
 
 class QueryCBTFooDB(BaseTool):
     name: str = "QueryCBTFooDB"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with information about its usage in food or ingestible products from the ChemBioTox database. This can be useful if the user is looking for exposure, usage, or industrial information about a chemical."
+    description: str = "Input a DTXSID to annotate a chemical with information about its usage in food or ingestible products from the ChemBioTox database. This can be useful if the user is looking for exposure, usage, or industrial information about a chemical."
 
     def __init__(
         self,
@@ -260,7 +260,7 @@ class QueryCBTFooDB(BaseTool):
 
 class QueryCBTCPD(BaseTool):
     name: str = "QueryCBTCPD"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with information about its usage in commercial products from the ChemBioTox database. This can be useful if the user is looking for exposure, usage, or industrial information about a chemical."
+    description: str = "Input a DTXSID to annotate a chemical with information about its usage in commercial products from the ChemBioTox database. This can be useful if the user is looking for exposure, usage, or industrial information about a chemical."
 
     def __init__(
         self,
@@ -300,7 +300,7 @@ class QueryCBTCPD(BaseTool):
 
 class QueryCBTChemicalVendors(BaseTool):
     name: str = "QueryCBTChemicalVendors"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, provides information about vendors/resources that carry and sell the chemical."
+    description: str = "Input a DTXSID to provide information about vendors/resources that carry and sell the chemical and where to obtain or purchase the chemical."
 
     def __init__(
         self,
@@ -338,7 +338,7 @@ class QueryCBTChemicalVendors(BaseTool):
 
 class QueryCBTTox21Models(BaseTool):
     name: str = "QueryCBTTox21Models"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with predicted interactions from Tox21 assay models from the ChemBioTox database."
+    description: str = "Input a DTXSID to annotatea a chemical with predicted biological interactions from Tox21 assay models from the ChemBioTox database."
 
     def __init__(
         self,
@@ -379,7 +379,7 @@ class QueryCBTTox21Models(BaseTool):
 
 class QueryCBTGRAS(BaseTool):
     name: str = "QueryCBTGRAS"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with information about if it is generally recognized as safe from the ChemBioTox database"
+    description: str = "Input a DTXSID to annotate a chemical with information about its safety and exposure from the ChemBioTox database."
 
     def __init__(
         self,
@@ -387,7 +387,7 @@ class QueryCBTGRAS(BaseTool):
         super().__init__()
 
     def _run(self, dtxsid: str) -> str:
-        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        """Input a DTXSID to return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
             f"{os.environ.get('CBT_API_ENDPOINT')}/gras?dtxsid={dtxsid}",
@@ -417,7 +417,7 @@ class QueryCBTGRAS(BaseTool):
     
 class QueryCTDDiseases(BaseTool):
     name: str = "QueryCTDDiseases"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with information about if it is associated with diseases from CTD in the ChemBioTox database"
+    description: str = "Input a DTXSID to annotate a chemical with information about its associated diseases, conditions, and illnesses from CTD in the ChemBioTox database. These are related to toxicological and biochemical processes. Either the diease's direct evidence or an inference score is given. Higher inference scores correspond to a more likely association."
     llm: BaseLLM = None
     def __init__(self, llm):
         super().__init__()
@@ -442,7 +442,7 @@ class QueryCTDDiseases(BaseTool):
             if 'inference_score' in i and 'inference_gene_symbol' in i:
                 ctd_diseases_list_inferred.append(f"{i['disease_name']} (inference score based on {i['inference_gene_symbol']}: {i['inference_score']})")
             if 'direct_evidence' in i:
-                ctd_diseases_list_measured.append(f"{i['disease_name']} ({i['direct_evidence']})")
+                ctd_diseases_list_measured.append(f"{i['disease_name']} (direct evidence: {i['direct_evidence']})")
 
         ctd_diseases_list_inferred = unique(ctd_diseases_list_inferred)
         ctd_diseases_list_measured = unique(ctd_diseases_list_measured)
@@ -466,7 +466,7 @@ class QueryCTDDiseases(BaseTool):
     
 class QueryCTDGenes(BaseTool):
     name: str = "QueryCBTGenes"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with information about its gene interactions from CTD in the ChemBioTox database"
+    description: str = "Input a DTXSID to annotate a chemical with information about its gene interactions from CTD in the ChemBioTox database."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -522,7 +522,7 @@ def format_leadscope(llm, response):
 
 class QueryCBTLeadscope(BaseTool):
     name: str = "QueryCBTLeadscope"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with predicted Leadscope QSAR models from the ChemBioTox database."
+    description: str = "Input a DTXSID to annotate a chemical with predicted Leadscope QSAR models from the ChemBioTox database. These models predict toxicological behavior of chemicals."
 
     llm: BaseLLM = None
 
@@ -583,7 +583,7 @@ def format_admet(llm, response):
 
 class QueryCBTADMET(BaseTool): # proprietary
     name: str = "QueryCBTADMET"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with predicted ADMET QSAR models from the ChemBioTox database. This can be helpful for understanding the absorption, distribution, metabolism, excretion, pathways, transportation, and toxicity of a chemical."
+    description: str = "Input a DTXSID to annotate a chemical with predicted ADMET QSAR models from the ChemBioTox database. This can be helpful for understanding the absorption, distribution, metabolism, excretion, pathways, transportation, and toxicity of a chemical."
 
     llm: BaseLLM = None
 
@@ -627,7 +627,7 @@ class QueryCBTADMET(BaseTool): # proprietary
     
 class QueryCBTMetabolites(BaseTool):
     name: str = "QueryCBTMetabolites"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, generate metabolites of the chemical from ADMET predictor with corresponding enzymes used in the metabolism."
+    description: str = "Input a DTXSID to generate metabolites of the chemical from ADMET predictor with corresponding enzymes used in the metabolism."
 
     llm: BaseLLM = None
 
@@ -675,7 +675,7 @@ class QueryCBTMetabolites(BaseTool):
 
 class QueryCBTSEEM3(BaseTool):
     name: str = "QueryCBTSEEM3"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with its SEEM3 exposure data. This can be helpful for finding the exposure, pathways, or transportation of a chemical."
+    description: str = "Input a DTXSID to annotate a chemical with its SEEM3 exposure data. This can be helpful for finding the exposure, pathways, or transportation of a chemical."
 
     llm: BaseLLM = None
 
@@ -718,7 +718,7 @@ class QueryCBTSEEM3(BaseTool):
     
 class QueryCBTDrugBankTransporters(BaseTool):
     name: str = "QueryCBTDrugBankTransporters"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, annotates a chemical with its DrugBank transporter data. This can be helpful for finding the pathway or transportation information for a chemical."
+    description: str = "Input a DTXSID to annotate a chemical with its DrugBank transporter data. This can be helpful for finding the pathway or transportation information for a chemical."
 
     llm: BaseLLM = None
 
@@ -765,7 +765,7 @@ class QueryCBTDrugBankTransporters(BaseTool):
 
 class QueryCBTAlerts(BaseTool):
     name: str = "QueryCBTAlerts"
-    description: str = "Given a SMILES string as input, find structural alerts from the OChem, ChEMBL, and Saagar datasources within the ChemBioTox database."
+    description: str = "Input a SMILES string to find structural alerts from the OChem, ChEMBL, and Saagar datasources within the ChemBioTox database. These alerts can provide context to chemical behavior, transport, and interactions."
 
     llm: BaseLLM = None
 
@@ -897,45 +897,6 @@ class QueryCBTAlertsMulti(BaseTool):
         """Use the tool asynchronously."""
         raise NotImplementedError()
     
-
-
-
-
-### Chemical Vendors ###
-class QueryCBTVendors(BaseTool):
-    name: str = "QueryCBTVendors"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns a list of chemical vendors from which the chemical may be acquired."
-    llm: BaseLLM = None
-
-    def __init__(self, llm):
-        super().__init__()
-        self.llm = llm
-
-    def _run(self, dtxsid: str) -> str:
-        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
-        dtxsid = re.sub(r'\s+', '', dtxsid)
-        res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/availability/vendors?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
-        )
-        res = res.json()
-        if len(res) < 1:
-            return(f"There was a problem completing the request.")
-        exp = res
-        exp_list = []
-        for i in exp:
-            if 'source_name' not in i or 'url' not in i:
-                continue
-            exp_list.append(f"{i['source_name']}: {i['url']}")
-        exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} may be purchased from the following vendors: {'; '.join(exp_list)}"
-        if len(exp_list) < 1:
-            response = f"The chemical {dtxsid} does not have any vendor data in the ChemBioTox Database."
-        return(response)
-
-    async def _arun(self, dtxsid: str) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError()
     
 ### Chemical Properties ###
 # Genra Properties - TODO
@@ -944,7 +905,7 @@ class QueryCBTVendors(BaseTool):
 # InvitroDB
 class QueryCBTInVitroDB(BaseTool):
     name: str = "QueryCBTInVitroDB"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns measured assay:activity pairs from assays for the chemical from the InVitroDB data in ChemBioTox."
+    description: str = "Input a DTXSID to get measured assay:activity pairs from assays for the chemical from the InVitroDB data in ChemBioTox."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -987,7 +948,7 @@ class QueryCBTInVitroDB(BaseTool):
 # CTD Cellular Components
 class QueryCTDBP(BaseTool):
     name: str = "QueryCTDBP"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns biological process data from CTD data in ChemBioTox."
+    description: str = "Input a DTXSID to get biological process data from CTD data in ChemBioTox. These processes include apoptosis, metabolism, development, regulation, etc."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1026,7 +987,7 @@ class QueryCTDBP(BaseTool):
 # CTD Cellular Components
 class QueryCTDCC(BaseTool):
     name: str = "QueryCTDCC"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns cellular components from CTD data in ChemBioTox."
+    description: str = "Input a DTXSID to return cellular components from CTD data in ChemBioTox."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1063,7 +1024,7 @@ class QueryCTDCC(BaseTool):
 # CTD Molecular Function
 class QueryCTDMF(BaseTool):
     name: str = "QueryCTDMF"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns molecular function from CTD data in ChemBioTox."
+    description: str = "Input a DTXSID to return molecular function from CTD data in ChemBioTox."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1102,7 +1063,7 @@ class QueryCTDMF(BaseTool):
 # Pubchem Bioassays
 class QueryPubChemBioassays(BaseTool):
     name: str = "QueryPubChemBioassays"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns biological assays (bioassays) that were run on the given chemical from PubChem data in ChemBioTox."
+    description: str = "Input a DTXSID to return biological assays (bioassays) that were run on the given chemical from PubChem data in ChemBioTox. These data can help provide context for a chemical's toxicological or biological behavior."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1146,7 +1107,7 @@ class QueryPubChemBioassays(BaseTool):
 # Pubchem Properties
 class QueryPubChemProperties(BaseTool):
     name: str = "QueryPubChemProperties"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns attribute:value pairs that represent chemical properties from PubChem data in ChemBioTox."
+    description: str = "Input a DTXSID to return attribute:value pairs that represent chemical properties from PubChem data in ChemBioTox. These data include identifiers and physical properties of chemicals."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1182,7 +1143,7 @@ class QueryPubChemProperties(BaseTool):
 # EPA Properties
 class QueryEPAProperties(BaseTool):
     name: str = "QueryEPAProperties"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns attribute:value pairs that represent chemical properties from EPA data in ChemBioTox."
+    description: str = "Input a DTXSID to return attribute:value pairs that represent chemical properties from EPA data in ChemBioTox. These data include identifiers and physical properties of chemicals."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1220,7 +1181,7 @@ class QueryEPAProperties(BaseTool):
 # CPDat
 class QueryCPD(BaseTool):
     name: str = "QueryCPD"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns the chemical's commercial usage categories from CPDat in ChemBioTox."
+    description: str = "Input a DTXSID to return the chemical's commercial usage categories from CPDat in ChemBioTox. These data provide information about what products a chemical is used in and possible sources of exposure."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1262,7 +1223,7 @@ class QueryCPD(BaseTool):
 # FooDB Enzymes
 class QueryFooDBEnzymes(BaseTool):
     name: str = "QueryFooDBEnzymes"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns enzymes that the chemical may interact with from FooDB in ChemBioTox."
+    description: str = "Input a DTXSID to return enzymes that the chemical may interact with from FooDB in ChemBioTox."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1299,7 +1260,7 @@ class QueryFooDBEnzymes(BaseTool):
 # FooDB Flavors
 class QueryFooDBFlavors(BaseTool):
     name: str = "QueryFooDBFlavors"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns the chemical's usage in food product flavors from FooDB in ChemBioTox."
+    description: str = "Input a DTXSID to return the chemical's usage in food product flavors from FooDB in ChemBioTox."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1336,7 +1297,7 @@ class QueryFooDBFlavors(BaseTool):
 # FooDB Content
 class QueryFooDBContent(BaseTool):
     name: str = "QueryFooDBContent"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns which food products the chemical is present in from FooDB in ChemBioTox."
+    description: str = "Input a DTXSID to return which food products the chemical is present in from FooDB in ChemBioTox. This also provides potential sources of exposure to the chemical."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1374,7 +1335,7 @@ class QueryFooDBContent(BaseTool):
 # FooDB Effects
 class QueryFooDBEffects(BaseTool):
     name: str = "QueryFooDBEffects"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns the chemical's health effects from FooDB in ChemBioTox."
+    description: str = "Input a DTXSID to return the chemical's health effects from FooDB in ChemBioTox. This can provide context for the chemical's toxicological and biological effects."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1414,7 +1375,7 @@ class QueryFooDBEffects(BaseTool):
 # DrugBank Carriers
 class QueryDrugBankCarriers(BaseTool):
     name: str = "QueryDrugBankCarriers"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns the chemical's carriers from DrugBank in ChemBioTox."
+    description: str = "Input a DTXSID to return the chemical's carriers from DrugBank in ChemBioTox."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1452,7 +1413,7 @@ class QueryDrugBankCarriers(BaseTool):
 # DrugBank Enzymes
 class QueryDrugBankEnzymes(BaseTool):
     name: str = "QueryDrugBankEnzymes"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns the chemical's associated enzymes from DrugBank in ChemBioTox."
+    description: str = "Input a DTXSID to return enzymes that the chemical interacts with from DrugBank in ChemBioTox."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1489,7 +1450,7 @@ class QueryDrugBankEnzymes(BaseTool):
 # DrugBank Targets
 class QueryDrugBankTargets(BaseTool):
     name: str = "QueryDrugBankTargets"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns the chemical's associated targets from DrugBank in ChemBioTox."
+    description: str = "Input a DTXSID to return the chemical's associated targets from DrugBank in ChemBioTox."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1526,7 +1487,7 @@ class QueryDrugBankTargets(BaseTool):
 # DrugBank Transporters
 class QueryDrugBankTransporters(BaseTool):
     name: str = "QueryDrugBankTransporters"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns the chemical's associated transporters from DrugBank in ChemBioTox."
+    description: str = "Input a DTXSID to return the chemical's associated transporters from DrugBank in ChemBioTox."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1565,7 +1526,7 @@ class QueryDrugBankTransporters(BaseTool):
 # HMDB biospecimen locations
 class QueryHMDBBS(BaseTool):
     name: str = "QueryHMDBBS"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns possible biospecimen locations from HMDB in ChemBioTox."
+    description: str = "Input a DTXSID to return where in the body the chemical can be found from HMDB in ChemBioTox."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1603,7 +1564,7 @@ class QueryHMDBBS(BaseTool):
 # HMDB cellular locations
 class QueryHMDBC(BaseTool):
     name: str = "QueryHMDBC"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns possible cellular locations from HMDB in ChemBioTox."
+    description: str = "Input a DTXSID to return where in the cell the chemical can be found from HMDB in ChemBioTox."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1640,7 +1601,7 @@ class QueryHMDBC(BaseTool):
 # HMDB tissue locations
 class QueryHMDBT(BaseTool):
     name: str = "QueryHMDBT"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns possible tissue locations from HMDB in ChemBioTox."
+    description: str = "Input a DTXSID to return tissues and organs the chemical can be found in from HMDB in ChemBioTox."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1677,7 +1638,7 @@ class QueryHMDBT(BaseTool):
 # HMDB diseases
 class QueryHMDBDiseases(BaseTool):
     name: str = "QueryHMDBDiseases"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns associated diseases from HMDB in ChemBioTox."
+    description: str = "Input a DTXSID to return associated diseases from HMDB in ChemBioTox. These data provide toxicological, biological, and health effect data for chemicals."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1715,7 +1676,7 @@ class QueryHMDBDiseases(BaseTool):
 # Superfund
 class QuerySuperfund(BaseTool):
     name: str = "QuerySuperfund"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns the presence of the chemical in superfund sites as reported in ChemBioTox."
+    description: str = "Input a DTXSID to retrieve the presence of the chemical in superfund sites as reported in ChemBioTox. This provides information about exposure to a chemical as well as environmental health effects."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1757,7 +1718,7 @@ class QuerySuperfund(BaseTool):
 # T3DB
 class QueryT3DB(BaseTool):
     name: str = "QueryT3DB"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns possible targets of the chemical as reported in the T3DB in ChemBioTox."
+    description: str = "Input a DTXSID to return possible targets of the chemical as reported in the T3DB in ChemBioTox. This provides information about how a chemical interacts with the body."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1795,7 +1756,7 @@ class QueryT3DB(BaseTool):
 # ToxRefDB Nonneoplastic
 class QueryToxRefDBNonNP(BaseTool):
     name: str = "QueryToxRefDBNonNP"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns its non-neoplastic annotations as reported in the ToxRefDB in ChemBioTox."
+    description: str = "Input a DTXSID to return its non-neoplastic annotations as reported in the ToxRefDB in ChemBioTox. This gives information about non-cancerous diseases associated with the chemical."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1833,7 +1794,7 @@ class QueryToxRefDBNonNP(BaseTool):
 # ToxRefDB Neoplastic
 class QueryToxRefDBNP(BaseTool):
     name: str = "QueryToxRefDBNP"
-    description: str = "Given a DSSTox substance ID or DTXSID as input, returns its neoplastic (cancer) annotations as reported in the ToxRefDB in ChemBioTox."
+    description: str = "Input a DTXSID to return its neoplastic (cancer) annotations as reported in the ToxRefDB in ChemBioTox. This gives information about cancerous diseases associated with the chemical."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1868,4 +1829,34 @@ class QueryToxRefDBNP(BaseTool):
         """Use the tool asynchronously."""
         raise NotImplementedError()
 
-    
+
+# ToxRefDB Studies
+class QueryToxRefDBStudies(BaseTool):
+    name: str = "QueryToxRefDBStudies"
+    description: str = "Input a DTXSID to return the results and measurements of assays as reported in the ToxRefDB in ChemBioTox. These can help describe the toxicity of a chemical. Use this tool when asked about specific types of toxicology, like subacute toxicology."
+    llm: BaseLLM = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/toxrefdb/studies?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+        res = res.json()
+
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        
+        response = res
+        if len(res) < 1:
+            response = f"The chemical {dtxsid} does not have any ToxRefDB study data in the ChemBioTox Database."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()

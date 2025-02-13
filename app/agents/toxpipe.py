@@ -4,6 +4,7 @@ from .toxpipe_agent_executor import create_react_agent
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate, MessagesPlaceholder
 from langgraph.graph.message import add_messages
 from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.runnables.base import RunnableSerializable
 # Model interface
 from langchain_openai import ChatOpenAI, AzureChatOpenAI
 from langchain_anthropic import ChatAnthropic
@@ -38,14 +39,19 @@ from .prompts_chem import PROMPT, TEMPLATE
 from typing import Sequence
 from typing_extensions import Annotated, TypedDict
 import os
+from langchain_core.load.serializable import Serializable
+from langchain_community.chat_message_histories import SQLChatMessageHistory
+from langgraph.checkpoint.postgres import PostgresSaver
+from psycopg_pool import ConnectionPool
 
 # Handle models that have issues reading tools via LangChain's tool API. We will have to add these manually as a prompt.
-BAD_TOOL_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', 'mixtral-8x7b-instruct']
+BAD_TOOL_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', 'mixtral-8x7b-instruct', 'llama3-1-70b', 'claude-3-sonnet', 'amazon-titan-text-premier', 'cohere-command-r-plus']
 
-def _make_llm(model, api_version, temp):
+def _make_llm(model, api_version, temp, max_retries):
     llm = AzureChatOpenAI(
         temperature=temp,
-        model_name=model
+        model_name=model,
+        max_retries=max_retries
     )
     return llm
 
@@ -63,21 +69,23 @@ class ToxPipeAgent:
         api_version=os.environ.get("OPENAI_API_VERSION"),
         temp=0.0, # higher temperature creates more answer variance, but this is potentially better if we are doing a multi-agent approach
         max_iterations=10, # maximum number of agent recursions in chain
+        max_retries=10, # maximum number of retries upon LLM failure - set this to finite to avoid token limit errors from OpenAI
         step_timeout=0, # maximum time in seconds to take per recursion
         n_agents=1, # number of parallel agents to run - set to 1 for no parallelism. Higher values better for more complicated queries to help reduce variance
         summarize=False, # if True, will summarize output. Ignored and always treated as True if n_agents > 1.
         verbose=False,
-        auth=False
+        auth=False,
+        checkpointer=None
     ):
-        self.llm = _make_llm(model, api_version, temp)
+        self.llm = _make_llm(model, api_version, temp, max_retries)
         set_llm_cache(SQLiteCache(database_path=".langchain.db")) # set cache to avoid making the same API calls over and over again
         self.tools = make_tools(self.llm, verbose=verbose, auth=auth)
         self.n_agents = n_agents
         self.summarize = summarize
         self.max_iterations = max_iterations
-        memory = MemorySaver() # Initialize per-thread message persistence
+        self.max_retries = max_retries
         self.thread_id = name
-
+        self.checkpointer = checkpointer
         manual_tool_support = []
 
         # If we use a model that doesn't fully support tools, then we need to manually add the tools as part of the prompt
@@ -85,13 +93,17 @@ class ToxPipeAgent:
             manual_tool_support = self.tools
 
         # Initialize agent to add tools to model
-        agent_executor = create_react_agent(self.llm, self.tools, state_modifier=PROMPT, checkpointer=memory, manual_tool_support=manual_tool_support, debug=verbose) # state_modifier=PROMPT adds the prompt instructions to the agent
+        agent_executor = create_react_agent(self.llm, self.tools, state_modifier=PROMPT, checkpointer=checkpointer, manual_tool_support=manual_tool_support, debug=verbose) # state_modifier=PROMPT adds the prompt instructions to the agent
         if step_timeout > 0:
             agent_executor.step_timeout = step_timeout
 
         self.agent_with_chat_history = agent_executor
         self.config = {"configurable": {"thread_id": self.thread_id}, "recursion_limit": self.max_iterations}
-        
+
+    @classmethod
+    def is_lc_serializable(cls) -> bool:
+        return True
+
 
     def run(self, input):
         n_agents = self.n_agents
