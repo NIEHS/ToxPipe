@@ -9,6 +9,7 @@
 .vscode/saddlerto.code-workspace
 docs/data/
 .Rproj.user
+.env
 
 /.luarc.json
 .vscode/settings.json
