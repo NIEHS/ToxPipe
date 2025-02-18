@@ -8,8 +8,6 @@ from langchain.llms import BaseLLM
 from langchain.tools import BaseTool
 from langchain_core.prompts import ChatPromptTemplate
 from time import time
-from glob import glob
-
 from dotenv import load_dotenv
 load_dotenv('../../.env')
 
