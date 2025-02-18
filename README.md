@@ -10,7 +10,7 @@
 
 <!-- PROJECT LOGO -->
 <div align="center">
-  <img src="./res/toxpipe-logo-v2.png" alt="ToxPipe Logo" width="200" height="200">
+  <img src="./docs/res/toxpipe-logo-v2.png" alt="ToxPipe Logo" width="412" height="178">
   <h1 align="center">ToxPipe: Semi-autonomous AI integration of diverse toxicological data streams</h1>
 </div>
 

@@ -1,0 +1,122 @@
+...@classes.d2
+
+# direction: right
+
+nih {
+  label: NIEHS Internal
+
+  user: Users {
+    shape: image
+    icon: ../images/logos/user.svg
+  }
+
+  gpuBox: GPU Server {
+    class: [server]
+    # icon: ../images/logos/
+
+    toxpipe: ToxPipe {
+      style: {
+        font-size: 70
+      }
+
+      dashy: Dashy {
+        shape: image
+        icon: ../images/logos/dashy_logo.png
+      }
+
+      librechat: LibreChat {
+        class: docker
+        shape: image
+        icon: ../images/logos/librechat_logo.svg
+      }
+
+      mongoDb: "" {
+        class: docker
+        shape: image
+        icon: ../images/logos/mongodb_wordmark.svg
+      }
+
+      librechatRag: LibreChat RAG {
+        class: docker
+      }
+
+      vectorDb: pgvector {
+        class: [docker, db]
+        shape: image
+        icon: ../images/logos/postgresql-wordmark.svg
+      }
+
+      meilisearch {
+        class: [docker]
+        shape: image
+        icon: ../images/logos/meilisearch_logo.svg
+      }
+
+      litellm: "" {
+        class: docker
+        shape: image
+        icon: ../images/logos/litellm_logo.jpeg
+      }
+
+      litellmDb: LiteLLM DB {
+        shape: image
+        icon: ../images/logos/postgresql-wordmark.svg
+      }
+
+      langfuse: "" {
+        class: docker
+        shape: image
+        icon: ../images/logos/langfuse_logo.svg
+      }
+
+      langfuseDb: "LangFuse DB" {
+        class: docker
+        shape: image
+        icon: ../images/logos/postgresql-wordmark.svg
+      }
+
+      dashy -> librechat
+      dashy -> litellm
+      dashy -> langfuse
+      litellm <- litellmDb
+      litellm -> librechat
+      litellm -> langfuse: Logging and Traces
+      langfuse <- langfuseDb
+      librechatRag <-> vectorDB
+      librechat <-> librechatRag
+      librechat <-> mongoDb: Conversations
+      librechat <-> meilisearch: Conversation Search
+      meilisearch <-> mongoDb
+    }
+  }
+
+
+}
+
+azure: "Azure" {
+  direction: right
+  # label: Azure Cloud
+  # label.near: outside-top-center
+  # icon: ../images/logos/azure.svg
+
+  openaiApi: "OpenAI Models" {
+    class: api
+    icon: ../images/logos/openai-logos/SVGs/openai-lockup.svg
+
+    gpt4: GPT-4 Models {
+
+    }
+    
+    gpt35: GPT-3.5 Models {
+
+    }
+  }
+}
+
+
+*.style.font-size: 100
+*.*.style.font-size: 60
+*.label.near: "outside-top-center"
+*.icon.near: "outside-top-left"
+
+*.style.border-radius: 20
