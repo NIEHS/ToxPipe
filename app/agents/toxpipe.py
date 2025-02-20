@@ -61,7 +61,7 @@ class ToxPipeAgent:
         api_version=os.environ.get("OPENAI_API_VERSION"),
         temp=0.0, # higher temperature creates more answer variance, but this is potentially better if we are doing a multi-agent approach
         max_iterations=10, # maximum number of agent recursions in chain
-        max_retries=20, # maximum number of retries upon LLM failure - set this to finite to avoid token limit errors from OpenAI
+        max_retries=100, # maximum number of retries upon LLM failure - set this to finite to avoid token limit errors from OpenAI
         step_timeout=0, # maximum time in seconds to take per recursion
         n_agents=1, # number of parallel agents to run - set to 1 for no parallelism. Higher values better for more complicated queries to help reduce variance
         summarize=False, # if True, will summarize output. Ignored and always treated as True if n_agents > 1.
