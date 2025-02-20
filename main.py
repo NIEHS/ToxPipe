@@ -63,8 +63,10 @@ COHERE_MODELS = ['cohere-command-r-plus']
 AUTH_MODE = False
 VERBOSE = False
 
+MODEL_CACHE = {}
+
 @app.get("/agent/create/", tags=["agent"])
-async def create_agent(request: Request, response: Response, model: str = "azure-gpt-4o", temp: float = 0, max_iterations: int = 10, max_retries: int = 10, step_timeout: float = 0, n_threads: int = 1, summarize: bool = False):
+async def create_agent(request: Request, response: Response, model: str = "azure-gpt-4o", temp: float = 0, max_iterations: int = 10, max_retries: int = 20, step_timeout: float = 0, n_threads: int = 1, summarize: bool = False):
 
     # Input validation
     if model not in ANTHROPIC_MODELS and model not in OLLAMA_MODELS and model not in OPENAI_MODELS and model not in MISTRALAI_MODELS and model not in GOOGLE_MODELS and model not in AMAZON_MODELS and model not in COHERE_MODELS:
@@ -90,24 +92,36 @@ async def create_agent(request: Request, response: Response, model: str = "azure
 @app.get("/agent/query/", tags=["agent"])
 async def query_agent(request: Request, response: Response, agentid: uuid.UUID, q: str):    
     tpa = None
-    #try:
-    with open(f"./created_agents/{agentid}.json", 'r') as fp:
-        agent = json.load(fp)
 
-        print("==agent==")
-        print(agent)
+    if agentid not in MODEL_CACHE:
+        try:
+            with open(f"./created_agents/{agentid}.json", 'r') as fp:
+                agent = json.load(fp)
+                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer)
+                MODEL_CACHE[agentid] = tpa
 
-        tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer)
-#except Exception as e:
-    #print("Error loading agent from file.")
-    #print(e)
-    #tpa = None
+        except Exception as e:
+            print("Error loading agent from file.")
+            print(e)
+            tpa = None
+    else:
+        print("Fetching agent from cache")
+        tpa = MODEL_CACHE[agentid]
 
     if tpa is None:
         response.status_code = 400
         return {"response": f"Error: agent {agentid} not found or unable to be loaded. Did you initialize the agent?"}
     
-    res = tpa.run(q)
+    res = None
+
+    try:
+        res = tpa.run(q)
+    except Exception as e:
+        print("Error running agent.")
+        print(e)
+        response.status_code = 400
+        return {"response": f"Error: agent {agentid} failed to run with message: {e}."}
+    
     return {"response": res}
 
 @app.get("/models", tags=["models"])
