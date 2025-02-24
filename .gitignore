@@ -18,6 +18,7 @@ reports/
 images/
 meetings/
 
+**/resources/*
 **/.env
 __pycache__
 .venv
