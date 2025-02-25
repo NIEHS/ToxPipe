@@ -11,7 +11,7 @@ from langchain.llms import BaseLLM
 from langchain_core.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
 from random import sample
-load_dotenv()
+load_dotenv('../../../.config/.env')
 
 def unique(l):
     ls = set(l)

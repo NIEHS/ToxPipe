@@ -28,7 +28,7 @@ import concurrent.futures
 from .multi import *
 # Load environment variables
 from dotenv import load_dotenv
-load_dotenv('./.env')
+load_dotenv('../.config/.env')
 # Prompts
 from .prompts_chem import PROMPT
 # Other

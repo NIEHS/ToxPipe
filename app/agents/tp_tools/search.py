@@ -9,7 +9,7 @@ from langchain.tools import BaseTool
 from langchain_core.prompts import ChatPromptTemplate
 from time import time
 from dotenv import load_dotenv
-load_dotenv('../../.env')
+load_dotenv('../../../.config/.env')
 
 N_PAPERS = 15
 

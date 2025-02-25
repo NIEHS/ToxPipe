@@ -14,7 +14,7 @@ from rxn4chemistry import RXN4ChemistryWrapper  # type: ignore
 from .utils import is_smiles
 
 from dotenv import load_dotenv
-load_dotenv('../../.env')
+load_dotenv('../../../.config/.env')
 
 
 __all__ = ["RXNPredict", "RXNRetrosynthesis"]

@@ -11,7 +11,7 @@ from langgraph.checkpoint.postgres import PostgresSaver
 from psycopg_pool import ConnectionPool
 import os
 from dotenv import load_dotenv
-load_dotenv('./app/.env')
+load_dotenv('.config/.env')
 
 # Persistent memory
 # Establish Postgres Connection for ToxPipe
@@ -84,6 +84,7 @@ async def create_agent(request: Request, response: Response, model: str = "azure
 
     agent = {"agentid": str(agentid), "model": model, "temp": temp, "max_iterations": max_iterations, "max_retries":max_retries, "step_timeout":step_timeout, "n_threads":n_threads, "summarize":summarize, "date_created":str(datetime.datetime.now())}
 
+    os.makedirs("./created_agents", exist_ok=True)
     with open(f"./created_agents/{agentid}.json", 'w') as fp:
         json.dump(agent, fp)
     return agent
