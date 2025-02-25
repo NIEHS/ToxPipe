@@ -6,10 +6,14 @@
 .config/nginx/dhparam.pem
 .config/heimdall/nginx/dhparams.pem
 .config/heimdall/www/app.sqlite
+.config/.env
 .vscode/saddlerto.code-workspace
 docs/data/
 .Rproj.user
 .env
+.langchain.db
+created_agents/
+rsconnect-python/
 
 /.luarc.json
 .vscode/settings.json
