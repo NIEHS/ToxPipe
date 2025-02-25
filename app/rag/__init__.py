@@ -50,8 +50,13 @@ def createChains(llm, temperature):
 def query(query_text: str, llm: str ='azure-gpt-4o', temperature: float=0) -> str:
     '''
     Provides response to user query
-    '''
     
+    :param query_text: User query
+    :param llm: Name of the LLM
+    :param temperature: Temperature
+    :return: Response to user query
+    '''
+
     custom_chain_pr, custom_chain = createChains(llm=llm, temperature=temperature)
 
     keywords = custom_chain_pr.invoke(query_text)
