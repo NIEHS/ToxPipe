@@ -2,13 +2,14 @@ from .llms import getOpenAIModel
 from .prompts import getPrompt, PromptPreRetrieval, PromptRAG
 from .retrievers import CustomRetriever
 from .output_parsers import CustomOutputParser, PreRetrievalOutputParserSchema
+from langchain.llms import BaseLLM
 
-def createChains(llm, temperature):
+def createChains(llm):
 
     # -----------------------------------------------------------------------
     # LLM
     # -----------------------------------------------------------------------
-    llm = getOpenAIModel(llm, temperature=temperature)
+    # inherit from agentic LLM
 
     # -----------------------------------------------------------------------
     # Prompt
@@ -47,7 +48,7 @@ def createChains(llm, temperature):
     return custom_chain_pr, custom_chain
 
 # -----------------------------------------------------------------------
-def query(query_text: str, llm: str ='azure-gpt-4o', temperature: float=0) -> str:
+def query(query_text: str, llm: BaseLLM) -> str:
     '''
     Provides response to user query
     
@@ -57,7 +58,7 @@ def query(query_text: str, llm: str ='azure-gpt-4o', temperature: float=0) -> st
     :return: Response to user query
     '''
 
-    custom_chain_pr, custom_chain = createChains(llm=llm, temperature=temperature)
+    custom_chain_pr, custom_chain = createChains(llm=llm)
 
     keywords = custom_chain_pr.invoke(query_text)
 

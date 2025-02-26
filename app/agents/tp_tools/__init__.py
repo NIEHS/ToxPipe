@@ -6,3 +6,4 @@ from .rxn4chem import *  # noqa
 from .safety import *  # noqa
 from .gene_expression import *  # noqa
 from .cbt import * # noqa
+from .ragsearch import * # noqa

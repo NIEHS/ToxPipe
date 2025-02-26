@@ -41,9 +41,11 @@ BAD_TOOL_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', 'm
 
 def _make_llm(model, api_version, temp, max_retries):
     llm = AzureChatOpenAI(
-        temperature=temp,
         model_name=model,
-        max_retries=max_retries
+        temperature=temp,
+        max_retries=max_retries,
+        max_tokens=None,
+        timeout=None
     )
     return llm
 
@@ -65,7 +67,7 @@ class ToxPipeAgent:
         step_timeout=0, # maximum time in seconds to take per recursion
         n_agents=1, # number of parallel agents to run - set to 1 for no parallelism. Higher values better for more complicated queries to help reduce variance
         summarize=False, # if True, will summarize output. Ignored and always treated as True if n_agents > 1.
-        verbose=False,
+        verbose=True,
         auth=False,
         checkpointer=None
     ):

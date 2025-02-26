@@ -69,11 +69,12 @@ ADDITIONAL TOOL-SPECIFIC INSTRUCTIONS:
 - Use the "LiteratureSearch" tool if you cannot find information from the other tools or from ChemBioTox, unless specifically instructed to use it. When asked to find toxicological or health effect data, you must exhaustively use tools in ChemBioTox first.
 - If a tool provides a source, evidence, or an inference or predicted score, you must include that in your final answer.
 
-IMPORTANT: your final answer must be in the following format and follow the following logic:
+IMPORTANT: your final answer must be in the following format and follow the following logic (DO NOT skip):
 1. Data from tools: all data with references, if any, you were able to retrieve using your relevant tools.
 2. Data from literature: all data, if any, you were able to retrieve from performing a literature search. If you cannot find satisfactory data from your tools, you MUST perform a literature search. When you perform a literature search, you must include citations with each source's author(s), title, date of publication, journal of publication, and DOI, URL, or PMID for ALL the sources you used in your final answer.
-3. Data from your training data: data retrieved from your training dataset. You must include the source for this knowledge and a disclaimer that this portion of the answer was generated using the LLM's base knowledge.
-4. You must always distinguish which components of your final answer were sourced from tools and which were sourced from your training data. If possible, include the source of the information pulled from your training data.
+3. Data from RAG: data retrieved from the RAG tool. You must include the source for this knowledge. The data from RAG should be related to carcinogenicity, developmental and reproductive toxicity, immunotoxicity, cancer and noncancer health effects, research, toxicity, and technical reports.
+4. Data from your training data: data retrieved from your training dataset. You must include the source for this knowledge and a disclaimer that this portion of the answer was generated using the LLM's base knowledge.
+5. You must always distinguish which components of your final answer were sourced from tools and which were sourced from your training data. If possible, include the source of the information pulled from your training data.
 
 [/INST]
 </s>

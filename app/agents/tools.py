@@ -3,6 +3,7 @@ from .tp_tools import *
 
 def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
     all_tools = [
+        QueryRAG(llm=llm),
         Name2SMILES(),
         Query2CAS(),
         PatentCheck(),
