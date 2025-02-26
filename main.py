@@ -1,8 +1,15 @@
 
 # -*- coding: utf-8 -*-
 from fastapi import FastAPI, Request, Response
+
+# use locally
 from .app.agents import toxpipe as tp
 from .app.agents import tools as tl
+
+# use on posit connect
+#from app.agents import toxpipe as tp
+#from app.agents import tools as tl
+
 from langchain.tools.render import render_text_description
 import json
 import datetime
@@ -124,6 +131,43 @@ async def query_agent(request: Request, response: Response, agentid: uuid.UUID, 
         return {"response": f"Error: agent {agentid} failed to run with message: {e}."}
     
     return {"response": res}
+
+
+@app.get("/agent/rag/", tags=["agent"])
+async def query_rag(request: Request, response: Response, agentid: uuid.UUID, q: str):    
+    tpa = None
+
+    if agentid not in MODEL_CACHE:
+        try:
+            with open(f"./created_agents/{agentid}.json", 'r') as fp:
+                agent = json.load(fp)
+                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer)
+                MODEL_CACHE[agentid] = tpa
+
+        except Exception as e:
+            print("Error loading agent from file.")
+            print(e)
+            tpa = None
+    else:
+        print("Fetching agent from cache")
+        tpa = MODEL_CACHE[agentid]
+
+    if tpa is None:
+        response.status_code = 400
+        return {"response": f"Error: agent {agentid} not found or unable to be loaded. Did you initialize the agent?"}
+    
+    res = None
+
+    try:
+        res = tpa.run_rag(q)
+    except Exception as e:
+        print("Error running agent.")
+        print(e)
+        response.status_code = 400
+        return {"response": f"Error: agent {agentid} failed to run with message: {e}."}
+    
+    return {"response": res}
+
 
 @app.get("/models", tags=["models"])
 async def view_supported_models(request: Request, response: Response):

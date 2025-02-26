@@ -1,5 +1,4 @@
 # LangChain/Graph agent creation
-#from langgraph.prebuilt import create_react_agent
 from .toxpipe_agent_executor import create_react_agent
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.message import add_messages
@@ -22,6 +21,7 @@ tools = FileManagementToolkit(
     selected_tools=["read_file", "write_file", "list_directory"],
 ).get_tools()
 read_tool, write_tool, list_tool = tools
+
 from .tools import make_tools
 # Multiprocessing
 import concurrent.futures
@@ -36,6 +36,8 @@ from typing import Sequence
 from typing_extensions import Annotated, TypedDict
 import os
 
+from ..rag import query
+
 # Handle models that have issues reading tools via LangChain's tool API. We will have to add these manually as a prompt.
 BAD_TOOL_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', 'mixtral-8x7b-instruct', 'llama3-1-70b', 'claude-3-sonnet', 'amazon-titan-text-premier', 'cohere-command-r-plus']
 
@@ -43,9 +45,7 @@ def _make_llm(model, api_version, temp, max_retries):
     llm = AzureChatOpenAI(
         model_name=model,
         temperature=temp,
-        max_retries=max_retries,
-        max_tokens=None,
-        timeout=None
+        max_retries=max_retries
     )
     return llm
 
@@ -147,3 +147,15 @@ class ToxPipeAgent:
         summary = summary_chain.invoke({"n_agents": n_agents, "input": input, "res": res})
 
         return summary.content
+    
+    def run_rag(self, input):
+        try:
+            rag_res = query(input, llm=self.llm)
+            if(len(rag_res) < 1):
+                return f"RAG did not find any results for query: {input}."
+            return rag_res
+        except Exception as e:
+            print("Error running RAG.")
+            print(e)
+            return f"Error: RAG failed to run with message: {e}."
+    
