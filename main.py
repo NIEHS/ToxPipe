@@ -3,12 +3,12 @@
 from fastapi import FastAPI, Request, Response
 
 # use locally
-from .app.agents import toxpipe as tp
-from .app.agents import tools as tl
+#from .app.agents import toxpipe as tp
+#from .app.agents import tools as tl
 
 # use on posit connect
-#from app.agents import toxpipe as tp
-#from app.agents import tools as tl
+from app.agents import toxpipe as tp
+from app.agents import tools as tl
 
 from langchain.tools.render import render_text_description
 import json
@@ -71,6 +71,11 @@ AUTH_MODE = False
 VERBOSE = False
 
 MODEL_CACHE = {}
+
+
+@app.get("/help/")
+async def help(request: Request, response: Response):
+    return {"response": f"use the /agent/create/ endpoint to define an agent with the specified parameters. If the agent was successfully created, this endpoint will return a UUID for the agent. Use the /agent/query/ endpoint to query the agent with the specified UUID and query string. Increasing agent temperature may increase answer variance, but may also increase the likelihood of nonsensical answers. Increasing max iterations may help for complex queries that need many steps to process. Increasing max retries may help if queries to the agent repeatedly fail. Setting n_threads > 1 spawns n_threads copies of the agent to process the query in parallel, which may generate a more comprehensive answer; when n_threads = 1, only a single instance of the agent is run. When summarize is set to True, the agent will attempt to summarize the output of the query: this is automaticalyl set to true when n_threads > 1."}
 
 @app.get("/agent/create/", tags=["agent"])
 async def create_agent(request: Request, response: Response, model: str = "azure-gpt-4o", temp: float = 0, max_iterations: int = 10, max_retries: int = 100, step_timeout: float = 0, n_threads: int = 1, summarize: bool = False):
