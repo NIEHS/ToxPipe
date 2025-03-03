@@ -3,12 +3,12 @@
 from fastapi import FastAPI, Request, Response
 
 # use locally
-#from .app.agents import toxpipe as tp
-#from .app.agents import tools as tl
+from .app.agents import toxpipe as tp
+from .app.agents import tools as tl
 
 # use on posit connect
-from app.agents import toxpipe as tp
-from app.agents import tools as tl
+#from app.agents import toxpipe as tp
+#from app.agents import tools as tl
 
 from langchain.tools.render import render_text_description
 import json
@@ -66,9 +66,10 @@ GOOGLE_MODELS = ['gemini-1.5-pro'] # TODO - VertexAIException BadRequestError - 
 AMAZON_MODELS = ['amazon-titan-text-premier']
 COHERE_MODELS = ['cohere-command-r-plus']
 
-# Must be False for public API, True for Private API. When in doubt, set to False.
-AUTH_MODE = False
+
+AUTH_MODE = False # Must be False for public API, True for Private API. When in doubt, set to False.
 VERBOSE = False
+CACHE = False
 
 MODEL_CACHE = {}
 
@@ -92,7 +93,6 @@ async def create_agent(request: Request, response: Response, model: str = "azure
         return {"response": f"Error: 'n_threads' must be 5 or less."}
 
     agentid = uuid.uuid4()
-    #tpa = tp.ToxPipeAgent(name=agentid, model=model, temp=temp, max_iterations=max_iterations, max_retries=max_retries, step_timeout=step_timeout, n_agents=n_threads, summarize=summarize, verbose=False, auth=AUTH_MODE)
 
     agent = {"agentid": str(agentid), "model": model, "temp": temp, "max_iterations": max_iterations, "max_retries":max_retries, "step_timeout":step_timeout, "n_threads":n_threads, "summarize":summarize, "date_created":str(datetime.datetime.now())}
 
@@ -110,7 +110,7 @@ async def query_agent(request: Request, response: Response, agentid: uuid.UUID, 
         try:
             with open(f"./created_agents/{agentid}.json", 'r') as fp:
                 agent = json.load(fp)
-                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer)
+                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE)
                 MODEL_CACHE[agentid] = tpa
 
         except Exception as e:
@@ -146,7 +146,7 @@ async def query_rag(request: Request, response: Response, agentid: uuid.UUID, q:
         try:
             with open(f"./created_agents/{agentid}.json", 'r') as fp:
                 agent = json.load(fp)
-                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer)
+                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE)
                 MODEL_CACHE[agentid] = tpa
 
         except Exception as e:

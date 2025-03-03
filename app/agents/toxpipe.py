@@ -67,12 +67,14 @@ class ToxPipeAgent:
         step_timeout=0, # maximum time in seconds to take per recursion
         n_agents=1, # number of parallel agents to run - set to 1 for no parallelism. Higher values better for more complicated queries to help reduce variance
         summarize=False, # if True, will summarize output. Ignored and always treated as True if n_agents > 1.
-        verbose=True,
+        verbose=False,
         auth=False,
-        checkpointer=None
+        checkpointer=None,
+        cache=False # If true, will cache repeat requests to avoid making duplicate API calls
     ):
         self.llm = _make_llm(model, api_version, temp, max_retries)
-        set_llm_cache(SQLiteCache(database_path=".langchain.db")) # set cache to avoid making the same API calls over and over again
+        if cache == True:
+            set_llm_cache(SQLiteCache(database_path=".langchain.db")) # set cache to avoid making the same API calls over and over again
         self.tools = make_tools(self.llm, verbose=verbose, auth=auth)
         self.n_agents = n_agents
         self.summarize = summarize
