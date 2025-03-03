@@ -475,22 +475,23 @@ class QueryCTDGenes(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/genes?dtxsid={dtxsid}",
+            f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/genes/llm?dtxsid={dtxsid}",
             headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
         )
         res = res.json()
+
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        ctd_genes = res['anno_ctd_genes']
+        ctd_genes = res
         ctd_genes_list = []
         for i in ctd_genes:
-            if 'interaction' not in i:
+            if 'interaction' not in i or 'genes' not in i:
                 continue
-            ctd_genes_list.append(f"{i['interaction']}")
+            ctd_genes_list.append(f"{i['interaction']} of {i['genes']}")
 
         ctd_genes_list = unique(ctd_genes_list)
 
-        response = f"The chemical {dtxsid} has the following gene interactions (retrieved from the CTD): {';'.join(ctd_genes_list)}"
+        response = f"The chemical {dtxsid} has the following gene interactions (retrieved from the CTD): {'; '.join(ctd_genes_list)}"
         if len(ctd_genes_list) < 1:
             response = f"The chemical {dtxsid} does not have any gene information in the CTD."
         return(response)
