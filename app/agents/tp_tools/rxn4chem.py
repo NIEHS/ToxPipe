@@ -10,6 +10,7 @@ from langchain_community.chat_models import ChatOpenAI
 from langchain.schema import HumanMessage
 from langchain.tools import BaseTool
 from rxn4chemistry import RXN4ChemistryWrapper  # type: ignore
+import os
 
 from .utils import is_smiles
 
