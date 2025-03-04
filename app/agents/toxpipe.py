@@ -41,11 +41,12 @@ from ..rag import query
 # Handle models that have issues reading tools via LangChain's tool API. We will have to add these manually as a prompt.
 BAD_TOOL_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', 'mixtral-8x7b-instruct', 'llama3-1-70b', 'claude-3-sonnet', 'amazon-titan-text-premier', 'cohere-command-r-plus']
 
-def _make_llm(model, api_version, temp, max_retries):
+def _make_llm(model, api_version, temp, max_retries, seed):
     llm = AzureChatOpenAI(
         model_name=model,
         temperature=temp,
-        max_retries=max_retries
+        max_retries=max_retries,
+        seed=seed
     )
     return llm
 
@@ -70,9 +71,10 @@ class ToxPipeAgent:
         verbose=False,
         auth=False,
         checkpointer=None,
-        cache=False # If true, will cache repeat requests to avoid making duplicate API calls
+        cache=False, # If true, will cache repeat requests to avoid making duplicate API calls
+        seed=1
     ):
-        self.llm = _make_llm(model, api_version, temp, max_retries)
+        self.llm = _make_llm(model, api_version, temp, max_retries, seed)
         if cache == True:
             set_llm_cache(SQLiteCache(database_path=".langchain.db")) # set cache to avoid making the same API calls over and over again
         self.tools = make_tools(self.llm, verbose=verbose, auth=auth)
@@ -82,6 +84,7 @@ class ToxPipeAgent:
         self.max_retries = max_retries
         self.thread_id = name
         self.checkpointer = checkpointer
+        self.seed = seed
         manual_tool_support = []
 
         # If we use a model that doesn't fully support tools, then we need to manually add the tools as part of the prompt

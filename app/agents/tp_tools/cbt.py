@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 from random import sample
 load_dotenv('../../../.config/.env')
 
+MAX_RESULTS = os.environ.get("TOXPIPE_CBT_MAX_RESULTS")
+
 def unique(l):
     ls = set(l)
     unique_list = (list(ls))
@@ -491,7 +493,11 @@ class QueryCTDGenes(BaseTool):
 
         ctd_genes_list = unique(ctd_genes_list)
 
-        response = f"The chemical {dtxsid} has the following gene interactions (retrieved from the CTD): {'; '.join(ctd_genes_list)}"
+        if len(ctd_genes_list) > MAX_RESULTS:
+            ctd_genes_list = sample(ctd_genes_list, MAX_RESULTS)
+
+
+        response = f"The chemical {dtxsid} has the following possible gene interactions (retrieved from the CTD): {'; '.join(ctd_genes_list)}"
         if len(ctd_genes_list) < 1:
             response = f"The chemical {dtxsid} does not have any gene information in the CTD."
         return(response)
@@ -864,16 +870,16 @@ class QueryCBTAlertsMulti(BaseTool):
 
             # taking subset makes the thought process much faster
             alerts_list_ochem = unique(alerts_list_ochem)
-            if len(alerts_list_ochem) > 10:
-                alerts_list_ochem = sample(alerts_list_ochem, 10)
+            if len(alerts_list_ochem) > MAX_RESULTS:
+                alerts_list_ochem = sample(alerts_list_ochem, MAX_RESULTS)
 
             alerts_list_chembl = unique(alerts_list_chembl)
-            if len(alerts_list_chembl) > 10:
-                alerts_list_chembl = sample(alerts_list_chembl, 10)
+            if len(alerts_list_chembl) > MAX_RESULTS:
+                alerts_list_chembl = sample(alerts_list_chembl, MAX_RESULTS)
 
             alerts_list_saagar = unique(alerts_list_saagar)
-            if len(alerts_list_saagar) > 10:
-                alerts_list_saagar = sample(alerts_list_saagar, 10)
+            if len(alerts_list_saagar) > MAX_RESULTS:
+                alerts_list_saagar = sample(alerts_list_saagar, MAX_RESULTS)
 
             alerts_list = alerts_list_ochem + alerts_list_chembl + alerts_list_saagar
 
@@ -944,7 +950,7 @@ class QueryCBTInVitroDB(BaseTool):
         """Use the tool asynchronously."""
         raise NotImplementedError()
 
-# CTD Cellular Components
+# CTD Biological Processes
 class QueryCTDBP(BaseTool):
     name: str = "QueryCTDBP"
     description: str = "Input a DTXSID to get biological process data from CTD data in ChemBioTox. These processes include apoptosis, metabolism, development, regulation, etc."
@@ -969,10 +975,16 @@ class QueryCTDBP(BaseTool):
         exp_list = []
         for i in exp:
             if 'go_term_name' in i and 'corrected_pvalue' in i:
-                exp_list.append(f"{i['go_term_name']} (pvalue: {i['corrected_pvalue']})")
+                if i['corrected_pvalue'] < 0.05:
+                    exp_list.append(f"{i['go_term_name']}")
             else:
                 continue
         exp_list = unique(exp_list)
+
+        # Reduce size if returned data is huge
+        if len(exp_list) > MAX_RESULTS:
+            exp_list = sample(exp_list, MAX_RESULTS)
+
         response = f"The chemical {dtxsid} may be associated with the following biological processes in CTD: {'; '.join(exp_list)}"
         if len(exp_list) < 1:
             response = f"The chemical {dtxsid} does not have any biological process data in the ChemBioTox Database."
@@ -1007,10 +1019,15 @@ class QueryCTDCC(BaseTool):
         exp_list = []
         for i in exp:
             if 'go_term_name' in i and 'corrected_pvalue' in i:
-                exp_list.append(f"{i['go_term_name']} (pvalue: {i['corrected_pvalue']})")
+                if i['corrected_pvalue'] < 0.05:
+                    exp_list.append(f"{i['go_term_name']}")
             else:
                 continue
         exp_list = unique(exp_list)
+        # Reduce size if returned data is huge
+        if len(exp_list) > MAX_RESULTS:
+            exp_list = sample(exp_list, MAX_RESULTS)
+
         response = f"The chemical {dtxsid} may have the following cellular components in CTD: {'; '.join(exp_list)}"
         if len(exp_list) < 1:
             response = f"The chemical {dtxsid} does not have any cellular component data in the ChemBioTox Database."
@@ -1020,7 +1037,7 @@ class QueryCTDCC(BaseTool):
         """Use the tool asynchronously."""
         raise NotImplementedError()
     
-# CTD Molecular Function
+# CTD Molecular Functions
 class QueryCTDMF(BaseTool):
     name: str = "QueryCTDMF"
     description: str = "Input a DTXSID to return molecular function from CTD data in ChemBioTox."
@@ -1044,11 +1061,16 @@ class QueryCTDMF(BaseTool):
         exp_list = []
         for i in exp:
             if 'go_term_name' in i and 'corrected_pvalue' in i:
-                exp_list.append(f"{i['go_term_name']} (pvalue: {i['corrected_pvalue']})")
+                if i['corrected_pvalue'] < 0.05:
+                    exp_list.append(f"{i['go_term_name']}")
             else:
                 continue
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} may have the following molecular functions in CTD: {'; '.join(exp_list)}"
+
+        if len(exp_list) > MAX_RESULTS:
+            exp_list = sample(exp_list, MAX_RESULTS)
+
+        response = f"The chemical {dtxsid} may have the following molecular functions according to CTD: {'; '.join(exp_list)}"
         if len(exp_list) < 1:
             response = f"The chemical {dtxsid} does not have any molecular function data in the ChemBioTox Database."
         return(response)

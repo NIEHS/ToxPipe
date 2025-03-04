@@ -67,9 +67,30 @@ AMAZON_MODELS = ['amazon-titan-text-premier']
 COHERE_MODELS = ['cohere-command-r-plus']
 
 
-AUTH_MODE = False # Must be False for public API, True for Private API. When in doubt, set to False.
-VERBOSE = False
-CACHE = False
+AUTH_MODE = os.environ.get("TOXPIPE_AUTH_MODE")
+VERBOSE = os.environ.get("TOXPIPE_VERBOSE")
+CACHE = os.environ.get("TOXPIPE_CACHE")
+
+if AUTH_MODE == "True":
+    AUTH_MODE = True
+elif AUTH_MODE == "False":    
+    AUTH_MODE = False
+else:
+    raise ValueError("TOXPIPE_AUTH_MODE must be set to either 'True' or 'False' in the .env file.")
+
+if VERBOSE == "True":
+    VERBOSE = True
+elif VERBOSE == "False":    
+    VERBOSE = False
+else:
+    raise ValueError("TOXPIPE_VERBOSE must be set to either 'True' or 'False' in the .env file.")
+
+if CACHE == "True":
+    CACHE = True
+elif CACHE == "False":    
+    CACHE = False
+else:
+    raise ValueError("TOXPIPE_CACHE must be set to either 'True' or 'False' in the .env file.")
 
 MODEL_CACHE = {}
 
@@ -79,7 +100,7 @@ async def help(request: Request, response: Response):
     return {"response": f"use the /agent/create/ endpoint to define an agent with the specified parameters. If the agent was successfully created, this endpoint will return a UUID for the agent. Use the /agent/query/ endpoint to query the agent with the specified UUID and query string. Increasing agent temperature may increase answer variance, but may also increase the likelihood of nonsensical answers. Increasing max iterations may help for complex queries that need many steps to process. Increasing max retries may help if queries to the agent repeatedly fail. Setting n_threads > 1 spawns n_threads copies of the agent to process the query in parallel, which may generate a more comprehensive answer; when n_threads = 1, only a single instance of the agent is run. When summarize is set to True, the agent will attempt to summarize the output of the query: this is automaticalyl set to true when n_threads > 1."}
 
 @app.get("/agent/create/", tags=["agent"])
-async def create_agent(request: Request, response: Response, model: str = "azure-gpt-4o", temp: float = 0, max_iterations: int = 10, max_retries: int = 100, step_timeout: float = 0, n_threads: int = 1, summarize: bool = False):
+async def create_agent(request: Request, response: Response, model: str = "azure-gpt-4o", temp: float = 0, max_iterations: int = 10, max_retries: int = 100, step_timeout: float = 0, n_threads: int = 1, summarize: bool = False, seed: int = 1):
 
     # Input validation
     if model not in ANTHROPIC_MODELS and model not in OLLAMA_MODELS and model not in OPENAI_MODELS and model not in MISTRALAI_MODELS and model not in GOOGLE_MODELS and model not in AMAZON_MODELS and model not in COHERE_MODELS:
@@ -94,7 +115,7 @@ async def create_agent(request: Request, response: Response, model: str = "azure
 
     agentid = uuid.uuid4()
 
-    agent = {"agentid": str(agentid), "model": model, "temp": temp, "max_iterations": max_iterations, "max_retries":max_retries, "step_timeout":step_timeout, "n_threads":n_threads, "summarize":summarize, "date_created":str(datetime.datetime.now())}
+    agent = {"agentid": str(agentid), "model": model, "temp": temp, "max_iterations": max_iterations, "max_retries":max_retries, "step_timeout":step_timeout, "n_threads":n_threads, "summarize":summarize, "seed":seed, "date_created":str(datetime.datetime.now())}
 
     os.makedirs("./created_agents", exist_ok=True)
     with open(f"./created_agents/{agentid}.json", 'w') as fp:
@@ -110,7 +131,7 @@ async def query_agent(request: Request, response: Response, agentid: uuid.UUID, 
         try:
             with open(f"./created_agents/{agentid}.json", 'r') as fp:
                 agent = json.load(fp)
-                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE)
+                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE, seed=agent["seed"])
                 MODEL_CACHE[agentid] = tpa
 
         except Exception as e:
