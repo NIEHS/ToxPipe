@@ -307,7 +307,6 @@ class SimilarControlChemCheck(BaseTool):
         try:
             if not is_smiles(smiles):
                 return "Please input a valid SMILES string."
-
             max_sim = (
                 cw_df["smiles"]
                 .apply(lambda x: self.tanimoto(smiles, x))
