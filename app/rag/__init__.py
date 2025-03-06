@@ -3,6 +3,7 @@ from .prompts import getPrompt, PromptPreRetrieval, PromptRAG
 from .retrievers import CustomRetriever
 from .output_parsers import CustomOutputParser, PreRetrievalOutputParserSchema
 from langchain.llms import BaseLLM
+from langchain_core.prompts import PromptTemplate
 
 def createChains(llm):
 
@@ -16,7 +17,6 @@ def createChains(llm):
     # -----------------------------------------------------------------------
     prompt_pr = getPrompt(PromptPreRetrieval)
     prompt = getPrompt(PromptRAG)
-    
 
     # -----------------------------------------------------------------------
     # Retriever

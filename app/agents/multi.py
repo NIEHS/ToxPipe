@@ -9,15 +9,11 @@ def run_parallel(self=None, input="", user_id=""):
             self.config,
             stream_mode="values",
         ):
-            last = chunk["messages"][-1].content # Just get last message in the chain - this is the LLM's final answer
+            last = chunk["messages"][-1]#.content # Just get last message in the chain - this is the LLM's final answer
+
     except GraphRecursionError: # Throw error if chain reaches the max number of recursions/iterations
         last = "Agent stopped due to max iterations."
     except TimeoutError: # Throw an error if a step takes too long
         last = "Agent stopped due to a step timeout."
 
-    outputs = last.replace("Final Answer: ", "") # Strip "Final Answer: " if it appears in the final response
-    outputs = outputs.replace("<result>", "").replace("</result>", "") # Strip <result> and </result> - this happens with Anthropic models
-    outputs = outputs.strip() # Strip leading & trailing whitespace from final answer
-    
-
-    return(outputs)
+    return(last)

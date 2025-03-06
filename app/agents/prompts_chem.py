@@ -76,10 +76,17 @@ IMPORTANT: your final answer must be in the following format and follow the foll
 4. Data from your training data: data retrieved from your training dataset. You must include the source for this knowledge and a disclaimer that this portion of the answer was generated using the LLM's base knowledge.
 5. You must always distinguish which components of your final answer were sourced from tools and which were sourced from your training data. If possible, include the source of the information pulled from your training data.
 
+The query you must respond to is as follows:
+{messages}
+
+Format your response as follows:
+{format_instructions}
+
 [/INST]
 </s>
 """
 
 
 
-PROMPT = ChatPromptTemplate.from_messages([("system", TEMPLATE_NEW), MessagesPlaceholder(variable_name="messages")])
+#PROMPT = ChatPromptTemplate.from_messages([("system", TEMPLATE_NEW), MessagesPlaceholder(variable_name="messages")])
+PROMPT = TEMPLATE_NEW
