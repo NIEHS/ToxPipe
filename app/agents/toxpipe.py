@@ -14,6 +14,7 @@ from tempfile import TemporaryDirectory
 from langchain_community.agent_toolkits import FileManagementToolkit
 from langchain_core.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field, model_validator
+import json
 
 # Create temporary working directory
 working_directory = TemporaryDirectory()
@@ -175,8 +176,16 @@ class ToxPipeAgent:
             summary_chain = summary_prompt | self.llm
             summary = summary_chain.invoke({"n_agents": n_agents, "input": input, "res": res})
             res = summary
+
+        try:
+            json.loads(res)
+        except json.JSONDecodeError: # if not json, just return raw response
+            return res
+
         res = self.parser.invoke(res)
         return res.response
+        
+        
     
     def run_rag(self, input):
         try:
