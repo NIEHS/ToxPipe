@@ -46,6 +46,7 @@ from ..rag import query
 # Handle models that have issues reading tools via LangChain's tool API. We will have to add these manually as a prompt.
 BAD_TOOL_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', 'mixtral-8x7b-instruct', 'llama3-1-70b', 'claude-3-sonnet', 'amazon-titan-text-premier', 'cohere-command-r-plus']
 
+# Create LLM handler - always use AzureChatOpenAI since all models are accessed through NIEHS's litellm instance.
 def _make_llm(model, api_version, temp, max_retries, seed):
     llm = AzureChatOpenAI(
         model_name=model,
@@ -55,9 +56,9 @@ def _make_llm(model, api_version, temp, max_retries, seed):
     )
     return llm
 
+# format for output parser
 class Response(BaseModel):
     response: str = Field(description="Full string response from the LLM containing information from tools, literature, RAG, and training data.")
-
     @model_validator(mode="before")
     @classmethod
     def valid_response(cls, values: dict) -> dict:
@@ -72,21 +73,22 @@ class ToxPipeAgent:
     """
     def __init__(
         self,
-        name,
-        model,
-        api_version=os.environ.get("OPENAI_API_VERSION"),
+        name, # UUID created by FastAPI
+        model, # LLM name
+        api_version=os.environ.get("OPENAI_API_VERSION"), # from .config/.env
         temp=0.0, # higher temperature creates more answer variance, but this is potentially better if we are doing a multi-agent approach
         max_iterations=10, # maximum number of agent recursions in chain
         max_retries=100, # maximum number of retries upon LLM failure - set this to finite to avoid token limit errors from OpenAI
         step_timeout=0, # maximum time in seconds to take per recursion
         n_agents=1, # number of parallel agents to run - set to 1 for no parallelism. Higher values better for more complicated queries to help reduce variance
         summarize=False, # if True, will summarize output. Ignored and always treated as True if n_agents > 1.
-        verbose=False,
-        auth=False,
-        checkpointer=None,
+        verbose=False, # If True, will produce verbose output but can drastically slow down the agent
+        auth=False, # If True, the agent will use the proprietary internal CBT tools. When in doubt, keep False.
+        checkpointer=None, # If not None, will save the agent state to the specified checkpointer
         cache=False, # If true, will cache repeat requests to avoid making duplicate API calls
-        seed=1
+        seed=1 # Random seed for LLM. Set the seed for more deterministic results.
     ):
+        # Initialize parameters
         self.llm = _make_llm(model, api_version, temp, max_retries, seed)
         if cache == True:
             set_llm_cache(SQLiteCache(database_path=".langchain.db")) # set cache to avoid making the same API calls over and over again
@@ -123,11 +125,12 @@ class ToxPipeAgent:
         self.agent_with_chat_history = agent_executor
         self.config = {"configurable": {"thread_id": self.thread_id}, "recursion_limit": self.max_iterations}
 
+    # Not currently used, but meant to force the agent to be serializable for pickling
     @classmethod
     def is_lc_serializable(cls) -> bool:
         return True
 
-
+    # Run the agent - i.e., query the LLM
     def run(self, input):
         n_agents = self.n_agents
         proc = []
@@ -135,17 +138,17 @@ class ToxPipeAgent:
         with concurrent.futures.ThreadPoolExecutor(max_workers=n_agents) as executor:
             for i in range(0, n_agents):
                 proc.append(executor.submit(run_parallel, self, input, i))
-        i = 0    
+
+        # Join the results of each thread into a single response
         for future in concurrent.futures.as_completed(proc):
             fr = future.result()
             if hasattr(fr, "content"):
                 fr = fr.content
             res.append(fr)
-            i += 1
         res = "\n\n".join(res)
 
+        # If we are summarizing or running multiple agents, we need to summarize the results into a single result using the following conditions
         if self.summarize == True or n_agents > 1:
-
             summary_prompt_template = """
             Previously, {n_agents} separate LLM agents were run to answer the following input from an end user:
 
@@ -177,11 +180,11 @@ class ToxPipeAgent:
             summary = summary_chain.invoke({"n_agents": n_agents, "input": input, "res": res})
             res = summary
 
+        # The final response should always be a string. If it is instead a JSON, then parse it into a string before returning.
         try:
             json.loads(res)
         except json.JSONDecodeError: # if not json, just return raw response
             return res
-
         res = self.parser.invoke(res)
         return res.response
         

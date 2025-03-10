@@ -3,12 +3,12 @@
 from fastapi import FastAPI, Request, Response
 
 # use locally
-from .app.agents import toxpipe as tp
-from .app.agents import tools as tl
+#from .app.agents import toxpipe as tp
+#from .app.agents import tools as tl
 
 # use on posit connect
-#from app.agents import toxpipe as tp
-#from app.agents import tools as tl
+from app.agents import toxpipe as tp
+from app.agents import tools as tl
 
 from langchain.tools.render import render_text_description
 import json
@@ -27,13 +27,11 @@ postgres_port = os.environ.get("TOXPIPE_POSTGRES_PORT")
 postgres_name = os.environ.get("TOXPIPE_POSTGRES_DATABASE")
 postgres_user = os.environ.get("TOXPIPE_POSTGRES_USER")
 postgres_pass = os.environ.get("TOXPIPE_POSTGRES_PASSWORD")
-
 DB_URI = f"postgresql://{postgres_user}:{postgres_pass}@{postgres_host}:{postgres_port}/{postgres_name}"
 connection_kwargs = {
     "autocommit": True,
     "prepare_threshold": 0,
 }
-
 checkpointer = None
 pool = ConnectionPool(conninfo=DB_URI, max_size=20, kwargs=connection_kwargs,)
 checkpointer = PostgresSaver(pool)
@@ -57,7 +55,10 @@ app = FastAPI(
     openapi_tags=tags_metadata,
 )
 
+# session cache for storing created agents so the API doesn't have to keep recreating them
 AGENT_DICT = {}
+
+# Supported models
 ANTHROPIC_MODELS = ['claude-3-5-sonnet', 'claude-3-sonnet', 'claude-3-haiku', 'claude-3-opus'] # haiku and opus work better
 OLLAMA_MODELS = ['llama3-1-70b', 'llama3-1-8b', 'openbiollm-llama3-70b'] # These have trouble with tools
 OPENAI_MODELS = ['azure-gpt-4o', 'azure-gpt-3.5-turbo', 'azure-gpt-4o-mini', 'azure-gpt-3.5-turbo-16k', 'azure-gpt-4-turbo-20240409', 'azure-gpt-4', 'azure-o1', 'azure-o1-mini', 'azure-o3-mini'] # These all work pretty well
@@ -66,11 +67,12 @@ GOOGLE_MODELS = ['gemini-1.5-pro'] # TODO - VertexAIException BadRequestError - 
 AMAZON_MODELS = ['amazon-titan-text-premier']
 COHERE_MODELS = ['cohere-command-r-plus']
 
+# Load environment variables from .config/.env
+AUTH_MODE = os.environ.get("TOXPIPE_AUTH_MODE") # Should usually be false unless running a secure, internal-to-NIEHS version of this API
+VERBOSE = os.environ.get("TOXPIPE_VERBOSE") # Should be false on production
+CACHE = os.environ.get("TOXPIPE_CACHE") 
 
-AUTH_MODE = os.environ.get("TOXPIPE_AUTH_MODE")
-VERBOSE = os.environ.get("TOXPIPE_VERBOSE")
-CACHE = os.environ.get("TOXPIPE_CACHE")
-
+# Convert environment variables to boolean if they are strings
 if AUTH_MODE == "True":
     AUTH_MODE = True
 elif AUTH_MODE == "False":    
@@ -94,14 +96,14 @@ else:
 
 MODEL_CACHE = {}
 
-
+# Endpoint for basic API instructions
 @app.get("/help/")
 async def help(request: Request, response: Response):
-    return {"response": f"use the /agent/create/ endpoint to define an agent with the specified parameters. If the agent was successfully created, this endpoint will return a UUID for the agent. Use the /agent/query/ endpoint to query the agent with the specified UUID and query string. Increasing agent temperature may increase answer variance, but may also increase the likelihood of nonsensical answers. Increasing max iterations may help for complex queries that need many steps to process. Increasing max retries may help if queries to the agent repeatedly fail. Setting n_threads > 1 spawns n_threads copies of the agent to process the query in parallel, which may generate a more comprehensive answer; when n_threads = 1, only a single instance of the agent is run. When summarize is set to True, the agent will attempt to summarize the output of the query: this is automaticalyl set to true when n_threads > 1."}
+    return {"response": f"Use the /agent/create/ endpoint to define an agent with the specified parameters. If the agent was successfully created, this endpoint will return a UUID for the agent. Use the /agent/query/ endpoint to query the agent with the specified UUID and query string. Increasing agent temperature may increase answer variance, but may also increase the likelihood of nonsensical answers. Increasing max iterations may help for complex queries that need many steps to process. Increasing max retries may help if queries to the agent repeatedly fail. Setting n_threads > 1 spawns n_threads copies of the agent to process the query in parallel, which may generate a more comprehensive answer; when n_threads = 1, only a single instance of the agent is run. When summarize is set to True, the agent will attempt to summarize the output of the query: this is automaticalyl set to true when n_threads > 1."}
 
+# Endpoint for creating an agent. Note that this will not actually create the agent object in memory, it just creates a JSON file with the agent parameters so that the API is "aware" that such an agent is defined and may be created later.
 @app.get("/agent/create/", tags=["agent"])
 async def create_agent(request: Request, response: Response, model: str = "azure-gpt-4o", temp: float = 0, max_iterations: int = 10, max_retries: int = 100, step_timeout: float = 0, n_threads: int = 1, summarize: bool = False, seed: int = 1):
-
     # Input validation
     if model not in ANTHROPIC_MODELS and model not in OLLAMA_MODELS and model not in OPENAI_MODELS and model not in MISTRALAI_MODELS and model not in GOOGLE_MODELS and model not in AMAZON_MODELS and model not in COHERE_MODELS:
         response.status_code = 400
@@ -112,21 +114,20 @@ async def create_agent(request: Request, response: Response, model: str = "azure
     if n_threads > 5:
         response.status_code = 400
         return {"response": f"Error: 'n_threads' must be 5 or less."}
-
-    agentid = uuid.uuid4()
-
+    agentid = uuid.uuid4() # Generate UUID for the agent
     agent = {"agentid": str(agentid), "model": model, "temp": temp, "max_iterations": max_iterations, "max_retries":max_retries, "step_timeout":step_timeout, "n_threads":n_threads, "summarize":summarize, "seed":seed, "date_created":str(datetime.datetime.now())}
-
+    # Create a JSON file with the agent parameters
     os.makedirs("./created_agents", exist_ok=True)
     with open(f"./created_agents/{agentid}.json", 'w') as fp:
         json.dump(agent, fp)
     return agent
 
-
+# Endpoint for querying an agent. This will create the agent from the JSON file (or load it from the cache if it has been previously loaded) and run the query. If the agent is not found, the API will return an error message. 
 @app.get("/agent/query/", tags=["agent"])
 async def query_agent(request: Request, response: Response, agentid: uuid.UUID, q: str):    
     tpa = None
 
+    # Check if the agent is in the cache. If not, then generate the agent from the JSON file and save to cache.
     if agentid not in MODEL_CACHE:
         try:
             with open(f"./created_agents/{agentid}.json", 'r') as fp:
@@ -138,6 +139,8 @@ async def query_agent(request: Request, response: Response, agentid: uuid.UUID, 
             print("Error loading agent from file.")
             print(e)
             tpa = None
+
+    # Otherwise, just load the agent from the cache.
     else:
         print("Fetching agent from cache")
         tpa = MODEL_CACHE[agentid]
@@ -158,7 +161,7 @@ async def query_agent(request: Request, response: Response, agentid: uuid.UUID, 
     
     return {"response": res}
 
-
+# Endpoint for querying an agent specifically using RAG and no additional tools. This will create the agent from the JSON file (or load it from the cache if it has been previously loaded) and run the query. If the agent is not found, the API will return an error message.
 @app.get("/agent/rag/", tags=["agent"])
 async def query_rag(request: Request, response: Response, agentid: uuid.UUID, q: str):    
     tpa = None
@@ -194,11 +197,12 @@ async def query_rag(request: Request, response: Response, agentid: uuid.UUID, q:
     
     return {"response": res}
 
-
+# Endpoint for viewing a list of supported models.
 @app.get("/models", tags=["models"])
 async def view_supported_models(request: Request, response: Response):
     return {"ANTHROPIC_MODELS": ANTHROPIC_MODELS, "OLLAMA_MODELS": OLLAMA_MODELS, "OPENAI_MODELS": OPENAI_MODELS, "MISTRALAI_MODELS": MISTRALAI_MODELS, "GOOGLE_MODELS": GOOGLE_MODELS, "AMAZON_MODELS": AMAZON_MODELS, "COHERE_MODELS": COHERE_MODELS}
 
+# Endpoint for viewing a list of supported tools for an agent.
 @app.get("/models/tools", tags=["models"])
 async def view_available_tools(request: Request, response: Response):
     tools = render_text_description(tl.make_tools(llm=None, auth=AUTH_MODE))
@@ -207,7 +211,5 @@ async def view_available_tools(request: Request, response: Response):
     for tool in tools:
         tmpsplit = tool.split(" - ")
         if len(tmpsplit) == 2:
-            tools_to_return.append({"tool_name": tmpsplit[0], "tool_description": tmpsplit[1]})
-
-    
+            tools_to_return.append({"tool_name": tmpsplit[0], "tool_description": tmpsplit[1]})    
     return tools_to_return

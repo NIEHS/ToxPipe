@@ -1,6 +1,7 @@
 from langchain.base_language import BaseLanguageModel
 from .tp_tools import *
 
+# Instantiate tools available for agent use
 def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
     all_tools = [
         QueryRAG(llm=llm),
@@ -38,7 +39,7 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
         QueryCTDGenes(llm=llm),
         QueryCTDCC(llm=llm),
         QueryCTDMF(llm=llm),
-        #QueryCTDBP(llm=llm),
+        QueryCTDBP(llm=llm),
         QueryPubChemProperties(llm=llm),
         QueryPubChemBioassays(llm=llm),
         QueryEPAProperties(llm=llm),

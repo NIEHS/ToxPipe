@@ -1,3 +1,5 @@
+# This is a custom, cloned implementation of LangChain's AgentExecutor so that we can modify it to better handle non-OpenAI models and for other debugging purposes.
+
 from typing import Callable, Literal, Optional, Sequence, Type, TypeVar, Union, cast
 
 from langchain_core.language_models import BaseChatModel, LanguageModelLike
@@ -26,7 +28,6 @@ from langgraph.utils.runnable import RunnableCallable
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate, MessagesPlaceholder
 from langgraph.graph.message import add_messages
 from langchain_core.output_parsers import JsonOutputParser
-from .prompts_chem import PROMPT, TEMPLATE
 from langchain.tools.render import render_text_description
 from operator import itemgetter
 import json

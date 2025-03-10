@@ -1,5 +1,6 @@
 from langgraph.errors import GraphRecursionError
 
+# Each agent thread runs this method when querying its LLM
 def run_parallel(self=None, input="", user_id=""):
     chain = self.agent_with_chat_history
     last = ""
@@ -9,7 +10,7 @@ def run_parallel(self=None, input="", user_id=""):
             self.config,
             stream_mode="values",
         ):
-            last = chunk["messages"][-1]#.content # Just get last message in the chain - this is the LLM's final answer
+            last = chunk["messages"][-1] # Just get last message in the chain - this is the LLM's final answer
 
     except GraphRecursionError: # Throw error if chain reaches the max number of recursions/iterations
         last = "Agent stopped due to max iterations."
