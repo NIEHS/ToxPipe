@@ -8,7 +8,10 @@ class CustomRetriever():
     docs_res: dict = {}
 
     def __init__(self):
-        embedding = OpenAIEmbeddings(model='text-embedding-ada-002')
+        embedding = OpenAIEmbeddings(model='text-embedding-ada-002', 
+                                     base_url=Config.env_config['OPENAI_BASE_URL'], 
+                                     api_key=Config.env_config['OPENAI_API_KEY']
+        )
         db = Chroma(collection_name='quickstart', persist_directory=str(Config.DIR_DATA), embedding_function=embedding)
         self.retriever = db.as_retriever(search_type='similarity_score_threshold', search_kwargs={'k': 5, 'score_threshold': 0.3})
 

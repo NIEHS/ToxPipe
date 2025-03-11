@@ -1,20 +1,18 @@
 from pathlib import Path
-from dotenv import dotenv_values, load_dotenv
+from dotenv import dotenv_values
 from langfuse.callback import CallbackHandler
-import os
-load_dotenv('../../.config/.env')
 
 # ---------------------------------------------------------------------------
 class Config:
-    DIR_HOME = Path(__file__).parent.parent
-    DIR_DATA = (DIR_HOME / 'rag' / 'resources')
+    DIR_HOME = Path(__file__).parent.parent.parent
+    DIR_DATA = (DIR_HOME / 'app' / 'rag' / 'resources')
 
-    env_config = dotenv_values(DIR_HOME / ".env")
+    env_config = dotenv_values(DIR_HOME / ".config" / ".env")
 
     langfuse_handler = CallbackHandler(
-        public_key=os.environ.get("LANGFUSE_PUBLIC_KEY"),
-        secret_key=os.environ.get("LANGFUSE_SECRET_KEY"),
-        host=os.environ.get("LANGFUSE_HOST")
+        public_key=env_config["LANGFUSE_PUBLIC_KEY"],
+        secret_key=env_config["LANGFUSE_SECRET_KEY"],
+        host=env_config["LANGFUSE_HOST"]
     )
 
     TOKENS_PER_LLM_CALL = 5000
