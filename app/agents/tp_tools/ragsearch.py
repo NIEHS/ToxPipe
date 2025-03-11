@@ -13,7 +13,7 @@ from ...rag import query
 
 def query_rag(q: str, llm: BaseLLM) -> str:
     try:
-        rag_res = query(q, llm=llm)
+        rag_res = query(q, llm=llm)['Response']
         if(len(rag_res) < 1):
             return f"RAG did not find any results for query: {q}."
         else: 
