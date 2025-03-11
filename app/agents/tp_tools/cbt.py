@@ -33,10 +33,12 @@ class Query2DTXSID(BaseTool):
     def _run(self, name: str) -> str:
         """Input a chemical name, return its DSSTox substance ID (DTXSID) available in ChemBioTox."""
         name = name.rstrip()
+
         res = requests.get(
             f"{os.environ.get('CBT_API_ENDPOINT')}/name2dtxsid?name={name}",
             headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
         )
+
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -57,10 +59,12 @@ class Name2DTXSID(BaseTool):
     def _run(self, name: str) -> str:
         """Input a chemical name, return its DSSTox substance ID (DTXSID) available in ChemBioTox."""
         name = name.rstrip()
+
         res = requests.get(
             f"{os.environ.get('CBT_API_ENDPOINT')}/name2dtxsid?name={name}",
             headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
         )
+
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
@@ -69,6 +73,32 @@ class Name2DTXSID(BaseTool):
             response = f"The chemical {name} has the following DSSTox Substance ID in the ChemBioTox Database: {res[0]['dsstox_substance_id']}."
         return(response)
     
+class CASRN2DTXSID(BaseTool):
+    name: str = "CASRN2DTXSID"
+    description: str = "Input a chemical's CAS number (CASRN) to return the DTXSID for that chemical from the ChemBioTox database."
+
+    def __init__(
+        self,
+    ):
+        super().__init__()
+
+    def _run(self, casrn: str) -> str:
+        """Input a chemical CASRN, return its DSSTox substance ID (DTXSID) available in ChemBioTox."""
+        casrn = casrn.rstrip()
+
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/casrn2dtxsid?casrn={casrn}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+        
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        response = f"The chemical {casrn} does not map to a DSSTox Substance ID in the ChemBioTox Database."
+        if len(res) > 0:
+            response = f"The chemical {casrn} has the following DSSTox Substance ID in the ChemBioTox Database: {res[0]['dsstox_substance_id']}."
+        return(response)
+
 class Name2SMILES(BaseTool):
     name: str = "Name2SMILES"
     description: str = "Input a chemical name and return the corresponding SMILES string."
@@ -437,18 +467,25 @@ class QueryCTDDiseases(BaseTool):
         if len(res) < 1:
             return(f"There was a problem completing the request.")
         ctd_diseases = res['anno_ctd_diseases']
+
         ctd_diseases_list_measured = []
         ctd_diseases_list_inferred = []
+        ctd_diseases_list_inferred_scores = []
+
         for i in ctd_diseases:
             if 'disease_name' not in i:
                 continue
             if 'inference_score' in i and 'inference_gene_symbol' in i:
-                ctd_diseases_list_inferred.append(f"{i['disease_name']} (inference score based on {i['inference_gene_symbol']}: {i['inference_score']})")
+                ctd_diseases_list_inferred.append(f"{i['disease_name']}")
+                ctd_diseases_list_inferred_scores.append(float(i['inference_score']))
             if 'direct_evidence' in i:
-                ctd_diseases_list_measured.append(f"{i['disease_name']} (direct evidence: {i['direct_evidence']})")
+                ctd_diseases_list_measured.append(f"{i['disease_name']}")
 
-        ctd_diseases_list_inferred = unique(ctd_diseases_list_inferred)
-        ctd_diseases_list_measured = unique(ctd_diseases_list_measured)
+        ctd_diseases_list_measured = unique(ctd_diseases_list_measured)[:MAX_RESULTS]
+
+        ctd_diseases_list_inferred = pd.DataFrame({'disease': ctd_diseases_list_inferred, 'score': ctd_diseases_list_inferred_scores})
+        ctd_diseases_list_inferred = ctd_diseases_list_inferred.sort_values(by='score', ascending=False)
+        ctd_diseases_list_inferred = ctd_diseases_list_inferred['disease'].tolist()[:MAX_RESULTS]
 
         response1 = ""
         response2 = ""

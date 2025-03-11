@@ -26,6 +26,7 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
         Name2DTXSID(),
         Query2DTXSID(),
         SMILES2DTXSID(),
+        CASRN2DTXSID(),
 
         StructuralSimilarity(),
 
