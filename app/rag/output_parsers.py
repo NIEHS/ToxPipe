@@ -27,4 +27,4 @@ class CustomOutputParser(JsonOutputParser):
         except Exception as exp:
             print(str(exp))
             response = json.dumps({'Response':data.content})
-        return response['Response']
+        return response

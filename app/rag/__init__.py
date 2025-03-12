@@ -11,7 +11,7 @@ def createChains(llm):
     # LLM
     # -----------------------------------------------------------------------
     # If agentic LLM is not provided, use a new one with model name = llm
-    if not isinstance(llm, BaseLLM):
+    if isinstance(llm, str):
         llm = getOpenAIModel(llm)
 
     # -----------------------------------------------------------------------
@@ -36,15 +36,15 @@ def createChains(llm):
     # -----------------------------------------------------------------------
     custom_chain_pr = (
         prompt_pr 
-        | llm.with_structured_output(PreRetrievalOutputParserSchema)
-        #| output_parser_pr.parseKWOutput
+        | llm#.with_structured_output(PreRetrievalOutputParserSchema)
+        | output_parser_pr.parseKWOutput
     )
 
     custom_chain = (
         {'resources': retriever.getResources, 'query': lambda x: x['query']}
         | prompt
-        | llm.with_structured_output(OutputParserSchema)
-        #| output_parser.parseResOutput
+        | llm#.with_structured_output(OutputParserSchema)
+        | output_parser.parseResOutput
     )
 
     return custom_chain_pr, custom_chain

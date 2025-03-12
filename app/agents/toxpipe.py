@@ -15,6 +15,7 @@ from langchain_community.agent_toolkits import FileManagementToolkit
 from langchain_core.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field, model_validator
 import json
+import traceback
 
 # Create temporary working directory
 working_directory = TemporaryDirectory()
@@ -199,5 +200,6 @@ class ToxPipeAgent:
         except Exception as e:
             print("Error running RAG.")
             print(e)
-            return f"Error: RAG failed to run with message: {e}."
+            error_str = f'Line number: {e.__traceback__.tb_lineno}, Description: {e}\n\n{traceback.format_exc()}'
+            return f"Error: RAG failed to run with message: {error_str}."
     

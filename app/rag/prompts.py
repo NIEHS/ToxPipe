@@ -82,16 +82,18 @@ class PromptRAG:
     Adhere to ethical standards in toxicology and maintain scientific objectivity in your assessments.
 
     **Output format**
-    - Only provide responses in string format
-    - Do NOT provide outputs in JSON format
-    - If the answer isn't available within the provided resources, show the following output in string format,
-        {EXAMPLE_NOT_FOUND}
-    - DO NOT ANSWER FROM OUTSIDE THE PROVIDED RESOURCES
-    - If answer is found, format the answer following the examples below
+    - ALWAYS provide outputs in JSON format
+    - If the answer isn't available within the provided resources, answer from your training knowledge
+    - If answer is available within the provided resources, format the answer following the examples below
 
     Example 1:
 
         {EXAMPLE_1}
+
+    - If the answer is not found anywhere, respond with a friendly message following the example below
+
+    {EXAMPLE_NOT_FOUND}
+
     """
 
     USER_PROMPT_TEMPLATE = f"""
