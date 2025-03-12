@@ -1,9 +1,9 @@
 from langchain_core.output_parsers import JsonOutputParser
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import json
 
 class PreRetrievalOutputParserSchema(BaseModel):
-    Keywords: list[str]
+    Keywords: list[str] = Field("List of 10 keywords", max_length=10)
 
 class OutputParserSchema(BaseModel):
     Response: str
