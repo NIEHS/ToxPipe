@@ -444,15 +444,29 @@ class Query2CAS(BaseTool):
         try:
             # if query is smiles
             smiles = None
+
+            print("here 1-----")
+
             if is_smiles(query):
                 smiles = query
+
+            print("===SMILES 2===")
+            print(smiles)
+
             cas = query2cas(query, self.url_cid, self.url_data)
+
+            print("here 2-----")
+
             if smiles is None:
                 smiles = query2smiles(query, None)
+
+            print("===SMILES 2===")
+            print(smiles)
+            
             # great now check if smiles is controlled
             msg = self.ControlChemCheck._run(smiles)
             if "high similarity" in msg or "appears" in msg:
-                return f"CAS number {cas}found, but " + msg
+                return f"CAS number {cas} found, but " + msg
             return cas
             # check if smiles is controlled
         except ValueError:

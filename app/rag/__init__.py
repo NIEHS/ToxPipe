@@ -3,6 +3,7 @@ from .prompts import getPrompt, PromptPreRetrieval, PromptRAG
 from .retrievers import CustomRetriever
 from .output_parsers import CustomOutputParser, OutputParserSchema, PreRetrievalOutputParserSchema
 from langchain.llms import BaseLLM
+from langchain_openai import AzureChatOpenAI
 import traceback
 
 def createChains(llm):
@@ -11,7 +12,7 @@ def createChains(llm):
     # LLM
     # -----------------------------------------------------------------------
     # If agentic LLM is not provided, use a new one with model name = llm
-    if not isinstance(llm, BaseLLM):
+    if not isinstance(llm, BaseLLM) and not isinstance(llm, AzureChatOpenAI):
         llm = getOpenAIModel(llm)
 
     # -----------------------------------------------------------------------
@@ -63,6 +64,7 @@ def query(query_text: str, llm: BaseLLM | str = 'azure-gpt-4o') -> str:
         custom_chain_pr, custom_chain = createChains(llm=llm)
         keywords = dict(custom_chain_pr.invoke(query_text))
         response = dict(custom_chain.invoke(input=keywords | dict(query=query_text)))#, config={"callbacks": [Config.langfuse_handler]})
+
     except Exception as exp:
         error = f'Line number: {exp.__traceback__.tb_lineno}, Description: {exp}\n\n{traceback.format_exc()}'
         print(error)

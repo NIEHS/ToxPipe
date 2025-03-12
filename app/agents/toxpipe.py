@@ -1,5 +1,6 @@
 # LangChain/Graph agent creation
-from .toxpipe_agent_executor import create_react_agent
+from .toxpipe_graph import create_react_agent
+
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.message import add_messages
 # Model interface
@@ -35,7 +36,11 @@ from .multi import *
 from dotenv import load_dotenv
 load_dotenv('../.config/.env')
 # Prompts
-from .prompts_chem import PROMPT
+from .prompts_chem import getPrompt, PromptAgentic
+
+# Output parsers
+from .output_parsers import CustomOutputParser, OutputParserSchema
+
 # Other
 from typing import Sequence
 from typing_extensions import Annotated, TypedDict
@@ -58,7 +63,10 @@ def _make_llm(model, api_version, temp, max_retries, seed):
 
 # format for output parser
 class Response(BaseModel):
-    response: str = Field(description="Full string response from the LLM containing information from tools, literature, RAG, and training data.")
+    thought: str = Field(description="Response from the LLM based on the previous message(s).")
+    action: str = Field(description="Which action to take or which tool to use next based on the thought.")
+    action_input: str = Field(description="Response from the LLM containing information from tools, literature, RAG, or training data.")
+    response: str = Field(description="Final response from the LLM containing information from tools, literature, RAG, and training data.")
     @model_validator(mode="before")
     @classmethod
     def valid_response(cls, values: dict) -> dict:
@@ -106,12 +114,13 @@ class ToxPipeAgent:
         self.parser = PydanticOutputParser(pydantic_object=Response)
         
         # Define prompt template
-        self.prompt_template = PromptTemplate(
-            template=PROMPT,
-            input_variables=["messages"],
-            partial_variables={"format_instructions": self.parser.get_format_instructions()},
-        )
+        #self.prompt_template = PromptTemplate(
+        #    template=PROMPT,
+        #    input_variables=["messages"],
+        #    partial_variables={"format_instructions": self.parser.get_format_instructions()},
+        #)
 
+        self.prompt_template = getPrompt(PromptAgentic)
 
         # If we use a model that doesn't fully support tools, then we need to manually add the tools as part of the prompt
         if model in BAD_TOOL_MODELS:
@@ -142,8 +151,6 @@ class ToxPipeAgent:
         # Join the results of each thread into a single response
         for future in concurrent.futures.as_completed(proc):
             fr = future.result()
-            if hasattr(fr, "content"):
-                fr = fr.content
             res.append(fr)
         res = "\n\n".join(res)
 
@@ -181,12 +188,24 @@ class ToxPipeAgent:
             res = summary
 
         # The final response should always be a string. If it is instead a JSON, then parse it into a string before returning.
+        print("=== RES 111===")
+        print(res)
+
+        return(res)
+        
+        """
         try:
             json.loads(res)
-        except json.JSONDecodeError: # if not json, just return raw response
+        except json.JSONDecodeError as e: # if not json, just return raw response
+
+            print("Error, not a JSON response.")
+            print(e)
+
             return res
+
         res = self.parser.invoke(res)
-        return res.response
+        return res.response"
+        """
         
         
     
