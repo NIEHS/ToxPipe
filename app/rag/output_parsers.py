@@ -1,9 +1,9 @@
 from langchain_core.output_parsers import JsonOutputParser
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import json
 
 class PreRetrievalOutputParserSchema(BaseModel):
-    Keywords: list[str]
+    Keywords: list[str] = Field("List of maximum 10 keywords", max_length=10)
 
 class OutputParserSchema(BaseModel):
     Response: str
@@ -27,4 +27,4 @@ class CustomOutputParser(JsonOutputParser):
         except Exception as exp:
             print(str(exp))
             response = json.dumps({'Response':data.content})
-        return response['Response']
+        return response
