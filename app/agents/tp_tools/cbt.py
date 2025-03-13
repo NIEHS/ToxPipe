@@ -171,7 +171,7 @@ class SMILES2DTXSID(BaseTool):
 # Structural Similarity
 class StructuralSimilarity(BaseTool):
     name: str = "StructuralSimilarity"
-    description: str = "Input a SMILES string to return a list of structurally similar chemicals and their corresponding Tanimoto similarities to the input chemical from the ChemBioTox database."
+    description: str = "Input a SMILES string to return a list of structurally similar chemicals and their corresponding Tanimoto similarities to the input chemical using RDKit."
 
     def __init__(
         self,
@@ -238,7 +238,7 @@ class FunctionalSimilarity(BaseTool):
 
 class QueryCBTFooDB(BaseTool):
     name: str = "QueryCBTFooDB"
-    description: str = "Input a DTXSID to annotate a chemical with information about its usage in food or ingestible products from the ChemBioTox database. This can be useful if the user is looking for exposure, usage, or industrial information about a chemical."
+    description: str = "Input a DTXSID to annotate a chemical with information about its usage in food or ingestible products from the FooDB. This can be useful if the user is looking for exposure, usage, or industrial information about a chemical."
 
     def __init__(
         self,
@@ -281,8 +281,8 @@ class QueryCBTFooDB(BaseTool):
             foodb_ontology_list.append(i['term'])
         foodb_ontology_list = unique(foodb_ontology_list)
 
-        response_flavors = f"The chemical {dtxsid} has the following flavors (retrieved from the FooDB): {';'.join(foodb_flavors_list)}"
-        response_ontology = f"The chemical {dtxsid} also has the following ontological properties (retrieved from the FooDB): {';'.join(foodb_ontology_list)}"
+        response_flavors = f"The chemical {dtxsid} has the following flavors (source: FooDB): {';'.join(foodb_flavors_list)}"
+        response_ontology = f"The chemical {dtxsid} also has the following ontological properties (source: FooDB): {';'.join(foodb_ontology_list)}"
 
         response = f"{response_flavors}. {response_ontology}"
         return(response)
@@ -293,7 +293,7 @@ class QueryCBTFooDB(BaseTool):
 
 class QueryCBTCPD(BaseTool):
     name: str = "QueryCBTCPD"
-    description: str = "Input a DTXSID to annotate a chemical with information about its usage in commercial products from the ChemBioTox database. This can be useful if the user is looking for exposure, usage, or industrial information about a chemical."
+    description: str = "Input a DTXSID to annotate a chemical with information about its usage in commercial products from the Chemical Products Database (CPDat). This can be useful if the user is looking for exposure, usage, or industrial information about a chemical."
 
     def __init__(
         self,
@@ -320,7 +320,7 @@ class QueryCBTCPD(BaseTool):
 
         cpd_list = unique(cpd_list)
 
-        response = f"The chemical {dtxsid} is used in the following commercial products (retrieved from the Chemical Products Database): {';'.join(cpd_list)}"
+        response = f"The chemical {dtxsid} is used in the following commercial products (source: Chemical Products Database): {';'.join(cpd_list)}"
         if len(cpd_list) < 1:
             response = f"The chemical {dtxsid} is not known to be in any commercial products in the Chemical Products Database."
 
@@ -333,7 +333,7 @@ class QueryCBTCPD(BaseTool):
 
 class QueryCBTChemicalVendors(BaseTool):
     name: str = "QueryCBTChemicalVendors"
-    description: str = "Input a DTXSID to provide information about vendors/resources that carry and sell the chemical and where to obtain or purchase the chemical."
+    description: str = "Input a DTXSID to provide information about vendors/resources that carry and sell the chemical and where to obtain or purchase the chemical. These data are from PubChem."
 
     def __init__(
         self,
@@ -359,7 +359,7 @@ class QueryCBTChemicalVendors(BaseTool):
 
         vendor_list = unique(vendor_list)
 
-        response = f"The chemical {dtxsid} may be purchased from the following vendors (retrieved from PubChem): {';'.join(vendor_list)}"
+        response = f"The chemical {dtxsid} may be purchased from the following vendors (source: PubChem): {';'.join(vendor_list)}"
         if len(vendor_list) < 1:
             response = f"The chemical {dtxsid} is not known to be purchasable from any vendors as listed in PubChem."
 
@@ -371,7 +371,7 @@ class QueryCBTChemicalVendors(BaseTool):
 
 class QueryCBTTox21Models(BaseTool):
     name: str = "QueryCBTTox21Models"
-    description: str = "Input a DTXSID to annotatea a chemical with predicted biological interactions from Tox21 assay models from the ChemBioTox database."
+    description: str = "Input a DTXSID to annotatea a chemical with predicted biological interactions from Tox21 assay models."
 
     def __init__(
         self,
@@ -400,7 +400,7 @@ class QueryCBTTox21Models(BaseTool):
         
         tox21_list = unique(tox21_list)
 
-        response = f"The chemical {dtxsid} is predicted to have the following interactions (calculated with Tox21 assay models): {';'.join(tox21_list)}."
+        response = f"The chemical {dtxsid} is predicted to have the following interactions (source: Tox21 assay models): {';'.join(tox21_list)}."
         if len(tox21_list) < 1:
             response = f"The chemical {dtxsid} is not predicted to have any assay predictions in Tox21."
         return(response)
@@ -412,7 +412,7 @@ class QueryCBTTox21Models(BaseTool):
 
 class QueryCBTGRAS(BaseTool):
     name: str = "QueryCBTGRAS"
-    description: str = "Input a DTXSID to annotate a chemical with information about its safety and exposure from the ChemBioTox database."
+    description: str = "Input a DTXSID to annotate a chemical with information about its safety and exposure from the Generally Recognized As Safe (GRAS) database."
 
     def __init__(
         self,
@@ -439,7 +439,7 @@ class QueryCBTGRAS(BaseTool):
         
         gras_list = unique(gras_list)
 
-        response = f"The chemical {dtxsid} has the following safety information (retrieved from the GRAS Database): {';'.join(gras_list)}"
+        response = f"The chemical {dtxsid} has the following safety information (source: GRAS Database): {';'.join(gras_list)}"
         if len(gras_list) < 1:
             response = f"The chemical {dtxsid} does not have any safety information in the GRAS Database."
         return(response)
@@ -450,7 +450,7 @@ class QueryCBTGRAS(BaseTool):
     
 class QueryCTDDiseases(BaseTool):
     name: str = "QueryCTDDiseases"
-    description: str = "Input a DTXSID to annotate a chemical with information about its associated diseases, conditions, and illnesses from CTD in the ChemBioTox database. These are related to toxicological and biochemical processes. Either the diease's direct evidence or an inference score is given. Higher inference scores correspond to a more likely association."
+    description: str = "Input a DTXSID to annotate a chemical with information about its associated diseases, conditions, and illnesses from the Comparative Toxicogenomics Database (CTD). These are related to toxicological and biochemical processes. Either the diease's direct evidence or an inference score is given. Higher inference scores correspond to a more likely association."
     llm: BaseLLM = None
     def __init__(self, llm):
         super().__init__()
@@ -490,9 +490,9 @@ class QueryCTDDiseases(BaseTool):
         response1 = ""
         response2 = ""
         if len(ctd_diseases_list_measured) > 0:
-            response1 = f"The chemical {dtxsid} has direct evidence that shows an association with the following diseases (retrieved from the CTD): {';'.join(ctd_diseases_list_measured)}."
+            response1 = f"The chemical {dtxsid} has direct evidence that shows an association with the following diseases (source: CTD): {';'.join(ctd_diseases_list_measured)}."
         if len(ctd_diseases_list_inferred) > 0:
-            response2 = f"The chemical {dtxsid} has inferred association(s) with the following diseases (retrieved from the CTD): {';'.join(ctd_diseases_list_measured)}. Note that these are purely inferred associations and may not be accurate: see https://ctdbase.org/help/chemDiseaseDetailHelp.jsp for more information. Larger inference scores suggest stronger associations."
+            response2 = f"The chemical {dtxsid} has inferred association(s) with the following diseases (source: CTD): {';'.join(ctd_diseases_list_measured)}. Note that these are purely inferred associations and may not be accurate: see https://ctdbase.org/help/chemDiseaseDetailHelp.jsp for more information. Larger inference scores suggest stronger associations."
 
         response = response1 + " " + response2
 
@@ -506,7 +506,7 @@ class QueryCTDDiseases(BaseTool):
     
 class QueryCTDGenes(BaseTool):
     name: str = "QueryCBTGenes"
-    description: str = "Input a DTXSID to annotate a chemical with information about its gene interactions from CTD in the ChemBioTox database."
+    description: str = "Input a DTXSID to annotate a chemical with information about its gene interactions from the Comparative Toxicogenomics Database (CTD)."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -531,7 +531,7 @@ class QueryCTDGenes(BaseTool):
             ctd_genes_list = ctd_genes_list[:MAX_RESULTS]
         ctd_genes_list = ctd_genes_list.index
 
-        response = f"The chemical {dtxsid} has the following possible gene interactions (retrieved from the CTD): {'; '.join(ctd_genes_list)}"
+        response = f"The chemical {dtxsid} has the following possible gene interactions (source: CTD): {'; '.join(ctd_genes_list)}"
         if len(ctd_genes_list) < 1:
             response = f"The chemical {dtxsid} does not have any gene information in the CTD."
         return(response)
@@ -561,7 +561,7 @@ def format_leadscope(llm, response):
 
 class QueryCBTLeadscope(BaseTool):
     name: str = "QueryCBTLeadscope"
-    description: str = "Input a DTXSID to annotate a chemical with predicted Leadscope QSAR models from the ChemBioTox database. These models predict toxicological behavior of chemicals."
+    description: str = "Input a DTXSID to annotate a chemical with predicted Leadscope QSAR models. These models predict toxicological behavior of chemicals."
 
     llm: BaseLLM = None
 
@@ -622,7 +622,7 @@ def format_admet(llm, response):
 
 class QueryCBTADMET(BaseTool): # proprietary
     name: str = "QueryCBTADMET"
-    description: str = "Input a DTXSID to annotate a chemical with predicted ADMET QSAR models from the ChemBioTox database. This can be helpful for understanding the absorption, distribution, metabolism, excretion, pathways, transportation, and toxicity of a chemical."
+    description: str = "Input a DTXSID to annotate a chemical with predicted ADMET QSAR models. This can be helpful for understanding the absorption, distribution, metabolism, excretion, pathways, transportation, and toxicity of a chemical."
 
     llm: BaseLLM = None
 
@@ -790,7 +790,7 @@ class QueryCBTDrugBankTransporters(BaseTool):
 
         transporters_list = unique(transporters_list)
 
-        response = f"The chemical {dtxsid} has transporters encoded by the following genes in the DrugBank database: {';'.join(transporters_list)}"
+        response = f"The chemical {dtxsid} has transporters encoded by the following genes (source: DrugBank database): {';'.join(transporters_list)}"
         if len(transporters_list) < 1:
             response = f"The chemical {dtxsid} does not have any transporter information in the DrugBank database."
 
@@ -833,7 +833,7 @@ class QueryCBTAlerts(BaseTool):
 
         alerts_list = unique(alerts_list)
 
-        response = f"The chemical given by the SMILES {smiles} has the following chemical substructures of note: {';'.join(alerts_list)}."
+        response = f"The chemical given by the SMILES {smiles} has the following chemical substructures of note (sources: OChem, ChEMBL, Saagar): {';'.join(alerts_list)}."
         if len(alerts_list) < 1:
             response = f"The chemical given by the SMILES {smiles} does not have any notable chemical substructures."
 
@@ -944,7 +944,7 @@ class QueryCBTAlertsMulti(BaseTool):
 # InvitroDB
 class QueryCBTInVitroDB(BaseTool):
     name: str = "QueryCBTInVitroDB"
-    description: str = "Input a DTXSID to get measured assay:activity pairs from assays for the chemical from the InVitroDB data in ChemBioTox."
+    description: str = "Input a DTXSID to get measured assay:activity pairs from assays for the chemical from the InVitroDB."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -975,9 +975,9 @@ class QueryCBTInVitroDB(BaseTool):
                 exp_list.append(f"{i['assay_name']}:{hitc_status})")
 
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} has the following assay:activity pairs in assays from InVitroDB: {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} has the following assay:activity pairs in assays (source: InVitroDB): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
-            response = f"The chemical {dtxsid} does not have any InVitroDB data in the ChemBioTox Database."
+            response = f"The chemical {dtxsid} does not have any InVitroDB data."
         return(response)
 
     async def _arun(self, dtxsid: str) -> str:
@@ -987,7 +987,7 @@ class QueryCBTInVitroDB(BaseTool):
 # CTD Biological Processes
 class QueryCTDBP(BaseTool):
     name: str = "QueryCTDBP"
-    description: str = "Input a DTXSID to get biological process data from CTD data in ChemBioTox. These processes include apoptosis, metabolism, development, regulation, etc."
+    description: str = "Input a DTXSID to get biological process data from the Comparative Toxicogenomics Database (CTD). These processes include apoptosis, metabolism, development, regulation, etc."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1013,9 +1013,9 @@ class QueryCTDBP(BaseTool):
         if len(exp_list) > MAX_RESULTS:
             exp_list = exp_list[:MAX_RESULTS]
 
-        response = f"The chemical {dtxsid} may be associated with the following biological processes in CTD: {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} may be associated with the following biological processes (source: CTD): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
-            response = f"The chemical {dtxsid} does not have any biological process data in the ChemBioTox Database."
+            response = f"The chemical {dtxsid} does not have any biological process data in the CTD."
         return(response)
 
     async def _arun(self, dtxsid: str) -> str:
@@ -1026,7 +1026,7 @@ class QueryCTDBP(BaseTool):
 # CTD Cellular Components
 class QueryCTDCC(BaseTool):
     name: str = "QueryCTDCC"
-    description: str = "Input a DTXSID to return cellular components from CTD data in ChemBioTox."
+    description: str = "Input a DTXSID to return cellular components from the Comparative Toxicogenomics Database (CTD)."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1053,9 +1053,9 @@ class QueryCTDCC(BaseTool):
         if len(exp_list) > MAX_RESULTS:
             exp_list = exp_list[:MAX_RESULTS]
 
-        response = f"The chemical {dtxsid} may have the following cellular components in CTD: {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} may have the following cellular components (source: CTD): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
-            response = f"The chemical {dtxsid} does not have any cellular component data in the ChemBioTox Database."
+            response = f"The chemical {dtxsid} does not have any cellular component data in the CTD."
         return(response)
 
     async def _arun(self, dtxsid: str) -> str:
@@ -1065,7 +1065,7 @@ class QueryCTDCC(BaseTool):
 # CTD Molecular Functions
 class QueryCTDMF(BaseTool):
     name: str = "QueryCTDMF"
-    description: str = "Input a DTXSID to return molecular function from CTD data in ChemBioTox."
+    description: str = "Input a DTXSID to return molecular function from the Comparative Toxicogenomics Database (CTD)."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1090,9 +1090,9 @@ class QueryCTDMF(BaseTool):
         if len(exp_list) > MAX_RESULTS:
             exp_list = exp_list[:MAX_RESULTS]
 
-        response = f"The chemical {dtxsid} may have the following molecular functions according to CTD: {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} may have the following molecular functions (source: CTD): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
-            response = f"The chemical {dtxsid} does not have any molecular function data in the ChemBioTox Database."
+            response = f"The chemical {dtxsid} does not have any molecular function data in the CTD."
         return(response)
 
     async def _arun(self, dtxsid: str) -> str:
@@ -1104,7 +1104,7 @@ class QueryCTDMF(BaseTool):
 # Pubchem Bioassays
 class QueryPubChemBioassays(BaseTool):
     name: str = "QueryPubChemBioassays"
-    description: str = "Input a DTXSID to return biological assays (bioassays) that were run on the given chemical from PubChem data in ChemBioTox. These data can help provide context for a chemical's toxicological or biological behavior."
+    description: str = "Input a DTXSID to return biological assays (bioassays) that were run on the given chemical from PubChem. These data can help provide context for a chemical's toxicological or biological behavior."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1135,7 +1135,7 @@ class QueryPubChemBioassays(BaseTool):
                 continue
 
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} was tested in the following assays from PubChem: {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} was tested in the following assays (source: PubChem): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
             response = f"The chemical {dtxsid} does not have any PubChem bioassay data in the ChemBioTox Database."
         return(response)
@@ -1148,7 +1148,7 @@ class QueryPubChemBioassays(BaseTool):
 # Pubchem Properties
 class QueryPubChemProperties(BaseTool):
     name: str = "QueryPubChemProperties"
-    description: str = "Input a DTXSID to return attribute:value pairs that represent chemical properties from PubChem data in ChemBioTox. These data include identifiers and physical properties of chemicals."
+    description: str = "Input a DTXSID to return attribute:value pairs that represent chemical properties from PubChem. These data include identifiers and physical properties of chemicals."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1172,7 +1172,7 @@ class QueryPubChemProperties(BaseTool):
                 continue
             exp_list.append(f"{i['pubchem_attribute']}: {i['pubchem_value']}")
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} has the following properties (represented as attribute:value pairs) from PubChem: {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} has the following properties (represented as attribute:value pairs) (source: PubChem): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
             response = f"The chemical {dtxsid} does not have any PubChem chemical property data in the ChemBioTox Database."
         return(response)
@@ -1184,7 +1184,7 @@ class QueryPubChemProperties(BaseTool):
 # EPA Properties
 class QueryEPAProperties(BaseTool):
     name: str = "QueryEPAProperties"
-    description: str = "Input a DTXSID to return attribute:value pairs that represent chemical properties from EPA data in ChemBioTox. These data include identifiers and physical properties of chemicals."
+    description: str = "Input a DTXSID to return attribute:value pairs that represent chemical properties from the EPA. These data include identifiers and physical properties of chemicals."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1208,7 +1208,7 @@ class QueryEPAProperties(BaseTool):
                 continue
             exp_list.append(f"{i['epa_attribute']}: {i['epa_value']}")
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} has the following properties (represented as attribute:value pairs) from the EPA: {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} has the following properties (represented as attribute:value pairs) (source: EPA): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
             response = f"The chemical {dtxsid} does not have any EPA chemical property data in the ChemBioTox Database."
         return(response)
@@ -1222,7 +1222,7 @@ class QueryEPAProperties(BaseTool):
 # CPDat
 class QueryCPD(BaseTool):
     name: str = "QueryCPD"
-    description: str = "Input a DTXSID to return the chemical's commercial usage categories from CPDat in ChemBioTox. These data provide information about what products a chemical is used in and possible sources of exposure."
+    description: str = "Input a DTXSID to return the chemical's commercial usage categories from the CPDat. These data provide information about what products a chemical is used in and possible sources of exposure."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1252,9 +1252,9 @@ class QueryCPD(BaseTool):
             exp_list.append(to_append)
 
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} is used in the following products from the CPDat: {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} is used in the following products (source: CPDat): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
-            response = f"The chemical {dtxsid} does not have any commercial product data in the ChemBioTox Database."
+            response = f"The chemical {dtxsid} does not have any commercial product data in the CPDat."
         return(response)
 
     async def _arun(self, dtxsid: str) -> str:
@@ -1264,7 +1264,7 @@ class QueryCPD(BaseTool):
 # FooDB Enzymes
 class QueryFooDBEnzymes(BaseTool):
     name: str = "QueryFooDBEnzymes"
-    description: str = "Input a DTXSID to return enzymes that the chemical may interact with from FooDB in ChemBioTox."
+    description: str = "Input a DTXSID to return enzymes that the chemical may interact with from the FooDB."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1289,9 +1289,9 @@ class QueryFooDBEnzymes(BaseTool):
             exp_list.append(f"{i['enzyme_name']}")
 
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} may interact with the following enzymes (as reported by FooDB): {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} may interact with the following enzymes (source: FooDB): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
-            response = f"The chemical {dtxsid} does not have any food enzyme data in the ChemBioTox Database."
+            response = f"The chemical {dtxsid} does not have any food enzyme data in the FooDB."
         return(response)
 
     async def _arun(self, dtxsid: str) -> str:
@@ -1301,7 +1301,7 @@ class QueryFooDBEnzymes(BaseTool):
 # FooDB Flavors
 class QueryFooDBFlavors(BaseTool):
     name: str = "QueryFooDBFlavors"
-    description: str = "Input a DTXSID to return the chemical's usage in food product flavors from FooDB in ChemBioTox."
+    description: str = "Input a DTXSID to return the chemical's usage in food product flavors from the FooDB."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1326,9 +1326,9 @@ class QueryFooDBFlavors(BaseTool):
             exp_list.append(f"{i['flavor_name']} {i['category']}")
 
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} can have the following flavors (as reported by FooDB): {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} can have the following flavors (source: FooDB): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
-            response = f"The chemical {dtxsid} does not have any flavor data in the ChemBioTox Database."
+            response = f"The chemical {dtxsid} does not have any flavor data in the FooDB."
         return(response)
 
     async def _arun(self, dtxsid: str) -> str:
@@ -1338,7 +1338,7 @@ class QueryFooDBFlavors(BaseTool):
 # FooDB Content
 class QueryFooDBContent(BaseTool):
     name: str = "QueryFooDBContent"
-    description: str = "Input a DTXSID to return which food products the chemical is present in from FooDB in ChemBioTox. This also provides potential sources of exposure to the chemical."
+    description: str = "Input a DTXSID to return which food products the chemical is present in from the FooDB. This also provides potential sources of exposure to the chemical."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1364,9 +1364,9 @@ class QueryFooDBContent(BaseTool):
                 continue
 
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} may be found in the following food products (as reported by FooDB): {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} may be found in the following food products (source: FooDB): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
-            response = f"The chemical {dtxsid} does not have any food product data in the ChemBioTox Database."
+            response = f"The chemical {dtxsid} does not have any food product data in the FooDB."
         return(response)
 
     async def _arun(self, dtxsid: str) -> str:
@@ -1376,7 +1376,7 @@ class QueryFooDBContent(BaseTool):
 # FooDB Effects
 class QueryFooDBEffects(BaseTool):
     name: str = "QueryFooDBEffects"
-    description: str = "Input a DTXSID to return the chemical's health effects from FooDB in ChemBioTox. This can provide context for the chemical's toxicological and biological effects."
+    description: str = "Input a DTXSID to return the chemical's health effects from the FooDB. This can provide context for the chemical's toxicological and biological effects."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1401,9 +1401,9 @@ class QueryFooDBEffects(BaseTool):
             exp_list.append(f"{i['health_effect_name']}")
 
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} may have the following health effects (as reported by FooDB): {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} may have the following health effects (source: FooDB): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
-            response = f"The chemical {dtxsid} does not have any health effect data in the ChemBioTox Database."
+            response = f"The chemical {dtxsid} does not have any health effect data in the FooDB."
         return(response)
 
     async def _arun(self, dtxsid: str) -> str:
@@ -1416,7 +1416,7 @@ class QueryFooDBEffects(BaseTool):
 # DrugBank Carriers
 class QueryDrugBankCarriers(BaseTool):
     name: str = "QueryDrugBankCarriers"
-    description: str = "Input a DTXSID to return the chemical's carriers from DrugBank in ChemBioTox."
+    description: str = "Input a DTXSID to return the chemical's carriers from DrugBank."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1441,9 +1441,9 @@ class QueryDrugBankCarriers(BaseTool):
             exp_list.append(f"{i['annotation']}")
 
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} may have the following carriers (as reported by DrugBank): {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} may have the following carriers (source: DrugBank): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
-            response = f"The chemical {dtxsid} does not have any carrier data in the ChemBioTox Database."
+            response = f"The chemical {dtxsid} does not have any carrier data in DrugBank."
         return(response)
 
     async def _arun(self, dtxsid: str) -> str:
@@ -1454,7 +1454,7 @@ class QueryDrugBankCarriers(BaseTool):
 # DrugBank Enzymes
 class QueryDrugBankEnzymes(BaseTool):
     name: str = "QueryDrugBankEnzymes"
-    description: str = "Input a DTXSID to return enzymes that the chemical interacts with from DrugBank in ChemBioTox."
+    description: str = "Input a DTXSID to return enzymes that the chemical interacts with from DrugBank."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1479,9 +1479,9 @@ class QueryDrugBankEnzymes(BaseTool):
             exp_list.append(f"{i['annotation']}")
 
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} may interact with the following enzymes (as reported by DrugBank): {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} may interact with the following enzymes (source: DrugBank): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
-            response = f"The chemical {dtxsid} does not have any enzyme data in the ChemBioTox Database."
+            response = f"The chemical {dtxsid} does not have any enzyme data in DrugBank."
         return(response)
 
     async def _arun(self, dtxsid: str) -> str:
@@ -1491,7 +1491,7 @@ class QueryDrugBankEnzymes(BaseTool):
 # DrugBank Targets
 class QueryDrugBankTargets(BaseTool):
     name: str = "QueryDrugBankTargets"
-    description: str = "Input a DTXSID to return the chemical's associated targets from DrugBank in ChemBioTox."
+    description: str = "Input a DTXSID to return the chemical's associated targets from DrugBank. This provides information about chemical interactions."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1516,9 +1516,9 @@ class QueryDrugBankTargets(BaseTool):
             exp_list.append(f"{i['annotation']}")
 
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} may have the following targets (as reported by DrugBank): {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} may have the following targets (source: DrugBank): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
-            response = f"The chemical {dtxsid} does not have any target data in the ChemBioTox Database."
+            response = f"The chemical {dtxsid} does not have any target data in DrugBank."
         return(response)
 
     async def _arun(self, dtxsid: str) -> str:
@@ -1528,7 +1528,7 @@ class QueryDrugBankTargets(BaseTool):
 # DrugBank Transporters
 class QueryDrugBankTransporters(BaseTool):
     name: str = "QueryDrugBankTransporters"
-    description: str = "Input a DTXSID to return the chemical's associated transporters from DrugBank in ChemBioTox."
+    description: str = "Input a DTXSID to return the chemical's associated transporters from DrugBank."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1553,9 +1553,9 @@ class QueryDrugBankTransporters(BaseTool):
             exp_list.append(f"{i['annotation']}")
 
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} may have the following transporters (as reported by DrugBank): {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} may have the following transporters (source: DrugBank): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
-            response = f"The chemical {dtxsid} does not have any transporter data in the ChemBioTox Database."
+            response = f"The chemical {dtxsid} does not have any transporter data in DrugBank."
         return(response)
 
     async def _arun(self, dtxsid: str) -> str:
@@ -1567,7 +1567,7 @@ class QueryDrugBankTransporters(BaseTool):
 # HMDB biospecimen locations
 class QueryHMDBBS(BaseTool):
     name: str = "QueryHMDBBS"
-    description: str = "Input a DTXSID to return where in the body the chemical can be found from HMDB in ChemBioTox."
+    description: str = "Input a DTXSID to return where in the body the chemical can be found from the HMDB."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1593,9 +1593,9 @@ class QueryHMDBBS(BaseTool):
             exp_list.append(f"{i['annotation']}")
 
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} may be found in the following biospecimen locations (as reported by HMDB): {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} may be found in the following biospecimen locations (source: HMDB): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
-            response = f"The chemical {dtxsid} does not have any biospecimen location data in the ChemBioTox Database."
+            response = f"The chemical {dtxsid} does not have any biospecimen location data in the HMDB."
         return(response)
 
     async def _arun(self, dtxsid: str) -> str:
@@ -1605,7 +1605,7 @@ class QueryHMDBBS(BaseTool):
 # HMDB cellular locations
 class QueryHMDBC(BaseTool):
     name: str = "QueryHMDBC"
-    description: str = "Input a DTXSID to return where in the cell the chemical can be found from HMDB in ChemBioTox."
+    description: str = "Input a DTXSID to return where in the cell the chemical can be found from the HMDB."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1630,9 +1630,9 @@ class QueryHMDBC(BaseTool):
             exp_list.append(f"{i['annotation']}")
 
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} may be found in the following cellular locations (as reported by HMDB): {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} may be found in the following cellular locations (source: HMDB): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
-            response = f"The chemical {dtxsid} does not have any cellular location data in the ChemBioTox Database."
+            response = f"The chemical {dtxsid} does not have any cellular location data in the HMDB."
         return(response)
 
     async def _arun(self, dtxsid: str) -> str:
@@ -1642,7 +1642,7 @@ class QueryHMDBC(BaseTool):
 # HMDB tissue locations
 class QueryHMDBT(BaseTool):
     name: str = "QueryHMDBT"
-    description: str = "Input a DTXSID to return tissues and organs the chemical can be found in from HMDB in ChemBioTox."
+    description: str = "Input a DTXSID to return tissues and organs the chemical can be found in from the HMDB."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1667,9 +1667,9 @@ class QueryHMDBT(BaseTool):
             exp_list.append(f"{i['annotation']}")
 
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} may be found in the following tissue locations (as reported by HMDB): {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} may be found in the following tissue locations (source: HMDB): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
-            response = f"The chemical {dtxsid} does not have any tissue location data in the ChemBioTox Database."
+            response = f"The chemical {dtxsid} does not have any tissue location data in the HMDB."
         return(response)
 
     async def _arun(self, dtxsid: str) -> str:
@@ -1679,7 +1679,7 @@ class QueryHMDBT(BaseTool):
 # HMDB diseases
 class QueryHMDBDiseases(BaseTool):
     name: str = "QueryHMDBDiseases"
-    description: str = "Input a DTXSID to return associated diseases from HMDB in ChemBioTox. These data provide toxicological, biological, and health effect data for chemicals."
+    description: str = "Input a DTXSID to return associated diseases from the HMDB. These data provide toxicological, biological, and health effect data for chemicals."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1705,9 +1705,9 @@ class QueryHMDBDiseases(BaseTool):
             exp_list.append(f"{i['annotation']}")
 
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} may be associated with the following diseases (as reported by HMDB): {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} may be associated with the following diseases (source: HMDB): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
-            response = f"The chemical {dtxsid} does not have any HMDB disease data in the ChemBioTox Database."
+            response = f"The chemical {dtxsid} does not have any HMDB disease data in the HMDB."
         return(response)
 
     async def _arun(self, dtxsid: str) -> str:
@@ -1759,7 +1759,7 @@ class QuerySuperfund(BaseTool):
 # T3DB
 class QueryT3DB(BaseTool):
     name: str = "QueryT3DB"
-    description: str = "Input a DTXSID to return possible targets of the chemical as reported in the T3DB in ChemBioTox. This provides information about how a chemical interacts with the body."
+    description: str = "Input a DTXSID to return possible targets of the chemical as reported in the T3DB. This provides information about how a chemical interacts with the body."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1785,9 +1785,9 @@ class QueryT3DB(BaseTool):
             exp_list.append(f"{i['target_name']}")
 
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} has the following potential targets according to T3DB: {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} has the following potential targets (source: T3DB): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
-            response = f"The chemical {dtxsid} does not have any T3DB target data in the ChemBioTox Database."
+            response = f"The chemical {dtxsid} does not have any T3DB target data."
         return(response)
 
     async def _arun(self, dtxsid: str) -> str:
@@ -1797,7 +1797,7 @@ class QueryT3DB(BaseTool):
 # ToxRefDB Nonneoplastic
 class QueryToxRefDBNonNP(BaseTool):
     name: str = "QueryToxRefDBNonNP"
-    description: str = "Input a DTXSID to return its non-neoplastic annotations as reported in the ToxRefDB in ChemBioTox. This gives information about non-cancerous diseases associated with the chemical."
+    description: str = "Input a DTXSID to return its non-neoplastic annotations as reported in the ToxRefDB. This gives information about non-cancerous diseases associated with the chemical."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1823,9 +1823,9 @@ class QueryToxRefDBNonNP(BaseTool):
             exp_list.append(f"{i['annotation']}")
 
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} has the following non-neoplastic (non-cancer) annotations according to the ToxRefDB: {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} has the following non-neoplastic (non-cancer) annotations (source: ToxRefDB): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
-            response = f"The chemical {dtxsid} does not have any ToxRefDB non-neoplastic data in the ChemBioTox Database."
+            response = f"The chemical {dtxsid} does not have any ToxRefDB non-neoplastic data."
         return(response)
 
     async def _arun(self, dtxsid: str) -> str:
@@ -1835,7 +1835,7 @@ class QueryToxRefDBNonNP(BaseTool):
 # ToxRefDB Neoplastic
 class QueryToxRefDBNP(BaseTool):
     name: str = "QueryToxRefDBNP"
-    description: str = "Input a DTXSID to return its neoplastic (cancer) annotations as reported in the ToxRefDB in ChemBioTox. This gives information about cancerous diseases associated with the chemical."
+    description: str = "Input a DTXSID to return its neoplastic (cancer) annotations as reported in the ToxRefDB. This gives information about cancerous diseases associated with the chemical."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1861,9 +1861,9 @@ class QueryToxRefDBNP(BaseTool):
             exp_list.append(f"{i['annotation']}")
 
         exp_list = unique(exp_list)
-        response = f"The chemical {dtxsid} has the following neoplastic annotations according to the ToxRefDB: {'; '.join(exp_list)}"
+        response = f"The chemical {dtxsid} has the following neoplastic annotations (source: ToxRefDB): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
-            response = f"The chemical {dtxsid} does not have any ToxRefDB neoplastic data in the ChemBioTox Database."
+            response = f"The chemical {dtxsid} does not have any ToxRefDB neoplastic data."
         return(response)
 
     async def _arun(self, dtxsid: str) -> str:
@@ -1874,7 +1874,7 @@ class QueryToxRefDBNP(BaseTool):
 # ToxRefDB Studies
 class QueryToxRefDBStudies(BaseTool):
     name: str = "QueryToxRefDBStudies"
-    description: str = "Input a DTXSID to return the results and measurements of assays as reported in the ToxRefDB in ChemBioTox. These can help describe the toxicity of a chemical. Use this tool when asked about specific types of toxicology, like subacute toxicology."
+    description: str = "Input a DTXSID to return the results and measurements of assays as reported in the ToxRefDB. These can help describe the toxicity of a chemical. Use this tool when asked about specific types of toxicology, like subacute toxicology."
     llm: BaseLLM = None
 
     def __init__(self, llm):

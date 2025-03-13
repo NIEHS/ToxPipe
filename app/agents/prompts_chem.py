@@ -57,6 +57,7 @@ class PromptAgentic:
             ```
     - If using the "Final Answer" format:
         - Final Answer: (the final answer to the original input question after using the appropriate tools. You must include sources for each section of the information provided, which are typically given after the string "source:")
+        - When sourcing information from ChemBioTox, you must specify which datasource in ChemBioTox was used (for example, CTD, PubChem, EPA, DrugBank, etc.).
         - Do not include any "Thought:" in your final answer. Only return the information following "Final Answer:".
         - The final answer should always contain 4 parts: information from tools, information from RAG search, information from scientific literature search, and information from training data.
         - Do not answer in JSON format. Use the following string format:
