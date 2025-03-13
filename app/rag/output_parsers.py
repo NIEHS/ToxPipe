@@ -11,11 +11,7 @@ class CustomPreRetrievalOutputParser(JsonOutputParser):
         super().__init__(pydantic_object=output_parser)
 
     def parseOutput(self, data):
-        try:
-            response = self.parse(data.content)
-        except Exception as exp:
-            print(str(exp))
-            response = json.dumps({'Keywords':[data.content]})
+        response = self.parse(data.content)
         return response
     
 class CustomOutputParser():
