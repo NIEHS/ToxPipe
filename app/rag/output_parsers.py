@@ -5,15 +5,12 @@ import json
 class PreRetrievalOutputParserSchema(BaseModel):
     Keywords: list[str] = Field("List of maximum 10 keywords", max_length=10)
 
-class OutputParserSchema(BaseModel):
-    Response: str
+class CustomPreRetrievalOutputParser(JsonOutputParser):
 
-class CustomOutputParser(JsonOutputParser):
-
-    def __init__(self, output_parser=OutputParserSchema):
+    def __init__(self, output_parser=PreRetrievalOutputParserSchema):
         super().__init__(pydantic_object=output_parser)
 
-    def parseKWOutput(self, data):
+    def parseOutput(self, data):
         try:
             response = self.parse(data.content)
         except Exception as exp:
@@ -21,10 +18,7 @@ class CustomOutputParser(JsonOutputParser):
             response = json.dumps({'Keywords':[data.content]})
         return response
     
-    def parseResOutput(self, data):
-        try:
-            response = self.parse(data.content)
-        except Exception as exp:
-            print(str(exp))
-            response = json.dumps({'Response':data.content})
-        return response
+class CustomOutputParser():
+    
+    def parseOutput(self, data):
+        return {'Response':data.content}

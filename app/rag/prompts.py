@@ -22,25 +22,6 @@ class PromptPreRetrieval:
     {query}
     """
 
-EXAMPLE_1 = """
-    Question: "Question"
-
-    Answer:
-        ```json
-        {{
-            "Response": "Friendly and appropriate response"
-        }}
-        ```
-"""
-
-EXAMPLE_NOT_FOUND = """
-```json
-{{ 
-    "Response": ""
-}}
-```
-"""
-
 USER_PROMPT_TEMPLATE_CONTEXT = """
 Consider following resources: 
 ----------------------------------------------
@@ -82,17 +63,11 @@ class PromptRAG:
     Adhere to ethical standards in toxicology and maintain scientific objectivity in your assessments.
 
     **Output format**
-    - ALWAYS provide outputs in JSON format
-    - If the answer isn't available within the provided resources, answer from your training knowledge
-    - If answer is available within the provided resources, format the answer following the examples below
-
-    Example 1:
-
-        {EXAMPLE_1}
-
-    - If the answer is not found anywhere, respond with a friendly message following the example below
-
-    {EXAMPLE_NOT_FOUND}
+    
+    Strictly followin the rules below
+    - Search the answer within the provided resources.
+    - If the answer isn't available within the provided resources, find the answer from your training knowledge.
+    - If the answer is not found anywhere respond with a friendly message
 
     """
 
