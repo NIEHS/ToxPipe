@@ -15,7 +15,7 @@ class CustomPreRetrievalOutputParser(JsonOutputParser):
             response = self.parse(data.content)
         except Exception as exp:
             print(str(exp))
-            response = {'Keywords':[data.content]}
+            response = json.dumps({'Keywords':[data.content]})
         return response
     
 class CustomOutputParser():
