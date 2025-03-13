@@ -3,12 +3,12 @@
 from fastapi import FastAPI, Request, Response
 
 # use locally
-from .app.agents import toxpipe as tp
-from .app.agents import tools as tl
+#from .app.agents import toxpipe as tp
+#from .app.agents import tools as tl
 
 # use on posit connect
-#from app.agents import toxpipe as tp
-#from app.agents import tools as tl
+from app.agents import toxpipe as tp
+from app.agents import tools as tl
 
 from langchain.tools.render import render_text_description
 import json
@@ -103,7 +103,7 @@ async def help(request: Request, response: Response):
 
 # Endpoint for creating an agent. Note that this will not actually create the agent object in memory, it just creates a JSON file with the agent parameters so that the API is "aware" that such an agent is defined and may be created later.
 @app.get("/agent/create/", tags=["agent"])
-async def create_agent(request: Request, response: Response, model: str = "azure-gpt-4o", temp: float = 0, max_iterations: int = 10, max_retries: int = 100, step_timeout: float = 0, n_threads: int = 1, summarize: bool = False, seed: int = 1):
+async def create_agent(request: Request, response: Response, model: str = "azure-gpt-4o", temp: float = 0, max_iterations: int = 20, max_retries: int = 100, step_timeout: float = 0, n_threads: int = 1, summarize: bool = False, seed: int = 1):
     # Input validation
     if model not in ANTHROPIC_MODELS and model not in OLLAMA_MODELS and model not in OPENAI_MODELS and model not in MISTRALAI_MODELS and model not in GOOGLE_MODELS and model not in AMAZON_MODELS and model not in COHERE_MODELS:
         response.status_code = 400
