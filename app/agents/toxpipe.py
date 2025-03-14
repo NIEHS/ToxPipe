@@ -182,11 +182,41 @@ class ToxPipeAgent:
                 12. If asked to provide a list of chemicals, like metabolites, you must include the full list in the summary without summarizing or grouping the list.
                 13. When providing the sources for information, you must include each source's author(s), title, date of publication, journal of publication, and DOI, URL, or PMID if available in the final summary.
                 14. You MUST provide each agent's raw response WITHOUT SUMMARIZING above the final summary, noting which agent produced which result.
+
+
+            The following is an example of the final response summary that should be returned:
+            ** Agent 1 Response **
+            Agent 1's full response here.
+
+            ...
+
+            ** Agent N Response **
+            Agent N's full response here.
+
+            ** Summary **
+            ** Topic 1 **
+            Summary: Summary of topic 1 across all agents here.
+            Confidence: Confidence rating for topic 1 here. (Confidence: number of agents that returned this topic / total number of agents)
+            Source: Source for topic 1 here.
+
+            ...
+            
+            ** Topic N **
+            Summary: Summary of topic N across all agents here.
+            Confidence: Confidence rating for topic N here. (Confidence: number of agents that returned this topic / total number of agents)
+            Source: Source for topic N here.
+
+            ** Disclaimer **
+            The confidence score is calculated by taking the number of agents that returned a topic / the total number of agents. This is then formatted as a percentage. For example, if 3 out of 5 agents returned a topic, the confidence score would be 60%.
+
+                
+
             """
             summary_prompt = ChatPromptTemplate.from_template(summary_prompt_template)
             summary_chain = summary_prompt | self.llm
             summary = summary_chain.invoke({"n_agents": n_agents, "input": input, "res": res})
-            res = summary
+
+            res = summary.content
 
         # The final response should always be a string. If it is instead a JSON, then parse it into a string before returning.
         #print("=== RES ===")
