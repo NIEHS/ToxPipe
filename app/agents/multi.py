@@ -10,8 +10,6 @@ def run_parallel(self=None, input="", user_id=""):
             self.config,
             stream_mode="values",
         ):
-            
-            
             last = chunk["messages"][-1].content # Just get last message in the chain - this is the LLM's final answer
 
     except GraphRecursionError: # Throw error if chain reaches the max number of recursions/iterations

@@ -117,7 +117,7 @@ class MoleculeSafety:
         return self.pubchem_data[cas_number]
 
     def ghs_classification(self, text):
-        """Gives the ghs classification from Pubchem. Give this tool the name or CAS number of one molecule."""
+        """Gives the GHS classification from Pubchem. Give this tool the name or CAS number of one molecule."""
         if is_smiles(text):
             return "Please input a valid CAS number."
         data = self._fetch_pubchem_data(text)
@@ -247,7 +247,6 @@ class SafetySummary(BaseTool):
         prompt = PromptTemplate(
             template=safety_summary_prompt, input_variables=["data"]
         )
-        #self.llm_chain = LLMChain(prompt=prompt, llm=self.llm)
         self.llm_chain = prompt | self.llm
 
     def _run(self, cas: str) -> str:
@@ -258,8 +257,9 @@ class SafetySummary(BaseTool):
             return "Molecule not found in Pubchem."
 
         data = self.mol_safety.get_safety_summary(cas)
-        #return self.llm_chain.run(" ".join(data))
-        return self.llm_chain.invoke(" ".join(str(data)))
+        res = self.llm_chain.invoke(" ".join(str(data)))
+        res = f"{res} (source: PubChem)"
+        return res
 
     async def _arun(self, cas_number):
         raise NotImplementedError("Async not implemented.")
@@ -404,11 +404,6 @@ class _Name2SMILES(BaseTool):
         """This function queries the given molecule name and returns a SMILES string from the record"""
         """Useful to get the SMILES string of one molecule by searching the name of a molecule. Only query with one specific name."""
 
-        print("=======query")
-        print(query)
-        print("========url")
-        print(self.url)
-
         smi = query2smiles(query, self.url)
         # check if smiles is controlled
         msg = "Note: " + self.ControlChemCheck._run(smi)
@@ -445,23 +440,14 @@ class Query2CAS(BaseTool):
             # if query is smiles
             smiles = None
 
-            print("here 1-----")
-
             if is_smiles(query):
                 smiles = query
 
-            print("===SMILES 2===")
-            print(smiles)
-
             cas = query2cas(query, self.url_cid, self.url_data)
 
-            print("here 2-----")
 
             if smiles is None:
                 smiles = query2smiles(query, None)
-
-            print("===SMILES 2===")
-            print(smiles)
             
             # great now check if smiles is controlled
             msg = self.ControlChemCheck._run(smiles)

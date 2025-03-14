@@ -189,25 +189,10 @@ class ToxPipeAgent:
             res = summary
 
         # The final response should always be a string. If it is instead a JSON, then parse it into a string before returning.
-        print("=== RES 111===")
-        print(res)
+        #print("=== RES ===")
+        #print(res)
 
         return(res)
-        
-        """
-        try:
-            json.loads(res)
-        except json.JSONDecodeError as e: # if not json, just return raw response
-
-            print("Error, not a JSON response.")
-            print(e)
-
-            return res
-
-        res = self.parser.invoke(res)
-        return res.response"
-        """
-        
         
     
     def run_rag(self, input):
