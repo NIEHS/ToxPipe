@@ -1,13 +1,11 @@
 # LangChain/Graph agent creation
 from .toxpipe_graph import create_react_agent
 
-from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.message import add_messages
 # Model interface
 from langchain_openai import AzureChatOpenAI
 # Memory & Cache
 from langchain_core.messages import BaseMessage
-from langchain_core.prompts import PromptTemplate
 from langchain.globals import set_llm_cache
 from langchain_community.cache import SQLiteCache
 # File management & Tools
@@ -37,10 +35,7 @@ from .multi import *
 from dotenv import load_dotenv
 load_dotenv('../.config/.env')
 # Prompts
-from .prompts_chem import getPrompt, PromptAgentic
-
-# Output parsers
-from .output_parsers import CustomOutputParser, OutputParserSchema
+from .prompts_chem import getPrompt, PromptAgentic, summary_prompt
 
 # Other
 from typing import Sequence
@@ -157,70 +152,12 @@ class ToxPipeAgent:
 
         # If we are summarizing or running multiple agents, we need to summarize the results into a single result using the following conditions
         if self.summarize == True or n_agents > 1:
-            summary_prompt_template = """
-            Previously, {n_agents} separate LLM agents were run to answer the following input from an end user:
-
-            {input}
-
-            The following are the raw results from each agent:
-
-            {res}
-
-            Using these responses, reformat the responses into a single response to be returned to the end user.
-            IMPORTANT: you MUST follow the following steps when formulating your final response:
-                1. This summary should contain the most relevant information from the raw results that answers the original input. Try to only include information that is relevant to the original input and avoid including any irrelevant information.
-                2. If there are any discrepancies between the raw results, try to resolve them in the summary.
-                3. If there are any contradictions between the raw results, try to explain why these contradictions exist and what the implications are for the end user.
-                4. If there are any uncertainties in the raw results, try to explain why these uncertainties exist and what the implications are for the end user.
-                5. If there are any limitations in the raw results, try to explain what these limitations are and how they affect the end user.
-                6. If there are any other important details in the raw results that are relevant to the end user, try to include these in the summary as well.
-                7. You MUST include a "confidence rating" for each piece of information in the summary that indicates how confident you are in that piece of information. This confidence rating should be the number of agents that returned that piece of information divided by the total number of agents, {n_agents} and formatted as a percentage.
-                8. If there is information that is only present in a minority of the agent responses, explain that this information has a low confidence rating.
-                9. Rank the information in descending order of confidence, with the most confident items at the top of the list.
-                10. If they are available, you must include the source for ALL information returned in the summary. This includes the source for the raw results from each agent as well as the source for any additional information that you include in the summary.
-                11. Maintain as much of the original information and formatting as possible from the raw results when creating the final response. This includes any lists, tables, sources, or other formatting that was present in the raw results.
-                12. If asked to provide a list of chemicals, like metabolites, you must include the full list in the summary without summarizing or grouping the list.
-                13. When providing the sources for information, you must include each source's author(s), title, date of publication, journal of publication, and DOI, URL, or PMID if available in the final summary.
-                14. You MUST provide each agent's raw response WITHOUT SUMMARIZING above the final summary, noting which agent produced which result.
-
-
-            The following is an example of the final response summary that should be returned:
-            ** Agent 1 Response **
-            Agent 1's full response here.
-
-            ...
-
-            ** Agent N Response **
-            Agent N's full response here.
-
-            ** Summary **
-            ** Topic 1 **
-            Summary: Summary of topic 1 across all agents here.
-            Confidence: Confidence rating for topic 1 here. (Confidence: number of agents that returned this topic / total number of agents)
-            Source: Source for topic 1 here.
-
-            ...
             
-            ** Topic N **
-            Summary: Summary of topic N across all agents here.
-            Confidence: Confidence rating for topic N here. (Confidence: number of agents that returned this topic / total number of agents)
-            Source: Source for topic N here.
-
-            ** Disclaimer **
-            The confidence score is calculated by taking the number of agents that returned a topic / the total number of agents. This is then formatted as a percentage. For example, if 3 out of 5 agents returned a topic, the confidence score would be 60%.
-
-                
-
-            """
-            summary_prompt = ChatPromptTemplate.from_template(summary_prompt_template)
+            
             summary_chain = summary_prompt | self.llm
             summary = summary_chain.invoke({"n_agents": n_agents, "input": input, "res": res})
 
             res = summary.content
-
-        # The final response should always be a string. If it is instead a JSON, then parse it into a string before returning.
-        #print("=== RES ===")
-        #print(res)
 
         return(res)
         
