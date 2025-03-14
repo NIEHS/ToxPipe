@@ -16,3 +16,4 @@ class Config:
     )
 
     TOKENS_PER_LLM_CALL = 5000
+    MAX_KEYWORDS = 10

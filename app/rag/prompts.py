@@ -7,7 +7,7 @@ class PromptPreRetrieval:
     You will be given a query. Analyze the query and find a list of "keywords" or "phrases" on which you need information to answer the query. Always follow the rules below
 
     ** Rules **
-    - List maximum of 10 keywords or phrases. DO NOT LIST more than 10 keywords.
+    - List maximum of 10 keywords or phrases. THE LIST MUST NOT BE MORE THAN 10.
     - Answer the query in the JSON format
 
     ```json

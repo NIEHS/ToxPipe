@@ -51,7 +51,7 @@ class CustomRetriever():
 
             return docs_str
 
-        for kw in input['Keywords']:
+        for kw in input['Keywords'][:Config.MAX_KEYWORDS]:
             try:
                 docs = self.retriever.invoke(kw)
                 if len(docs): self.docs_res[kw] = docs
