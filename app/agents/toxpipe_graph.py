@@ -33,6 +33,8 @@ from operator import itemgetter
 import json
 import re
 
+from .tools import make_translate_tools
+
 
 # We create the AgentState that we will pass around
 # This simply involves a list of messages
@@ -313,6 +315,13 @@ def create_react_agent(
     #print("===tools===")
     #print(tools)
     #print(type(tools))
+
+    #translate_tools = make_translate_tools()
+    #print("===translate_tools===")
+    #print(translate_tools)
+    #print(type(translate_tools))
+
+
 
     if isinstance(tools, ToolExecutor):
         tool_classes: Sequence[BaseTool] = tools.tools

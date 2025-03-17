@@ -79,7 +79,7 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
 
     return all_tools
 
-def make_translate_tools(llm: BaseLanguageModel):
+def make_translate_tools():
     translate_tools = [
         Name2SMILES(),
         Query2CAS(),
