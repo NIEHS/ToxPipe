@@ -1,6 +1,7 @@
 from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
 from .utils import Config
+from chromadb import HttpClient
 
 # ---------------------------------------------------------------------------
 class CustomRetriever():
@@ -13,7 +14,12 @@ class CustomRetriever():
             base_url=Config.env_config['OPENAI_BASE_URL'], 
             api_key=Config.env_config['OPENAI_API_KEY']
         )
-        db = Chroma(collection_name='quickstart', persist_directory=str(Config.DIR_DATA), embedding_function=embedding)
+        # Local use
+        #db = Chroma(collection_name='quickstart', persist_directory=str(Config.DIR_DATA), embedding_function=embedding)
+
+        # Remote use
+        chroma_client = HttpClient(host=Config.env_config['CHROMA_HOST'],  port=Config.env_config['CHROMA_PORT'])
+        db = Chroma(client=chroma_client, collection_name="quickstart", embedding_function=embedding)
         self.retriever = db.as_retriever(search_type='similarity_score_threshold', search_kwargs={'k': 5, 'score_threshold': 0.3})
 
     def getResources(self, input):

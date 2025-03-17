@@ -309,6 +309,10 @@ def create_react_agent(
             state_schema.__annotations__
         ):
             raise ValueError(f"Missing required key(s) {missing_keys} in state_schema")
+        
+    #print("===tools===")
+    #print(tools)
+    #print(type(tools))
 
     if isinstance(tools, ToolExecutor):
         tool_classes: Sequence[BaseTool] = tools.tools
@@ -333,6 +337,10 @@ def create_react_agent(
             return "__end__"
         # Otherwise if there is, we continue
         else:
+
+            #print("=== LAST MSG ===")
+            #print(last_message)
+
             return "tools"
         
 

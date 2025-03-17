@@ -78,3 +78,13 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
         all_tools.append(QueryCBTMetabolites(llm=llm))
 
     return all_tools
+
+def make_translate_tools(llm: BaseLanguageModel):
+    translate_tools = [
+        Name2SMILES(),
+        Query2CAS(),
+        Name2DTXSID(),
+        SMILES2DTXSID(),
+        CASRN2DTXSID(),
+    ]
+    return translate_tools

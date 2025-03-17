@@ -108,13 +108,6 @@ class ToxPipeAgent:
 
         # Define parser
         self.parser = PydanticOutputParser(pydantic_object=Response)
-        
-        # Define prompt template
-        #self.prompt_template = PromptTemplate(
-        #    template=PROMPT,
-        #    input_variables=["messages"],
-        #    partial_variables={"format_instructions": self.parser.get_format_instructions()},
-        #)
 
         self.prompt_template = getPrompt(PromptAgentic)
 
