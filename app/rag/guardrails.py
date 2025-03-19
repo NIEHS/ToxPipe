@@ -1,8 +1,7 @@
 from typing import Literal
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import JsonOutputParser
 from pydantic import BaseModel, Field
-from .utils import State
+from .utils import State, OutputParser
 
 domain = 'either of toxicology, chemicals, chemical compound and biological terms'
 
@@ -10,15 +9,6 @@ class GuardrailsOutput(BaseModel):
     decision: Literal['tox', 'end'] = Field(
         description=f'Decision on whether the question is related to {domain}'
     )
-
-class GuardrailsOutputParser(JsonOutputParser):
-
-    def __init__(self, output_parser=GuardrailsOutput):
-        super().__init__(pydantic_object=output_parser)
-
-    def parseOutput(self, data):
-        response = self.parse(data.content)
-        return response
 
 class Guardrails:
 
@@ -43,7 +33,7 @@ class Guardrails:
     def __init__(self, llm):
         # Will be used in future
         #self.guardrails_chain = self.guardrails_prompt | llm.with_structured_output(GuardrailsOutput)
-        self.guardrails_chain = self.guardrails_prompt | llm | GuardrailsOutputParser().parseOutput
+        self.guardrails_chain = self.guardrails_prompt | llm | OutputParser(GuardrailsOutput)
 
 
     def guardrails(self, state: State) -> State:

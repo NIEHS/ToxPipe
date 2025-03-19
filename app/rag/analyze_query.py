@@ -1,7 +1,6 @@
-from .utils import State
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
-from langchain_core.output_parsers import JsonOutputParser
+from .utils import State, OutputParser
 
 class UserQueryKeywordsSchema(BaseModel):
     '''
@@ -9,15 +8,6 @@ class UserQueryKeywordsSchema(BaseModel):
     to get context on.
     '''
     keyphrases: list[str] = Field('List of maximum 10 keywords', max_length=10)
-
-class AnalyzeQueryOutputParser(JsonOutputParser):
-
-    def __init__(self, output_parser=UserQueryKeywordsSchema):
-        super().__init__(pydantic_object=output_parser)
-
-    def parseOutput(self, data):
-        response = self.parse(data.content)
-        return response
 
 class AnalyzeQuery:
 
@@ -56,8 +46,8 @@ class AnalyzeQuery:
 
     def __init__(self, llm):
         # Will be used in future
-        # self.analyze_query_chain = analyze_query_prompt | llm.with_structured_output(UserQueryKeywordsSchema)
-        self.analyze_query_chain = self.analyze_query_prompt | llm | AnalyzeQueryOutputParser().parseOutput
+        #self.analyze_query_chain = self.analyze_query_prompt | llm.with_structured_output(UserQueryKeywordsSchema)
+        self.analyze_query_chain = self.analyze_query_prompt | llm | OutputParser(UserQueryKeywordsSchema)
 
     def analyze_query(self, state: State) -> State:
         '''

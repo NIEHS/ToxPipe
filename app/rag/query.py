@@ -1,11 +1,6 @@
     
-from .utils import State
 from langchain_core.prompts import ChatPromptTemplate
-
-class CustomOutputParser():
-        
-    def parseOutput(self, data):
-        return {'Response':data.content}
+from .utils import State
 
 class Query:
 
@@ -37,7 +32,7 @@ class Query:
     You will be given a query followed by resources. Answer the query based on the resources provided.
 
     When providing answer, STRICTLY FOLLOW the rules below:
-    1. If you cannot answer the query based on the resources, output "irrelevant".
+    1. If the resources do not have information regarding the query, output only one word: "irrelevant".
     2. DO NOT ANSWER the query using information outside the resources.
 
     ----------------------------------------------
@@ -84,16 +79,18 @@ class Query:
     )
 
     def __init__(self, llm):
-        output_parser = CustomOutputParser()
-        self.query_with_context_chain = (self.query_with_context_prompt | llm | output_parser.parseOutput)
-        self.query_without_context_chain = (self.query_without_context_prompt | llm | output_parser.parseOutput)
+        self.query_with_context_chain = (self.query_with_context_prompt | llm | self.parseOutput)
+        self.query_without_context_chain = (self.query_without_context_prompt | llm | self.parseOutput)
+    
+    def parseOutput(self, data):
+        return data.content
 
     def query_with_context(self, state: State) -> State:
         '''
         Get llm response with context
         '''
         
-        response = self.query_with_context_chain.invoke({'query': state.get('query'), 'resources': state.get('resources')})['Response']
+        response = self.query_with_context_chain.invoke({'query': state.get('query'), 'resources': state.get('resources')})
 
         if response == 'irrelevant': 
             return {**state, **{'next_action': 'query_without_context', 'steps': ['query_with_context']}}
@@ -107,5 +104,5 @@ class Query:
         Get llm response without context
         '''
         
-        return {'response': self.query_without_context_chain.invoke({'query': state.get('query')})['Response'], 
+        return {'response': self.query_without_context_chain.invoke({'query': state.get('query')}), 
                 'steps': ['query_without_context']}

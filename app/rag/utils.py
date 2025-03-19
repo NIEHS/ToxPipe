@@ -6,6 +6,7 @@ from operator import add
 from typing import Annotated, List
 
 from typing_extensions import TypedDict
+from langchain_core.output_parsers import JsonOutputParser
 
 # ---------------------------------------------------------------------------
 class Config:
@@ -31,3 +32,9 @@ class State(TypedDict):
     keyphrases: List[str]
     resources: str
     steps: Annotated[List[str], add]
+
+# ---------------------------------------------------------------------------
+class OutputParser(JsonOutputParser):
+
+    def __init__(self, output_parser):
+        super().__init__(pydantic_object=output_parser)
