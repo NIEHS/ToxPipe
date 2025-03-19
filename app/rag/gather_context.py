@@ -57,7 +57,8 @@ class CustomRetriever():
                         print(f'Resource retriever formatting: {str(w)}')
 
             return docs_str
-
+        
+        self.docs_res = {}
         for kw in keyphrases[:Config.MAX_KEYWORDS]:
             try:
                 docs = self.retriever.invoke(kw)
@@ -69,14 +70,16 @@ class CustomRetriever():
 
 # ---------------------------------------------------------------------------
 class GatherContext:
+    
+    def __init__(self):
+        self.retriever = CustomRetriever()
 
-    def gather_context(state: State) -> State:
+    def gather_context(self, state: State) -> State:
         '''
         Gather context using keyphrases extracted from user query
         '''
-        
-        retriever = CustomRetriever()
-        resources = retriever.getResources(state.get('keyphrases'))
+
+        resources = self.retriever.getResources(state.get('keyphrases'))
         
         return {'resources': resources, 
                 'steps': ['gather_context']}

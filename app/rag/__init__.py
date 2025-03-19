@@ -36,8 +36,8 @@ def createGraph(llm):
 
     gr = Guardrails(llm)
     aq = AnalyzeQuery(llm)
+    gc = GatherContext()
     qr = Query(llm)
-
 
     # -----------------------------------------------------------------------
     # Langgraph
@@ -54,7 +54,7 @@ def createGraph(llm):
     else:
         langgraph.add_edge(START, 'analyze_query')
     langgraph.add_node(aq.analyze_query)
-    langgraph.add_node(GatherContext.gather_context)
+    langgraph.add_node(gc.gather_context)
     langgraph.add_node(qr.query_with_context)
     langgraph.add_node(qr.query_without_context)
     langgraph.add_edge('analyze_query', 'gather_context')
