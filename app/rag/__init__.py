@@ -34,14 +34,14 @@ def createGraph(llm):
     if isinstance(llm, str):
         llm = getOpenAIModel(llm)
 
+    # -----------------------------------------------------------------------
+    # Langgraph
+    # -----------------------------------------------------------------------
     gr = Guardrails(llm)
     aq = AnalyzeQuery(llm)
     gc = GatherContext()
     qr = Query(llm)
-
-    # -----------------------------------------------------------------------
-    # Langgraph
-    # -----------------------------------------------------------------------
+    
     langgraph = StateGraph(State, input=State, output=State)
     use_guardrail = False
     if use_guardrail:
