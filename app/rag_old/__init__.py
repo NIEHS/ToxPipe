@@ -70,4 +70,4 @@ def query(query_text: str, llm: BaseLLM | str = 'azure-gpt-4o') -> str:
         print(error)
         breakpoint()
     
-    return {'response': response['Response'], 'searched_keywords': keywords['Keywords'], 'error': error}
+    return {'response': response['Response'], 'searched_keyphrases': keywords['Keywords'], 'error': error}
