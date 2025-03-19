@@ -81,12 +81,15 @@ def query(query_text: str, llm: BaseLLM | str = 'azure-gpt-4o') -> str:
             Steps taken by the LLM to generate the response,
             Any errors during execution
     '''
-    response, error = {'response': ''}, ''
+
     try:
         langgraph = createGraph(llm=llm)
         response = dict(langgraph.invoke(dict(query=query_text)))#, config={"callbacks": [Config.langfuse_handler]})
     except Exception as exp:
-        error = f'Line number: {exp.__traceback__.tb_lineno}, Description: {exp}\n\n{traceback.format_exc()}'
-        print(error)
+        response = {'error': f'Line number: {exp.__traceback__.tb_lineno}, Description: {exp}\n\n{traceback.format_exc()}'}
+        print(response['error'])
     
-    return {'response': response['response'], 'searched_keyphrases': response['keyphrases'], 'steps_taken': response['steps'], 'error': error}
+    return {'response': response.get('response', ''), 
+            'searched_keyphrases': response.get('keyphrases', []), 
+            'steps_taken': response.get('steps', []), 
+            'error': response.get('error', '')}
