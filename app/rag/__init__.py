@@ -1,12 +1,31 @@
 from .llms import getOpenAIModel
-from .prompts import getPrompt, PromptPreRetrieval, PromptRAG
-from .retrievers import CustomRetriever
-from .output_parsers import CustomPreRetrievalOutputParser, CustomOutputParser
+from .utils import State
 from langchain.llms import BaseLLM
-from langchain_openai import AzureChatOpenAI
+from langgraph.graph import END, START, StateGraph
+from typing import Literal
+from .guardrails import Guardrails
+from .analyze_query import AnalyzeQuery
+from .gather_context import GatherContext
+from .query import Query
 import traceback
 
-def createChains(llm):
+def guardrails_condition(
+        state: State,
+    ) -> Literal['analyze_query', '__end__']:
+        if state.get('next_action') == 'end':
+            return END
+        if state.get('next_action') == 'tox':
+            return 'analyze_query'
+
+def validate_context_condition(
+    state: State,
+) -> Literal['query_without_context', '__end__']:
+    if state.get('next_action') == 'end':
+        return END
+    if state.get('next_action') == 'query_without_context':
+        return 'query_without_context'
+
+def createGraph(llm):
 
     # -----------------------------------------------------------------------
     # LLM
@@ -15,40 +34,40 @@ def createChains(llm):
     if isinstance(llm, str):
         llm = getOpenAIModel(llm)
 
-    # -----------------------------------------------------------------------
-    # Prompt
-    # -----------------------------------------------------------------------
-    prompt_pr = getPrompt(PromptPreRetrieval)
-    prompt = getPrompt(PromptRAG)
+    gr = Guardrails(llm)
+    aq = AnalyzeQuery(llm)
+    qr = Query(llm)
+
 
     # -----------------------------------------------------------------------
-    # Retriever
+    # Langgraph
     # -----------------------------------------------------------------------
-    retriever = CustomRetriever()
-
-    # -----------------------------------------------------------------------
-    # Output parser
-    # -----------------------------------------------------------------------
-    output_parser_pr = CustomPreRetrievalOutputParser()
-    output_parser = CustomOutputParser()
-
-    # -----------------------------------------------------------------------
-    # Chain
-    # -----------------------------------------------------------------------
-    custom_chain_pr = (
-        prompt_pr 
-        | llm#.with_structured_output(PreRetrievalOutputParserSchema)
-        | output_parser_pr.parseOutput
+    langgraph = StateGraph(State, input=State, output=State)
+    use_guardrail = False
+    if use_guardrail:
+        langgraph.add_node(gr.guardrails)
+        langgraph.add_edge(START, 'guardrails')
+        langgraph.add_conditional_edges(
+            'guardrails',
+            guardrails_condition,
+        )
+    else:
+        langgraph.add_edge(START, 'analyze_query')
+    langgraph.add_node(aq.analyze_query)
+    langgraph.add_node(GatherContext.gather_context)
+    langgraph.add_node(qr.query_with_context)
+    langgraph.add_node(qr.query_without_context)
+    langgraph.add_edge('analyze_query', 'gather_context')
+    langgraph.add_edge('gather_context', 'query_with_context')
+    langgraph.add_conditional_edges(
+        'query_with_context',
+        validate_context_condition,
     )
+    langgraph.add_edge('query_without_context', END)
 
-    custom_chain = (
-        {'resources': retriever.getResources, 'query': lambda x: x['query']}
-        | prompt
-        | llm#.with_structured_output(OutputParserSchema)
-        | output_parser.parseOutput
-    )
+    langgraph = langgraph.compile()
 
-    return custom_chain_pr, custom_chain
+    return langgraph
 
 # -----------------------------------------------------------------------
 def query(query_text: str, llm: BaseLLM | str = 'azure-gpt-4o') -> str:
@@ -57,16 +76,17 @@ def query(query_text: str, llm: BaseLLM | str = 'azure-gpt-4o') -> str:
     
     :param query_text: User query
     :param llm: BaseLLM object or Name of the LLM
-    :return: Response to user query
+    :return: Response to user query, 
+            Searched keyphrases from RAG DB, 
+            Steps taken by the LLM to generate the response,
+            Any errors during execution
     '''
-    response, keywords, error = {'Response': ''}, {'Keywords': []}, ''
+    response, error = {'response': ''}, ''
     try:
-        custom_chain_pr, custom_chain = createChains(llm=llm)
-        keywords = dict(custom_chain_pr.invoke(query_text))
-        response = dict(custom_chain.invoke(input=keywords | dict(query=query_text)))#, config={"callbacks": [Config.langfuse_handler]})
-
+        langgraph = createGraph(llm=llm)
+        response = dict(langgraph.invoke(dict(query=query_text)))#, config={"callbacks": [Config.langfuse_handler]})
     except Exception as exp:
         error = f'Line number: {exp.__traceback__.tb_lineno}, Description: {exp}\n\n{traceback.format_exc()}'
         print(error)
     
-    return {'response': response['Response'], 'searched_keywords': keywords['Keywords'], 'error': error}
+    return {'response': response['response'], 'searched_keyphrases': response['keyphrases'], 'steps_taken': response['steps'], 'error': error}

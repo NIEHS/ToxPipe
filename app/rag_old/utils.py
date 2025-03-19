@@ -2,11 +2,6 @@ from pathlib import Path
 from dotenv import dotenv_values
 from langfuse.callback import CallbackHandler
 
-from operator import add
-from typing import Annotated, List
-
-from typing_extensions import TypedDict
-
 # ---------------------------------------------------------------------------
 class Config:
     DIR_HOME = Path(__file__).parent.parent.parent
@@ -22,12 +17,3 @@ class Config:
 
     TOKENS_PER_LLM_CALL = 5000
     MAX_KEYWORDS = 10
-
-# ---------------------------------------------------------------------------
-class State(TypedDict):
-    query: str
-    next_action: str
-    response: str
-    keyphrases: List[str]
-    resources: str
-    steps: Annotated[List[str], add]
