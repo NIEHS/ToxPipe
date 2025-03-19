@@ -1,5 +1,6 @@
     
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
 from .utils import State
 
 class Query:
@@ -79,11 +80,8 @@ class Query:
     )
 
     def __init__(self, llm):
-        self.query_with_context_chain = (self.query_with_context_prompt | llm | self.parseOutput)
-        self.query_without_context_chain = (self.query_without_context_prompt | llm | self.parseOutput)
-    
-    def parseOutput(self, data):
-        return data.content
+        self.query_with_context_chain = (self.query_with_context_prompt | llm | StrOutputParser())
+        self.query_without_context_chain = (self.query_without_context_prompt | llm | StrOutputParser())
 
     def query_with_context(self, state: State) -> State:
         '''
