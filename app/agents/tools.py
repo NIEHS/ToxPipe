@@ -4,7 +4,6 @@ from .tp_tools import *
 # Instantiate tools available for agent use
 def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
     all_tools = [
-        QueryRAG(llm=llm),
         Name2SMILES(),
         Query2CAS(),
         PatentCheck(),
@@ -13,13 +12,11 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
         FuncGroups(),
         ExplosiveCheck(),
         ControlChemCheck(),
-        Scholar2ResultLLM(llm=llm), # Note: very slow
         SafetySummary(llm=llm),
         GeneExpression(llm=llm),
         HallmarkGeneAnalyzer(llm=llm),
         Rat2HumanGene(llm=llm),
         Human2RatGene(llm=llm),
-        QueryCBTFooDB(),
         QueryCBTChemicalVendors(),
         QueryCBTGRAS(),
         QueryCBTTox21Models(),
@@ -81,10 +78,20 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
 
 def make_translate_tools():
     translate_tools = [
-        Name2SMILES(),
-        Query2CAS(),
         Name2DTXSID(),
         SMILES2DTXSID(),
         CASRN2DTXSID(),
     ]
     return translate_tools
+
+def make_rag_tools(llm: BaseLanguageModel):
+    rag_tools = [
+        QueryRAG(llm=llm),
+    ]
+    return rag_tools
+
+def make_literature_tools(llm: BaseLanguageModel):
+    literature_tools = [
+        Scholar2ResultLLM(llm=llm),
+    ]
+    return literature_tools
