@@ -33,7 +33,7 @@ class Query:
     You will be given a query followed by resources. Answer the query based on the resources provided.
 
     When providing answer, STRICTLY FOLLOW the rules below:
-    1. If the resources do not have information regarding the query, output only one word: "irrelevant".
+    1. If the resources do not have information regarding the query, output in following format: "resources_irrelevant"
     2. DO NOT ANSWER the query using information outside the resources.
 
     ----------------------------------------------
@@ -90,7 +90,7 @@ class Query:
         
         response = self.query_with_context_chain.invoke({'query': state.get('query'), 'resources': state.get('resources')})
 
-        if response == 'irrelevant': 
+        if 'resources_irrelevant' in response: 
             return {**state, **{'next_action': 'query_without_context', 'steps': ['query_with_context']}}
         
         return {'response': response,
