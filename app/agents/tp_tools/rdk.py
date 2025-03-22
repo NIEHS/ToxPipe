@@ -1,7 +1,11 @@
 from langchain.tools import BaseTool
 from rdkit import Chem
 from rdkit.Chem import rdMolDescriptors
-
+import requests
+import os
+import urllib.parse
+from dotenv import load_dotenv
+load_dotenv('../../../.config/.env')
 from .utils import *
 
 
@@ -50,7 +54,7 @@ class MolSimilarity(BaseTool):
 
 class SMILES2Weight(BaseTool):
     name: str = "SMILES2Weight"
-    description: str = "Input SMILES, returns molecular weight."
+    description: str = "Input DTXSID, returns molecular weight."
 
     def __init__(
         self,
@@ -132,11 +136,21 @@ class FuncGroups(BaseTool):
         mol = Chem.MolFromSmiles(mol.strip())
         return len(Chem.Mol.GetSubstructMatches(mol, fgmol, uniquify=True)) > 0
 
-    def _run(self, smiles: str) -> str:
+    def _run(self, dtxsid: str) -> str:
         """
-        Input a molecule SMILES or name.
-        Returns a list of functional groups identified by their common name (in natural language).
+        Input a chemical DTXSID, returns a list of functional groups identified by their common name (in natural language).
         """
+
+        dtxsid = dtxsid.rstrip()
+
+        # Convert DTXSID to SMILES
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/dtxsid2smiles?dtxsid={urllib.parse.quote_plus(dtxsid)}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+        res = res.json()
+        smiles = res[0]["canonical_smiles"]
+
         try:
             fgs_in_molec = [
                 name

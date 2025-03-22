@@ -15,7 +15,7 @@ from typing_extensions import Annotated, TypedDict
 
 from langgraph._api.deprecation import deprecated_parameter
 from langgraph.errors import ErrorCode, create_error_message
-from langgraph.graph import StateGraph
+from langgraph.graph import StateGraph, START, END
 from langgraph.graph.graph import CompiledGraph
 from langgraph.graph.message import add_messages
 from langgraph.managed import IsLastStep, RemainingSteps
@@ -32,8 +32,9 @@ from langchain.tools.render import render_text_description
 from operator import itemgetter
 import json
 import re
+import uuid
 
-from .tools import make_translate_tools
+from .tools import make_translate_tools, make_rag_tools, make_literature_tools
 
 
 # We create the AgentState that we will pass around
@@ -311,17 +312,18 @@ def create_react_agent(
             state_schema.__annotations__
         ):
             raise ValueError(f"Missing required key(s) {missing_keys} in state_schema")
-        
-    #print("===tools===")
-    #print(tools)
-    #print(type(tools))
 
-    #translate_tools = make_translate_tools()
-    #print("===translate_tools===")
-    #print(translate_tools)
-    #print(type(translate_tools))
+    translate_tools = make_translate_tools()
+    translate_tool_node = ToolNode(translate_tools)
+    translate_tool_classes = list(translate_tool_node.tools_by_name.values())
 
+    rag_tools = make_rag_tools(llm=model)
+    rag_tool_node = ToolNode(rag_tools)
+    rag_tool_classes = list(rag_tool_node.tools_by_name.values())
 
+    literature_tools = make_literature_tools(llm=model)
+    literature_tool_node = ToolNode(literature_tools)
+    literature_tool_classes = list(literature_tool_node.tools_by_name.values())
 
     if isinstance(tools, ToolExecutor):
         tool_classes: Sequence[BaseTool] = tools.tools
@@ -334,70 +336,66 @@ def create_react_agent(
         # get the tool functions wrapped in a tool class from the ToolNode
         tool_classes = list(tool_node.tools_by_name.values())
 
-    if _should_bind_tools(model, tool_classes):
-        model = cast(BaseChatModel, model).bind_tools(tool_classes)
+    #if _should_bind_tools(model, tool_classes):
+        #model = cast(BaseChatModel, model).bind_tools(tool_classes)
 
+    model_inner = model
+    model_rag = model
+    model_literature = model
+    model_training = model
+
+    model = cast(BaseChatModel, model).bind_tools(translate_tool_classes + rag_tool_classes + literature_tool_classes)
+    model_inner = cast(BaseChatModel, model_inner).bind_tools(tool_classes)
+    model_rag = cast(BaseChatModel, model_rag).bind_tools(rag_tool_classes)
+    model_literature = cast(BaseChatModel, model_literature).bind_tools(literature_tool_classes)
+    model_training = cast(BaseChatModel, model_literature)
+    
     # Define the function that determines whether to continue or not
-    def should_continue(state: AgentState) -> Literal["tools", "__end__"]:
+    def tool_calls(state: AgentState) -> Literal["tools", "agent3"]:
         messages = state["messages"]
         last_message = messages[-1]
+        # If there is no function call, then we finish
+        if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
+            return "agent3"
+        # Otherwise if there is, we continue
+        else:
+            return "tools"
+    
+    def rag_call(state: AgentState) -> Literal["rag", "agent4"]:
+        """Conduct a RAG search if unable to find an answer via the ChemBioTox tools. If this answer is unsatisfactory, then we must conduct a literature search."""
+        messages = state["messages"]
+        last_message = messages[-1]
+
+        # If there is no function call, then we finish
+        if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
+            return "agent4"
+        # Otherwise if there is, we continue
+        else:
+            return "rag"
+
+    def literature_call(state: AgentState) -> Literal["literature", "training"]:
+        """Conduct a literature search if unable to find an answer via a RAG search. If this answer is unsatisfactory, then we must formulate an answer using the model's pretrained knowledge."""
+        messages = state["messages"]
+        last_message = messages[-1]
+
+        # If there is no function call, then we finish
+        if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
+            return "training"
+        # Otherwise if there is, we continue
+        else:
+            return "literature"
+
+    def training_call(state: AgentState) -> Literal["training", "__end__"]:
+        """Formulate an answer using the model's pretrained knowledge. If this answer is unsatisfactory, then we must say we were unable to find an answer."""
+        messages = state["messages"]
+        last_message = messages[-1]
+
         # If there is no function call, then we finish
         if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
             return "__end__"
         # Otherwise if there is, we continue
         else:
-
-            #print("=== LAST MSG ===")
-            #print(last_message)
-
-            return "tools"
-        
-
-
-    # Add manual tool support if model doesn't support tool calling
-    if len(manual_tool_support) > 0:
-        rendered_tools = render_text_description(manual_tool_support)
-        TOOLS_TEMPLATE = f"""
-
-        <s>
-        [INST]
-
-        YOUR ROLE:
-        You are an expert chemist and your task is to respond to the question or solve the problem to the best of your ability using the provided tools. 
-        IMPORTANT: only use ONE tool at a time, in a sequential manner. Do NOT pass your "thought" as an input to the tool. Instead, use the output of the previous tool as a guide for your next action.
-        IMPORTANT: If you deem that another tool must be used after the current one, you MUST call that tool and wait for its output before proceeding. Do NOT prematurely produce a final answer before performing all actions.
-        IMPORTANT: If you are unable to formulate an answer using your tools, you must state that you were unable to find an answer using the available tools.
-        IMPORTANT: Your final answer should contain all information necessary to answer the question and subquestions. If you are asked to perform multiple tasks or are asked multiple questions, you should provide a final answer for each task. You must cite the source for each piece of information in your final answer: the source is typically given after the text "source:"
-        IMPORTANT: You must always reformat the output of each tool into a sentence if the original output is a list so that you may understand the tool's output better.
-
-        ADDITIONAL TOOL-SPECIFIC INSTRUCTIONS:
-        - If a tool requires a DSSTox Substance ID or DTXSID as input and you have a chemical name, you must first convert the chemical name to a DTXSID before using the tool and include ONLY the DTXSID as the input to the tool.
-        - Each tool requires a single input. IF you have multiple possible inputs for a tool, run the same tool multiple times with each input separately.
-        - If you cannot determine an answer using a tool for a given action, you must use the "LiteratureSearch" tool to find the answer. You must include the source in your final answer. Do not skip using this tool.
-        - If you, at any point, used the LiteratureSearch tool, you must include citations with each source's author(s), title, date of publication, journal of publication, and DOI, URL, or PMID for ALL the sources you used in your final answer.
-
-        IMPORTANT: If you were asked to provide the structure for a chemical, synthesize a chemical, or find a similar chemical, then do the following:
-        1. check if the molecule is a controlled chemical. If it is a controlled chemical, then immediately stop execution with an appropriate error to the user. If it is not a controlled chemical, then check if the molecule has high similarity (i.e., similarity is greater than 0.35) with a controlled chemical. If it is a controlled chemical, then immediately stop execution with an appropriate error to the user. 
-        2. If it is not a controlled chemical, then check if it has high similarity (i.e., structural similarity is greater than 0.35) with a controlled chemical. If the molecule has high similarity to a controlled chemical, immediately stop execution with an appropriate error to the user. It is okay to continue if the molecule is not a controlled chemical or if the molecule has only a low similarity (i.e., less than or equal to 0.35) to a controlled chemical.
-        3. Does the question involve any molecules? If so, as a first step, check if any are controlled chemicals. If any are, include a warning in your final answer.
-        4. Were you asked to plan a synthesis route? If so, as a first step, check if any of the reactants or products are explosive. If any are, include a warning in your final answer.
-        5. Were you asked to execute a synthesis route? If so, check if any of the reactants or products are explosive. If any are, ask the user for permission to continue.
-        Do not skip steps 1, 2, 3, 4, and 5. If the molecule is not a controlled chemical, does not have high similarity to a controlled chemical, and is not explosive, then ensure you thoroughly answer everything asked for in the following question.
-        
-        These are the names and descriptions of tools you have access to:
-        
-        {rendered_tools}
-        
-        Given the user input, return the name and input of the tool to use. IMPORTANT: You MUST ALWAYS return your response as a valid JSON blob with 'name' and 'arguments' keys! Return ONLY the valid JSON blob and do not return your other thoughts. Do not skip this step.
-
-        After using a tool, determine if the tool's output satisfies the user's original query. If the tool's output satisfies the user's original query, then output the tool's output as the final answer. If the tool's output does not satisfy the user's original query, choose the best tool to produce an answer that would satisfy the user's request.
-        
-        [/INST]
-        </s>
-        """
-
-        TOOLS_PROMPT = ChatPromptTemplate([("system", TOOLS_TEMPLATE), MessagesPlaceholder(variable_name="messages")])
-        state_modifier = TOOLS_PROMPT
+            return "training"
 
     # we're passing store here for validation
     preprocessor = _get_model_preprocessing_runnable(
@@ -405,35 +403,16 @@ def create_react_agent(
     )
 
     model_runnable = preprocessor | model
+    model_inner_runnable = preprocessor | model_inner
+    model_rag_runnable = preprocessor | model_rag
+    model_literature_runnable = preprocessor | model_literature
+    model_training_runnable = preprocessor | model_training
     
-    if len(manual_tool_support) > 0:
-
-        def tool_chain(model_output):
-            tool_map = {tool.name: tool for tool in manual_tool_support}
-            chosen_tool = tool_map[model_output["name"]]
-            return itemgetter("arguments") | chosen_tool
-
-        def extract_json(model_output):
-            try:
-                s = str(model_output.content).replace("\n", " ")
-                pattern = r"\{(.*?)\}"
-                json_blocks = re.findall(pattern, s)
-                json_blocks = ["{"+i.strip()+"}"+"}" for i in json_blocks][0]
-                js = json.loads(json_blocks)
-
-                tool_output = tool_chain(js)
-
-                model_output = tool_output
-            except Exception as e:
-                return model_output    
-            return model_output | JsonOutputParser() | tool_chain
-
-        model_runnable = model_runnable | extract_json
 
     # Define the function that calls the model
     def call_model(state: AgentState, config: RunnableConfig) -> AgentState:
         _validate_chat_history(state["messages"])
-        response = model_runnable.invoke(state, config)
+        response = model_runnable.invoke(state["messages"], config)
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
         all_tools_return_direct = (
             all(call["name"] in should_return_direct for call in response.tool_calls)
@@ -467,10 +446,10 @@ def create_react_agent(
             }
         # We return a list, because this will get added to the existing list
         return {"messages": [response]}
-
-    async def acall_model(state: AgentState, config: RunnableConfig) -> AgentState:
+    
+    def call_model_inner(state: AgentState, config: RunnableConfig) -> AgentState:
         _validate_chat_history(state["messages"])
-        response = await model_runnable.ainvoke(state, config)
+        response = model_inner_runnable.invoke(state["messages"], config)
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
         all_tools_return_direct = (
             all(call["name"] in should_return_direct for call in response.tool_calls)
@@ -504,54 +483,255 @@ def create_react_agent(
             }
         # We return a list, because this will get added to the existing list
         return {"messages": [response]}
+    
+
+    def call_model_rag(state: AgentState, config: RunnableConfig) -> AgentState:
+        _validate_chat_history(state["messages"])
+        response = model_rag_runnable.invoke(state["messages"], config)
+
+        has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
+        all_tools_return_direct = (
+            all(call["name"] in should_return_direct for call in response.tool_calls)
+            if isinstance(response, AIMessage)
+            else False
+        )
+        if (
+            (
+                "remaining_steps" not in state
+                and state["is_last_step"]
+                and has_tool_calls
+            )
+            or (
+                "remaining_steps" in state
+                and state["remaining_steps"] < 1
+                and all_tools_return_direct
+            )
+            or (
+                "remaining_steps" in state
+                and state["remaining_steps"] < 2
+                and has_tool_calls
+            )
+        ):
+            return {
+                "messages": [
+                    AIMessage(
+                        id=response.id,
+                        content="Sorry, need more steps to process this request.",
+                    )
+                ]
+            }
+        # We return a list, because this will get added to the existing list
+        return {"messages": [response]}
+    
+    def call_model_literature(state: AgentState, config: RunnableConfig) -> AgentState:
+        _validate_chat_history(state["messages"])
+        response = model_literature_runnable.invoke(state["messages"], config)
+
+        has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
+        all_tools_return_direct = (
+            all(call["name"] in should_return_direct for call in response.tool_calls)
+            if isinstance(response, AIMessage)
+            else False
+        )
+        if (
+            (
+                "remaining_steps" not in state
+                and state["is_last_step"]
+                and has_tool_calls
+            )
+            or (
+                "remaining_steps" in state
+                and state["remaining_steps"] < 1
+                and all_tools_return_direct
+            )
+            or (
+                "remaining_steps" in state
+                and state["remaining_steps"] < 2
+                and has_tool_calls
+            )
+        ):
+            return {
+                "messages": [
+                    AIMessage(
+                        id=response.id,
+                        content="Sorry, need more steps to process this request.",
+                    )
+                ]
+            }
+        # We return a list, because this will get added to the existing list
+        return {"messages": [response]}
+    
+    
+    def call_model_training(state: AgentState, config: RunnableConfig) -> AgentState:
+        _validate_chat_history(state["messages"])
+        response = model_training_runnable.invoke(state["messages"], config)
+
+        has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
+        all_tools_return_direct = (
+            all(call["name"] in should_return_direct for call in response.tool_calls)
+            if isinstance(response, AIMessage)
+            else False
+        )
+        if (
+            (
+                "remaining_steps" not in state
+                and state["is_last_step"]
+                and has_tool_calls
+            )
+            or (
+                "remaining_steps" in state
+                and state["remaining_steps"] < 1
+                and all_tools_return_direct
+            )
+            or (
+                "remaining_steps" in state
+                and state["remaining_steps"] < 2
+                and has_tool_calls
+            )
+        ):
+            return {
+                "messages": [
+                    AIMessage(
+                        id=response.id,
+                        content="Sorry, need more steps to process this request.",
+                    )
+                ]
+            }
+        # We return a list, because this will get added to the existing list
+        return {"messages": [response]}
+    
+
 
     # Define a new graph
     workflow = StateGraph(state_schema or AgentState)
 
-    # Define the two nodes we will cycle between
-    workflow.add_node("agent", RunnableCallable(call_model, acall_model))
+    ### Define all nodes: ###
+
+    ### STAGE 1 - DATA PREPROCESSING ###
+    # Initial agent model node - this determines the format of the user's input - chemical name, CASRN, or SMILES
+    workflow.add_node("agent", RunnableCallable(call_model))
+
+    # Data preprocessing node - translates user input to DTXSID as that will be the standard input for all tools
+    workflow.add_node("preprocess", translate_tool_node)
+
+    ### STAGE 2 - DATA PREPROCESSING ###
+    # this stage should be called up to max_iterations times
+    # Stage 2 agent model node - this determines which tools, if any, to use
+    workflow.add_node("agent2", RunnableCallable(call_model_inner))
+
+    # Tool node - this is where the tools are called
     workflow.add_node("tools", tool_node)
 
-    # Set the entrypoint as `agent`
-    # This means that this node is the first one called
+    # Summarize node - this is where the model's output is summarized if it is excessively long
+    #workflow.add_node("summarize", RunnableCallable(call_model))
+    
+    ### STAGE 3 - FILL IN DATA GAPS ###
+    # Stage 3 agent model node - this determines how to use RAG
+    workflow.add_node("agent3", RunnableCallable(call_model_rag))
+
+    # RAG node - this is where the RAG search is conducted if the ChemBioTox tools are unable to find a satisfactory answer
+    workflow.add_node("rag", rag_tool_node)
+    
+    # Stage 3 agent model node - this determines how to use RAG
+    workflow.add_node("agent4", RunnableCallable(call_model_literature))
+
+    # Literature node - this is where the literature search is conducted if the RAG search is unable to find a satisfactory answer
+    workflow.add_node("literature", literature_tool_node)
+
+    # Training data node - formulate a last-ditch answer from the training data if the literature search is unable to find a satisfactory answer
+    workflow.add_node("training", RunnableCallable(call_model_training))
+
+
     workflow.set_entry_point("agent")
 
-    # We now add a conditional edge
-    workflow.add_conditional_edges(
-        # First, we define the start node. We use `agent`.
-        # This means these are the edges taken after the `agent` node is called.
-        "agent",
-        # Next, we pass in the function that will determine which node is called next.
-        should_continue,
-    )
-
-    # If any of the tools are configured to return_directly after running,
-    # our graph needs to check if these were called
-    should_return_direct = {t.name for t in tool_classes if t.return_direct}
-
-    def route_tool_responses(state: AgentState) -> Literal["agent", "__end__"]:
+    ### ADD EDGES ###
+    # Always want to start with a deliberation step to figure out how to get the user's input into DTXSID
+    # Figure out which translation tool to use
+    def route_preprocess_responses(state: AgentState) -> Literal["preprocess", "rag", "literature", "__end__"]:
         for m in reversed(state["messages"]):
             if not isinstance(m, ToolMessage):
                 break
             if m.name in should_return_direct:
                 return "__end__"
-        return "agent"
+        
+        #last = str(state["messages"][-1].content).lower()
+        last = state["messages"][-1].tool_calls[0]["name"]
+
+        if last == "LiteratureSearch":
+            return "literature"
+        elif last == "QueryRAG":
+            return "rag"
+        return "preprocess"
+    #workflow.add_edge("agent", "preprocess")
+    workflow.add_conditional_edges("agent", route_preprocess_responses)
+
+    workflow.add_edge("preprocess", "agent2")
+
+    # Deliberation step for tool selection - if successful, move to tools else move to RAG search
+    workflow.add_conditional_edges("agent2", tool_calls)
+    # After using a tool, go back to agent2 for further deliberation, summarizing if necessary
+    # If any of the tools are configured to return_directly after running, our graph needs to check if these were called
+    should_return_direct = {t.name for t in tool_classes if t.return_direct}
+    def route_tool_responses(state: AgentState) -> Literal["agent2", "__end__"]:
+        for m in reversed(state["messages"]):
+            if not isinstance(m, ToolMessage):
+                break
+            if m.name in should_return_direct:
+                return "__end__"
+        return "agent2"
 
     if should_return_direct:
         workflow.add_conditional_edges("tools", route_tool_responses)
     else:
-        workflow.add_edge("tools", "agent")
+        workflow.add_edge("tools", "agent2")
+    # TODO - add summary after tool
+    #workflow.add_edge("summarize", "agent2")
+
+    workflow.add_conditional_edges("agent3", rag_call)
+    rag_should_return_direct = {t.name for t in rag_tool_classes if t.return_direct}
+    def rag_route_tool_responses(state: AgentState) -> Literal["agent3", "__end__"]:
+        for m in reversed(state["messages"]):
+            if not isinstance(m, ToolMessage):
+                break
+            if m.name in should_return_direct:
+                return "__end__"
+        return "agent3"
+    if rag_should_return_direct:
+        workflow.add_conditional_edges("rag", rag_route_tool_responses)
+    else:
+        workflow.add_edge("rag", "agent3")
+
+
+    workflow.add_conditional_edges("agent4", literature_call)
+    literature_should_return_direct = {t.name for t in literature_tool_classes if t.return_direct}
+    def literature_route_tool_responses(state: AgentState) -> Literal["agent4", "__end__"]:
+        for m in reversed(state["messages"]):
+            if not isinstance(m, ToolMessage):
+                break
+            if m.name in should_return_direct:
+                return "__end__"
+        return "agent4"
+    if literature_should_return_direct:
+        workflow.add_conditional_edges("literature", literature_route_tool_responses)
+    else:
+        workflow.add_edge("literature", "agent4")
+
+    workflow.add_conditional_edges("training", training_call)
+    workflow.add_edge("training", END)
+    
+    
 
     # Finally, we compile it!
     # This compiles it into a LangChain Runnable,
     # meaning you can use it as you would any other runnable
-    return workflow.compile(
+    workflow = workflow.compile(
         checkpointer=checkpointer,
         store=store,
         interrupt_before=interrupt_before,
         interrupt_after=interrupt_after,
         debug=debug,
     )
+    return workflow 
 
 
 # Keep for backwards compatibility
