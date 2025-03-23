@@ -1,11 +1,10 @@
-    
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from .utils import State
 
-class Query:
+class FindContextRelevance:
 
-    system_prompt = f'''
+    find_context_relevance_system_prompt = f'''
         You are an expert toxicologist with extensive knowledge in chemical safety assessment, toxicokinetics, and toxicodynamics. Your expertise includes:
 
         1. Interpreting chemical structures and properties
@@ -29,75 +28,43 @@ class Query:
         Adhere to ethical standards in toxicology and maintain scientific objectivity in your assessments.
         '''
 
-    user_prompt_with_context = '''
-    You will be given a query followed by resources. Answer the query based on the resources provided.
+    find_context_relevance_human_prompt = '''
+    You will be given a query followed by context. You need to decide if the context is relevant to answer the query.
 
     ----------------------------------------------
     ** Query **
     {query}
 
-    ** Resources ** 
+    ** Context ** 
     ----------------------------------------------
-    {resources}
+    {context}
+
+    ** Output format **
+    You will always output either "relevant" or "irrelevant" based on your decision.
     '''
 
-    user_prompt_without_context = '''
-    ----------------------------------------------
-    Answer the following query:
-
-    ** Query **
-    {query}
-    '''
-        
-    query_with_context_prompt = ChatPromptTemplate.from_messages(
+    find_context_relevance_prompt = ChatPromptTemplate.from_messages(
         [
             (
                 'system',
-                (system_prompt),
+                (find_context_relevance_system_prompt),
             ),
             (
                 'human',
-                (user_prompt_with_context),
-            ),
-        ]
-    )
-
-    query_without_context_prompt = ChatPromptTemplate.from_messages(
-        [
-            (
-                'system',
-                (system_prompt),
-            ),
-            (
-                'human',
-                (user_prompt_without_context),
+                (find_context_relevance_human_prompt),
             ),
         ]
     )
 
     def __init__(self, llm):
-        self.query_with_context_chain = (self.query_with_context_prompt | llm | StrOutputParser())
-        self.query_without_context_chain = (self.query_without_context_prompt | llm | StrOutputParser())
+        self.find_relevance_chain = (self.find_context_relevance_prompt | llm | StrOutputParser())
 
-    def query_with_context(self, state: State) -> State:
+    def find_context_relevance(self, state: State) -> State:
         '''
-        Get llm response with context
+        Find relevance of the context to the query
         '''
+        response = self.find_relevance_chain.invoke({'query': state.get('query'), 'context': state.get('resources')})
+
+        next_action = 'irrelevant' if 'irrelevant' in response.lower() else 'relevant'
         
-        response = self.query_with_context_chain.invoke({'query': state.get('query'), 'resources': state.get('resources')})
-
-        if 'irrelevant' in response: 
-            return {**state, **{'next_action': 'query_without_context', 'steps': ['query_with_context']}}
-        
-        return {'response': response,
-                'steps': ['query_with_context']} 
-
-    def query_without_context(self, state: State) -> State:
-        '''
-        Get llm response without context
-        '''
-
-        response = self.query_without_context_chain.invoke({'query': state.get('query')}), 
-        
-        return {'response': response, 
-                'steps': ['query_without_context']}
+        return {**state, **{'next_action': next_action, 'steps': ['find_context_relevance']}}
