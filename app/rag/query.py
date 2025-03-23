@@ -90,7 +90,7 @@ class Query:
         
         response = self.query_with_context_chain.invoke({'query': state.get('query'), 'resources': state.get('resources')})
 
-        if 'resources_irrelevant' in response: 
+        if 'irrelevant' in response: 
             return {**state, **{'next_action': 'query_without_context', 'steps': ['query_with_context']}}
         
         return {'response': response,
