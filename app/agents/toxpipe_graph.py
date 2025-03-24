@@ -689,32 +689,32 @@ def create_react_agent(
 
     workflow.add_conditional_edges("agent3", rag_call)
     rag_should_return_direct = {t.name for t in rag_tool_classes if t.return_direct}
-    def rag_route_tool_responses(state: AgentState) -> Literal["agent3", "__end__"]:
-        for m in reversed(state["messages"]):
-            if not isinstance(m, ToolMessage):
-                break
-            if m.name in should_return_direct:
-                return "__end__"
-        return "agent3"
-    if rag_should_return_direct:
-        workflow.add_conditional_edges("rag", rag_route_tool_responses)
-    else:
-        workflow.add_edge("rag", "agent3")
-
-
-    workflow.add_conditional_edges("agent4", literature_call)
-    literature_should_return_direct = {t.name for t in literature_tool_classes if t.return_direct}
-    def literature_route_tool_responses(state: AgentState) -> Literal["agent4", "__end__"]:
+    def rag_route_tool_responses(state: AgentState) -> Literal["agent4", "__end__"]:
         for m in reversed(state["messages"]):
             if not isinstance(m, ToolMessage):
                 break
             if m.name in should_return_direct:
                 return "__end__"
         return "agent4"
+    if rag_should_return_direct:
+        workflow.add_conditional_edges("rag", rag_route_tool_responses)
+    else:
+        workflow.add_edge("rag", "agent4")
+
+
+    workflow.add_conditional_edges("agent4", literature_call)
+    literature_should_return_direct = {t.name for t in literature_tool_classes if t.return_direct}
+    def literature_route_tool_responses(state: AgentState) -> Literal["training", "__end__"]:
+        for m in reversed(state["messages"]):
+            if not isinstance(m, ToolMessage):
+                break
+            if m.name in should_return_direct:
+                return "__end__"
+        return "training"
     if literature_should_return_direct:
         workflow.add_conditional_edges("literature", literature_route_tool_responses)
     else:
-        workflow.add_edge("literature", "agent4")
+        workflow.add_edge("literature", "training")
 
     workflow.add_conditional_edges("training", training_call)
     workflow.add_edge("training", END)
