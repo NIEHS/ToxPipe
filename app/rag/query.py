@@ -76,8 +76,8 @@ class Query:
     )
 
     def __init__(self, llm):
-        self.query_with_context_chain = (self.query_with_context_prompt | llm | StrOutputParser())
-        self.query_without_context_chain = (self.query_without_context_prompt | llm | StrOutputParser())
+        self.query_with_context_chain = self.query_with_context_prompt | llm | StrOutputParser()
+        self.query_without_context_chain = self.query_without_context_prompt | llm | StrOutputParser()
 
     def query_with_context(self, state: State) -> State:
         '''
@@ -97,7 +97,7 @@ class Query:
         Get llm response without context
         '''
 
-        response = self.query_without_context_chain.invoke({'query': state.get('query')}), 
+        response = self.query_without_context_chain.invoke({'query': state.get('query')}) 
         
         return {'response': response, 
                 'steps': ['query_without_context']}

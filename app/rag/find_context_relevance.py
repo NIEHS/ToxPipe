@@ -57,7 +57,7 @@ class FindContextRelevance:
     )
 
     def __init__(self, llm):
-        self.find_relevance_chain = (self.find_context_relevance_prompt | llm | StrOutputParser())
+        self.find_relevance_chain = self.find_context_relevance_prompt | llm | StrOutputParser()
 
     def find_context_relevance(self, state: State) -> State:
         '''
