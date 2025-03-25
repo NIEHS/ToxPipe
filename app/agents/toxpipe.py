@@ -48,11 +48,12 @@ from ..rag import query
 BAD_TOOL_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', 'mixtral-8x7b-instruct', 'llama3-1-70b', 'claude-3-sonnet', 'amazon-titan-text-premier', 'cohere-command-r-plus']
 
 # Create LLM handler - always use AzureChatOpenAI since all models are accessed through NIEHS's litellm instance.
-def _make_llm(model, api_version, temp, max_retries, seed):
+def _make_llm(model, api_version, temp, max_retries, max_tokens, seed):
     llm = AzureChatOpenAI(
         model_name=model,
         temperature=temp,
         max_retries=max_retries,
+        max_tokens=max_tokens,
         seed=seed
     )
     return llm
@@ -83,6 +84,7 @@ class ToxPipeAgent:
         temp=0.0, # higher temperature creates more answer variance, but this is potentially better if we are doing a multi-agent approach
         max_iterations=10, # maximum number of agent recursions in chain
         max_retries=100, # maximum number of retries upon LLM failure - set this to finite to avoid token limit errors from OpenAI
+        max_tokens=4096, # maximum number of tokens to use per query
         step_timeout=0, # maximum time in seconds to take per recursion
         n_agents=1, # number of parallel agents to run - set to 1 for no parallelism. Higher values better for more complicated queries to help reduce variance
         summarize=False, # if True, will summarize output. Ignored and always treated as True if n_agents > 1.
@@ -93,7 +95,7 @@ class ToxPipeAgent:
         seed=1 # Random seed for LLM. Set the seed for more deterministic results.
     ):
         # Initialize parameters
-        self.llm = _make_llm(model, api_version, temp, max_retries, seed)
+        self.llm = _make_llm(model, api_version, temp, max_retries, max_tokens, seed)
         if cache == True:
             set_llm_cache(SQLiteCache(database_path=".langchain.db")) # set cache to avoid making the same API calls over and over again
         self.tools = make_tools(self.llm, verbose=verbose, auth=auth)
@@ -101,6 +103,7 @@ class ToxPipeAgent:
         self.summarize = summarize
         self.max_iterations = max_iterations
         self.max_retries = max_retries
+        self.max_tokens = max_tokens
         self.thread_id = name
         self.checkpointer = checkpointer
         self.seed = seed
@@ -155,9 +158,9 @@ class ToxPipeAgent:
         return(res)
         
     
-    def run_rag(self, input):
+    def run_rag(self, input, use_training_data):
         try:
-            res = query(input, llm=self.llm)
+            res = query(input, llm=self.llm, use_training_data=use_training_data)["response"]
             if(len(res) < 1):
                 return f"RAG did not find any results for query: {input}."
             return res

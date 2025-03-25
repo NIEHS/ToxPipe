@@ -38,7 +38,14 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
         QueryCTDCC(llm=llm),
         QueryCTDMF(llm=llm),
         QueryCTDBP(llm=llm),
-        QueryPubChemProperties(llm=llm),
+
+        #QueryPubChemProperties(llm=llm),
+        QueryPubChemSynonyms(llm=llm),
+        QueryPubChemMass(llm=llm),
+        QueryPubChemFormula(llm=llm),
+        QueryPubChemWeight(llm=llm),
+        QueryPubChemXLogP(llm=llm),
+        
         QueryPubChemBioassays(llm=llm),
         QueryEPAProperties(llm=llm),
         QueryCPD(llm=llm),

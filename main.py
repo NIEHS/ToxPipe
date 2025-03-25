@@ -3,12 +3,12 @@
 from fastapi import FastAPI, Request, Response
 
 # use locally
-#from .app.agents import toxpipe as tp
-#from .app.agents import tools as tl
+from .app.agents import toxpipe as tp
+from .app.agents import tools as tl
 
 # use on posit connect
-from app.agents import toxpipe as tp
-from app.agents import tools as tl
+#from app.agents import toxpipe as tp
+#from app.agents import tools as tl
 
 from langchain.tools.render import render_text_description
 import json
@@ -103,7 +103,7 @@ async def help(request: Request, response: Response):
 
 # Endpoint for creating an agent. Note that this will not actually create the agent object in memory, it just creates a JSON file with the agent parameters so that the API is "aware" that such an agent is defined and may be created later.
 @app.get("/agent/create/", tags=["agent"])
-async def create_agent(request: Request, response: Response, model: str = "azure-gpt-4o", temp: float = 0, max_iterations: int = 20, max_retries: int = 100, step_timeout: float = 0, n_threads: int = 1, summarize: bool = False, seed: int = 1):
+async def create_agent(request: Request, response: Response, model: str = "azure-gpt-4o", temp: float = 0, max_iterations: int = 20, max_retries: int = 100, max_tokens=4096, step_timeout: float = 0, n_threads: int = 1, summarize: bool = False, seed: int = 1):
     # Input validation
     if model not in ANTHROPIC_MODELS and model not in OLLAMA_MODELS and model not in OPENAI_MODELS and model not in MISTRALAI_MODELS and model not in GOOGLE_MODELS and model not in AMAZON_MODELS and model not in COHERE_MODELS:
         response.status_code = 400
@@ -115,7 +115,7 @@ async def create_agent(request: Request, response: Response, model: str = "azure
         response.status_code = 400
         return {"response": f"Error: 'n_threads' must be 5 or less."}
     agentid = uuid.uuid4() # Generate UUID for the agent
-    agent = {"agentid": str(agentid), "model": model, "temp": temp, "max_iterations": max_iterations, "max_retries":max_retries, "step_timeout":step_timeout, "n_threads":n_threads, "summarize":summarize, "seed":seed, "date_created":str(datetime.datetime.now())}
+    agent = {"agentid": str(agentid), "model": model, "temp": temp, "max_iterations": max_iterations, "max_retries":max_retries, "max_tokens":max_tokens, "step_timeout":step_timeout, "n_threads":n_threads, "summarize":summarize, "seed":seed, "date_created":str(datetime.datetime.now())}
     # Create a JSON file with the agent parameters
     os.makedirs("./created_agents", exist_ok=True)
     with open(f"./created_agents/{agentid}.json", 'w') as fp:
@@ -132,7 +132,7 @@ async def query_agent(request: Request, response: Response, agentid: uuid.UUID, 
         try:
             with open(f"./created_agents/{agentid}.json", 'r') as fp:
                 agent = json.load(fp)
-                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE, seed=agent["seed"])
+                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"],  max_tokens=agent["max_tokens"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE, seed=agent["seed"])
                 MODEL_CACHE[agentid] = tpa
 
         except Exception as e:
@@ -163,14 +163,14 @@ async def query_agent(request: Request, response: Response, agentid: uuid.UUID, 
 
 # Endpoint for querying an agent specifically using RAG and no additional tools. This will create the agent from the JSON file (or load it from the cache if it has been previously loaded) and run the query. If the agent is not found, the API will return an error message.
 @app.get("/agent/rag/", tags=["agent"])
-async def query_rag(request: Request, response: Response, agentid: uuid.UUID, q: str):    
+async def query_rag(request: Request, response: Response, agentid: uuid.UUID, q: str, use_training_data: bool = True):    
     tpa = None
 
     if agentid not in MODEL_CACHE:
         try:
             with open(f"./created_agents/{agentid}.json", 'r') as fp:
                 agent = json.load(fp)
-                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE)
+                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"],  max_tokens=agent["max_tokens"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE, seed=agent["seed"])
                 MODEL_CACHE[agentid] = tpa
 
         except Exception as e:
@@ -188,7 +188,7 @@ async def query_rag(request: Request, response: Response, agentid: uuid.UUID, q:
     res = None
 
     try:
-        res = tpa.run_rag(q)
+        res = tpa.run_rag(q, use_training_data)
     except Exception as e:
         print("Error running agent.")
         print(e)

@@ -63,6 +63,7 @@ class PromptAgentic:
         - Do not include any "Thought:" in your final answer. Only return the information following "Final Answer:".
         - The final answer should contain up to 4 parts: information from tools, information from RAG search, information from scientific literature search, and information from training data.
         - Only include a part in your final answer if you were able to find information from that part. For example, if you were only able to find information from tools and training data, you should only include those two parts in your final answer.
+        - If you find, at any time, that the most recent response sufficiently answers the user's query, you may stop evaluating early and return that response.
         - Do not answer in JSON format. Use the following string format:
         - Example:
             ** Tools **
