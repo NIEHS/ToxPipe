@@ -440,17 +440,10 @@ def create_react_agent(
         else:
             return "tools"
     
-    def rag_call(state: AgentState) -> Literal["rag", "agent4"]:
+    def rag_call(state: AgentState) -> Literal["rag", "agent4", "__end__"]:
         """Conduct a RAG search if unable to find an answer via the ChemBioTox tools. If this answer is unsatisfactory, then we must conduct a literature search."""
-
-        print("=== making rag call====")
         messages = state["messages"]
-        last_message = messages[-1]
-
-
-        print("=== RAG last_message ===")
-        print(last_message)
-        
+        last_message = messages[-1]        
         # If we deem the answer to be sufficient, then we finish
         if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
             sufficient_check = find_context_relevance(messages[0].content, messages[-1].content)
@@ -461,7 +454,7 @@ def create_react_agent(
         else:
             return "rag"
 
-    def literature_call(state: AgentState) -> Literal["literature", "training"]:
+    def literature_call(state: AgentState) -> Literal["literature", "training", "__end__"]:
         """Conduct a literature search if unable to find an answer via a RAG search. If this answer is unsatisfactory, then we must formulate an answer using the model's pretrained knowledge."""
 
         print("=== making lit call====")
@@ -470,7 +463,7 @@ def create_react_agent(
 
 
         print("=== LIT last_message ===")
-        print(last_message)
+        #print(last_message)
 
         # If we deem the answer to be sufficient, then we finish
         if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
@@ -497,7 +490,11 @@ def create_react_agent(
     # Define the function that calls the model
     def call_model(state: AgentState, config: RunnableConfig) -> AgentState:
         _validate_chat_history(state["messages"])
-        response = model_runnable.invoke(state["messages"], config)
+
+        print("length MESSAGES")
+        print(len(state["messages"]))
+
+        response = model_runnable.invoke(state["messages"], config) # TODO speed up
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
         all_tools_return_direct = (
             all(call["name"] in should_return_direct for call in response.tool_calls)
@@ -736,14 +733,15 @@ def create_react_agent(
                 return "__end__"
         
         #last = str(state["messages"][-1].content).lower()
-        last = state["messages"][-1].tool_calls[0]["name"]
+        tool_calls = state["messages"][-1].tool_calls
 
-        if last == "LiteratureSearch":
-            return "literature"
-        elif last == "QueryRAG":
-            return "rag"
+        if len(tool_calls) > 0:
+            last = state["messages"][-1].tool_calls[0]["name"]
+            if last == "LiteratureSearch":
+                return "literature"
+            elif last == "QueryRAG":
+                return "rag"
         return "preprocess"
-    #workflow.add_edge("agent", "preprocess")
     workflow.add_conditional_edges("agent", route_preprocess_responses)
 
     workflow.add_edge("preprocess", "agent2")
@@ -753,20 +751,6 @@ def create_react_agent(
     # After using a tool, go back to agent2 for further deliberation, summarizing if necessary
     # If any of the tools are configured to return_directly after running, our graph needs to check if these were called
     should_return_direct = {t.name for t in tool_classes if t.return_direct}
-    """
-    def route_tool_responses(state: AgentState) -> Literal["agent2", "__end__"]:
-        for m in reversed(state["messages"]):
-            if not isinstance(m, ToolMessage):
-                break
-            if m.name in should_return_direct:
-                return "__end__"
-        return "agent2"
-
-    if should_return_direct:
-        workflow.add_conditional_edges("tools", route_tool_responses)
-    else:
-        workflow.add_edge("tools", "agent2")
-    """
 
     workflow.add_edge("tools", "agent2")
 
