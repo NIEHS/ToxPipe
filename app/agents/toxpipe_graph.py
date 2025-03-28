@@ -25,9 +25,10 @@ from langgraph.store.base import BaseStore
 from langgraph.types import Checkpointer
 from langgraph.utils.runnable import RunnableCallable
 
+
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate, MessagesPlaceholder
 from langgraph.graph.message import add_messages
-from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
 from langchain.tools.render import render_text_description
 from operator import itemgetter
 import json
@@ -35,6 +36,65 @@ import re
 import uuid
 
 from .tools import make_translate_tools, make_rag_tools, make_literature_tools
+
+
+sufficient_system_prompt = f'''
+    You are an expert toxicologist with extensive knowledge in chemical safety assessment, toxicokinetics, and toxicodynamics. Your expertise includes:
+
+    1. Interpreting chemical structures and properties
+    2. Analyzing toxicological data from various sources (e.g., in vitro, in vivo, and in silico studies)
+    3. Applying read-across and QSAR (Quantitative Structure-Activity Relationship) approaches
+    4. Understanding mechanisms of toxicity and adverse outcome pathways
+    5. Evaluating systemic availability based on ADME (Absorption, Distribution, Metabolism, Excretion) properties
+    6. Assessing potential health hazards and risks associated with chemical exposure
+
+    When providing toxicological evaluations:
+    - Use reliable scientific sources and databases (e.g., PubChem, ECHA, EPA, IARC)
+    - Consider both experimental data and predictive models
+    - Explain your reasoning and cite relevant studies or guidelines
+    - Acknowledge uncertainties and data gaps
+    - Provide a balanced assessment, considering both potential hazards and mitigating factors
+    - Use a weight-of-evidence approach when multiple data sources are available
+    - Classify toxicodynamic activity and systemic availability as high, medium, or low based on 
+    the available evidence and expert judgment
+    - When using read-across, clearly state the basis for the analogy and any limitations
+
+    Adhere to ethical standards in toxicology and maintain scientific objectivity in your assessments.
+    '''
+
+sufficient_human_prompt = '''
+You will be provided with the most recent response from the model and the user's original query. Please review the response and determine if it is sufficient to answer the original query. If the response is sufficient, please respond with "sufficient". If the response is not sufficient, please respond with "not sufficient". Do not respond with anything else.
+If the response could benefit from using the tools available, please respond with "not sufficient" so the model can use the tools to find a more accurate answer.
+If the user specifically asks to perform a search on available literature or the RAG model, please respond with "not sufficient" so the model can perform the search.
+
+----------------------------------------------
+** Response **
+{response}
+
+----------------------------------------------
+** Query ** 
+{query}
+
+----------------------------------------------
+** Possible Tools ** 
+{tools}
+
+** Output format **
+You will always output either "sufficient" or "not sufficient" based on your decision.
+'''
+
+sufficient_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            'system',
+            (sufficient_system_prompt),
+        ),
+        (
+            'human',
+            (sufficient_human_prompt),
+        ),
+    ]
+)
 
 
 # We create the AgentState that we will pass around
@@ -140,40 +200,6 @@ def _get_model_preprocessing_runnable(
         state_modifier = _convert_messages_modifier_to_state_modifier(messages_modifier)
 
     return _get_state_modifier_runnable(state_modifier, store)
-
-
-def _should_bind_tools(model: LanguageModelLike, tools: Sequence[BaseTool]) -> bool:
-    if not isinstance(model, RunnableBinding):
-        return True
-
-    if "tools" not in model.kwargs:
-        return True
-
-    bound_tools = model.kwargs["tools"]
-    if len(tools) != len(bound_tools):
-        raise ValueError(
-            "Number of tools in the model.bind_tools() and tools passed to create_react_agent must match"
-        )
-
-    tool_names = set(tool.name for tool in tools)
-    bound_tool_names = set()
-    for bound_tool in bound_tools:
-        # OpenAI-style tool
-        if bound_tool.get("type") == "function":
-            bound_tool_name = bound_tool["function"]["name"]
-        # Anthropic-style tool
-        elif bound_tool.get("name"):
-            bound_tool_name = bound_tool["name"]
-        else:
-            # unknown tool type so we'll ignore it
-            continue
-
-        bound_tool_names.add(bound_tool_name)
-
-    if missing_tools := tool_names - bound_tool_names:
-        raise ValueError(f"Missing tools '{missing_tools}' in the model.bind_tools()")
-
-    return False
 
 
 def _validate_chat_history(
@@ -336,8 +362,7 @@ def create_react_agent(
         # get the tool functions wrapped in a tool class from the ToolNode
         tool_classes = list(tool_node.tools_by_name.values())
 
-    #if _should_bind_tools(model, tool_classes):
-        #model = cast(BaseChatModel, model).bind_tools(tool_classes)
+    llm = model
 
     model_inner = model
     model_rag = model
@@ -346,56 +371,65 @@ def create_react_agent(
 
     model = cast(BaseChatModel, model).bind_tools(translate_tool_classes + rag_tool_classes + literature_tool_classes)
     model_inner = cast(BaseChatModel, model_inner).bind_tools(tool_classes)
-    model_rag = cast(BaseChatModel, model_rag).bind_tools(rag_tool_classes)
+    model_rag = cast(BaseChatModel, model_rag).bind_tools(rag_tool_classes + literature_tool_classes)
     model_literature = cast(BaseChatModel, model_literature).bind_tools(literature_tool_classes)
     model_training = cast(BaseChatModel, model_literature)
+
+
+    sufficiency_chain = sufficient_prompt | llm | StrOutputParser()
+
+    def find_context_relevance(query, response):
+        '''
+        Find relevance of the context to the query
+        '''
+        response = sufficiency_chain.invoke({"response": response, "query": query, "tools":rag_tool_classes + literature_tool_classes})
+
+        return response
+    
+
     
     # Define the function that determines whether to continue or not
-    def tool_calls(state: AgentState) -> Literal["tools", "agent3"]:
+    def main_tool_calls(state: AgentState) -> Literal["tools", "agent3", "__end__"]:
         messages = state["messages"]
         last_message = messages[-1]
-        # If there is no function call, then we finish
+
+        # If we deem the answer to be sufficient, then we finish
         if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
-            return "agent3"
-        # Otherwise if there is, we continue
+            sufficient_check = find_context_relevance(messages[0].content, messages[-1].content)
+            if sufficient_check.lower() == "sufficient":
+                return "__end__"
+            else:
+                return "agent3"   
         else:
             return "tools"
     
-    def rag_call(state: AgentState) -> Literal["rag", "agent4"]:
+    def rag_call(state: AgentState) -> Literal["rag", "agent4", "__end__"]:
         """Conduct a RAG search if unable to find an answer via the ChemBioTox tools. If this answer is unsatisfactory, then we must conduct a literature search."""
         messages = state["messages"]
-        last_message = messages[-1]
-
-        # If there is no function call, then we finish
+        last_message = messages[-1]        
+        # If we deem the answer to be sufficient, then we finish
         if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
-            return "agent4"
-        # Otherwise if there is, we continue
+            sufficient_check = find_context_relevance(messages[0].content, messages[-1].content)
+            if sufficient_check.lower() == "sufficient":
+                return "__end__"
+            else:
+                return "agent4"   
         else:
             return "rag"
 
-    def literature_call(state: AgentState) -> Literal["literature", "training"]:
+    def literature_call(state: AgentState) -> Literal["literature", "training", "__end__"]:
         """Conduct a literature search if unable to find an answer via a RAG search. If this answer is unsatisfactory, then we must formulate an answer using the model's pretrained knowledge."""
         messages = state["messages"]
         last_message = messages[-1]
-
-        # If there is no function call, then we finish
+        # If we deem the answer to be sufficient, then we finish
         if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
-            return "training"
-        # Otherwise if there is, we continue
+            sufficient_check = find_context_relevance(messages[0].content, messages[-1].content)
+            if sufficient_check.lower() == "sufficient":
+                return "__end__"
+            else:
+                return "training"   
         else:
             return "literature"
-
-    def training_call(state: AgentState) -> Literal["training", "__end__"]:
-        """Formulate an answer using the model's pretrained knowledge. If this answer is unsatisfactory, then we must say we were unable to find an answer."""
-        messages = state["messages"]
-        last_message = messages[-1]
-
-        # If there is no function call, then we finish
-        if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
-            return "__end__"
-        # Otherwise if there is, we continue
-        else:
-            return "training"
 
     # we're passing store here for validation
     preprocessor = _get_model_preprocessing_runnable(
@@ -412,7 +446,8 @@ def create_react_agent(
     # Define the function that calls the model
     def call_model(state: AgentState, config: RunnableConfig) -> AgentState:
         _validate_chat_history(state["messages"])
-        response = model_runnable.invoke(state["messages"], config)
+
+        response = model_runnable.invoke(state["messages"], config) # TODO speed up
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
         all_tools_return_direct = (
             all(call["name"] in should_return_direct for call in response.tool_calls)
@@ -491,7 +526,7 @@ def create_react_agent(
 
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
         all_tools_return_direct = (
-            all(call["name"] in should_return_direct for call in response.tool_calls)
+            all(call["name"] in rag_should_return_direct for call in response.tool_calls)
             if isinstance(response, AIMessage)
             else False
         )
@@ -529,7 +564,7 @@ def create_react_agent(
 
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
         all_tools_return_direct = (
-            all(call["name"] in should_return_direct for call in response.tool_calls)
+            all(call["name"] in literature_should_return_direct for call in response.tool_calls)
             if isinstance(response, AIMessage)
             else False
         )
@@ -567,11 +602,7 @@ def create_react_agent(
         response = model_training_runnable.invoke(state["messages"], config)
 
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
-        all_tools_return_direct = (
-            all(call["name"] in should_return_direct for call in response.tool_calls)
-            if isinstance(response, AIMessage)
-            else False
-        )
+        all_tools_return_direct = False
         if (
             (
                 "remaining_steps" not in state
@@ -621,9 +652,6 @@ def create_react_agent(
 
     # Tool node - this is where the tools are called
     workflow.add_node("tools", tool_node)
-
-    # Summarize node - this is where the model's output is summarized if it is excessively long
-    #workflow.add_node("summarize", RunnableCallable(call_model))
     
     ### STAGE 3 - FILL IN DATA GAPS ###
     # Stage 3 agent model node - this determines how to use RAG
@@ -655,37 +683,26 @@ def create_react_agent(
                 return "__end__"
         
         #last = str(state["messages"][-1].content).lower()
-        last = state["messages"][-1].tool_calls[0]["name"]
-
-        if last == "LiteratureSearch":
-            return "literature"
-        elif last == "QueryRAG":
-            return "rag"
+        tool_calls = state["messages"][-1].tool_calls
+        if len(tool_calls) > 0:
+            last = state["messages"][-1].tool_calls[0]["name"]
+            if last == "LiteratureSearch":
+                return "literature"
+            elif last == "QueryRAG":
+                return "rag"
         return "preprocess"
-    #workflow.add_edge("agent", "preprocess")
     workflow.add_conditional_edges("agent", route_preprocess_responses)
 
     workflow.add_edge("preprocess", "agent2")
 
     # Deliberation step for tool selection - if successful, move to tools else move to RAG search
-    workflow.add_conditional_edges("agent2", tool_calls)
+    workflow.add_conditional_edges("agent2", main_tool_calls)
     # After using a tool, go back to agent2 for further deliberation, summarizing if necessary
     # If any of the tools are configured to return_directly after running, our graph needs to check if these were called
     should_return_direct = {t.name for t in tool_classes if t.return_direct}
-    def route_tool_responses(state: AgentState) -> Literal["agent2", "__end__"]:
-        for m in reversed(state["messages"]):
-            if not isinstance(m, ToolMessage):
-                break
-            if m.name in should_return_direct:
-                return "__end__"
-        return "agent2"
 
-    if should_return_direct:
-        workflow.add_conditional_edges("tools", route_tool_responses)
-    else:
-        workflow.add_edge("tools", "agent2")
-    # TODO - add summary after tool
-    #workflow.add_edge("summarize", "agent2")
+    #workflow.add_edge("tools", "agent2")
+    workflow.add_edge("tools", "agent3") # Just do single tools call since agent2 call multiple tools
 
     workflow.add_conditional_edges("agent3", rag_call)
     rag_should_return_direct = {t.name for t in rag_tool_classes if t.return_direct}
@@ -693,14 +710,14 @@ def create_react_agent(
         for m in reversed(state["messages"]):
             if not isinstance(m, ToolMessage):
                 break
-            if m.name in should_return_direct:
+            if m.name in rag_should_return_direct:
                 return "__end__"
-        return "agent4"
+        #return "agent4"
+        return "training"
     if rag_should_return_direct:
         workflow.add_conditional_edges("rag", rag_route_tool_responses)
     else:
         workflow.add_edge("rag", "agent4")
-
 
     workflow.add_conditional_edges("agent4", literature_call)
     literature_should_return_direct = {t.name for t in literature_tool_classes if t.return_direct}
@@ -708,16 +725,16 @@ def create_react_agent(
         for m in reversed(state["messages"]):
             if not isinstance(m, ToolMessage):
                 break
-            if m.name in should_return_direct:
+            if m.name in literature_should_return_direct:
                 return "__end__"
         return "training"
     if literature_should_return_direct:
         workflow.add_conditional_edges("literature", literature_route_tool_responses)
     else:
         workflow.add_edge("literature", "training")
+    
 
-    workflow.add_conditional_edges("training", training_call)
-    workflow.add_edge("training", END)
+    workflow.add_edge("training", END) # Always end after training, training step should be a last resort if the model couldn't find anything in the available tools & resources
     
     
 

@@ -1086,6 +1086,163 @@ class QueryPubChemProperties(BaseTool):
         """Use the tool asynchronously."""
         raise NotImplementedError()
     
+# Separate PubChem properties
+class QueryPubChemSynonyms(BaseTool):
+    name: str = "QueryPubChemSynonyms"
+    description: str = "Input a DTXSID to return synonyms for the chemical it represents from PubChem. These synonyms can help provide context for a chemical's identity and use."
+    llm: BaseLLM = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/pubchem/properties/synonyms?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        exp = res
+        if len(exp) > 10:
+            exp = exp[:10]
+        response = f"The chemical {dtxsid} has the following synonyms (source: PubChem): {'; '.join(exp)}"
+        if len(exp) < 1:
+            response = f"The chemical {dtxsid} does not have any synonyms in PubChem."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+
+# Separate PubChem properties
+class QueryPubChemMass(BaseTool):
+    name: str = "QueryPubChemMass"
+    description: str = "Input a DTXSID to return the molecular mass for the chemical it represents from PubChem."
+    llm: BaseLLM = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/pubchem/properties/mass?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        exp = res
+        response = f"The molecular mass of {dtxsid} is (source: PubChem): {exp}"
+        if len(exp) < 1:
+            response = f"The chemical {dtxsid} does not have molecular mass information in PubChem."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+    
+
+# Separate PubChem properties
+class QueryPubChemFormula(BaseTool):
+    name: str = "QueryPubChemFormula"
+    description: str = "Input a DTXSID to return the chemical formula for the chemical it represents from PubChem."
+    llm: BaseLLM = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/pubchem/properties/formula?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        exp = res
+
+        print("===========!!!! exp !!!!===============")
+        print(exp)
+
+        response = f"The chemical formula of {dtxsid} is (source: PubChem): {exp}"
+        if len(exp) < 1:
+            response = f"The chemical {dtxsid} does not have chemical formula information in PubChem."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+
+# Separate PubChem properties
+class QueryPubChemWeight(BaseTool):
+    name: str = "QueryPubChemWeight"
+    description: str = "Input a DTXSID to return the molecular weight for the chemical it represents from PubChem."
+    llm: BaseLLM = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/pubchem/properties/weight?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        exp = res
+        response = f"The molecular weight of {dtxsid} is (source: PubChem): {exp}"
+        if len(exp) < 1:
+            response = f"The chemical {dtxsid} does not have molecular weight information in PubChem."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+
+# Separate PubChem properties
+class QueryPubChemXLogP(BaseTool):
+    name: str = "QueryPubChemXLogP"
+    description: str = "Input a DTXSID to return the octanol-water partition coefficient (LogP) for the chemical it represents from PubChem. This can provide context for a chemical's solubility and hydrophobicity and potential for bioaccumulation."
+    llm: BaseLLM = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/pubchem/properties/xlogp?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+        res = res.json()
+        if len(res) < 1:
+            return(f"There was a problem completing the request.")
+        exp = res
+        response = f"The octanol-water partition coefficient (LogP) of {dtxsid} is (source: PubChem): {exp}"
+        if len(exp) < 1:
+            response = f"The chemical {dtxsid} does not have octanol-water partition coefficient (LogP) information in PubChem."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+
 # EPA Properties
 class QueryEPAProperties(BaseTool):
     name: str = "QueryEPAProperties"
