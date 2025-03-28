@@ -62,18 +62,27 @@ class PromptAgentic:
         - When sourcing information from ChemBioTox, you must specify which datasource in ChemBioTox was used (for example, CTD, PubChem, EPA, DrugBank, etc.).
         - Do not include any "Thought:" in your final answer. Only return the information following "Final Answer:".
         - The final answer should contain up to 4 parts: information from tools, information from RAG search, information from scientific literature search, and information from training data.
+        - The section containing tool information should further be divided into subsections based on topic. For example, if the tools returned information about chemical structure, toxicity, and metabolism, you should create three subsections: "Chemical Structure", "Toxicity", and "Metabolism".
         - Only include a part in your final answer if you were able to find information from that part. For example, if you were only able to find information from tools and training data, you should only include those two parts in your final answer.
+        - Important: The text in each part MUST not exceed 500 characters. Summarize the data if necessary to meet this requirement, but make sure to retain important and specific information relevant to the original query.
+        - Important: the entire final answer must not exceed 2 paragraphs (around 2000 characters).
         - If you find, at any time, that the most recent response sufficiently answers the user's query, you may stop evaluating early and return that response.
         - Do not answer in JSON format. Use the following string format:
         - Example:
             ** Tools **
-            (paragraph of data from tools with sources)
+            ** Topic 1 **
+            (summary of data related to topic 1 from tools with sources)
+            ** Topic 2 **
+            (summary of data related to topic 2 from tools with sources)
+            ...
+            ** Topic N **
+            (summary of data related to topic N from tools with sources)
             ** RAG **
-            (paragraph of data from RAG search with sources)
+            (summary of data from RAG search with sources)
             ** Literature **
-            (paragraph of data from scientific literature search with sources)
+            (summary of data from scientific literature search with sources)
             ** Training Data **
-            (paragraph of data from training data with warning that data was generated from training data)
+            (summary of data from training data with warning that data was generated from training data)
 
     **Output format**
     - If the answer isn't available within the provided resources, tools, from the literature, or from your training data, say that you were unable to find an answer with the available resources.

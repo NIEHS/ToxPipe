@@ -202,40 +202,6 @@ def _get_model_preprocessing_runnable(
     return _get_state_modifier_runnable(state_modifier, store)
 
 
-def _should_bind_tools(model: LanguageModelLike, tools: Sequence[BaseTool]) -> bool:
-    if not isinstance(model, RunnableBinding):
-        return True
-
-    if "tools" not in model.kwargs:
-        return True
-
-    bound_tools = model.kwargs["tools"]
-    if len(tools) != len(bound_tools):
-        raise ValueError(
-            "Number of tools in the model.bind_tools() and tools passed to create_react_agent must match"
-        )
-
-    tool_names = set(tool.name for tool in tools)
-    bound_tool_names = set()
-    for bound_tool in bound_tools:
-        # OpenAI-style tool
-        if bound_tool.get("type") == "function":
-            bound_tool_name = bound_tool["function"]["name"]
-        # Anthropic-style tool
-        elif bound_tool.get("name"):
-            bound_tool_name = bound_tool["name"]
-        else:
-            # unknown tool type so we'll ignore it
-            continue
-
-        bound_tool_names.add(bound_tool_name)
-
-    if missing_tools := tool_names - bound_tool_names:
-        raise ValueError(f"Missing tools '{missing_tools}' in the model.bind_tools()")
-
-    return False
-
-
 def _validate_chat_history(
     messages: Sequence[BaseMessage],
 ) -> None:
@@ -396,9 +362,6 @@ def create_react_agent(
         # get the tool functions wrapped in a tool class from the ToolNode
         tool_classes = list(tool_node.tools_by_name.values())
 
-    #if _should_bind_tools(model, tool_classes):
-        #model = cast(BaseChatModel, model).bind_tools(tool_classes)
-
     llm = model
 
     model_inner = model
@@ -408,7 +371,7 @@ def create_react_agent(
 
     model = cast(BaseChatModel, model).bind_tools(translate_tool_classes + rag_tool_classes + literature_tool_classes)
     model_inner = cast(BaseChatModel, model_inner).bind_tools(tool_classes)
-    model_rag = cast(BaseChatModel, model_rag).bind_tools(rag_tool_classes)
+    model_rag = cast(BaseChatModel, model_rag).bind_tools(rag_tool_classes + literature_tool_classes)
     model_literature = cast(BaseChatModel, model_literature).bind_tools(literature_tool_classes)
     model_training = cast(BaseChatModel, model_literature)
 
@@ -456,15 +419,8 @@ def create_react_agent(
 
     def literature_call(state: AgentState) -> Literal["literature", "training", "__end__"]:
         """Conduct a literature search if unable to find an answer via a RAG search. If this answer is unsatisfactory, then we must formulate an answer using the model's pretrained knowledge."""
-
-        print("=== making lit call====")
         messages = state["messages"]
         last_message = messages[-1]
-
-
-        print("=== LIT last_message ===")
-        #print(last_message)
-
         # If we deem the answer to be sufficient, then we finish
         if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
             sufficient_check = find_context_relevance(messages[0].content, messages[-1].content)
@@ -490,9 +446,6 @@ def create_react_agent(
     # Define the function that calls the model
     def call_model(state: AgentState, config: RunnableConfig) -> AgentState:
         _validate_chat_history(state["messages"])
-
-        print("length MESSAGES")
-        print(len(state["messages"]))
 
         response = model_runnable.invoke(state["messages"], config) # TODO speed up
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
@@ -699,9 +652,6 @@ def create_react_agent(
 
     # Tool node - this is where the tools are called
     workflow.add_node("tools", tool_node)
-
-    # Summarize node - this is where the model's output is summarized if it is excessively long
-    #workflow.add_node("summarize", RunnableCallable(call_model))
     
     ### STAGE 3 - FILL IN DATA GAPS ###
     # Stage 3 agent model node - this determines how to use RAG
@@ -734,7 +684,6 @@ def create_react_agent(
         
         #last = str(state["messages"][-1].content).lower()
         tool_calls = state["messages"][-1].tool_calls
-
         if len(tool_calls) > 0:
             last = state["messages"][-1].tool_calls[0]["name"]
             if last == "LiteratureSearch":
@@ -752,7 +701,8 @@ def create_react_agent(
     # If any of the tools are configured to return_directly after running, our graph needs to check if these were called
     should_return_direct = {t.name for t in tool_classes if t.return_direct}
 
-    workflow.add_edge("tools", "agent2")
+    #workflow.add_edge("tools", "agent2")
+    workflow.add_edge("tools", "agent3") # Just do single tools call since agent2 call multiple tools
 
     workflow.add_conditional_edges("agent3", rag_call)
     rag_should_return_direct = {t.name for t in rag_tool_classes if t.return_direct}
@@ -762,12 +712,12 @@ def create_react_agent(
                 break
             if m.name in rag_should_return_direct:
                 return "__end__"
-        return "agent4"
+        #return "agent4"
+        return "training"
     if rag_should_return_direct:
         workflow.add_conditional_edges("rag", rag_route_tool_responses)
     else:
         workflow.add_edge("rag", "agent4")
-
 
     workflow.add_conditional_edges("agent4", literature_call)
     literature_should_return_direct = {t.name for t in literature_tool_classes if t.return_direct}
@@ -782,6 +732,7 @@ def create_react_agent(
         workflow.add_conditional_edges("literature", literature_route_tool_responses)
     else:
         workflow.add_edge("literature", "training")
+    
 
     workflow.add_edge("training", END) # Always end after training, training step should be a last resort if the model couldn't find anything in the available tools & resources
     

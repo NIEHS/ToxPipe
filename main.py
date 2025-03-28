@@ -1,3 +1,4 @@
+import atexit
 
 # -*- coding: utf-8 -*-
 from fastapi import FastAPI, Request, Response
@@ -14,7 +15,7 @@ from langchain.tools.render import render_text_description
 import json
 import datetime
 import uuid
-from langgraph.checkpoint.postgres import PostgresSaver
+from langgraph.checkpoint.postgres import PostgresSaver, ShallowPostgresSaver 
 from psycopg_pool import ConnectionPool
 import os
 from dotenv import load_dotenv
@@ -32,10 +33,17 @@ connection_kwargs = {
     "autocommit": True,
     "prepare_threshold": 0,
 }
-checkpointer = None
 pool = ConnectionPool(conninfo=DB_URI, max_size=20, kwargs=connection_kwargs,)
-checkpointer = PostgresSaver(pool)
+checkpointer = ShallowPostgresSaver(pool)
+#checkpointer = PostgresSaver(pool)
 checkpointer.setup()
+
+def exit_handler():
+    print("Shutting down...")
+    pool.close()
+    print("Connection pool closed.")
+
+atexit.register(exit_handler)
 
 tags_metadata = [
     {
@@ -213,3 +221,5 @@ async def view_available_tools(request: Request, response: Response):
         if len(tmpsplit) == 2:
             tools_to_return.append({"tool_name": tmpsplit[0], "tool_description": tmpsplit[1]})    
     return tools_to_return
+
+
