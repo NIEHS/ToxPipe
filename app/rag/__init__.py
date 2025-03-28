@@ -22,10 +22,8 @@ def guardrails_condition(
 # -----------------------------------------------------------------------
 def validate_context_condition(
     state: State,
-) -> Literal['query_with_context', 'query_without_context']:
-    if state.get('next_action') == 'relevant':
-        return 'query_with_context'
-    return 'query_without_context'
+) -> Literal['query_without_context', '__end__']:
+    return state.get('next_action')
 
 # -----------------------------------------------------------------------
 def createGraph(llm, use_training_data):
@@ -52,13 +50,13 @@ def createGraph(llm, use_training_data):
 
         langgraph.add_node(aq.analyze_query)
         langgraph.add_node(gc.gather_context)
-        langgraph.add_node(fc.find_context_relevance)
+        #langgraph.add_node(find_context_relevance)
         langgraph.add_node(qr.query_with_context)
         langgraph.add_node(qr.query_without_context)
-        
+
         use_guardrail = False
         if use_guardrail:
-            langgraph.add_node(gr.guardrails)
+            langgraph.add_node(guardrails)
             langgraph.add_edge(START, 'guardrails')
             langgraph.add_conditional_edges(
                 'guardrails',
@@ -68,12 +66,11 @@ def createGraph(llm, use_training_data):
             langgraph.add_edge(START, 'analyze_query')
 
         langgraph.add_edge('analyze_query', 'gather_context')
-        langgraph.add_edge('gather_context', 'find_context_relevance')
+        langgraph.add_edge('gather_context', 'query_with_context')
         langgraph.add_conditional_edges(
-            'find_context_relevance',
+            'query_with_context',
             validate_context_condition,
         )
-        langgraph.add_edge('query_with_context', END)
         langgraph.add_edge('query_without_context', END)
 
     else:

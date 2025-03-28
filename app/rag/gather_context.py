@@ -21,7 +21,7 @@ class CustomRetriever():
         # Remote use
         chroma_client = HttpClient(host=Config.env_config['CHROMA_HOST'],  port=Config.env_config['CHROMA_PORT'])
         db = Chroma(client=chroma_client, collection_name='quickstart', embedding_function=embedding)
-        self.retriever = db.as_retriever(search_type='similarity_score_threshold', search_kwargs={'k': 5, 'score_threshold': 0.3})
+        self.retriever = db.as_retriever(search_type='similarity_score_threshold', search_kwargs={'k': Config.MAX_NUM_DOCS, 'score_threshold': Config.SIMILARITY_THRESHOLD})
 
     def getResources(self, keyphrases):
 

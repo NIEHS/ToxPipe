@@ -23,6 +23,8 @@ class Config:
 
     TOKENS_PER_LLM_CALL = 5000
     MAX_KEYWORDS = 10
+    MAX_NUM_DOCS = 5
+    SIMILARITY_THRESHOLD = 0.3
 
 # ---------------------------------------------------------------------------
 class State(TypedDict):
