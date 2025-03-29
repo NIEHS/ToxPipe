@@ -160,8 +160,8 @@ class ToxPipeAgent:
     
     def run_rag(self, input, use_training_data):
         try:
-            res = query(input, llm=self.llm, use_training_data=use_training_data)["response"]
-            if(len(res) < 1):
+            res = query(input, llm=self.llm, use_training_data=use_training_data)
+            if(len(res['response']) < 1):
                 return f"RAG did not find any results for query: {input}."
             return res
         except Exception as e:
