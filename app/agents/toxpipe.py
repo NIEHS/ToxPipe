@@ -15,6 +15,7 @@ from langchain_core.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field, model_validator
 import json
 import traceback
+import tiktoken
 
 # Create temporary working directory
 working_directory = TemporaryDirectory()
@@ -49,12 +50,14 @@ BAD_TOOL_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', 'm
 
 # Create LLM handler - always use AzureChatOpenAI since all models are accessed through NIEHS's litellm instance.
 def _make_llm(model, api_version, temp, max_retries, max_tokens, seed):
+    ttname = model.replace("azure-", "")
     llm = AzureChatOpenAI(
         model_name=model,
         temperature=temp,
         max_retries=max_retries,
         max_tokens=max_tokens,
-        seed=seed
+        seed=seed,
+        tiktoken_model_name=ttname
     )
     return llm
 
@@ -119,7 +122,7 @@ class ToxPipeAgent:
             manual_tool_support = self.tools
 
         # Initialize agent to add tools to model
-        agent_executor = create_react_agent(self.llm, self.tools, state_modifier=self.prompt_template, checkpointer=checkpointer, manual_tool_support=manual_tool_support, debug=verbose) # state_modifier=PROMPT adds the prompt instructions to the agent
+        agent_executor = create_react_agent(self.llm, self.tools, state_modifier=self.prompt_template, checkpointer=checkpointer, manual_tool_support=manual_tool_support, debug=verbose, model_name=model) # state_modifier=PROMPT adds the prompt instructions to the agent
         if step_timeout > 0:
             agent_executor.step_timeout = step_timeout
 

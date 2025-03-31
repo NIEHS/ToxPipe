@@ -24,6 +24,8 @@ from langgraph.prebuilt.tool_node import ToolNode
 from langgraph.store.base import BaseStore
 from langgraph.types import Checkpointer
 from langgraph.utils.runnable import RunnableCallable
+from langchain_core.prompt_values import ChatPromptValue
+from langchain.agents.output_parsers import OpenAIFunctionsAgentOutputParser
 
 
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate, MessagesPlaceholder
@@ -247,6 +249,7 @@ def create_react_agent(
     interrupt_after: Optional[list[str]] = None,
     manual_tool_support: Optional[list[str]] = None,
     debug: bool = False,
+    model_name: Optional[str] = None,
 ) -> CompiledGraph:
     """Creates a graph that works with a chat model that utilizes tool calling.
 
@@ -375,7 +378,30 @@ def create_react_agent(
     model_literature = cast(BaseChatModel, model_literature).bind_tools(literature_tool_classes)
     model_training = cast(BaseChatModel, model_literature)
 
+    # Limit context window if too long
+    def condense_prompt(prompt: ChatPromptValue) -> ChatPromptValue:
+        messages = prompt.to_messages()
+        num_tokens = llm.get_num_tokens_from_messages(messages)
+        ai_function_messages = messages[2:]
 
+        print("======== MESSAGES ========")
+        print(messages)
+        print(len(messages))
+
+        print("--- AI FUNC ---")
+        print(ai_function_messages)
+        print(len(ai_function_messages))
+
+        while num_tokens > 4_000:
+            ai_function_messages = ai_function_messages[2:]
+            num_tokens = llm.get_num_tokens_from_messages(
+                messages[:2] + ai_function_messages
+            )
+        messages = messages[:2] + ai_function_messages
+        return ChatPromptValue(messages=messages)
+
+
+    #sufficiency_chain = sufficient_prompt | condense_prompt | llm | StrOutputParser()
     sufficiency_chain = sufficient_prompt | llm | StrOutputParser()
 
     def find_context_relevance(query, response):
@@ -436,18 +462,27 @@ def create_react_agent(
         state_modifier, messages_modifier, store
     )
 
+    #model_runnable = preprocessor | condense_prompt | model
     model_runnable = preprocessor | model
+
+    #model_inner_runnable = preprocessor | condense_prompt | model_inner
     model_inner_runnable = preprocessor | model_inner
+
+    #model_rag_runnable = preprocessor | condense_prompt | model_rag
     model_rag_runnable = preprocessor | model_rag
+
+    #model_literature_runnable = preprocessor | condense_prompt | model_literature
     model_literature_runnable = preprocessor | model_literature
+
+    #model_training_runnable = preprocessor | condense_prompt| model_training
     model_training_runnable = preprocessor | model_training
     
 
     # Define the function that calls the model
     def call_model(state: AgentState, config: RunnableConfig) -> AgentState:
         _validate_chat_history(state["messages"])
-
         response = model_runnable.invoke(state["messages"], config) # TODO speed up
+
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
         all_tools_return_direct = (
             all(call["name"] in should_return_direct for call in response.tool_calls)
@@ -479,6 +514,7 @@ def create_react_agent(
                     )
                 ]
             }
+
         # We return a list, because this will get added to the existing list
         return {"messages": [response]}
     
