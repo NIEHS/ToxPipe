@@ -4,7 +4,7 @@ from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 from typing import Literal
 from pydantic import BaseModel, Field
 from langgraph.graph import END
-from .utils import State
+from .utils import Config, State
 
 class QueryWithContextSchema(BaseModel):
     '''
@@ -24,6 +24,7 @@ class QueryWithContextOutputParser(JsonOutputParser):
 
     def parseOutput(self, data):
         response = self.parse(data.content)
+        if isinstance(response['response'], list): response['response'] = ', '.join(response['response'])
         return response
 
 class Query:
@@ -76,7 +77,7 @@ class Query:
     ```json
     {{
         "decision": "relevant",
-        "response": "Appropriate answer to the user query based on the resources"
+        "response": "This field represents an appropriate answer to the user query based on the resources. This field must be in string format"
     }}
     ```
 
@@ -126,7 +127,10 @@ class Query:
     )
 
     def __init__(self, llm):
-        self.query_with_context_chain = self.query_with_context_prompt | llm | QueryWithContextOutputParser().parseOutput
+        if llm.model_name in Config.models_with_structured_output_support:
+            self.query_with_context_chain = self.query_with_context_prompt | llm.with_structured_output(QueryWithContextSchema)
+        else:
+            self.query_with_context_chain = self.query_with_context_prompt | llm | QueryWithContextOutputParser().parseOutput
         self.query_without_context_chain = self.query_without_context_prompt | llm | StrOutputParser()
 
     def query_with_context(self, state: State) -> State:
@@ -134,7 +138,8 @@ class Query:
         Get llm response with context
         '''
         
-        response = self.query_with_context_chain.invoke({'query': state.get('query'), 'resources': state.get('resources')})
+        response = dict(self.query_with_context_chain.invoke({'query': state.get('query'), 'resources': state.get('resources')}))
+        
         if response['decision'] == 'relevant': 
             return {'response': response['response'], 
                     'next_action': END, 

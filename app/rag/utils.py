@@ -26,6 +26,8 @@ class Config:
     MAX_NUM_DOCS = 5
     SIMILARITY_THRESHOLD = 0.3
 
+    models_with_structured_output_support = {'azure-gpt-4o', 'claude-3-5-sonnet', 'gemini-1.5-pro'}
+
 # ---------------------------------------------------------------------------
 class State(TypedDict):
     query: str

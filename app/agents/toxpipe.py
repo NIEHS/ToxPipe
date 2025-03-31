@@ -159,14 +159,5 @@ class ToxPipeAgent:
         
     
     def run_rag(self, input, use_training_data):
-        try:
-            res = query(input, llm=self.llm, use_training_data=use_training_data)
-            if(len(res['response']) < 1):
-                return f"RAG did not find any results for query: {input}."
-            return res
-        except Exception as e:
-            print("Error running RAG.")
-            print(e)
-            error_str = f'Line number: {e.__traceback__.tb_lineno}, Description: {e}\n\n{traceback.format_exc()}'
-            return f"Error: RAG failed to run with message: {error_str}."
+        return query(input, llm=self.llm, use_training_data=use_training_data)
     
