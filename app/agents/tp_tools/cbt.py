@@ -1936,7 +1936,7 @@ class QueryToxRefDBNP(BaseTool):
 # ToxRefDB Studies
 class QueryToxRefDBStudies(BaseTool):
     name: str = "QueryToxRefDBStudies"
-    description: str = "Input a DTXSID to return the results and measurements of assays as reported in the ToxRefDB. These can help describe the toxicity of a chemical. Use this tool when asked about specific types of toxicology, like subacute toxicology."
+    description: str = "Input a DTXSID to return the results and measurements of assays as reported in the ToxRefDB. These can help describe the toxicity of a chemical. Use this tool when asked about specific types of toxicology, like subacute toxicology, carcinogenicity, neurotoxicity, etc."
     llm: BaseLLM = None
 
     def __init__(self, llm):
@@ -1947,16 +1947,22 @@ class QueryToxRefDBStudies(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/toxrefdb/studies?dtxsid={dtxsid}",
+            f"{os.environ.get('CBT_API_ENDPOINT')}/toxrefdb/studies/llm?dtxsid={dtxsid}",
             headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
         )
         res = res.json()
 
+        study_data = []
+        for i in res:
+            if 'effect_desc' not in i:
+                continue
+            study_data.append(i['effect_desc'])
+
         if len(res) < 1:
             return(f"There was a problem completing the request.")
         
-        response = res
-        if len(res) < 1:
+        response = f"The chemical {dtxsid} may be associated with the following attributes (source: ToxRefDB): {', '.join(study_data)}."
+        if len(study_data) < 1:
             response = f"The chemical {dtxsid} does not have any ToxRefDB study data in the ChemBioTox Database."
         return(response)
 

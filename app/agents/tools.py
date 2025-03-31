@@ -59,9 +59,6 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
         QueryDrugBankTargets(llm=llm),
         QueryDrugBankTransporters(llm=llm),
 
-        QueryToxRefDBNonNP(llm=llm),
-        QueryToxRefDBNP(llm=llm),
-
         QueryHMDBBS(llm=llm),
         QueryHMDBC(llm=llm),
         QueryHMDBT(llm=llm),
@@ -71,7 +68,10 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
 
         QueryT3DB(llm=llm),
 
+        # TODO: improve ToxRefDB repsonses
         QueryToxRefDBStudies(llm=llm)
+        #QueryToxRefDBNonNP(llm=llm),
+        #QueryToxRefDBNP(llm=llm),
 
     ]
 
