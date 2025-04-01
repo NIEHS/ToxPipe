@@ -50,14 +50,13 @@ BAD_TOOL_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', 'm
 
 # Create LLM handler - always use AzureChatOpenAI since all models are accessed through NIEHS's litellm instance.
 def _make_llm(model, api_version, temp, max_retries, max_tokens, seed):
-    ttname = model.replace("azure-", "")
     llm = AzureChatOpenAI(
         model_name=model,
         temperature=temp,
         max_retries=max_retries,
         max_tokens=max_tokens,
         seed=seed,
-        tiktoken_model_name=ttname
+        tiktoken_model_name="gpt-4o" # use the gpt-4o tiktoken model for all models to avoid an error when calculating token limit
     )
     return llm
 
@@ -88,6 +87,7 @@ class ToxPipeAgent:
         max_iterations=10, # maximum number of agent recursions in chain
         max_retries=100, # maximum number of retries upon LLM failure - set this to finite to avoid token limit errors from OpenAI
         max_tokens=4096, # maximum number of tokens to use per query
+        max_memory_tokens=4096, # maximum number of tokens to consider in the context window - this is the maximum number of tokens to use for the LLM's memory
         step_timeout=0, # maximum time in seconds to take per recursion
         n_agents=1, # number of parallel agents to run - set to 1 for no parallelism. Higher values better for more complicated queries to help reduce variance
         summarize=False, # if True, will summarize output. Ignored and always treated as True if n_agents > 1.
@@ -107,6 +107,8 @@ class ToxPipeAgent:
         self.max_iterations = max_iterations
         self.max_retries = max_retries
         self.max_tokens = max_tokens
+        self.max_memory_tokens = max_memory_tokens
+        self.step_timeout = step_timeout
         self.thread_id = name
         self.checkpointer = checkpointer
         self.seed = seed
@@ -122,7 +124,7 @@ class ToxPipeAgent:
             manual_tool_support = self.tools
 
         # Initialize agent to add tools to model
-        agent_executor = create_react_agent(self.llm, self.tools, state_modifier=self.prompt_template, checkpointer=checkpointer, manual_tool_support=manual_tool_support, debug=verbose, model_name=model) # state_modifier=PROMPT adds the prompt instructions to the agent
+        agent_executor = create_react_agent(self.llm, self.tools, state_modifier=self.prompt_template, checkpointer=checkpointer, manual_tool_support=manual_tool_support, debug=verbose, model_name=model, max_memory_tokens=max_memory_tokens) # state_modifier=PROMPT adds the prompt instructions to the agent
         if step_timeout > 0:
             agent_executor.step_timeout = step_timeout
 

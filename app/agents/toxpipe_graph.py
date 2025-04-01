@@ -26,7 +26,7 @@ from langgraph.types import Checkpointer
 from langgraph.utils.runnable import RunnableCallable
 from langchain_core.prompt_values import ChatPromptValue
 from langchain.agents.output_parsers import OpenAIFunctionsAgentOutputParser
-
+from langchain_core.messages import HumanMessage, SystemMessage
 
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate, MessagesPlaceholder
 from langgraph.graph.message import add_messages
@@ -39,6 +39,14 @@ import uuid
 
 from .tools import make_translate_tools, make_rag_tools, make_literature_tools
 
+ANTHROPIC_MODELS = ['claude-3-5-sonnet', 'claude-3-sonnet', 'claude-3-haiku', 'claude-3-opus'] # haiku and opus work better
+OLLAMA_MODELS = ['llama3-1-70b', 'llama3-1-8b', 'openbiollm-llama3-70b'] # These have trouble with tools
+OPENAI_MODELS = ['azure-gpt-4o', 'azure-gpt-3.5-turbo', 'azure-gpt-4o-mini', 'azure-gpt-3.5-turbo-16k', 'azure-gpt-4-turbo-20240409', 'azure-gpt-4', 'azure-o1', 'azure-o1-mini', 'azure-o3-mini'] # These all work pretty well
+MISTRALAI_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', 'mixtral-8x7b-instruct'] # mistral-large-2 and mixtral-8x7b-instruct has issues accessing tools
+GOOGLE_MODELS = ['gemini-1.5-pro'] # TODO - VertexAIException BadRequestError - "Unable to submit request because one or more function parameters didn\'t specify the schema type field. Learn more: https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling
+AMAZON_MODELS = ['amazon-titan-text-premier']
+COHERE_MODELS = ['cohere-command-r-plus']
+BAD_TOOL_MODELS = OLLAMA_MODELS + MISTRALAI_MODELS + GOOGLE_MODELS + AMAZON_MODELS + COHERE_MODELS
 
 sufficient_system_prompt = f'''
     You are an expert toxicologist with extensive knowledge in chemical safety assessment, toxicokinetics, and toxicodynamics. Your expertise includes:
@@ -250,6 +258,7 @@ def create_react_agent(
     manual_tool_support: Optional[list[str]] = None,
     debug: bool = False,
     model_name: Optional[str] = None,
+    max_memory_tokens: Optional[int] = 0,
 ) -> CompiledGraph:
     """Creates a graph that works with a chat model that utilizes tool calling.
 
@@ -379,25 +388,17 @@ def create_react_agent(
     model_training = cast(BaseChatModel, model_literature)
 
     # Limit context window if too long
-    def condense_prompt(prompt: ChatPromptValue) -> ChatPromptValue:
+    def condense_prompt(prompt: ChatPromptValue) -> ChatPromptValue:        
         messages = prompt.to_messages()
         num_tokens = llm.get_num_tokens_from_messages(messages)
         ai_function_messages = messages[2:]
-
-        print("======== MESSAGES ========")
-        print(messages)
-        print(len(messages))
-
-        print("--- AI FUNC ---")
-        print(ai_function_messages)
-        print(len(ai_function_messages))
-
-        while num_tokens > 4_000:
-            ai_function_messages = ai_function_messages[2:]
-            num_tokens = llm.get_num_tokens_from_messages(
-                messages[:2] + ai_function_messages
-            )
-        messages = messages[:2] + ai_function_messages
+        if max_memory_tokens > 0: # When 0, don't trim the context window
+            while num_tokens > max_memory_tokens:
+                ai_function_messages = ai_function_messages[2:]
+                num_tokens = llm.get_num_tokens_from_messages(
+                    messages[:2] + ai_function_messages
+                )
+        messages = messages[:2] + ai_function_messages # append the first two messages to the trimmed list of internal messages
         return ChatPromptValue(messages=messages)
 
 
@@ -462,20 +463,17 @@ def create_react_agent(
         state_modifier, messages_modifier, store
     )
 
-    #model_runnable = preprocessor | condense_prompt | model
-    model_runnable = preprocessor | model
+    model_runnable = preprocessor | condense_prompt | model
+    model_inner_runnable = preprocessor | condense_prompt | model_inner
+    model_rag_runnable = preprocessor | condense_prompt | model_rag
+    model_literature_runnable = preprocessor | condense_prompt | model_literature
+    model_training_runnable = preprocessor | condense_prompt| model_training
 
-    #model_inner_runnable = preprocessor | condense_prompt | model_inner
-    model_inner_runnable = preprocessor | model_inner
-
-    #model_rag_runnable = preprocessor | condense_prompt | model_rag
-    model_rag_runnable = preprocessor | model_rag
-
-    #model_literature_runnable = preprocessor | condense_prompt | model_literature
-    model_literature_runnable = preprocessor | model_literature
-
-    #model_training_runnable = preprocessor | condense_prompt| model_training
-    model_training_runnable = preprocessor | model_training
+    #model_runnable = preprocessor | model
+    #model_inner_runnable = preprocessor | model_inner
+    #model_rag_runnable = preprocessor | model_rag
+    #model_literature_runnable = preprocessor | model_literature
+    #model_training_runnable = preprocessor | model_training
     
 
     # Define the function that calls the model
@@ -520,6 +518,10 @@ def create_react_agent(
     
     def call_model_inner(state: AgentState, config: RunnableConfig) -> AgentState:
         _validate_chat_history(state["messages"])
+
+        if model_name in BAD_TOOL_MODELS:
+            state["messages"].append(HumanMessage(content="Please continue."))
+
         response = model_inner_runnable.invoke(state["messages"], config)
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
         all_tools_return_direct = (
@@ -558,6 +560,10 @@ def create_react_agent(
 
     def call_model_rag(state: AgentState, config: RunnableConfig) -> AgentState:
         _validate_chat_history(state["messages"])
+
+        if model_name in BAD_TOOL_MODELS:
+            state["messages"].append(HumanMessage(content="Please continue."))
+        
         response = model_rag_runnable.invoke(state["messages"], config)
 
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
@@ -596,6 +602,10 @@ def create_react_agent(
     
     def call_model_literature(state: AgentState, config: RunnableConfig) -> AgentState:
         _validate_chat_history(state["messages"])
+
+        if model_name in BAD_TOOL_MODELS:
+            state["messages"].append(HumanMessage(content="Please continue."))
+
         response = model_literature_runnable.invoke(state["messages"], config)
 
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
@@ -635,6 +645,10 @@ def create_react_agent(
     
     def call_model_training(state: AgentState, config: RunnableConfig) -> AgentState:
         _validate_chat_history(state["messages"])
+
+        if model_name in BAD_TOOL_MODELS:
+            state["messages"].append(HumanMessage(content="Please continue."))
+
         response = model_training_runnable.invoke(state["messages"], config)
 
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
