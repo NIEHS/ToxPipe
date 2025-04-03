@@ -26,7 +26,7 @@ def validate_context_condition(
     return state.get('next_action')
 
 # -----------------------------------------------------------------------
-def createGraph(llm, use_training_data):
+def createGraph(llm, use_training_data, relevancy_check):
 
     # -----------------------------------------------------------------------
     # LLM
@@ -45,61 +45,71 @@ def createGraph(llm, use_training_data):
     qr = Query(llm)
 
     langgraph = StateGraph(State, input=State, output=State)
-    
-    if use_training_data:
 
+    if not relevancy_check:
         langgraph.add_node(aq.analyze_query)
         langgraph.add_node(gc.gather_context)
-        #langgraph.add_node(find_context_relevance)
-        langgraph.add_node(qr.query_with_context)
         langgraph.add_node(qr.query_without_context)
-
-        use_guardrail = False
-        if use_guardrail:
-            langgraph.add_node(guardrails)
-            langgraph.add_edge(START, 'guardrails')
-            langgraph.add_conditional_edges(
-                'guardrails',
-                guardrails_condition,
-            )
-        else:
-            langgraph.add_edge(START, 'analyze_query')
-
+        langgraph.add_edge(START, 'analyze_query')
         langgraph.add_edge('analyze_query', 'gather_context')
-        langgraph.add_edge('gather_context', 'query_with_context')
-        langgraph.add_conditional_edges(
-            'query_with_context',
-            validate_context_condition,
-        )
+        langgraph.add_edge('gather_context', 'query_without_context')
         langgraph.add_edge('query_without_context', END)
 
     else:
+        if use_training_data:
 
-        langgraph.add_node(aq.analyze_query)
-        langgraph.add_node(gc.gather_context)
-        langgraph.add_node(qr.query_with_context)
-        
-        use_guardrail = False
-        if use_guardrail:
-            langgraph.add_node(gr.guardrails)
-            langgraph.add_edge(START, 'guardrails')
+            langgraph.add_node(aq.analyze_query)
+            langgraph.add_node(gc.gather_context)
+            #langgraph.add_node(find_context_relevance)
+            langgraph.add_node(qr.query_with_context)
+            langgraph.add_node(qr.query_without_context)
+
+            use_guardrail = False
+            if use_guardrail:
+                langgraph.add_node(guardrails)
+                langgraph.add_edge(START, 'guardrails')
+                langgraph.add_conditional_edges(
+                    'guardrails',
+                    guardrails_condition,
+                )
+            else:
+                langgraph.add_edge(START, 'analyze_query')
+
+            langgraph.add_edge('analyze_query', 'gather_context')
+            langgraph.add_edge('gather_context', 'query_with_context')
             langgraph.add_conditional_edges(
-                'guardrails',
-                guardrails_condition,
+                'query_with_context',
+                validate_context_condition,
             )
-        else:
-            langgraph.add_edge(START, 'analyze_query')
+            langgraph.add_edge('query_without_context', END)
 
-        langgraph.add_edge('analyze_query', 'gather_context')
-        langgraph.add_edge('gather_context', 'query_with_context')
-        langgraph.add_edge('query_with_context', END)
+        else:
+
+            langgraph.add_node(aq.analyze_query)
+            langgraph.add_node(gc.gather_context)
+            langgraph.add_node(qr.query_with_context)
+            
+            use_guardrail = False
+            if use_guardrail:
+                langgraph.add_node(gr.guardrails)
+                langgraph.add_edge(START, 'guardrails')
+                langgraph.add_conditional_edges(
+                    'guardrails',
+                    guardrails_condition,
+                )
+            else:
+                langgraph.add_edge(START, 'analyze_query')
+
+            langgraph.add_edge('analyze_query', 'gather_context')
+            langgraph.add_edge('gather_context', 'query_with_context')
+            langgraph.add_edge('query_with_context', END)
 
     langgraph = langgraph.compile()
 
     return langgraph
 
 # -----------------------------------------------------------------------
-def query(query_text: str, llm: BaseLLM | str = 'azure-gpt-4o', use_training_data: bool = True) -> str:
+def query(query_text: str, llm: BaseLLM | str = 'azure-gpt-4o', use_training_data: bool = True, relevancy_check: bool = True) -> str:
     '''
     Provides response to user query
     
@@ -114,7 +124,7 @@ def query(query_text: str, llm: BaseLLM | str = 'azure-gpt-4o', use_training_dat
     '''
 
     try:
-        langgraph = createGraph(llm=llm, use_training_data=use_training_data)
+        langgraph = createGraph(llm=llm, use_training_data=use_training_data, relevancy_check=relevancy_check)
         response = dict(langgraph.invoke(dict(query=query_text)))#, config={"callbacks": [Config.langfuse_handler]})
     except Exception as exp:
         response = {'error': f'Line number: {exp.__traceback__.tb_lineno}, Description: {exp}\n\n{traceback.format_exc()}'}

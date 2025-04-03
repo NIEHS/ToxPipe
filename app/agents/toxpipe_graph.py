@@ -74,8 +74,11 @@ sufficient_system_prompt = f'''
 
 sufficient_human_prompt = '''
 You will be provided with the most recent response from the model and the user's original query. Please review the response and determine if it is sufficient to answer the original query. If the response is sufficient, please respond with "sufficient". If the response is not sufficient, please respond with "not sufficient". Do not respond with anything else.
-If the response could benefit from using the tools available, please respond with "not sufficient" so the model can use the tools to find a more accurate answer.
-If the user specifically asks to perform a search on available literature or the RAG model, please respond with "not sufficient" so the model can perform the search.
+- If the response could benefit from using the tools available, please respond with "not sufficient" so the model can use the tools to find a more accurate answer.
+- If the user specifically asks to perform a search on available literature or the RAG model, please respond with "not sufficient" so the model can perform the search.
+- If the user specifically asks to use the model's training data, please respond with "not sufficient" so the model can use its training data.
+- If a RAG search comes to an irrelevant decision, please respond with "not sufficient" so the model can use its training data to find a more accurate answer.
+- If a literature search cannot find information, please respond with "not sufficient" so the model can use its training data to find a more accurate answer.
 
 ----------------------------------------------
 ** Response **
@@ -383,7 +386,8 @@ def create_react_agent(
 
     model = cast(BaseChatModel, model).bind_tools(translate_tool_classes + rag_tool_classes + literature_tool_classes)
     model_inner = cast(BaseChatModel, model_inner).bind_tools(tool_classes)
-    model_rag = cast(BaseChatModel, model_rag).bind_tools(rag_tool_classes + literature_tool_classes)
+    #model_rag = cast(BaseChatModel, model_rag).bind_tools(rag_tool_classes + literature_tool_classes)
+    model_rag = cast(BaseChatModel, model_rag).bind_tools(rag_tool_classes)
     model_literature = cast(BaseChatModel, model_literature).bind_tools(literature_tool_classes)
     model_training = cast(BaseChatModel, model_literature)
 
@@ -429,7 +433,8 @@ def create_react_agent(
                 return "agent3"   
         else:
             return "tools"
-    
+
+
     def rag_call(state: AgentState) -> Literal["rag", "agent4", "__end__"]:
         """Conduct a RAG search if unable to find an answer via the ChemBioTox tools. If this answer is unsatisfactory, then we must conduct a literature search."""
         messages = state["messages"]
@@ -463,18 +468,20 @@ def create_react_agent(
         state_modifier, messages_modifier, store
     )
 
+    
     model_runnable = preprocessor | condense_prompt | model
     model_inner_runnable = preprocessor | condense_prompt | model_inner
     model_rag_runnable = preprocessor | condense_prompt | model_rag
     model_literature_runnable = preprocessor | condense_prompt | model_literature
-    model_training_runnable = preprocessor | condense_prompt| model_training
+    model_training_runnable = preprocessor | condense_prompt | model_training
+    """
 
-    #model_runnable = preprocessor | model
-    #model_inner_runnable = preprocessor | model_inner
-    #model_rag_runnable = preprocessor | model_rag
-    #model_literature_runnable = preprocessor | model_literature
-    #model_training_runnable = preprocessor | model_training
-    
+    model_runnable = preprocessor | model
+    model_inner_runnable = preprocessor | model_inner
+    model_rag_runnable = preprocessor | model_rag
+    model_literature_runnable = preprocessor | model_literature
+    model_training_runnable = preprocessor | model_training
+    """
 
     # Define the function that calls the model
     def call_model(state: AgentState, config: RunnableConfig) -> AgentState:
@@ -554,8 +561,10 @@ def create_react_agent(
                     )
                 ]
             }
+        
         # We return a list, because this will get added to the existing list
         return {"messages": [response]}
+    
     
 
     def call_model_rag(state: AgentState, config: RunnableConfig) -> AgentState:
@@ -732,15 +741,14 @@ def create_react_agent(
             if m.name in should_return_direct:
                 return "__end__"
         
-        #last = str(state["messages"][-1].content).lower()
-        tool_calls = state["messages"][-1].tool_calls
-        if len(tool_calls) > 0:
-            last = state["messages"][-1].tool_calls[0]["name"]
-            if last == "LiteratureSearch":
-                return "literature"
-            elif last == "QueryRAG":
+        if len(state["messages"][-1].tool_calls) > 0:
+            tool_calls = [i["name"] for i in state["messages"][-1].tool_calls]
+            if "QueryRAG" in tool_calls:
                 return "rag"
-        return "preprocess"
+            if "LiteratureSearch" in tool_calls:
+                return "literature"
+            return "preprocess"
+        return "__end__"
     workflow.add_conditional_edges("agent", route_preprocess_responses)
 
     workflow.add_edge("preprocess", "agent2")
@@ -751,10 +759,10 @@ def create_react_agent(
     # If any of the tools are configured to return_directly after running, our graph needs to check if these were called
     should_return_direct = {t.name for t in tool_classes if t.return_direct}
 
-    #workflow.add_edge("tools", "agent2")
     workflow.add_edge("tools", "agent3") # Just do single tools call since agent2 call multiple tools
 
     workflow.add_conditional_edges("agent3", rag_call)
+
     rag_should_return_direct = {t.name for t in rag_tool_classes if t.return_direct}
     def rag_route_tool_responses(state: AgentState) -> Literal["agent4", "__end__"]:
         for m in reversed(state["messages"]):
@@ -762,13 +770,13 @@ def create_react_agent(
                 break
             if m.name in rag_should_return_direct:
                 return "__end__"
-        #return "agent4"
-        return "training"
+        return "agent4"
     if rag_should_return_direct:
         workflow.add_conditional_edges("rag", rag_route_tool_responses)
     else:
         workflow.add_edge("rag", "agent4")
 
+    
     workflow.add_conditional_edges("agent4", literature_call)
     literature_should_return_direct = {t.name for t in literature_tool_classes if t.return_direct}
     def literature_route_tool_responses(state: AgentState) -> Literal["training", "__end__"]:
@@ -782,15 +790,10 @@ def create_react_agent(
         workflow.add_conditional_edges("literature", literature_route_tool_responses)
     else:
         workflow.add_edge("literature", "training")
-    
 
     workflow.add_edge("training", END) # Always end after training, training step should be a last resort if the model couldn't find anything in the available tools & resources
     
-    
-
-    # Finally, we compile it!
-    # This compiles it into a LangChain Runnable,
-    # meaning you can use it as you would any other runnable
+    # Compile graph
     workflow = workflow.compile(
         checkpointer=checkpointer,
         store=store,
