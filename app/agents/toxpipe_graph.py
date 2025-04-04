@@ -36,6 +36,7 @@ from operator import itemgetter
 import json
 import re
 import uuid
+import itertools
 
 from .tools import make_translate_tools, make_rag_tools, make_literature_tools
 
@@ -217,7 +218,7 @@ def _get_model_preprocessing_runnable(
 
 def _validate_chat_history(
     messages: Sequence[BaseMessage],
-) -> None:
+) -> Sequence[BaseMessage]:
     """Validate that all tool calls in AIMessages have a corresponding ToolMessage."""
     all_tool_calls = [
         tool_call
@@ -233,17 +234,29 @@ def _validate_chat_history(
         for tool_call in all_tool_calls
         if tool_call["id"] not in tool_call_ids_with_results
     ]
-    if not tool_calls_without_results:
-        return
 
-    error_message = create_error_message(
-        message="Found AIMessages with tool_calls that do not have a corresponding ToolMessage. "
-        f"Here are the first few of those tool calls: {tool_calls_without_results[:3]}.\n\n"
-        "Every tool call (LLM requesting to call a tool) in the message history MUST have a corresponding ToolMessage "
-        "(result of a tool invocation to return to the LLM) - this is required by most LLM providers.",
-        error_code=ErrorCode.INVALID_CHAT_HISTORY,
-    )
-    raise ValueError(error_message)
+    if not tool_calls_without_results:
+        return messages
+
+    
+    pruned_messages = []
+    for message in messages:
+        if isinstance(message, ToolMessage) and message.tool_call_id not in tool_call_ids_with_results:
+            continue
+        elif isinstance(message, AIMessage):
+            if message.tool_calls:
+                ids = [call["id"] for call in message.tool_calls]
+                bad_ids = [id for id in ids if id not in tool_call_ids_with_results]
+                if len(bad_ids) > 0:
+                    continue
+                else:
+                    pruned_messages.append(message)
+            else:
+                pruned_messages.append(message)
+        else:
+            pruned_messages.append(message)
+    messages = pruned_messages
+    return messages
 
 
 @deprecated_parameter("messages_modifier", "0.1.9", "state_modifier", removal="0.3.0")
@@ -386,12 +399,11 @@ def create_react_agent(
 
     model = cast(BaseChatModel, model).bind_tools(translate_tool_classes + rag_tool_classes + literature_tool_classes)
     model_inner = cast(BaseChatModel, model_inner).bind_tools(tool_classes)
-    #model_rag = cast(BaseChatModel, model_rag).bind_tools(rag_tool_classes + literature_tool_classes)
     model_rag = cast(BaseChatModel, model_rag).bind_tools(rag_tool_classes)
     model_literature = cast(BaseChatModel, model_literature).bind_tools(literature_tool_classes)
     model_training = cast(BaseChatModel, model_literature)
 
-    # Limit context window if too long
+    # Truncate context window if too long
     def condense_prompt(prompt: ChatPromptValue) -> ChatPromptValue:        
         messages = prompt.to_messages()
         num_tokens = llm.get_num_tokens_from_messages(messages)
@@ -402,7 +414,30 @@ def create_react_agent(
                 num_tokens = llm.get_num_tokens_from_messages(
                     messages[:2] + ai_function_messages
                 )
-        messages = messages[:2] + ai_function_messages # append the first two messages to the trimmed list of internal messages
+        messages = messages[:2] + ai_function_messages # append the first two messages (system and human) to the trimmed list of internal messages
+
+        # Prune any tool messages without a tool call
+        tool_messages = [message.tool_call_id for message in messages if isinstance(message, ToolMessage)]
+        tool_call_messages = [[i['id'] for i in message.tool_calls] for message in messages if isinstance(message, AIMessage) and message.tool_calls]
+        tool_call_messages = list(itertools.chain.from_iterable(tool_call_messages)) # flatten the list of tool call messages
+        good_tool_calls = list(set(tool_messages) & set(tool_call_messages)) # get only tool calls that have a corresponding tool message
+        pruned_messages = []
+        for message in messages:
+            if isinstance(message, ToolMessage) and message.tool_call_id not in good_tool_calls:
+                continue
+            elif isinstance(message, AIMessage):
+                if message.tool_calls:
+                    ids = [call["id"] for call in message.tool_calls]
+                    bad_ids = [id for id in ids if id not in good_tool_calls]
+                    if len(bad_ids) > 0:
+                        continue
+                    else:
+                        pruned_messages.append(message)
+                else:
+                    pruned_messages.append(message)
+            else:
+                pruned_messages.append(message)
+        messages = pruned_messages
         return ChatPromptValue(messages=messages)
 
 
@@ -474,21 +509,13 @@ def create_react_agent(
     model_rag_runnable = preprocessor | condense_prompt | model_rag
     model_literature_runnable = preprocessor | condense_prompt | model_literature
     model_training_runnable = preprocessor | condense_prompt | model_training
-    """
-
-    model_runnable = preprocessor | model
-    model_inner_runnable = preprocessor | model_inner
-    model_rag_runnable = preprocessor | model_rag
-    model_literature_runnable = preprocessor | model_literature
-    model_training_runnable = preprocessor | model_training
-    """
 
     # Define the function that calls the model
     def call_model(state: AgentState, config: RunnableConfig) -> AgentState:
-        _validate_chat_history(state["messages"])
+        state["messages"] = _validate_chat_history(state["messages"])
         response = model_runnable.invoke(state["messages"], config) # TODO speed up
-
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
+
         all_tools_return_direct = (
             all(call["name"] in should_return_direct for call in response.tool_calls)
             if isinstance(response, AIMessage)
@@ -524,7 +551,7 @@ def create_react_agent(
         return {"messages": [response]}
     
     def call_model_inner(state: AgentState, config: RunnableConfig) -> AgentState:
-        _validate_chat_history(state["messages"])
+        state["messages"] = _validate_chat_history(state["messages"])
 
         if model_name in BAD_TOOL_MODELS:
             state["messages"].append(HumanMessage(content="Please continue."))
@@ -568,7 +595,7 @@ def create_react_agent(
     
 
     def call_model_rag(state: AgentState, config: RunnableConfig) -> AgentState:
-        _validate_chat_history(state["messages"])
+        state["messages"] = _validate_chat_history(state["messages"])
 
         if model_name in BAD_TOOL_MODELS:
             state["messages"].append(HumanMessage(content="Please continue."))
@@ -610,7 +637,7 @@ def create_react_agent(
         return {"messages": [response]}
     
     def call_model_literature(state: AgentState, config: RunnableConfig) -> AgentState:
-        _validate_chat_history(state["messages"])
+        state["messages"] = _validate_chat_history(state["messages"])
 
         if model_name in BAD_TOOL_MODELS:
             state["messages"].append(HumanMessage(content="Please continue."))
@@ -653,7 +680,7 @@ def create_react_agent(
     
     
     def call_model_training(state: AgentState, config: RunnableConfig) -> AgentState:
-        _validate_chat_history(state["messages"])
+        state["messages"] = _validate_chat_history(state["messages"])
 
         if model_name in BAD_TOOL_MODELS:
             state["messages"].append(HumanMessage(content="Please continue."))
