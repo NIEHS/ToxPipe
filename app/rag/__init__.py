@@ -49,11 +49,11 @@ def createGraph(llm, use_training_data, relevancy_check):
     if not relevancy_check:
         langgraph.add_node(aq.analyze_query)
         langgraph.add_node(gc.gather_context)
-        langgraph.add_node(qr.query_without_context)
+        langgraph.add_node(qr.query_with_context)
         langgraph.add_edge(START, 'analyze_query')
         langgraph.add_edge('analyze_query', 'gather_context')
-        langgraph.add_edge('gather_context', 'query_without_context')
-        langgraph.add_edge('query_without_context', END)
+        langgraph.add_edge('gather_context', 'query_with_context')
+        langgraph.add_edge('query_with_context', END)
 
     else:
         if use_training_data:
