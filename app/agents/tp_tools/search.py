@@ -166,7 +166,7 @@ class Scholar2ResultLLM(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, query) -> str:
+    def _run(self, query:str) -> str:
         return scholar2result_llm(self.llm, query)
 
     async def _arun(self, query) -> str:

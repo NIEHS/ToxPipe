@@ -40,6 +40,7 @@ class QueryRAG(BaseTool):
 
     def _run(self, q: str) -> str:
         """Search for chemical information using RAG."""
-        rag_res = query_rag(q=q, llm=self.llm, use_training_data=False, relevancy_check=False) # never use training data when in agentic pipeline
+        #rag_res = query_rag(q=q, llm=self.llm, use_training_data=False, relevancy_check=False) # never use training data when in agentic pipeline
+        rag_res = query_rag(q=q, llm=self.llm, use_training_data=False, relevancy_check=True) # never use training data when in agentic pipeline
 
         return rag_res

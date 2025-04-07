@@ -47,7 +47,7 @@ MISTRALAI_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', '
 GOOGLE_MODELS = ['gemini-1.5-pro'] # TODO - VertexAIException BadRequestError - "Unable to submit request because one or more function parameters didn\'t specify the schema type field. Learn more: https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling
 AMAZON_MODELS = ['amazon-titan-text-premier']
 COHERE_MODELS = ['cohere-command-r-plus']
-BAD_TOOL_MODELS = OLLAMA_MODELS + MISTRALAI_MODELS + GOOGLE_MODELS + AMAZON_MODELS + COHERE_MODELS
+BAD_TOOL_MODELS = OLLAMA_MODELS + MISTRALAI_MODELS + AMAZON_MODELS + COHERE_MODELS
 
 sufficient_system_prompt = f'''
     You are an expert toxicologist with extensive knowledge in chemical safety assessment, toxicokinetics, and toxicodynamics. Your expertise includes:
@@ -109,6 +109,36 @@ sufficient_prompt = ChatPromptTemplate.from_messages(
         ),
     ]
 )
+
+
+training_human_prompt = '''
+Follow the instructions below ONLY for the training step:
+- You will be provided with the context needed to answer the user's original query. Please review the responses from your memory, the tools, RAG search, and literature search.
+- You will supplement the information from the tools, RAG search, and literature search with your training data to provide a complete answer to the user's query.
+- Include all relevant information from your memory, tools, RAG search, literature search, and training data in your final response.
+
+----------------------------------------------
+** Context **
+{context}
+
+----------------------------------------------
+** Query ** 
+{query}
+
+** Output format **
+You will always output a string that is a complete answer to the user's query.
+'''
+
+training_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            'human',
+            (training_human_prompt),
+        ),
+    ]
+)
+
+
 
 
 # We create the AgentState that we will pass around
@@ -448,7 +478,7 @@ def create_react_agent(
         '''
         Find relevance of the context to the query
         '''
-        response = sufficiency_chain.invoke({"response": response, "query": query, "tools":rag_tool_classes + literature_tool_classes})
+        response = sufficiency_chain.invoke({"response": response, "query": query, "tools":translate_tool_classes + tool_classes + rag_tool_classes + literature_tool_classes})
 
         return response
     
@@ -502,13 +532,15 @@ def create_react_agent(
     preprocessor = _get_model_preprocessing_runnable(
         state_modifier, messages_modifier, store
     )
-
     
     model_runnable = preprocessor | condense_prompt | model
     model_inner_runnable = preprocessor | condense_prompt | model_inner
     model_rag_runnable = preprocessor | condense_prompt | model_rag
     model_literature_runnable = preprocessor | condense_prompt | model_literature
+
     model_training_runnable = preprocessor | condense_prompt | model_training
+
+    #model_training_runnable = training_prompt | model_training | StrOutputParser()
 
     # Define the function that calls the model
     def call_model(state: AgentState, config: RunnableConfig) -> AgentState:
@@ -686,6 +718,7 @@ def create_react_agent(
             state["messages"].append(HumanMessage(content="Please continue."))
 
         response = model_training_runnable.invoke(state["messages"], config)
+        #response = model_training_runnable.invoke({"context":state["messages"], "query":state["messages"][0].content}, config)
 
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
         all_tools_return_direct = False
