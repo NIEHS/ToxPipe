@@ -50,16 +50,13 @@ class PromptAgentic:
     - Change the answer format depending on the type of response.
     - Only respond with one type of response: "Thought, Action, Action Input" or "Final Answer"
     - If using the "Thought, Action, Action Input" format:
-        - Thought: (reflect on your progress and decide what to do next, using the output of the previous action as a guide.)
-        - Action: (the action name, should be one of the tools available)
-        - Action Input: (the input string to the action. Do not include the thought itself as an action input)
         - Answer the query in the JSON format provided below.
         - Example:
             ```json
             {{
                 "thought": (current progress and next steps),
-                "action": (action or tool),
-                "action_input": (input for the action),
+                "action": (action or tool to use),
+                "action_input": (input for the tool or action),
             }}
             ```
     - If using the "Final Answer" format:

@@ -1,6 +1,6 @@
 # This is a custom, cloned implementation of LangChain's AgentExecutor so that we can modify it to better handle non-OpenAI models and for other debugging purposes.
 
-from typing import Callable, Literal, Optional, Sequence, Type, TypeVar, Union, cast
+from typing import Callable, Literal, Optional, Sequence, Type, TypeVar, Union, cast, Annotated, Any, List
 
 from langchain_core.language_models import BaseChatModel, LanguageModelLike
 from langchain_core.messages import AIMessage, BaseMessage, SystemMessage, ToolMessage
@@ -28,16 +28,24 @@ from langchain_core.prompt_values import ChatPromptValue
 from langchain.agents.output_parsers import OpenAIFunctionsAgentOutputParser
 from langchain_core.messages import HumanMessage, SystemMessage
 
+from langchain_core.exceptions import OutputParserException
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate, MessagesPlaceholder
 from langgraph.graph.message import add_messages
 from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
 from langchain.tools.render import render_text_description
 from operator import itemgetter
 import json
+from json import JSONDecodeError
+from langchain_core.outputs import Generation
 import re
 import uuid
 import itertools
-
+from pydantic import BaseModel, Field
+from langchain_core.utils.json import (
+    parse_and_check_json_markdown,
+    parse_json_markdown,
+    parse_partial_json,
+)
 from .tools import make_translate_tools, make_rag_tools, make_literature_tools
 
 ANTHROPIC_MODELS = ['claude-3-5-sonnet', 'claude-3-sonnet', 'claude-3-haiku', 'claude-3-opus'] # haiku and opus work better
@@ -48,6 +56,128 @@ GOOGLE_MODELS = ['gemini-1.5-pro'] # TODO - VertexAIException BadRequestError - 
 AMAZON_MODELS = ['amazon-titan-text-premier']
 COHERE_MODELS = ['cohere-command-r-plus']
 BAD_TOOL_MODELS = OLLAMA_MODELS + MISTRALAI_MODELS + AMAZON_MODELS + COHERE_MODELS
+
+
+
+class DeliberationSchema(BaseModel):
+    '''
+    Represents an inner step of the agent in which it deliberates its next course of action.
+    '''
+    thought: str = Field(
+        description="The agent's current progress and next steps to follow."
+    )
+    action: str = Field(
+        description="The name of the next tool to use, if applicable." 
+    )
+    action_input: str = Field(
+        description="The input for the tool, if applicable." 
+    )
+
+class DeliberationOutputParser(JsonOutputParser):
+    def __init__(self, output_parser=DeliberationSchema):
+        super().__init__(pydantic_object=output_parser)
+
+    #def parse_result(self, result: list[Generation], *, partial: bool = False) -> Any:
+    def parse_result(self, result: list[AIMessage], *, partial: bool = False) -> Any:
+        """Parse the result of an LLM call to a JSON object.
+
+        Args:
+            result: The result of the LLM call.
+            partial: Whether to parse partial JSON objects.
+                If True, the output will be a JSON object containing
+                all the keys that have been returned so far.
+                If False, the output will be the full JSON object.
+                Default is False.
+
+        Returns:
+            The parsed JSON object.
+
+        Raises:
+            OutputParserException: If the output is not valid JSON.
+        """
+        text = result[-1].text
+        text = text.strip()
+        tool_call_message = result[-1].message
+        if not tool_call_message.tool_calls:
+            # Parse out tools and input
+            tool_names = tool_call_message.content
+
+            # Strip preamble to JSON
+            json_start = tool_names.find("{")
+            if json_start != -1:
+                tool_names = tool_names[json_start:]
+                try: 
+                    json.loads(tool_names)
+                except json.JSONDecodeError as e:
+                    tool_names = tool_names[:e.pos]
+
+            tool_names = json.loads(tool_names)
+
+            # Parse out the tool names and inputs
+            param_name = tool_names["action"]
+            param_input = tool_names["action_input"]
+            param_id = result[-1].message.id
+
+            result[-1].message.additional_kwargs["tool_calls"] = [
+                {
+                    "id": str(param_id),
+                    "function": {
+                        "arguments": param_input,
+                        "name": str(param_name),
+                    },
+                    "type": "function"
+                }
+            ]
+
+            result[-1].message.tool_calls = [
+                {
+                    "name": str(param_name),
+                    "args": param_input,
+                    "id": str(param_id),
+                    "type": "tool_call"
+                }
+            ]
+
+        result[-1].message.content = ""
+
+        return result[-1].message
+
+    def parse(self, text: str) -> Any:
+        """Parse the output of an LLM call to a JSON object.
+
+        Args:
+            text: The output of the LLM call.
+
+        Returns:
+            The parsed JSON object.
+        """
+        return self.parse_result([Generation(text=text)])
+    
+
+class FinalResponseSchema(BaseModel):
+    '''
+    Represents the agent's final response to the user's query
+    '''
+    thought: str = Field(
+        description="The agent's current progress and next steps to follow."
+    )
+    action: str = Field(
+        description="The name of the next tool to use, if applicable." 
+    )
+    action_input: str = Field(
+        description="The input for the tool, if applicable." 
+    )
+
+class FinalResponseOutputParser(StrOutputParser):
+    def __init__(self, output_parser=FinalResponseSchema):
+        super().__init__(pydantic_object=output_parser)
+
+    def parseOutput(self, data):
+        response = self.parse(data.content)
+        return response
+    
+
+
 
 sufficient_system_prompt = f'''
     You are an expert toxicologist with extensive knowledge in chemical safety assessment, toxicokinetics, and toxicodynamics. Your expertise includes:
@@ -431,7 +561,7 @@ def create_react_agent(
     model_inner = cast(BaseChatModel, model_inner).bind_tools(tool_classes)
     model_rag = cast(BaseChatModel, model_rag).bind_tools(rag_tool_classes)
     model_literature = cast(BaseChatModel, model_literature).bind_tools(literature_tool_classes)
-    model_training = cast(BaseChatModel, model_literature)
+    model_training = cast(BaseChatModel, model_training).bind_tools(literature_tool_classes + rag_tool_classes)
 
     # Truncate context window if too long
     def condense_prompt(prompt: ChatPromptValue) -> ChatPromptValue:        
@@ -474,12 +604,29 @@ def create_react_agent(
     #sufficiency_chain = sufficient_prompt | condense_prompt | llm | StrOutputParser()
     sufficiency_chain = sufficient_prompt | llm | StrOutputParser()
 
-    def find_context_relevance(query, response):
+    def find_context_relevance_tools(query, response):
         '''
         Find relevance of the context to the query
         '''
-        response = sufficiency_chain.invoke({"response": response, "query": query, "tools":translate_tool_classes + tool_classes + rag_tool_classes + literature_tool_classes})
-
+        response = sufficiency_chain.invoke({"response": response, "query": query, "tools":tool_classes})
+        return response
+    def find_context_relevance_rag(query, response):
+        '''
+        Find relevance of the context to the query
+        '''
+        response = sufficiency_chain.invoke({"response": response, "query": query, "tools":rag_tool_classes})
+        return response
+    def find_context_relevance_literature(query, response):
+        '''
+        Find relevance of the context to the query
+        '''
+        response = sufficiency_chain.invoke({"response": response, "query": query, "tools":literature_tool_classes})
+        return response
+    def find_context_relevance_training(query, response):
+        '''
+        Find relevance of the context to the query
+        '''
+        response = sufficiency_chain.invoke({"response": response, "query": query, "tools":[]})
         return response
     
 
@@ -491,7 +638,7 @@ def create_react_agent(
 
         # If we deem the answer to be sufficient, then we finish
         if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
-            sufficient_check = find_context_relevance(messages[0].content, messages[-1].content)
+            sufficient_check = find_context_relevance_tools(messages[0].content, messages[-1].content)
             if sufficient_check.lower() == "sufficient":
                 return "__end__"
             else:
@@ -506,7 +653,7 @@ def create_react_agent(
         last_message = messages[-1]        
         # If we deem the answer to be sufficient, then we finish
         if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
-            sufficient_check = find_context_relevance(messages[0].content, messages[-1].content)
+            sufficient_check = find_context_relevance_rag(messages[0].content, messages[-1].content)
             if sufficient_check.lower() == "sufficient":
                 return "__end__"
             else:
@@ -520,27 +667,45 @@ def create_react_agent(
         last_message = messages[-1]
         # If we deem the answer to be sufficient, then we finish
         if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
-            sufficient_check = find_context_relevance(messages[0].content, messages[-1].content)
+            sufficient_check = find_context_relevance_literature(messages[0].content, messages[-1].content)
             if sufficient_check.lower() == "sufficient":
                 return "__end__"
             else:
                 return "training"   
         else:
             return "literature"
+        
+    def training_call(state: AgentState) -> Literal["training", "__end__"]:
+        """Formulate an answer using the model's pretrained knowledge."""
+        messages = state["messages"]
+        last_message = messages[-1]
+        # If we deem the answer to be sufficient, then we finish
+        if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
+            sufficient_check = find_context_relevance_training(messages[0].content, messages[-1].content)
+            if sufficient_check.lower() == "sufficient":
+                return "__end__"
+            else:
+                return "training"   
+        else:
+            return "training"
 
     # we're passing store here for validation
     preprocessor = _get_model_preprocessing_runnable(
         state_modifier, messages_modifier, store
     )
     
-    model_runnable = preprocessor | condense_prompt | model
-    model_inner_runnable = preprocessor | condense_prompt | model_inner
-    model_rag_runnable = preprocessor | condense_prompt | model_rag
-    model_literature_runnable = preprocessor | condense_prompt | model_literature
-
-    model_training_runnable = preprocessor | condense_prompt | model_training
-
-    #model_training_runnable = training_prompt | model_training | StrOutputParser()
+    if model_name in OPENAI_MODELS:
+        model_runnable = preprocessor | condense_prompt | model
+        model_inner_runnable = preprocessor | condense_prompt | model_inner
+        model_rag_runnable = preprocessor | condense_prompt | model_rag
+        model_literature_runnable = preprocessor | condense_prompt | model_literature
+        model_training_runnable = preprocessor | condense_prompt | model_training
+    else:
+        model_runnable = preprocessor | condense_prompt | model | DeliberationOutputParser()
+        model_inner_runnable = preprocessor | condense_prompt | model_inner | DeliberationOutputParser()
+        model_rag_runnable = preprocessor | condense_prompt | model_rag | DeliberationOutputParser()
+        model_literature_runnable = preprocessor | condense_prompt | model_literature | DeliberationOutputParser()
+        model_training_runnable = preprocessor | condense_prompt | model_training
 
     # Define the function that calls the model
     def call_model(state: AgentState, config: RunnableConfig) -> AgentState:
@@ -718,7 +883,6 @@ def create_react_agent(
             state["messages"].append(HumanMessage(content="Please continue."))
 
         response = model_training_runnable.invoke(state["messages"], config)
-        #response = model_training_runnable.invoke({"context":state["messages"], "query":state["messages"][0].content}, config)
 
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
         all_tools_return_direct = False
@@ -850,6 +1014,22 @@ def create_react_agent(
         workflow.add_conditional_edges("literature", literature_route_tool_responses)
     else:
         workflow.add_edge("literature", "training")
+
+    """
+    workflow.add_conditional_edges("training", training_call)
+    training_should_return_direct = {t.name for t in [] if t.return_direct}
+    def training_route_tool_responses(state: AgentState) -> Literal["training", "__end__"]:
+        for m in reversed(state["messages"]):
+            if not isinstance(m, ToolMessage):
+                break
+            if m.name in training_should_return_direct:
+                return "__end__"
+        return "training"
+    if training_should_return_direct:
+        workflow.add_conditional_edges("training", training_route_tool_responses)
+    else:
+        workflow.add_edge("training", "__end__")
+    """
 
     workflow.add_edge("training", END) # Always end after training, training step should be a last resort if the model couldn't find anything in the available tools & resources
     
