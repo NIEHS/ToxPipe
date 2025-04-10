@@ -104,7 +104,7 @@ class MoleculeSafety:
         self.pubchem_data = {}
         self.llm = llm
 
-    def _fetch_pubchem_data(self, cas_number):
+    def _fetch_pubchem_data(self, cas_number: str):
         """Fetch data from PubChem for a given CAS number, or use cached data if it's already been fetched."""
         if cas_number not in self.pubchem_data:
             try:
@@ -274,7 +274,7 @@ class ExplosiveCheck(BaseTool):
         super().__init__()
         self.mol_safety = MoleculeSafety()
 
-    def _run(self, cas_number):
+    def _run(self, cas_number: str):
         """Checks if a molecule has an explosive GHS classification using pubchem."""
         # first check if the input is a CAS number
         if is_smiles(cas_number):

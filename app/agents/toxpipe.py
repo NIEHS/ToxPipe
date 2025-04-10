@@ -36,7 +36,7 @@ from .multi import *
 from dotenv import load_dotenv
 load_dotenv('../.config/.env')
 # Prompts
-from .prompts_chem import getPrompt, PromptAgentic, summary_prompt
+from .prompts_chem import getPrompt, getPromptGoogle, PromptAgentic, summary_prompt
 
 # Other
 from typing import Sequence
@@ -117,7 +117,10 @@ class ToxPipeAgent:
         # Define parser
         self.parser = PydanticOutputParser(pydantic_object=Response)
 
-        self.prompt_template = getPrompt(PromptAgentic)
+        if model == "gemini-1.5-pro":
+            self.prompt_template = getPromptGoogle(PromptAgentic)
+        else:
+            self.prompt_template = getPrompt(PromptAgentic)
 
         # If we use a model that doesn't fully support tools, then we need to manually add the tools as part of the prompt
         if model in BAD_TOOL_MODELS:

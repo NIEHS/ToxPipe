@@ -55,7 +55,7 @@ MISTRALAI_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', '
 GOOGLE_MODELS = ['gemini-1.5-pro'] # TODO - VertexAIException BadRequestError - "Unable to submit request because one or more function parameters didn\'t specify the schema type field. Learn more: https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling
 AMAZON_MODELS = ['amazon-titan-text-premier']
 COHERE_MODELS = ['cohere-command-r-plus']
-BAD_TOOL_MODELS = OLLAMA_MODELS + MISTRALAI_MODELS + AMAZON_MODELS + COHERE_MODELS
+BAD_TOOL_MODELS = MISTRALAI_MODELS
 
 
 
@@ -73,11 +73,89 @@ class DeliberationSchema(BaseModel):
         description="The input for the tool, if applicable." 
     )
 
-class DeliberationOutputParser(JsonOutputParser):
+class AnthropicDeliberationOutputParser(JsonOutputParser):
     def __init__(self, output_parser=DeliberationSchema):
         super().__init__(pydantic_object=output_parser)
 
-    #def parse_result(self, result: list[Generation], *, partial: bool = False) -> Any:
+    def parse_result(self, result: list[AIMessage], *, partial: bool = False) -> Any:
+        """Parse the result of an LLM call to a JSON object.
+
+        Args:
+            result: The result of the LLM call.
+            partial: Whether to parse partial JSON objects.
+                If True, the output will be a JSON object containing
+                all the keys that have been returned so far.
+                If False, the output will be the full JSON object.
+                Default is False.
+
+        Returns:
+            The parsed JSON object.
+
+        Raises:
+            OutputParserException: If the output is not valid JSON.
+        """
+        text = result[-1].text
+        text = text.strip()
+        tool_call_message = result[-1].message
+        if not tool_call_message.tool_calls:
+            # Parse out tools and input
+            tool_names = tool_call_message.content
+
+            # Strip preamble to JSON
+            json_start = tool_names.find("{")
+            if json_start != -1:
+                tool_names = tool_names[json_start:]
+                try: 
+                    json.loads(tool_names)
+                except json.JSONDecodeError as e:
+                    tool_names = tool_names[:e.pos]
+
+            tool_names = json.loads(tool_names)
+
+            # Parse out the tool names and inputs
+            param_name = tool_names["action"]
+            param_input = tool_names["action_input"]
+            param_id = result[-1].message.id
+
+            result[-1].message.additional_kwargs["tool_calls"] = [
+                {
+                    "id": str(param_id),
+                    "function": {
+                        "arguments": param_input,
+                        "name": str(param_name),
+                    },
+                    "type": "function"
+                }
+            ]
+
+            result[-1].message.tool_calls = [
+                {
+                    "name": str(param_name),
+                    "args": param_input,
+                    "id": str(param_id),
+                    "type": "tool_call"
+                }
+            ]
+
+        result[-1].message.content = ""
+
+        return result[-1].message
+
+    def parse(self, text: str) -> Any:
+        """Parse the output of an LLM call to a JSON object.
+
+        Args:
+            text: The output of the LLM call.
+
+        Returns:
+            The parsed JSON object.
+        """
+        return self.parse_result([Generation(text=text)])
+    
+class GoogleDeliberationOutputParser(JsonOutputParser):
+    def __init__(self, output_parser=DeliberationSchema):
+        super().__init__(pydantic_object=output_parser)
+
     def parse_result(self, result: list[AIMessage], *, partial: bool = False) -> Any:
         """Parse the result of an LLM call to a JSON object.
 
@@ -397,7 +475,6 @@ def _validate_chat_history(
 
     if not tool_calls_without_results:
         return messages
-
     
     pruned_messages = []
     for message in messages:
@@ -561,7 +638,7 @@ def create_react_agent(
     model_inner = cast(BaseChatModel, model_inner).bind_tools(tool_classes)
     model_rag = cast(BaseChatModel, model_rag).bind_tools(rag_tool_classes)
     model_literature = cast(BaseChatModel, model_literature).bind_tools(literature_tool_classes)
-    model_training = cast(BaseChatModel, model_training).bind_tools(literature_tool_classes + rag_tool_classes)
+    model_training = cast(BaseChatModel, model_training).bind_tools(translate_tool_classes + tool_classes + literature_tool_classes + rag_tool_classes)
 
     # Truncate context window if too long
     def condense_prompt(prompt: ChatPromptValue) -> ChatPromptValue:        
@@ -626,7 +703,8 @@ def create_react_agent(
         '''
         Find relevance of the context to the query
         '''
-        response = sufficiency_chain.invoke({"response": response, "query": query, "tools":[]})
+        #response = sufficiency_chain.invoke({"response": response, "query": query, "tools":[]})
+        response = sufficiency_chain.invoke({"response": response, "query": query, "tools": "You are in the training stage, you have no specialized tools available. Answer using only your training data."})
         return response
     
 
@@ -674,20 +752,6 @@ def create_react_agent(
                 return "training"   
         else:
             return "literature"
-        
-    def training_call(state: AgentState) -> Literal["training", "__end__"]:
-        """Formulate an answer using the model's pretrained knowledge."""
-        messages = state["messages"]
-        last_message = messages[-1]
-        # If we deem the answer to be sufficient, then we finish
-        if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
-            sufficient_check = find_context_relevance_training(messages[0].content, messages[-1].content)
-            if sufficient_check.lower() == "sufficient":
-                return "__end__"
-            else:
-                return "training"   
-        else:
-            return "training"
 
     # we're passing store here for validation
     preprocessor = _get_model_preprocessing_runnable(
@@ -700,12 +764,20 @@ def create_react_agent(
         model_rag_runnable = preprocessor | condense_prompt | model_rag
         model_literature_runnable = preprocessor | condense_prompt | model_literature
         model_training_runnable = preprocessor | condense_prompt | model_training
-    else:
-        model_runnable = preprocessor | condense_prompt | model | DeliberationOutputParser()
-        model_inner_runnable = preprocessor | condense_prompt | model_inner | DeliberationOutputParser()
-        model_rag_runnable = preprocessor | condense_prompt | model_rag | DeliberationOutputParser()
-        model_literature_runnable = preprocessor | condense_prompt | model_literature | DeliberationOutputParser()
+    elif model_name in ANTHROPIC_MODELS:
+        model_runnable = preprocessor | condense_prompt | model | AnthropicDeliberationOutputParser()
+        model_inner_runnable = preprocessor | condense_prompt | model_inner | AnthropicDeliberationOutputParser()
+        model_rag_runnable = preprocessor | condense_prompt | model_rag | AnthropicDeliberationOutputParser()
+        model_literature_runnable = preprocessor | condense_prompt | model_literature | AnthropicDeliberationOutputParser()
         model_training_runnable = preprocessor | condense_prompt | model_training
+    elif model_name in GOOGLE_MODELS:
+        model_runnable = preprocessor | condense_prompt | model | GoogleDeliberationOutputParser()
+        model_inner_runnable = preprocessor | condense_prompt | model_inner | GoogleDeliberationOutputParser()
+        model_rag_runnable = preprocessor | condense_prompt | model_rag | GoogleDeliberationOutputParser()
+        model_literature_runnable = preprocessor | condense_prompt | model_literature | GoogleDeliberationOutputParser()
+        model_training_runnable = preprocessor | condense_prompt | model_training
+    else:
+        raise ValueError(f"Model {model_name} not supported.")
 
     # Define the function that calls the model
     def call_model(state: AgentState, config: RunnableConfig) -> AgentState:
@@ -796,10 +868,20 @@ def create_react_agent(
 
         if model_name in BAD_TOOL_MODELS:
             state["messages"].append(HumanMessage(content="Please continue."))
-        
+
         response = model_rag_runnable.invoke(state["messages"], config)
 
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
+
+        if has_tool_calls:
+            agent_tool_call_names = [call["name"] for call in response.tool_calls if call["name"] == "QueryRAG"]
+            agent_tool_call_ids = [call["id"] for call in response.tool_calls]
+            user_query = state["messages"][0].content
+            if len(agent_tool_call_names) == 0: # Force the model to use the RAG tool
+                response.tool_calls = [{'name': 'QueryRAG', 'args': {'q': str(user_query)}, 'id': str(agent_tool_call_ids[0]), 'type': 'tool_call'}]
+                response.additional_kwargs["tool_calls"] = [{'id': str(agent_tool_call_ids[0]), 'function': {'arguments': {'q': str(user_query)}, 'name': 'QueryRAG'}, 'type': 'function', 'index': 0}]
+
+
         all_tools_return_direct = (
             all(call["name"] in rag_should_return_direct for call in response.tool_calls)
             if isinstance(response, AIMessage)
@@ -842,6 +924,15 @@ def create_react_agent(
         response = model_literature_runnable.invoke(state["messages"], config)
 
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
+
+        if has_tool_calls:
+            agent_tool_call_names = [call["name"] for call in response.tool_calls if call["name"] == "LiteratureSearch"]
+            agent_tool_call_ids = [call["id"] for call in response.tool_calls]
+            user_query = state["messages"][0].content
+            if len(agent_tool_call_names) == 0: # Force the model to use the Literature search tool
+                response.tool_calls = [{'name': 'LiteratureSearch', 'args': {'query': str(user_query)}, 'id': str(agent_tool_call_ids[0]), 'type': 'tool_call'}]
+                response.additional_kwargs["tool_calls"] = [{'id': str(agent_tool_call_ids[0]), 'function': {'arguments': {'query': str(user_query)}, 'name': 'LiteratureSearch'}, 'type': 'function', 'index': 0}]
+
         all_tools_return_direct = (
             all(call["name"] in literature_should_return_direct for call in response.tool_calls)
             if isinstance(response, AIMessage)
