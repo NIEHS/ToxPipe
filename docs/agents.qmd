@@ -47,6 +47,14 @@ author:
     roles: []
     affiliations:
       - NIEHS/DTT
+  - name: Amlan Talukder
+    degrees:
+      - B.S.
+    corresponding: false
+    email: 
+    roles: []
+    affiliations:
+      - NIEHS/DTT
 number-sections: false
 filters:
   - abstract-section
