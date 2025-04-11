@@ -1089,7 +1089,7 @@ class QueryPubChemProperties(BaseTool):
 # Separate PubChem properties
 class QueryPubChemSynonyms(BaseTool):
     name: str = "QueryPubChemSynonyms"
-    description: str = "Input a DTXSID to return synonyms for the chemical it represents from PubChem. These synonyms can help provide context for a chemical's identity and use."
+    description: str = "Input a DTXSID to return synonyms for the chemical it represents from PubChem. These synonyms can help provide context for a chemical's identity and use if you cannot find information using a given identifier."
     llm: BaseLLM = None
 
     def __init__(self, llm):
