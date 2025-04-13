@@ -66,7 +66,7 @@ def createGraph(llm, use_training_data, relevancy_check):
 
             use_guardrail = False
             if use_guardrail:
-                langgraph.add_node(guardrails)
+                langgraph.add_node(gr.guardrails)
                 langgraph.add_edge(START, 'guardrails')
                 langgraph.add_conditional_edges(
                     'guardrails',
