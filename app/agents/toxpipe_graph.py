@@ -94,6 +94,7 @@ class AnthropicDeliberationOutputParser(JsonOutputParser):
         Raises:
             OutputParserException: If the output is not valid JSON.
         """
+
         text = result[-1].text
         text = text.strip()
         tool_call_message = result[-1].message
@@ -305,6 +306,7 @@ You will be provided with the most recent response from the model and the user's
 You will always output either "sufficient" or "not sufficient" based on your decision.
 '''
 
+
 sufficient_prompt = ChatPromptTemplate.from_messages(
     [
         (
@@ -334,11 +336,40 @@ Follow the instructions below ONLY for the training step:
 {query}
 
 ** Output format **
-You will always output a string that is a complete answer to the user's query.
+Your output must follow the following format and rules:
+- Final Answer: (the final answer to the original input question after using the appropriate tools. You must include sources for each section of the information provided, which are typically given after the string "source:")
+- When sourcing information from ChemBioTox, you must specify which datasource in ChemBioTox was used (for example, CTD, PubChem, EPA, DrugBank, etc.).
+- Do not include any "Thought:" in your final answer. Only return the information following "Final Answer:".
+- The final answer should contain up to 4 parts: information from tools, information from RAG search, information from scientific literature search, and information from training data.
+- The section containing tool information should further be divided into subsections based on topic. For example, if the tools returned information about chemical structure, toxicity, and metabolism, you should create three subsections: "Chemical Structure", "Toxicity", and "Metabolism".
+- Only include a part in your final answer if you were able to find information from that part. For example, if you were only able to find information from tools and training data, you should only include those two parts in your final answer.
+- Important: The text in each part MUST not exceed 500 characters. Summarize the data if necessary to meet this requirement, but make sure to retain important and specific information relevant to the original query.
+- Important: the entire final answer must not exceed 2 paragraphs (around 2000 characters).
+- If you find, at any time, that the most recent response sufficiently answers the user's query, you may stop evaluating early and return that response.
+- Do not answer in JSON format. Use the following string format:
+- Example:
+    ** Tools **
+    ** Topic 1 **
+    (summary of data related to topic 1 from tools with sources)
+    ** Topic 2 **
+    (summary of data related to topic 2 from tools with sources)
+    ...
+    ** Topic N **
+    (summary of data related to topic N from tools with sources)
+    ** RAG **
+    (summary of data from RAG search with sources)
+    ** Literature **
+    (summary of data from scientific literature search with sources)
+    ** Training Data **
+    (summary of data from training data with warning that data was generated from training data)
 '''
 
 training_prompt = ChatPromptTemplate.from_messages(
     [
+        (
+            'system',
+            (sufficient_system_prompt),
+        ),
         (
             'human',
             (training_human_prompt),
@@ -638,7 +669,7 @@ def create_react_agent(
     model_inner = cast(BaseChatModel, model_inner).bind_tools(tool_classes)
     model_rag = cast(BaseChatModel, model_rag).bind_tools(rag_tool_classes)
     model_literature = cast(BaseChatModel, model_literature).bind_tools(literature_tool_classes)
-    model_training = cast(BaseChatModel, model_training).bind_tools(translate_tool_classes + tool_classes + literature_tool_classes + rag_tool_classes)
+    model_training = cast(BaseChatModel, model_training).bind_tools(literature_tool_classes + rag_tool_classes)
 
     # Truncate context window if too long
     def condense_prompt(prompt: ChatPromptValue) -> ChatPromptValue:        
@@ -678,7 +709,6 @@ def create_react_agent(
         return ChatPromptValue(messages=messages)
 
 
-    #sufficiency_chain = sufficient_prompt | condense_prompt | llm | StrOutputParser()
     sufficiency_chain = sufficient_prompt | llm | StrOutputParser()
 
     def find_context_relevance_tools(query, response):
@@ -769,13 +799,13 @@ def create_react_agent(
         model_inner_runnable = preprocessor | condense_prompt | model_inner | AnthropicDeliberationOutputParser()
         model_rag_runnable = preprocessor | condense_prompt | model_rag | AnthropicDeliberationOutputParser()
         model_literature_runnable = preprocessor | condense_prompt | model_literature | AnthropicDeliberationOutputParser()
-        model_training_runnable = preprocessor | condense_prompt | model_training
+        model_training_runnable = training_prompt | model_training
     elif model_name in GOOGLE_MODELS:
         model_runnable = preprocessor | condense_prompt | model | GoogleDeliberationOutputParser()
         model_inner_runnable = preprocessor | condense_prompt | model_inner | GoogleDeliberationOutputParser()
         model_rag_runnable = preprocessor | condense_prompt | model_rag | GoogleDeliberationOutputParser()
         model_literature_runnable = preprocessor | condense_prompt | model_literature | GoogleDeliberationOutputParser()
-        model_training_runnable = preprocessor | condense_prompt | model_training
+        model_training_runnable = training_prompt | model_training
     else:
         raise ValueError(f"Model {model_name} not supported.")
 
@@ -973,7 +1003,11 @@ def create_react_agent(
         if model_name in BAD_TOOL_MODELS:
             state["messages"].append(HumanMessage(content="Please continue."))
 
-        response = model_training_runnable.invoke(state["messages"], config)
+        response = None
+        if model_name not in OPENAI_MODELS:
+            response = model_training_runnable.invoke({"context": state["messages"][1:], "query": state["messages"][0].content})
+        else:
+            response = model_training_runnable.invoke(state["messages"], config)
 
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
         all_tools_return_direct = False
@@ -1003,8 +1037,7 @@ def create_react_agent(
                 ]
             }
         # We return a list, because this will get added to the existing list
-        return {"messages": [response]}
-    
+        return {"messages": [response]} 
 
 
     # Define a new graph

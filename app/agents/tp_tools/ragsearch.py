@@ -11,9 +11,9 @@ from random import sample
 load_dotenv('../../../.config/.env')
 from ...rag import query
 
-def query_rag(q: str, llm: BaseLLM, use_training_data: bool, relevancy_check: bool) -> str:
+def query_rag(q: str, llm: BaseLLM, use_training_data: bool) -> str:
     try:
-        rag_res = query(q, llm=llm, use_training_data=use_training_data, relevancy_check=relevancy_check)["response"]
+        rag_res = query(q, llm=llm, use_training_data=use_training_data)["response"]
         if type(rag_res) == dict:
             if rag_res["decision"] == "irrelevant":
                 return f"RAG did not find any results for query: {q}."
@@ -40,7 +40,6 @@ class QueryRAG(BaseTool):
 
     def _run(self, q: str) -> str:
         """Search for chemical information using RAG."""
-        #rag_res = query_rag(q=q, llm=self.llm, use_training_data=False, relevancy_check=False) # never use training data when in agentic pipeline
-        rag_res = query_rag(q=q, llm=self.llm, use_training_data=False, relevancy_check=True) # never use training data when in agentic pipeline
+        rag_res = query_rag(q=q, llm=self.llm, use_training_data=False) # never use training data when in agentic pipeline
 
         return rag_res
