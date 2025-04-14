@@ -806,6 +806,14 @@ def create_react_agent(
         model_rag_runnable = preprocessor | condense_prompt | model_rag | GoogleDeliberationOutputParser()
         model_literature_runnable = preprocessor | condense_prompt | model_literature | GoogleDeliberationOutputParser()
         model_training_runnable = training_prompt | model_training
+
+    elif model_name in OLLAMA_MODELS:
+        model_runnable = preprocessor | condense_prompt | model | GoogleDeliberationOutputParser()
+        model_inner_runnable = preprocessor | condense_prompt | model_inner | GoogleDeliberationOutputParser()
+        model_rag_runnable = preprocessor | condense_prompt | model_rag | GoogleDeliberationOutputParser()
+        model_literature_runnable = preprocessor | condense_prompt | model_literature | GoogleDeliberationOutputParser()
+        model_training_runnable = training_prompt | model_training
+    
     else:
         raise ValueError(f"Model {model_name} not supported.")
 

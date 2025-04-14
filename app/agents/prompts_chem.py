@@ -56,7 +56,7 @@ class PromptAgentic:
             {{
                 "thought": (current progress and next steps),
                 "action": (tool name to use next),
-                "action_input": {{"parameter1": "value1", "parameter2": "value2"}},
+                "action_input": {{"parameter1": "value1", "parameter2": "value2", ..., , "parameterN": "valueN"}},
             }}
             ```
     - If using the "Final Answer" format:
@@ -133,7 +133,7 @@ class PromptAgentic:
             {{
                 "thought": (current progress and next steps),
                 "action": (action or tool to use),
-                "action_input": (input for the tool or action),
+                "action_input": {{"parameter1": "value1", "parameter2": "value2", ..., , "parameterN": "valueN"}},
             }}
             ```
     - If using the "Final Answer" format:
