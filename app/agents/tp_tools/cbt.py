@@ -35,7 +35,7 @@ class Query2DTXSID(BaseTool):
         name = name.rstrip()
 
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/name2dtxsid?name={name}",
+            f"{os.environ.get('CBT_API_ENDPOINT')}/synonym2dtxsid?name={name}",
             headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
         )
 
@@ -61,7 +61,7 @@ class Name2DTXSID(BaseTool):
         name = name.rstrip()
 
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/name2dtxsid?name={name}",
+            f"{os.environ.get('CBT_API_ENDPOINT')}/synonym2dtxsid?name={name}",
             headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
         )
 
@@ -112,7 +112,7 @@ class Name2SMILES(BaseTool):
         """Input a chemical name, return its corresponding SMILES string available in ChemBioTox."""
         name = name.rstrip()
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/name2dtxsid?name={name}",
+            f"{os.environ.get('CBT_API_ENDPOINT')}/synonym2dtxsid?name={name}",
             headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
         )
         res = res.json()
