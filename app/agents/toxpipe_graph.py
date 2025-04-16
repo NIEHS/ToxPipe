@@ -55,7 +55,7 @@ MISTRALAI_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', '
 GOOGLE_MODELS = ['gemini-1.5-pro'] # TODO - VertexAIException BadRequestError - "Unable to submit request because one or more function parameters didn\'t specify the schema type field. Learn more: https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling
 AMAZON_MODELS = ['amazon-titan-text-premier']
 COHERE_MODELS = ['cohere-command-r-plus']
-BAD_TOOL_MODELS = MISTRALAI_MODELS
+BAD_TOOL_MODELS = []
 
 
 
@@ -232,7 +232,85 @@ class GoogleDeliberationOutputParser(JsonOutputParser):
         """
         return self.parse_result([Generation(text=text)])
     
+class MistralDeliberationOutputParser(JsonOutputParser):
+    def __init__(self, output_parser=DeliberationSchema):
+        super().__init__(pydantic_object=output_parser)
 
+    def parse_result(self, result: list[AIMessage], *, partial: bool = False) -> Any:
+        """Parse the result of an LLM call to a JSON object.
+
+        Args:
+            result: The result of the LLM call.
+            partial: Whether to parse partial JSON objects.
+                If True, the output will be a JSON object containing
+                all the keys that have been returned so far.
+                If False, the output will be the full JSON object.
+                Default is False.
+
+        Returns:
+            The parsed JSON object.
+
+        Raises:
+            OutputParserException: If the output is not valid JSON.
+        """
+        text = result[-1].text
+        text = text.strip()
+        tool_call_message = result[-1].message
+        if not tool_call_message.tool_calls:
+            # Parse out tools and input
+            tool_names = tool_call_message.content
+
+            # Strip preamble to JSON
+            json_start = tool_names.find("{")
+            if json_start != -1:
+                tool_names = tool_names[json_start:]
+                try: 
+                    json.loads(tool_names)
+                except json.JSONDecodeError as e:
+                    tool_names = tool_names[:e.pos]
+
+            tool_names = json.loads(tool_names)
+
+            # Parse out the tool names and inputs
+            param_name = tool_names["action"]
+            param_input = tool_names["action_input"]
+            param_id = result[-1].message.id
+
+            result[-1].message.additional_kwargs["tool_calls"] = [
+                {
+                    "id": str(param_id),
+                    "function": {
+                        "arguments": param_input,
+                        "name": str(param_name),
+                    },
+                    "type": "function"
+                }
+            ]
+
+            result[-1].message.tool_calls = [
+                {
+                    "name": str(param_name),
+                    "args": param_input,
+                    "id": str(param_id),
+                    "type": "tool_call"
+                }
+            ]
+
+        result[-1].message.content = ""
+
+        return result[-1].message
+
+    def parse(self, text: str) -> Any:
+        """Parse the output of an LLM call to a JSON object.
+
+        Args:
+            text: The output of the LLM call.
+
+        Returns:
+            The parsed JSON object.
+        """
+        return self.parse_result([Generation(text=text)])
+    
 class FinalResponseSchema(BaseModel):
     '''
     Represents the agent's final response to the user's query
@@ -806,12 +884,13 @@ def create_react_agent(
         model_rag_runnable = preprocessor | condense_prompt | model_rag | GoogleDeliberationOutputParser()
         model_literature_runnable = preprocessor | condense_prompt | model_literature | GoogleDeliberationOutputParser()
         model_training_runnable = training_prompt | model_training
+    # META models don't work 
 
-    elif model_name in OLLAMA_MODELS:
-        model_runnable = preprocessor | condense_prompt | model | GoogleDeliberationOutputParser()
-        model_inner_runnable = preprocessor | condense_prompt | model_inner | GoogleDeliberationOutputParser()
-        model_rag_runnable = preprocessor | condense_prompt | model_rag | GoogleDeliberationOutputParser()
-        model_literature_runnable = preprocessor | condense_prompt | model_literature | GoogleDeliberationOutputParser()
+    elif model_name in MISTRALAI_MODELS:
+        model_runnable = preprocessor | condense_prompt | model | MistralDeliberationOutputParser()
+        model_inner_runnable = preprocessor | condense_prompt | model_inner | MistralDeliberationOutputParser()
+        model_rag_runnable = preprocessor | condense_prompt | model_rag | MistralDeliberationOutputParser()
+        model_literature_runnable = preprocessor | condense_prompt | model_literature | MistralDeliberationOutputParser()
         model_training_runnable = training_prompt | model_training
     
     else:
@@ -859,11 +938,11 @@ def create_react_agent(
     
     def call_model_inner(state: AgentState, config: RunnableConfig) -> AgentState:
         state["messages"] = _validate_chat_history(state["messages"])
-
         if model_name in BAD_TOOL_MODELS:
             state["messages"].append(HumanMessage(content="Please continue."))
 
         response = model_inner_runnable.invoke(state["messages"], config)
+
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
         all_tools_return_direct = (
             all(call["name"] in should_return_direct for call in response.tool_calls)

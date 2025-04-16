@@ -1104,6 +1104,7 @@ class QueryPubChemSynonyms(BaseTool):
             headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
         )
         res = res.json()
+
         if len(res) < 1:
             return(f"There was a problem completing the request.")
         exp = res
