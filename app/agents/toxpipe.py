@@ -28,7 +28,7 @@ tools = FileManagementToolkit(
 ).get_tools()
 read_tool, write_tool, list_tool = tools
 
-from .tools import make_tools
+from .tools import make_tools, make_translate_tools, make_rag_tools, make_literature_tools
 # Multiprocessing
 import concurrent.futures
 from .multi import *
@@ -168,4 +168,8 @@ class ToxPipeAgent:
     
     def run_rag(self, input, use_training_data):
         return query(input, llm=self.llm, use_training_data=use_training_data)
+    
+    def run_lit(self, input):
+        literature_tools = make_literature_tools(self.llm)[0]
+        return literature_tools._run(input)
     
