@@ -13,10 +13,6 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
         ExplosiveCheck(),
         ControlChemCheck(),
         SafetySummary(llm=llm),
-        #GeneExpression(llm=llm),
-        #HallmarkGeneAnalyzer(llm=llm),
-        #Rat2HumanGene(llm=llm),
-        #Human2RatGene(llm=llm),
         QueryCBTChemicalVendors(),
         QueryCBTGRAS(),
         QueryCBTTox21Models(),
@@ -27,8 +23,6 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
 
         StructuralSimilarity(),
 
-        #QueryCBTAlerts(llm=llm), # These are really hard for the LLM to parse in a meaningful way right now
-        #QueryCBTAlertsMulti(llm=llm),
         QueryCBTSEEM3(llm=llm),
         QueryCBTDrugBankTransporters(llm=llm),
 
@@ -39,7 +33,6 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
         QueryCTDMF(llm=llm),
         QueryCTDBP(llm=llm),
 
-        #QueryPubChemProperties(llm=llm),
         QueryPubChemSynonyms(llm=llm),
         QueryPubChemMass(llm=llm),
         QueryPubChemFormula(llm=llm),
@@ -68,10 +61,7 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
 
         QueryT3DB(llm=llm),
 
-        # TODO: improve ToxRefDB repsonses
         QueryToxRefDBStudies(llm=llm)
-        #QueryToxRefDBNonNP(llm=llm),
-        #QueryToxRefDBNP(llm=llm),
 
     ]
 

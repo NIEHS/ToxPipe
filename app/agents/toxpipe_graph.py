@@ -13,6 +13,8 @@ from langchain_core.runnables import (
 from langchain_core.tools import BaseTool
 from typing_extensions import Annotated, TypedDict
 
+import copy
+
 from langgraph._api.deprecation import deprecated_parameter
 from langgraph.errors import ErrorCode, create_error_message
 from langgraph.graph import StateGraph, START, END
@@ -46,7 +48,7 @@ from langchain_core.utils.json import (
     parse_json_markdown,
     parse_partial_json,
 )
-from .tools import make_translate_tools, make_rag_tools, make_literature_tools
+from .tools import make_tools, make_translate_tools, make_rag_tools, make_literature_tools
 
 ANTHROPIC_MODELS = ['claude-3-5-sonnet', 'claude-3-sonnet', 'claude-3-haiku', 'claude-3-opus'] # haiku and opus work better
 OLLAMA_MODELS = ['llama3-1-70b', 'llama3-1-8b', 'openbiollm-llama3-70b'] # These have trouble with tools
@@ -70,246 +72,8 @@ class DeliberationSchema(BaseModel):
         description="The name of the next tool to use, if applicable." 
     )
     action_input: str = Field(
-        description="The input for the tool, if applicable." 
+        description="A JSON string detailing the input for the tool, if applicable. Each key-value pair represents a parameter and its corresponding value." 
     )
-
-class AnthropicDeliberationOutputParser(JsonOutputParser):
-    def __init__(self, output_parser=DeliberationSchema):
-        super().__init__(pydantic_object=output_parser)
-
-    def parse_result(self, result: list[AIMessage], *, partial: bool = False) -> Any:
-        """Parse the result of an LLM call to a JSON object.
-
-        Args:
-            result: The result of the LLM call.
-            partial: Whether to parse partial JSON objects.
-                If True, the output will be a JSON object containing
-                all the keys that have been returned so far.
-                If False, the output will be the full JSON object.
-                Default is False.
-
-        Returns:
-            The parsed JSON object.
-
-        Raises:
-            OutputParserException: If the output is not valid JSON.
-        """
-
-        text = result[-1].text
-        text = text.strip()
-        tool_call_message = result[-1].message
-        if not tool_call_message.tool_calls:
-            # Parse out tools and input
-            tool_names = tool_call_message.content
-
-            # Strip preamble to JSON
-            json_start = tool_names.find("{")
-            if json_start != -1:
-                tool_names = tool_names[json_start:]
-                try: 
-                    json.loads(tool_names)
-                except json.JSONDecodeError as e:
-                    tool_names = tool_names[:e.pos]
-
-            tool_names = json.loads(tool_names)
-
-            # Parse out the tool names and inputs
-            param_name = tool_names["action"]
-            param_input = tool_names["action_input"]
-            param_id = result[-1].message.id
-
-            result[-1].message.additional_kwargs["tool_calls"] = [
-                {
-                    "id": str(param_id),
-                    "function": {
-                        "arguments": param_input,
-                        "name": str(param_name),
-                    },
-                    "type": "function"
-                }
-            ]
-
-            result[-1].message.tool_calls = [
-                {
-                    "name": str(param_name),
-                    "args": param_input,
-                    "id": str(param_id),
-                    "type": "tool_call"
-                }
-            ]
-
-        result[-1].message.content = ""
-
-        return result[-1].message
-
-    def parse(self, text: str) -> Any:
-        """Parse the output of an LLM call to a JSON object.
-
-        Args:
-            text: The output of the LLM call.
-
-        Returns:
-            The parsed JSON object.
-        """
-        return self.parse_result([Generation(text=text)])
-    
-class GoogleDeliberationOutputParser(JsonOutputParser):
-    def __init__(self, output_parser=DeliberationSchema):
-        super().__init__(pydantic_object=output_parser)
-
-    def parse_result(self, result: list[AIMessage], *, partial: bool = False) -> Any:
-        """Parse the result of an LLM call to a JSON object.
-
-        Args:
-            result: The result of the LLM call.
-            partial: Whether to parse partial JSON objects.
-                If True, the output will be a JSON object containing
-                all the keys that have been returned so far.
-                If False, the output will be the full JSON object.
-                Default is False.
-
-        Returns:
-            The parsed JSON object.
-
-        Raises:
-            OutputParserException: If the output is not valid JSON.
-        """
-        text = result[-1].text
-        text = text.strip()
-        tool_call_message = result[-1].message
-        if not tool_call_message.tool_calls:
-            # Parse out tools and input
-            tool_names = tool_call_message.content
-
-            # Strip preamble to JSON
-            json_start = tool_names.find("{")
-            if json_start != -1:
-                tool_names = tool_names[json_start:]
-                try: 
-                    json.loads(tool_names)
-                except json.JSONDecodeError as e:
-                    tool_names = tool_names[:e.pos]
-
-            tool_names = json.loads(tool_names)
-
-            # Parse out the tool names and inputs
-            param_name = tool_names["action"]
-            param_input = tool_names["action_input"]
-            param_id = result[-1].message.id
-
-            result[-1].message.additional_kwargs["tool_calls"] = [
-                {
-                    "id": str(param_id),
-                    "function": {
-                        "arguments": param_input,
-                        "name": str(param_name),
-                    },
-                    "type": "function"
-                }
-            ]
-
-            result[-1].message.tool_calls = [
-                {
-                    "name": str(param_name),
-                    "args": param_input,
-                    "id": str(param_id),
-                    "type": "tool_call"
-                }
-            ]
-
-        result[-1].message.content = ""
-
-        return result[-1].message
-
-    def parse(self, text: str) -> Any:
-        """Parse the output of an LLM call to a JSON object.
-
-        Args:
-            text: The output of the LLM call.
-
-        Returns:
-            The parsed JSON object.
-        """
-        return self.parse_result([Generation(text=text)])
-    
-class MistralDeliberationOutputParser(JsonOutputParser):
-    def __init__(self, output_parser=DeliberationSchema):
-        super().__init__(pydantic_object=output_parser)
-
-    def parse_result(self, result: list[AIMessage], *, partial: bool = False) -> Any:
-        """Parse the result of an LLM call to a JSON object.
-
-        Args:
-            result: The result of the LLM call.
-            partial: Whether to parse partial JSON objects.
-                If True, the output will be a JSON object containing
-                all the keys that have been returned so far.
-                If False, the output will be the full JSON object.
-                Default is False.
-
-        Returns:
-            The parsed JSON object.
-
-        Raises:
-            OutputParserException: If the output is not valid JSON.
-        """
-        text = result[-1].text
-        text = text.strip()
-        tool_call_message = result[-1].message
-        if not tool_call_message.tool_calls:
-            # Parse out tools and input
-            tool_names = tool_call_message.content
-
-            # Strip preamble to JSON
-            json_start = tool_names.find("{")
-            if json_start != -1:
-                tool_names = tool_names[json_start:]
-                try: 
-                    json.loads(tool_names)
-                except json.JSONDecodeError as e:
-                    tool_names = tool_names[:e.pos]
-
-            tool_names = json.loads(tool_names)
-
-            # Parse out the tool names and inputs
-            param_name = tool_names["action"]
-            param_input = tool_names["action_input"]
-            param_id = result[-1].message.id
-
-            result[-1].message.additional_kwargs["tool_calls"] = [
-                {
-                    "id": str(param_id),
-                    "function": {
-                        "arguments": param_input,
-                        "name": str(param_name),
-                    },
-                    "type": "function"
-                }
-            ]
-
-            result[-1].message.tool_calls = [
-                {
-                    "name": str(param_name),
-                    "args": param_input,
-                    "id": str(param_id),
-                    "type": "tool_call"
-                }
-            ]
-
-        result[-1].message.content = ""
-
-        return result[-1].message
-
-    def parse(self, text: str) -> Any:
-        """Parse the output of an LLM call to a JSON object.
-
-        Args:
-            text: The output of the LLM call.
-
-        Returns:
-            The parsed JSON object.
-        """
-        return self.parse_result([Generation(text=text)])
     
 class FinalResponseSchema(BaseModel):
     '''
@@ -332,8 +96,6 @@ class FinalResponseOutputParser(StrOutputParser):
     def parseOutput(self, data):
         response = self.parse(data.content)
         return response
-    
-
 
 
 sufficient_system_prompt = f'''
@@ -456,6 +218,57 @@ training_prompt = ChatPromptTemplate.from_messages(
 )
 
 
+tools_system_prompt = f'''
+    You are an expert toxicologist with extensive knowledge in chemical safety assessment, toxicokinetics, and toxicodynamics. Your expertise includes:
+
+    1. Interpreting chemical structures and properties
+    2. Analyzing toxicological data from various sources (e.g., in vitro, in vivo, and in silico studies)
+    3. Applying read-across and QSAR (Quantitative Structure-Activity Relationship) approaches
+    4. Understanding mechanisms of toxicity and adverse outcome pathways
+    5. Evaluating systemic availability based on ADME (Absorption, Distribution, Metabolism, Excretion) properties
+    6. Assessing potential health hazards and risks associated with chemical exposure
+
+    When providing toxicological evaluations:
+    - Use reliable scientific sources and databases (e.g., PubChem, ECHA, EPA, IARC)
+    - Consider both experimental data and predictive models
+    - Explain your reasoning and cite relevant studies or guidelines
+    - Acknowledge uncertainties and data gaps
+    - Provide a balanced assessment, considering both potential hazards and mitigating factors
+    - Use a weight-of-evidence approach when multiple data sources are available
+    - Classify toxicodynamic activity and systemic availability as high, medium, or low based on 
+    the available evidence and expert judgment
+    - When using read-across, clearly state the basis for the analogy and any limitations
+
+    Adhere to ethical standards in toxicology and maintain scientific objectivity in your assessments.
+    '''
+
+tools_human_prompt = '''
+You will be provided with the user's original query and a list of your available tools. Please review this query and determine which tools are most relevant to answer the query.
+
+----------------------------------------------
+** Query ** 
+{query}
+
+----------------------------------------------
+** Possible Tools ** 
+{tools}
+
+'''
+
+
+tools_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            'system',
+            (tools_system_prompt),
+        ),
+        (
+            'human',
+            (tools_human_prompt),
+        ),
+    ]
+)
+
 
 
 # We create the AgentState that we will pass around
@@ -466,6 +279,12 @@ class AgentState(TypedDict):
     """The state of the agent."""
 
     messages: Annotated[Sequence[BaseMessage], add_messages]
+
+    tools_handler_messages: Annotated[Sequence[BaseMessage], add_messages]
+
+    rag_handler_messages: Annotated[Sequence[BaseMessage], add_messages]
+
+    literature_handler_messages: Annotated[Sequence[BaseMessage], add_messages]
 
     is_last_step: IsLastStep
 
@@ -585,6 +404,7 @@ def _validate_chat_history(
     if not tool_calls_without_results:
         return messages
     
+    # Prune any messages from the history that don't have a corresponding tool call
     pruned_messages = []
     for message in messages:
         if isinstance(message, ToolMessage) and message.tool_call_id not in tool_call_ids_with_results:
@@ -617,95 +437,10 @@ def create_react_agent(
     store: Optional[BaseStore] = None,
     interrupt_before: Optional[list[str]] = None,
     interrupt_after: Optional[list[str]] = None,
-    manual_tool_support: Optional[list[str]] = None,
     debug: bool = False,
     model_name: Optional[str] = None,
     max_memory_tokens: Optional[int] = 0,
 ) -> CompiledGraph:
-    """Creates a graph that works with a chat model that utilizes tool calling.
-
-    Args:
-        model: The `LangChain` chat model that supports tool calling.
-        tools: A list of tools, a ToolExecutor, or a ToolNode instance.
-        state_schema: An optional state schema that defines graph state.
-            Must have `messages` and `is_last_step` keys.
-            Defaults to `AgentState` that defines those two keys.
-        messages_modifier: An optional
-            messages modifier. This applies to messages BEFORE they are passed into the LLM.
-
-            Can take a few different forms:
-
-            - SystemMessage: this is added to the beginning of the list of messages.
-            - str: This is converted to a SystemMessage and added to the beginning of the list of messages.
-            - Callable: This function should take in a list of messages and the output is then passed to the language model.
-            - Runnable: This runnable should take in a list of messages and the output is then passed to the language model.
-            !!! Warning
-                `messages_modifier` parameter is deprecated as of version 0.1.9 and will be removed in 0.2.0
-        state_modifier: An optional
-            state modifier. This takes full graph state BEFORE the LLM is called and prepares the input to LLM.
-
-            Can take a few different forms:
-
-            - SystemMessage: this is added to the beginning of the list of messages in state["messages"].
-            - str: This is converted to a SystemMessage and added to the beginning of the list of messages in state["messages"].
-            - Callable: This function should take in full graph state and the output is then passed to the language model.
-            - Runnable: This runnable should take in full graph state and the output is then passed to the language model.
-        checkpointer: An optional checkpoint saver object. This is used for persisting
-            the state of the graph (e.g., as chat memory) for a single thread (e.g., a single conversation).
-        store: An optional store object. This is used for persisting data
-            across multiple threads (e.g., multiple conversations / users).
-        interrupt_before: An optional list of node names to interrupt before.
-            Should be one of the following: "agent", "tools".
-            This is useful if you want to add a user confirmation or other interrupt before taking an action.
-        interrupt_after: An optional list of node names to interrupt after.
-            Should be one of the following: "agent", "tools".
-            This is useful if you want to return directly or run additional processing on an output.
-        debug: A flag indicating whether to enable debug mode.
-
-    Returns:
-        A compiled LangChain runnable that can be used for chat interactions.
-
-    The resulting graph looks like this:
-
-    ``` mermaid
-    stateDiagram-v2
-        [*] --> Start
-        Start --> Agent
-        Agent --> Tools : continue
-        Tools --> Agent
-        Agent --> End : end
-        End --> [*]
-
-        classDef startClass fill:#ffdfba;
-        classDef endClass fill:#baffc9;
-        classDef otherClass fill:#fad7de;
-
-        class Start startClass
-        class End endClass
-        class Agent,Tools otherClass
-    ```
-
-    The "agent" node calls the language model with the messages list (after applying the messages modifier).
-    If the resulting AIMessage contains `tool_calls`, the graph will then call the ["tools"][langgraph.prebuilt.tool_node.ToolNode].
-    The "tools" node executes the tools (1 tool per `tool_call`) and adds the responses to the messages list
-    as `ToolMessage` objects. The agent node then calls the language model again.
-    The process repeats until no more `tool_calls` are present in the response.
-    The agent then returns the full list of messages as a dictionary containing the key "messages".
-
-    ``` mermaid
-        sequenceDiagram
-            participant U as User
-            participant A as Agent (LLM)
-            participant T as Tools
-            U->>A: Initial input
-            Note over A: Messages modifier + LLM
-            loop while tool_calls present
-                A->>T: Execute tools
-                T-->>A: ToolMessage for each tool_calls
-            end
-            A->>U: Return final state
-    ```
-    """
 
     if state_schema is not None:
         if missing_keys := {"messages", "is_last_step"} - set(
@@ -714,46 +449,36 @@ def create_react_agent(
             raise ValueError(f"Missing required key(s) {missing_keys} in state_schema")
 
     translate_tools = make_translate_tools()
-    translate_tool_node = ToolNode(translate_tools)
+    translate_tool_node = ToolNode(translate_tools, messages_key="tools_handler_messages")
     translate_tool_classes = list(translate_tool_node.tools_by_name.values())
+    translate_tool_names = list(translate_tool_node.tools_by_name.keys())
 
     rag_tools = make_rag_tools(llm=model)
-    rag_tool_node = ToolNode(rag_tools)
+    rag_tool_node = ToolNode(rag_tools, messages_key="rag_handler_messages")
     rag_tool_classes = list(rag_tool_node.tools_by_name.values())
+    rag_tool_names = list(rag_tool_node.tools_by_name.keys())
 
     literature_tools = make_literature_tools(llm=model)
-    literature_tool_node = ToolNode(literature_tools)
+    literature_tool_node = ToolNode(literature_tools, messages_key="literature_handler_messages")
     literature_tool_classes = list(literature_tool_node.tools_by_name.values())
+    literature_tool_names = list(literature_tool_node.tools_by_name.keys())
 
-    if isinstance(tools, ToolExecutor):
-        tool_classes: Sequence[BaseTool] = tools.tools
-        tool_node = ToolNode(tool_classes)
-    elif isinstance(tools, ToolNode):
-        tool_classes = list(tools.tools_by_name.values())
-        tool_node = tools
-    else:
-        tool_node = ToolNode(tools)
-        # get the tool functions wrapped in a tool class from the ToolNode
-        tool_classes = list(tool_node.tools_by_name.values())
+    tool_node = ToolNode(tools, messages_key="tools_handler_messages")
+    tool_classes = list(tool_node.tools_by_name.values())
+    tool_names = list(tool_node.tools_by_name.keys())
 
     llm = model
 
-    model_inner = model
-    model_rag = model
-    model_literature = model
-    model_training = model
-
-    model = cast(BaseChatModel, model).bind_tools(translate_tool_classes + rag_tool_classes + literature_tool_classes)
-    model_inner = cast(BaseChatModel, model_inner).bind_tools(tool_classes)
-    model_rag = cast(BaseChatModel, model_rag).bind_tools(rag_tool_classes)
-    model_literature = cast(BaseChatModel, model_literature).bind_tools(literature_tool_classes)
-    model_training = cast(BaseChatModel, model_training).bind_tools(literature_tool_classes + rag_tool_classes)
+    model_start = cast(BaseChatModel, model).bind_tools(translate_tool_classes + rag_tool_classes + literature_tool_classes)
+    model_inner = cast(BaseChatModel, model).bind_tools(tool_classes)
+    model_training = cast(BaseChatModel, model)#.bind_tools(tool_classes + literature_tool_classes + rag_tool_classes)
 
     # Truncate context window if too long
     def condense_prompt(prompt: ChatPromptValue) -> ChatPromptValue:        
         messages = prompt.to_messages()
         num_tokens = llm.get_num_tokens_from_messages(messages)
         ai_function_messages = messages[2:]
+
         if max_memory_tokens > 0: # When 0, don't trim the context window
             while num_tokens > max_memory_tokens:
                 ai_function_messages = ai_function_messages[2:]
@@ -786,316 +511,142 @@ def create_react_agent(
         messages = pruned_messages
         return ChatPromptValue(messages=messages)
 
-
-    sufficiency_chain = sufficient_prompt | llm | StrOutputParser()
-
-    def find_context_relevance_tools(query, response):
-        '''
-        Find relevance of the context to the query
-        '''
-        response = sufficiency_chain.invoke({"response": response, "query": query, "tools":tool_classes})
-        return response
-    def find_context_relevance_rag(query, response):
-        '''
-        Find relevance of the context to the query
-        '''
-        response = sufficiency_chain.invoke({"response": response, "query": query, "tools":rag_tool_classes})
-        return response
-    def find_context_relevance_literature(query, response):
-        '''
-        Find relevance of the context to the query
-        '''
-        response = sufficiency_chain.invoke({"response": response, "query": query, "tools":literature_tool_classes})
-        return response
-    def find_context_relevance_training(query, response):
-        '''
-        Find relevance of the context to the query
-        '''
-        #response = sufficiency_chain.invoke({"response": response, "query": query, "tools":[]})
-        response = sufficiency_chain.invoke({"response": response, "query": query, "tools": "You are in the training stage, you have no specialized tools available. Answer using only your training data."})
-        return response
-    
-
-    
-    # Define the function that determines whether to continue or not
-    def main_tool_calls(state: AgentState) -> Literal["tools", "agent3", "__end__"]:
-        messages = state["messages"]
-        last_message = messages[-1]
-
-        # If we deem the answer to be sufficient, then we finish
-        if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
-            sufficient_check = find_context_relevance_tools(messages[0].content, messages[-1].content)
-            if sufficient_check.lower() == "sufficient":
-                return "__end__"
-            else:
-                return "agent3"   
-        else:
-            return "tools"
-
-
-    def rag_call(state: AgentState) -> Literal["rag", "agent4", "__end__"]:
-        """Conduct a RAG search if unable to find an answer via the ChemBioTox tools. If this answer is unsatisfactory, then we must conduct a literature search."""
-        messages = state["messages"]
-        last_message = messages[-1]        
-        # If we deem the answer to be sufficient, then we finish
-        if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
-            sufficient_check = find_context_relevance_rag(messages[0].content, messages[-1].content)
-            if sufficient_check.lower() == "sufficient":
-                return "__end__"
-            else:
-                return "agent4"   
-        else:
-            return "rag"
-
-    def literature_call(state: AgentState) -> Literal["literature", "training", "__end__"]:
-        """Conduct a literature search if unable to find an answer via a RAG search. If this answer is unsatisfactory, then we must formulate an answer using the model's pretrained knowledge."""
-        messages = state["messages"]
-        last_message = messages[-1]
-        # If we deem the answer to be sufficient, then we finish
-        if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
-            sufficient_check = find_context_relevance_literature(messages[0].content, messages[-1].content)
-            if sufficient_check.lower() == "sufficient":
-                return "__end__"
-            else:
-                return "training"   
-        else:
-            return "literature"
-
     # we're passing store here for validation
     preprocessor = _get_model_preprocessing_runnable(
         state_modifier, messages_modifier, store
     )
     
     if model_name in OPENAI_MODELS:
-        model_runnable = preprocessor | condense_prompt | model
+        model_start_runnable = preprocessor | condense_prompt | model_start
         model_inner_runnable = preprocessor | condense_prompt | model_inner
-        model_rag_runnable = preprocessor | condense_prompt | model_rag
-        model_literature_runnable = preprocessor | condense_prompt | model_literature
-        model_training_runnable = preprocessor | condense_prompt | model_training
-    elif model_name in ANTHROPIC_MODELS:
-        model_runnable = preprocessor | condense_prompt | model | AnthropicDeliberationOutputParser()
-        model_inner_runnable = preprocessor | condense_prompt | model_inner | AnthropicDeliberationOutputParser()
-        model_rag_runnable = preprocessor | condense_prompt | model_rag | AnthropicDeliberationOutputParser()
-        model_literature_runnable = preprocessor | condense_prompt | model_literature | AnthropicDeliberationOutputParser()
         model_training_runnable = training_prompt | model_training
-    elif model_name in GOOGLE_MODELS:
-        model_runnable = preprocessor | condense_prompt | model | GoogleDeliberationOutputParser()
-        model_inner_runnable = preprocessor | condense_prompt | model_inner | GoogleDeliberationOutputParser()
-        model_rag_runnable = preprocessor | condense_prompt | model_rag | GoogleDeliberationOutputParser()
-        model_literature_runnable = preprocessor | condense_prompt | model_literature | GoogleDeliberationOutputParser()
-        model_training_runnable = training_prompt | model_training
-    # META models don't work 
-
-    elif model_name in MISTRALAI_MODELS:
-        model_runnable = preprocessor | condense_prompt | model | MistralDeliberationOutputParser()
-        model_inner_runnable = preprocessor | condense_prompt | model_inner | MistralDeliberationOutputParser()
-        model_rag_runnable = preprocessor | condense_prompt | model_rag | MistralDeliberationOutputParser()
-        model_literature_runnable = preprocessor | condense_prompt | model_literature | MistralDeliberationOutputParser()
-        model_training_runnable = training_prompt | model_training
-    
     else:
         raise ValueError(f"Model {model_name} not supported.")
 
     # Define the function that calls the model
     def call_model(state: AgentState, config: RunnableConfig) -> AgentState:
         state["messages"] = _validate_chat_history(state["messages"])
-        response = model_runnable.invoke(state["messages"], config) # TODO speed up
+        response = model_start_runnable.invoke(state["messages"], config) # Generate tool calls
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
+        if has_tool_calls:
 
-        all_tools_return_direct = (
-            all(call["name"] in should_return_direct for call in response.tool_calls)
-            if isinstance(response, AIMessage)
-            else False
-        )
-        if (
-            (
-                "remaining_steps" not in state
-                and state["is_last_step"]
-                and has_tool_calls
-            )
-            or (
-                "remaining_steps" in state
-                and state["remaining_steps"] < 1
-                and all_tools_return_direct
-            )
-            or (
-                "remaining_steps" in state
-                and state["remaining_steps"] < 2
-                and has_tool_calls
-            )
-        ):
-            return {
-                "messages": [
-                    AIMessage(
-                        id=response.id,
-                        content="Sorry, need more steps to process this request.",
-                    )
-                ]
+            all_tools_return_direct = False
+            if (
+                (
+                    "remaining_steps" not in state
+                    and state["is_last_step"]
+                    and has_tool_calls
+                )
+                or (
+                    "remaining_steps" in state
+                    and state["remaining_steps"] < 1
+                    and all_tools_return_direct
+                )
+                or (
+                    "remaining_steps" in state
+                    and state["remaining_steps"] < 2
+                    and has_tool_calls
+                )
+            ):
+                return {
+                    "messages": [
+                        AIMessage(
+                            id=response.id,
+                            content="Sorry, need more steps to process this request.",
+                        )
+                    ]
+                }
+
+            # Parse out translation tool calls
+            translation_messages = copy.deepcopy(response)
+            translation_messages.additional_kwargs = {
+                "tool_calls": [call for call in response.additional_kwargs["tool_calls"] if call["function"]["name"] in translate_tool_names],
+                "type": "function"
             }
+            translation_messages.tool_calls = [call for call in response.tool_calls if call["name"] in translate_tool_names]
 
-        # We return a list, because this will get added to the existing list
-        return {"messages": [response]}
-    
-    def call_model_inner(state: AgentState, config: RunnableConfig) -> AgentState:
-        state["messages"] = _validate_chat_history(state["messages"])
-        if model_name in BAD_TOOL_MODELS:
-            state["messages"].append(HumanMessage(content="Please continue."))
+            # Parse out rag tool calls
+            rag_messages = copy.deepcopy(response)
+            rag_messages.additional_kwargs = {
+                "tool_calls": [call for call in response.additional_kwargs["tool_calls"] if call["function"]["name"] in rag_tool_names],
+                "type": "function"
+            }
+            rag_messages.tool_calls = [call for call in response.tool_calls if call["name"] in rag_tool_names]
+            
+            # Parse out literature tool calls
+            literature_messages = copy.deepcopy(response)
+            literature_messages.additional_kwargs = {
+                "tool_calls": [call for call in response.additional_kwargs["tool_calls"] if call["function"]["name"] in literature_tool_names],
+                "type": "function"
+            }
+            literature_messages.tool_calls = [call for call in response.tool_calls if call["name"] in literature_tool_names]
 
-        response = model_inner_runnable.invoke(state["messages"], config)
 
-        has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
-        all_tools_return_direct = (
-            all(call["name"] in should_return_direct for call in response.tool_calls)
-            if isinstance(response, AIMessage)
-            else False
-        )
-        if (
-            (
-                "remaining_steps" not in state
-                and state["is_last_step"]
-                and has_tool_calls
-            )
-            or (
-                "remaining_steps" in state
-                and state["remaining_steps"] < 1
-                and all_tools_return_direct
-            )
-            or (
-                "remaining_steps" in state
-                and state["remaining_steps"] < 2
-                and has_tool_calls
-            )
-        ):
             return {
-                "messages": [
-                    AIMessage(
-                        id=response.id,
-                        content="Sorry, need more steps to process this request.",
-                    )
-                ]
+                "messages": [response],
+                "tools_handler_messages": [translation_messages],
+                "rag_handler_messages": [rag_messages],
+                "literature_handler_messages": [literature_messages]
             }
         
-        # We return a list, because this will get added to the existing list
-        return {"messages": [response]}
-    
-    
-
-    def call_model_rag(state: AgentState, config: RunnableConfig) -> AgentState:
-        state["messages"] = _validate_chat_history(state["messages"])
-
-        if model_name in BAD_TOOL_MODELS:
-            state["messages"].append(HumanMessage(content="Please continue."))
-
-        response = model_rag_runnable.invoke(state["messages"], config)
-
-        has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
-
-        if has_tool_calls:
-            agent_tool_call_names = [call["name"] for call in response.tool_calls if call["name"] == "QueryRAG"]
-            agent_tool_call_ids = [call["id"] for call in response.tool_calls]
-            user_query = state["messages"][0].content
-            if len(agent_tool_call_names) == 0: # Force the model to use the RAG tool
-                response.tool_calls = [{'name': 'QueryRAG', 'args': {'q': str(user_query)}, 'id': str(agent_tool_call_ids[0]), 'type': 'tool_call'}]
-                response.additional_kwargs["tool_calls"] = [{'id': str(agent_tool_call_ids[0]), 'function': {'arguments': {'q': str(user_query)}, 'name': 'QueryRAG'}, 'type': 'function', 'index': 0}]
-
-
-        all_tools_return_direct = (
-            all(call["name"] in rag_should_return_direct for call in response.tool_calls)
-            if isinstance(response, AIMessage)
-            else False
-        )
-        if (
-            (
-                "remaining_steps" not in state
-                and state["is_last_step"]
-                and has_tool_calls
-            )
-            or (
-                "remaining_steps" in state
-                and state["remaining_steps"] < 1
-                and all_tools_return_direct
-            )
-            or (
-                "remaining_steps" in state
-                and state["remaining_steps"] < 2
-                and has_tool_calls
-            )
-        ):
+        else:
             return {
-                "messages": [
-                    AIMessage(
-                        id=response.id,
-                        content="Sorry, need more steps to process this request.",
-                    )
-                ]
+                "messages": [response],
+                "tools_handler_messages": [],
+                "rag_handler_messages": [],
+                "literature_handler_messages": []
             }
-        # We return a list, because this will get added to the existing list
-        return {"messages": [response]}
-    
-    def call_model_literature(state: AgentState, config: RunnableConfig) -> AgentState:
-        state["messages"] = _validate_chat_history(state["messages"])
+        
+    # Define the function that calls the model
+    def call_skip(state: AgentState, config: RunnableConfig) -> AgentState:
+        return state
 
-        if model_name in BAD_TOOL_MODELS:
-            state["messages"].append(HumanMessage(content="Please continue."))
-
-        response = model_literature_runnable.invoke(state["messages"], config)
-
-        has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
-
-        if has_tool_calls:
-            agent_tool_call_names = [call["name"] for call in response.tool_calls if call["name"] == "LiteratureSearch"]
-            agent_tool_call_ids = [call["id"] for call in response.tool_calls]
-            user_query = state["messages"][0].content
-            if len(agent_tool_call_names) == 0: # Force the model to use the Literature search tool
-                response.tool_calls = [{'name': 'LiteratureSearch', 'args': {'query': str(user_query)}, 'id': str(agent_tool_call_ids[0]), 'type': 'tool_call'}]
-                response.additional_kwargs["tool_calls"] = [{'id': str(agent_tool_call_ids[0]), 'function': {'arguments': {'query': str(user_query)}, 'name': 'LiteratureSearch'}, 'type': 'function', 'index': 0}]
-
-        all_tools_return_direct = (
-            all(call["name"] in literature_should_return_direct for call in response.tool_calls)
-            if isinstance(response, AIMessage)
-            else False
-        )
-        if (
-            (
-                "remaining_steps" not in state
-                and state["is_last_step"]
-                and has_tool_calls
-            )
-            or (
-                "remaining_steps" in state
-                and state["remaining_steps"] < 1
-                and all_tools_return_direct
-            )
-            or (
-                "remaining_steps" in state
-                and state["remaining_steps"] < 2
-                and has_tool_calls
-            )
-        ):
-            return {
-                "messages": [
-                    AIMessage(
-                        id=response.id,
-                        content="Sorry, need more steps to process this request.",
-                    )
-                ]
-            }
-        # We return a list, because this will get added to the existing list
-        return {"messages": [response]}
+  
+    def call_model_inner(state: AgentState, config: RunnableConfig) -> AgentState:
+        if isinstance(state["tools_handler_messages"][-1], ToolMessage):
+            state["tools_handler_messages"] = _validate_chat_history(state["tools_handler_messages"])
+            response = model_inner_runnable.invoke(state["tools_handler_messages"], config) # Generate tool calls
+            has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
+            all_tools_return_direct = False
+            if (
+                (
+                    "remaining_steps" not in state
+                    and state["is_last_step"]
+                    and has_tool_calls
+                )
+                or (
+                    "remaining_steps" in state
+                    and state["remaining_steps"] < 1
+                    and all_tools_return_direct
+                )
+                or (
+                    "remaining_steps" in state
+                    and state["remaining_steps"] < 2
+                    and has_tool_calls
+                )
+            ):
+                return {
+                    "tools_handler_messages": [
+                        AIMessage(
+                            id=response.id,
+                            content="Sorry, need more steps to process this request.",
+                        )
+                    ]
+                }
+            return {"tools_handler_messages": [response]} 
+            
+        return {
+            "tools_handler_messages": [ToolMessage(content='')],
+        }
     
     
     def call_model_training(state: AgentState, config: RunnableConfig) -> AgentState:
+        # Merge message histories from all handlers
+        state["messages"] = state["messages"] + state["tools_handler_messages"] + state["rag_handler_messages"] + state["literature_handler_messages"]
         state["messages"] = _validate_chat_history(state["messages"])
-
-        if model_name in BAD_TOOL_MODELS:
-            state["messages"].append(HumanMessage(content="Please continue."))
-
-        response = None
-        if model_name not in OPENAI_MODELS:
-            response = model_training_runnable.invoke({"context": state["messages"][1:], "query": state["messages"][0].content})
-        else:
-            response = model_training_runnable.invoke(state["messages"], config)
-
+        user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]#.content
+        context = [message for message in state["messages"] if isinstance(message, ToolMessage)]
+        response = model_training_runnable.invoke({"context": context, "query": user_query})
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
         all_tools_return_direct = False
         if (
@@ -1130,119 +681,53 @@ def create_react_agent(
     # Define a new graph
     workflow = StateGraph(state_schema or AgentState)
 
-    ### Define all nodes: ###
+    # Determine initial tool calls
+    workflow.add_node("INPUT_HANDLER", RunnableCallable(call_model))
 
-    ### STAGE 1 - DATA PREPROCESSING ###
-    # Initial agent model node - this determines the format of the user's input - chemical name, CASRN, or SMILES
-    workflow.add_node("agent", RunnableCallable(call_model))
+    # Dummy node to pass input to tools/search if tool calls exist
+    workflow.add_node("SKIP_HANDLER", RunnableCallable(call_skip))
 
-    # Data preprocessing node - translates user input to DTXSID as that will be the standard input for all tools
-    workflow.add_node("preprocess", translate_tool_node)
+    # Invokes translation tools
+    workflow.add_node("TRANSLATE_TOOL_NODE", translate_tool_node)
 
-    ### STAGE 2 - DATA PREPROCESSING ###
-    # this stage should be called up to max_iterations times
-    # Stage 2 agent model node - this determines which tools, if any, to use
-    workflow.add_node("agent2", RunnableCallable(call_model_inner))
+    # Chooses which tools to call
+    workflow.add_node("TOOL_HANDLER", RunnableCallable(call_model_inner))
 
-    # Tool node - this is where the tools are called
-    workflow.add_node("tools", tool_node)
-    
-    ### STAGE 3 - FILL IN DATA GAPS ###
-    # Stage 3 agent model node - this determines how to use RAG
-    workflow.add_node("agent3", RunnableCallable(call_model_rag))
+    # Tool node - invokes tools
+    workflow.add_node("TOOL_NODE", tool_node)
 
-    # RAG node - this is where the RAG search is conducted if the ChemBioTox tools are unable to find a satisfactory answer
-    workflow.add_node("rag", rag_tool_node)
-    
-    # Stage 3 agent model node - this determines how to use RAG
-    workflow.add_node("agent4", RunnableCallable(call_model_literature))
+    # RAG node - invokes RAG search tool
+    workflow.add_node("RAG_TOOL_NODE", rag_tool_node)  
 
-    # Literature node - this is where the literature search is conducted if the RAG search is unable to find a satisfactory answer
-    workflow.add_node("literature", literature_tool_node)
+    # Literature node - invokes literature search tool
+    workflow.add_node("LITERATURE_TOOL_NODE", literature_tool_node)
 
-    # Training data node - formulate a last-ditch answer from the training data if the literature search is unable to find a satisfactory answer
-    workflow.add_node("training", RunnableCallable(call_model_training))
+    # Training data node - formulate a last-ditch answer from the training data and summarize data from the context
+    workflow.add_node("TRAINING_SUMMARY_HANDLER", RunnableCallable(call_model_training))
 
 
-    workflow.set_entry_point("agent")
+    workflow.add_edge(START, "INPUT_HANDLER") # Start with the agent node
 
-    ### ADD EDGES ###
-    # Always want to start with a deliberation step to figure out how to get the user's input into DTXSID
-    # Figure out which translation tool to use
-    def route_preprocess_responses(state: AgentState) -> Literal["preprocess", "rag", "literature", "__end__"]:
-        for m in reversed(state["messages"]):
-            if not isinstance(m, ToolMessage):
-                break
-            if m.name in should_return_direct:
-                return "__end__"
-        
-        if len(state["messages"][-1].tool_calls) > 0:
-            tool_calls = [i["name"] for i in state["messages"][-1].tool_calls]
-            if "QueryRAG" in tool_calls:
-                return "rag"
-            if "LiteratureSearch" in tool_calls:
-                return "literature"
-            return "preprocess"
-        return "__end__"
-    workflow.add_conditional_edges("agent", route_preprocess_responses)
+    # If the initial node didn't produce any tool calls, we can skip to the training step and just answer based on the context
+    def can_skip_to_training(state: AgentState) -> Literal["SKIP_HANDLER", "TRAINING_SUMMARY_HANDLER"]:
+        messages = state["messages"]
+        last_message = messages[-1]
+        # Okay to skip to training if the last message has no tool calls
+        if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
+            return "TRAINING_SUMMARY_HANDLER"  
+        else:
+            return "SKIP_HANDLER"
+    workflow.add_conditional_edges("INPUT_HANDLER", can_skip_to_training)
 
-    workflow.add_edge("preprocess", "agent2")
+    workflow.add_edge("SKIP_HANDLER", "TRANSLATE_TOOL_NODE") # Start with the agent node
+    workflow.add_edge("TRANSLATE_TOOL_NODE", "TOOL_HANDLER") # Once we have the DTXSID, we can call the tools
+    workflow.add_edge("TOOL_HANDLER", "TOOL_NODE") # Once we have the DTXSID, we can call the tools
+    workflow.add_edge("SKIP_HANDLER", "RAG_TOOL_NODE")
+    workflow.add_edge("SKIP_HANDLER", "LITERATURE_TOOL_NODE")
 
-    # Deliberation step for tool selection - if successful, move to tools else move to RAG search
-    workflow.add_conditional_edges("agent2", main_tool_calls)
-    # After using a tool, go back to agent2 for further deliberation, summarizing if necessary
-    # If any of the tools are configured to return_directly after running, our graph needs to check if these were called
-    should_return_direct = {t.name for t in tool_classes if t.return_direct}
+    workflow.add_edge(["TOOL_NODE", "RAG_TOOL_NODE", "LITERATURE_TOOL_NODE"], "TRAINING_SUMMARY_HANDLER") # Converge on training step to summarize the results of the tools and search
 
-    workflow.add_edge("tools", "agent3") # Just do single tools call since agent2 call multiple tools
-
-    workflow.add_conditional_edges("agent3", rag_call)
-
-    rag_should_return_direct = {t.name for t in rag_tool_classes if t.return_direct}
-    def rag_route_tool_responses(state: AgentState) -> Literal["agent4", "__end__"]:
-        for m in reversed(state["messages"]):
-            if not isinstance(m, ToolMessage):
-                break
-            if m.name in rag_should_return_direct:
-                return "__end__"
-        return "agent4"
-    if rag_should_return_direct:
-        workflow.add_conditional_edges("rag", rag_route_tool_responses)
-    else:
-        workflow.add_edge("rag", "agent4")
-
-    
-    workflow.add_conditional_edges("agent4", literature_call)
-    literature_should_return_direct = {t.name for t in literature_tool_classes if t.return_direct}
-    def literature_route_tool_responses(state: AgentState) -> Literal["training", "__end__"]:
-        for m in reversed(state["messages"]):
-            if not isinstance(m, ToolMessage):
-                break
-            if m.name in literature_should_return_direct:
-                return "__end__"
-        return "training"
-    if literature_should_return_direct:
-        workflow.add_conditional_edges("literature", literature_route_tool_responses)
-    else:
-        workflow.add_edge("literature", "training")
-
-    """
-    workflow.add_conditional_edges("training", training_call)
-    training_should_return_direct = {t.name for t in [] if t.return_direct}
-    def training_route_tool_responses(state: AgentState) -> Literal["training", "__end__"]:
-        for m in reversed(state["messages"]):
-            if not isinstance(m, ToolMessage):
-                break
-            if m.name in training_should_return_direct:
-                return "__end__"
-        return "training"
-    if training_should_return_direct:
-        workflow.add_conditional_edges("training", training_route_tool_responses)
-    else:
-        workflow.add_edge("training", "__end__")
-    """
-
-    workflow.add_edge("training", END) # Always end after training, training step should be a last resort if the model couldn't find anything in the available tools & resources
+    workflow.add_edge("TRAINING_SUMMARY_HANDLER", END) # Always end after training, training step should be a last resort if the model couldn't find anything in the available tools & resources
     
     # Compile graph
     workflow = workflow.compile(

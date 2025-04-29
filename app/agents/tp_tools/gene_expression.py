@@ -36,7 +36,7 @@ class GeneExpression(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, query) -> str:
+    def _run(self, query, **kwargs) -> str:
         return ge_search(self.llm, query)
 
     async def _arun(self, query) -> str:
@@ -58,7 +58,7 @@ class Rat2HumanGene(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, query) -> str:
+    def _run(self, query, **kwargs) -> str:
         mapped = gene_mapping.loc[gene_mapping['Rat Gene Symbol'] == query]['Human Gene Symbol'].values[0]
         if mapped is None or mapped == "nan":
             return f"No human gene found for the rat gene {query}."
@@ -79,7 +79,7 @@ class Human2RatGene(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, query) -> str:
+    def _run(self, query, **kwargs) -> str:
         mapped = gene_mapping.loc[gene_mapping['Human Gene Symbol'] == query]['Rat Gene Symbol'].values[0]
         if mapped is None or np.isnan(mapped) or mapped == "nan":
             return f"No rat gene found for the human gene {query}."
@@ -210,7 +210,7 @@ class HallmarkGeneAnalyzer(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, query) -> str:
+    def _run(self, query, **kwargs) -> str:
         # Load user file
         try:
 

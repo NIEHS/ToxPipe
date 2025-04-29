@@ -46,7 +46,7 @@ class RXN4Chem(BaseTool):
             return {}
 
     @abc.abstractmethod
-    def _run(self, smiles: str):  # type: ignore
+    def _run(self, smiles: str, **kwargs):  # type: ignore
         """Execute operation."""
         pass
 
@@ -98,7 +98,7 @@ class RXNPredict(RXN4Chem):
         "returns SMILES of the products."
     )
 
-    def _run(self, reactants: str) -> str:
+    def _run(self, reactants: str, **kwargs) -> str:
         """Run reaction prediction."""
         # Check that input is smiles
         if not is_smiles(reactants):
@@ -147,7 +147,7 @@ class RXNRetrosynthesis(RXN4Chem):
         super().__init__(rxn4chem_api_key)
         self.openai_api_key = openai_api_key
 
-    def _run(self, target: str) -> str:
+    def _run(self, target: str, **kwargs) -> str:
         """Run retrosynthesis prediction."""
         # Check that input is smiles
         if not is_smiles(target):

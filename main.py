@@ -20,6 +20,7 @@ from psycopg_pool import ConnectionPool
 import os
 from dotenv import load_dotenv
 load_dotenv('.config/.env')
+import traceback
 
 # Persistent memory
 # Establish Postgres Connection for ToxPipe
@@ -163,9 +164,10 @@ async def query_agent(request: Request, response: Response, agentid: uuid.UUID, 
         res = tpa.run(q)
     except Exception as e:
         print("Error running agent.")
-        print(e)
+        exp = {'error': f'Line number: {e.__traceback__.tb_lineno}, Description: {e}\n\n{traceback.format_exc()}'}
+        print(exp)
         response.status_code = 400
-        return {"response": f"Error: agent {agentid} failed to run with message: {e}."}
+        return {"response": f"Error: agent {agentid} failed to run with message: {exp}."}
     
     return {"response": res}
 

@@ -18,7 +18,7 @@ class MolSimilarity(BaseTool):
     def __init__(self):
         super().__init__()
 
-    def _run(self, smiles_pair: str) -> str:
+    def _run(self, smiles_pair: str, **kwargs) -> str:
         smi_list = smiles_pair.split(".")
         if len(smi_list) != 2:
             return "Input error, please input two smiles strings separated by '.'"
@@ -61,7 +61,7 @@ class SMILES2Weight(BaseTool):
     ):
         super().__init__()
 
-    def _run(self, smiles: str) -> str:
+    def _run(self, smiles: str, **kwargs) -> str:
         mol = Chem.MolFromSmiles(smiles.rstrip())
         if mol is None:
             return "Invalid SMILES string"
@@ -136,7 +136,7 @@ class FuncGroups(BaseTool):
         mol = Chem.MolFromSmiles(mol.strip())
         return len(Chem.Mol.GetSubstructMatches(mol, fgmol, uniquify=True)) > 0
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """
         Input a chemical DTXSID, returns a list of functional groups identified by their common name (in natural language).
         """

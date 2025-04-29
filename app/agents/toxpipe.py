@@ -36,7 +36,7 @@ from .multi import *
 from dotenv import load_dotenv
 load_dotenv('../.config/.env')
 # Prompts
-from .prompts_chem import getPrompt, getPromptGoogle, PromptAgentic, summary_prompt
+from .prompts_chem import getPrompt, PromptAgentic, summary_prompt
 
 # Other
 from typing import Sequence
@@ -112,7 +112,6 @@ class ToxPipeAgent:
         self.thread_id = name
         self.checkpointer = checkpointer
         self.seed = seed
-        manual_tool_support = []
 
         # Define parser
         self.parser = PydanticOutputParser(pydantic_object=Response)
@@ -122,12 +121,8 @@ class ToxPipeAgent:
         else:
             self.prompt_template = getPrompt(PromptAgentic)
 
-        # If we use a model that doesn't fully support tools, then we need to manually add the tools as part of the prompt
-        if model in BAD_TOOL_MODELS:
-            manual_tool_support = self.tools
-
         # Initialize agent to add tools to model
-        agent_executor = create_react_agent(self.llm, self.tools, state_modifier=self.prompt_template, checkpointer=checkpointer, manual_tool_support=manual_tool_support, debug=verbose, model_name=model, max_memory_tokens=max_memory_tokens) # state_modifier=PROMPT adds the prompt instructions to the agent
+        agent_executor = create_react_agent(self.llm, self.tools, state_modifier=self.prompt_template, checkpointer=checkpointer, debug=verbose, model_name=model, max_memory_tokens=max_memory_tokens) # state_modifier=PROMPT adds the prompt instructions to the agent
         if step_timeout > 0:
             agent_executor.step_timeout = step_timeout
 

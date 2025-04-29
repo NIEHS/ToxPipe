@@ -74,7 +74,7 @@ class PatentCheck(BaseTool):
     name: str = "PatentCheck"
     description: str = "Input SMILES, returns if molecule is patented"
 
-    def _run(self, smiles: str) -> str:
+    def _run(self, smiles: str, **kwargs) -> str:
         """Checks if compound is patented. Give this tool only one SMILES string"""
         try:
             r = molbloom.buy(smiles, canonicalize=True, catalog="surechembl")
@@ -249,7 +249,7 @@ class SafetySummary(BaseTool):
         )
         self.llm_chain = prompt | self.llm
 
-    def _run(self, cas: str) -> str:
+    def _run(self, cas: str, **kwargs) -> str:
         if is_smiles(cas):
             return "Please input a valid CAS number."
         data = self.mol_safety._fetch_pubchem_data(cas)
@@ -274,7 +274,7 @@ class ExplosiveCheck(BaseTool):
         super().__init__()
         self.mol_safety = MoleculeSafety()
 
-    def _run(self, cas_number: str):
+    def _run(self, cas_number: str, **kwargs):
         """Checks if a molecule has an explosive GHS classification using pubchem."""
         # first check if the input is a CAS number
         if is_smiles(cas_number):
@@ -297,7 +297,7 @@ class SimilarControlChemCheck(BaseTool):
     name: str = "SimilarityToControlChem"
     description: str = "Input SMILES, returns similarity to controlled chemicals."
 
-    def _run(self, smiles: str) -> str:
+    def _run(self, smiles: str, **kwargs) -> str:
         """Checks max similarity between compound and controlled chemicals.
         Input SMILES string."""
         data_path = os.path.join(dir_path, "data/chem_wep_smi.csv")
@@ -343,7 +343,7 @@ class ControlChemCheck(BaseTool):
     description: str = "Input: a chemical identifier such as a CASRN (CAS number), chemical name, or SMILES. Output: a statement saying if the input molecule is or is not a controlled chemical."
     similar_control_chem_check: ClassVar[BaseTool] = SimilarControlChemCheck()
 
-    def _run(self, query: str) -> str:
+    def _run(self, query: str, **kwargs) -> str:
         """Checks if compound is a controlled chemical. Input CAS number."""
         data_path = os.path.join(dir_path, "data/chem_wep_smi.csv")
         cw_df = pd.read_csv(data_path)
@@ -400,7 +400,7 @@ class _Name2SMILES(BaseTool):
         super().__init__()
         self.url = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{}/{}"
 
-    def _run(self, query: str) -> str:
+    def _run(self, query: str, **kwargs) -> str:
         """This function queries the given molecule name and returns a SMILES string from the record"""
         """Useful to get the SMILES string of one molecule by searching the name of a molecule. Only query with one specific name."""
 
@@ -435,7 +435,7 @@ class Query2CAS(BaseTool):
             "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/{}/JSON"
         )
 
-    def _run(self, query: str) -> str:
+    def _run(self, query: str, **kwargs) -> str:
         try:
             # if query is smiles
             smiles = None

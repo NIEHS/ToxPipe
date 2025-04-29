@@ -30,7 +30,7 @@ class Query2DTXSID(BaseTool):
     ):
         super().__init__()
 
-    def _run(self, name: str) -> str:
+    def _run(self, name: str, **kwargs) -> str:
         """Input a chemical name, return its DSSTox substance ID (DTXSID) available in ChemBioTox."""
         name = name.rstrip()
 
@@ -56,7 +56,7 @@ class Name2DTXSID(BaseTool):
     ):
         super().__init__()
 
-    def _run(self, name: str) -> str:
+    def _run(self, name: str, **kwargs) -> str:
         """Input a chemical name, return its DSSTox substance ID (DTXSID) available in ChemBioTox."""
         name = name.rstrip()
 
@@ -82,7 +82,7 @@ class CASRN2DTXSID(BaseTool):
     ):
         super().__init__()
 
-    def _run(self, casrn: str) -> str:
+    def _run(self, casrn: str, **kwargs) -> str:
         """Input a chemical CASRN, return its DSSTox substance ID (DTXSID) available in ChemBioTox."""
         casrn = casrn.rstrip()
 
@@ -108,7 +108,7 @@ class Name2SMILES(BaseTool):
     ):
         super().__init__()
 
-    def _run(self, name: str) -> str:
+    def _run(self, name: str, **kwargs) -> str:
         """Input a chemical name, return its corresponding SMILES string available in ChemBioTox."""
         name = name.rstrip()
         res = requests.get(
@@ -148,7 +148,7 @@ class SMILES2DTXSID(BaseTool):
     ):
         super().__init__()
 
-    def _run(self, name: str) -> str:
+    def _run(self, name: str, **kwargs) -> str:
         """Input a SMILES string, return its DSSTox substance ID (DTXSID) if available in ChemBioTox."""
         name = name.rstrip()
         res = requests.get(
@@ -178,7 +178,7 @@ class StructuralSimilarity(BaseTool):
     ):
         super().__init__()
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input a DTXSID, return structurally similar chemicals available in ChemBioTox."""
         dtxsid = dtxsid.rstrip()
 
@@ -216,7 +216,7 @@ class FunctionalSimilarity(BaseTool):
     ):
         super().__init__()
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input a SMILES string, return its DSSTox substance ID (DTXSID) if available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -248,7 +248,7 @@ class QueryCBTChemicalVendors(BaseTool):
     ):
         super().__init__()
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -286,7 +286,7 @@ class QueryCBTTox21Models(BaseTool):
     ):
         super().__init__()
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -327,7 +327,7 @@ class QueryCBTGRAS(BaseTool):
     ):
         super().__init__()
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input a DTXSID to return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -364,7 +364,7 @@ class QueryCTDDiseases(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -421,7 +421,7 @@ class QueryCTDGenes(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -477,7 +477,7 @@ class QueryCBTLeadscope(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -538,7 +538,7 @@ class QueryCBTADMET(BaseTool): # proprietary
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -582,7 +582,7 @@ class QueryCBTMetabolites(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -630,7 +630,7 @@ class QueryCBTSEEM3(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
 
@@ -673,7 +673,7 @@ class QueryCBTDrugBankTransporters(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
 
@@ -720,7 +720,7 @@ class QueryCBTAlerts(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, smiles: str) -> str:
+    def _run(self, smiles: str, **kwargs) -> str:
         """Input SMILES, return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         smiles = re.sub(r'\s+', '', smiles)
         res = requests.get(
@@ -779,7 +779,7 @@ class QueryCBTAlertsMulti(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, smiles: str) -> str:
+    def _run(self, smiles: str, **kwargs) -> str:
         """Input SMILES, return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         response_list = []
         smiles = re.sub(r'\s+', '', smiles)
@@ -859,7 +859,7 @@ class QueryCBTInVitroDB(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -899,7 +899,7 @@ class QueryCTDBP(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -938,7 +938,7 @@ class QueryCTDCC(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -977,7 +977,7 @@ class QueryCTDMF(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1016,7 +1016,7 @@ class QueryPubChemBioassays(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1060,7 +1060,7 @@ class QueryPubChemProperties(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1096,7 +1096,7 @@ class QueryPubChemSynonyms(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1129,7 +1129,7 @@ class QueryPubChemMass(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1160,7 +1160,7 @@ class QueryPubChemFormula(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1194,7 +1194,7 @@ class QueryPubChemWeight(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1224,7 +1224,7 @@ class QueryPubChemXLogP(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1254,7 +1254,7 @@ class QueryEPAProperties(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1292,7 +1292,7 @@ class QueryCPD(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1334,7 +1334,7 @@ class QueryFooDBEnzymes(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1371,7 +1371,7 @@ class QueryFooDBFlavors(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1408,7 +1408,7 @@ class QueryFooDBContent(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1446,7 +1446,7 @@ class QueryFooDBEffects(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1486,7 +1486,7 @@ class QueryDrugBankCarriers(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1524,7 +1524,7 @@ class QueryDrugBankEnzymes(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1561,7 +1561,7 @@ class QueryDrugBankTargets(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1598,7 +1598,7 @@ class QueryDrugBankTransporters(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1637,7 +1637,7 @@ class QueryHMDBBS(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1675,7 +1675,7 @@ class QueryHMDBC(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1712,7 +1712,7 @@ class QueryHMDBT(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1749,7 +1749,7 @@ class QueryHMDBDiseases(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1787,7 +1787,7 @@ class QuerySuperfund(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1829,7 +1829,7 @@ class QueryT3DB(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1867,7 +1867,7 @@ class QueryToxRefDBNonNP(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1905,7 +1905,7 @@ class QueryToxRefDBNP(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
@@ -1944,7 +1944,7 @@ class QueryToxRefDBStudies(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, dtxsid: str) -> str:
+    def _run(self, dtxsid: str, **kwargs) -> str:
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
