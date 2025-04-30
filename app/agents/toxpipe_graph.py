@@ -49,6 +49,7 @@ from langchain_core.utils.json import (
     parse_partial_json,
 )
 from .tools import make_tools, make_translate_tools, make_rag_tools, make_literature_tools
+from .prompts_chem import getInnerToolsPrompt, PromptAgentic
 
 ANTHROPIC_MODELS = ['claude-3-5-sonnet', 'claude-3-sonnet', 'claude-3-haiku', 'claude-3-opus'] # haiku and opus work better
 OLLAMA_MODELS = ['llama3-1-70b', 'llama3-1-8b', 'openbiollm-llama3-70b'] # These have trouble with tools
@@ -213,58 +214,6 @@ training_prompt = ChatPromptTemplate.from_messages(
         (
             'human',
             (training_human_prompt),
-        ),
-    ]
-)
-
-
-tools_system_prompt = f'''
-    You are an expert toxicologist with extensive knowledge in chemical safety assessment, toxicokinetics, and toxicodynamics. Your expertise includes:
-
-    1. Interpreting chemical structures and properties
-    2. Analyzing toxicological data from various sources (e.g., in vitro, in vivo, and in silico studies)
-    3. Applying read-across and QSAR (Quantitative Structure-Activity Relationship) approaches
-    4. Understanding mechanisms of toxicity and adverse outcome pathways
-    5. Evaluating systemic availability based on ADME (Absorption, Distribution, Metabolism, Excretion) properties
-    6. Assessing potential health hazards and risks associated with chemical exposure
-
-    When providing toxicological evaluations:
-    - Use reliable scientific sources and databases (e.g., PubChem, ECHA, EPA, IARC)
-    - Consider both experimental data and predictive models
-    - Explain your reasoning and cite relevant studies or guidelines
-    - Acknowledge uncertainties and data gaps
-    - Provide a balanced assessment, considering both potential hazards and mitigating factors
-    - Use a weight-of-evidence approach when multiple data sources are available
-    - Classify toxicodynamic activity and systemic availability as high, medium, or low based on 
-    the available evidence and expert judgment
-    - When using read-across, clearly state the basis for the analogy and any limitations
-
-    Adhere to ethical standards in toxicology and maintain scientific objectivity in your assessments.
-    '''
-
-tools_human_prompt = '''
-You will be provided with the user's original query and a list of your available tools. Please review this query and determine which tools are most relevant to answer the query.
-
-----------------------------------------------
-** Query ** 
-{query}
-
-----------------------------------------------
-** Possible Tools ** 
-{tools}
-
-'''
-
-
-tools_prompt = ChatPromptTemplate.from_messages(
-    [
-        (
-            'system',
-            (tools_system_prompt),
-        ),
-        (
-            'human',
-            (tools_human_prompt),
         ),
     ]
 )
@@ -471,7 +420,7 @@ def create_react_agent(
 
     model_start = cast(BaseChatModel, model).bind_tools(translate_tool_classes + rag_tool_classes + literature_tool_classes)
     model_inner = cast(BaseChatModel, model).bind_tools(tool_classes)
-    model_training = cast(BaseChatModel, model)#.bind_tools(tool_classes + literature_tool_classes + rag_tool_classes)
+    model_training = cast(BaseChatModel, model)
 
     # Truncate context window if too long
     def condense_prompt(prompt: ChatPromptValue) -> ChatPromptValue:        
@@ -516,9 +465,15 @@ def create_react_agent(
         state_modifier, messages_modifier, store
     )
     
+    tools_prompt = getInnerToolsPrompt(PromptAgentic)
+    inner_preprocessor = _get_model_preprocessing_runnable(
+        tools_prompt, messages_modifier, store
+    )
+
     if model_name in OPENAI_MODELS:
         model_start_runnable = preprocessor | condense_prompt | model_start
-        model_inner_runnable = preprocessor | condense_prompt | model_inner
+        #model_inner_runnable = preprocessor | condense_prompt | model_inner
+        model_inner_runnable = inner_preprocessor | condense_prompt | model_inner
         model_training_runnable = training_prompt | model_training
     else:
         raise ValueError(f"Model {model_name} not supported.")
@@ -528,6 +483,7 @@ def create_react_agent(
         state["messages"] = _validate_chat_history(state["messages"])
         response = model_start_runnable.invoke(state["messages"], config) # Generate tool calls
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
+        
         if has_tool_calls:
 
             all_tools_return_direct = False
@@ -605,8 +561,14 @@ def create_react_agent(
     def call_model_inner(state: AgentState, config: RunnableConfig) -> AgentState:
         if isinstance(state["tools_handler_messages"][-1], ToolMessage):
             state["tools_handler_messages"] = _validate_chat_history(state["tools_handler_messages"])
-            response = model_inner_runnable.invoke(state["tools_handler_messages"], config) # Generate tool calls
+
+            user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
+
+            dtxsid = [message for message in state["tools_handler_messages"] if isinstance(message, ToolMessage)]
+            response = model_inner_runnable.invoke({"query": user_query, "dtxsid": dtxsid, "tools": tool_names, "messages": state["tools_handler_messages"]}, config=config) # Generate tool calls
+
             has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
+
             all_tools_return_direct = False
             if (
                 (

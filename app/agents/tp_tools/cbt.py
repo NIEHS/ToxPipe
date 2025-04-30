@@ -171,7 +171,14 @@ class SMILES2DTXSID(BaseTool):
 # Structural Similarity
 class StructuralSimilarity(BaseTool):
     name: str = "StructuralSimilarity"
-    description: str = "Input a DTXSID to return a list of structurally similar chemicals and their corresponding Tanimoto similarities to the input chemical using RDKit."
+    description: str = """
+    
+    Input a DTXSID to return a list of similar chemicals and their corresponding Tanimoto similarities to the input chemical using RDKit. This can provide information about the chemical's structure and how it relates to other chemicals.
+    The following are examples of queries that this tool can answer:
+    - What are the most structurally similar chemicals to Bisphenol A?
+    - What are some similar chemicals to Aspirin?
+    - Provide some structurally similar chemicals to Acetaminophen.
+    """
 
     def __init__(
         self,
@@ -200,7 +207,6 @@ class StructuralSimilarity(BaseTool):
 
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        response = f"The chemical given by the SMILES {smiles} does not have data for structurally similar chemicals in the ChemBioTox Database."
 
         response = f"The chemical given by the SMILES {smiles} has the following similar chemicals, given as 'chemical name' (tanimoto similarity): {'; '.join(outp)}"                
         return(response)

@@ -36,7 +36,7 @@ from .multi import *
 from dotenv import load_dotenv
 load_dotenv('../.config/.env')
 # Prompts
-from .prompts_chem import getPrompt, PromptAgentic, summary_prompt
+from .prompts_chem import getPrompt, summary_prompt, PromptAgentic
 
 # Other
 from typing import Sequence
@@ -116,10 +116,7 @@ class ToxPipeAgent:
         # Define parser
         self.parser = PydanticOutputParser(pydantic_object=Response)
 
-        if model == "gemini-1.5-pro":
-            self.prompt_template = getPromptGoogle(PromptAgentic)
-        else:
-            self.prompt_template = getPrompt(PromptAgentic)
+        self.prompt_template = getPrompt(PromptAgentic)
 
         # Initialize agent to add tools to model
         agent_executor = create_react_agent(self.llm, self.tools, state_modifier=self.prompt_template, checkpointer=checkpointer, debug=verbose, model_name=model, max_memory_tokens=max_memory_tokens) # state_modifier=PROMPT adds the prompt instructions to the agent
