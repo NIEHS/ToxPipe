@@ -559,44 +559,53 @@ def create_react_agent(
 
   
     def call_model_inner(state: AgentState, config: RunnableConfig) -> AgentState:
+
+        state["tools_handler_messages"] = _validate_chat_history(state["tools_handler_messages"])
+
         if isinstance(state["tools_handler_messages"][-1], ToolMessage):
-            state["tools_handler_messages"] = _validate_chat_history(state["tools_handler_messages"])
+            try:
+            
+                user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
 
-            user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
+                dtxsid = [message for message in state["tools_handler_messages"] if isinstance(message, ToolMessage)]
 
-            dtxsid = [message for message in state["tools_handler_messages"] if isinstance(message, ToolMessage)]
+                response = model_inner_runnable.invoke({"query": user_query, "dtxsid": dtxsid, "tools": tool_names, "messages": state["tools_handler_messages"]}, config=config) # Generate tool calls
 
-            response = model_inner_runnable.invoke({"query": user_query, "dtxsid": dtxsid, "tools": tool_names, "messages": state["tools_handler_messages"]}, config=config) # Generate tool calls
+                has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
 
-            has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
-
-            all_tools_return_direct = False
-            if (
-                (
-                    "remaining_steps" not in state
-                    and state["is_last_step"]
-                    and has_tool_calls
-                )
-                or (
-                    "remaining_steps" in state
-                    and state["remaining_steps"] < 1
-                    and all_tools_return_direct
-                )
-                or (
-                    "remaining_steps" in state
-                    and state["remaining_steps"] < 2
-                    and has_tool_calls
-                )
-            ):
+                all_tools_return_direct = False
+                if (
+                    (
+                        "remaining_steps" not in state
+                        and state["is_last_step"]
+                        and has_tool_calls
+                    )
+                    or (
+                        "remaining_steps" in state
+                        and state["remaining_steps"] < 1
+                        and all_tools_return_direct
+                    )
+                    or (
+                        "remaining_steps" in state
+                        and state["remaining_steps"] < 2
+                        and has_tool_calls
+                    )
+                ):
+                    return {
+                        "tools_handler_messages": [
+                            AIMessage(
+                                id=response.id,
+                                content="Sorry, need more steps to process this request.",
+                            )
+                        ]
+                    }
+                return {"tools_handler_messages": [response]} 
+            
+            except:
                 return {
-                    "tools_handler_messages": [
-                        AIMessage(
-                            id=response.id,
-                            content="Sorry, need more steps to process this request.",
-                        )
-                    ]
+                    "tools_handler_messages": [],
                 }
-            return {"tools_handler_messages": [response]} 
+
 
         return {
             "tools_handler_messages": [],
@@ -684,11 +693,13 @@ def create_react_agent(
 
     workflow.add_edge("SKIP_HANDLER", "TRANSLATE_TOOL_NODE") # Start with the agent node
     workflow.add_edge("TRANSLATE_TOOL_NODE", "TOOL_HANDLER") # Once we have the DTXSID, we can call the tools
-    #workflow.add_edge("TOOL_HANDLER", "TOOL_NODE") # Once we have the DTXSID, we can call the tools
 
     def can_skip_tools(state: AgentState) -> Literal["TOOL_NODE", "TRAINING_SUMMARY_HANDLER"]:
         messages = state["tools_handler_messages"]
         last_message = messages[-1]
+
+        if not hasattr(last_message, "tool_calls"):
+            return "TRAINING_SUMMARY_HANDLER"
 
         # Okay to skip to training if the last message has no tool calls
         if not last_message.tool_calls:
