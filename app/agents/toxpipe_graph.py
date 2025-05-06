@@ -565,6 +565,7 @@ def create_react_agent(
             user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
 
             dtxsid = [message for message in state["tools_handler_messages"] if isinstance(message, ToolMessage)]
+
             response = model_inner_runnable.invoke({"query": user_query, "dtxsid": dtxsid, "tools": tool_names, "messages": state["tools_handler_messages"]}, config=config) # Generate tool calls
 
             has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
@@ -596,9 +597,9 @@ def create_react_agent(
                     ]
                 }
             return {"tools_handler_messages": [response]} 
-            
+
         return {
-            "tools_handler_messages": [ToolMessage(content='')],
+            "tools_handler_messages": [],
         }
     
     
@@ -683,7 +684,20 @@ def create_react_agent(
 
     workflow.add_edge("SKIP_HANDLER", "TRANSLATE_TOOL_NODE") # Start with the agent node
     workflow.add_edge("TRANSLATE_TOOL_NODE", "TOOL_HANDLER") # Once we have the DTXSID, we can call the tools
-    workflow.add_edge("TOOL_HANDLER", "TOOL_NODE") # Once we have the DTXSID, we can call the tools
+    #workflow.add_edge("TOOL_HANDLER", "TOOL_NODE") # Once we have the DTXSID, we can call the tools
+
+    def can_skip_tools(state: AgentState) -> Literal["TOOL_NODE", "TRAINING_SUMMARY_HANDLER"]:
+        messages = state["tools_handler_messages"]
+        last_message = messages[-1]
+
+        # Okay to skip to training if the last message has no tool calls
+        if not last_message.tool_calls:
+            return "TRAINING_SUMMARY_HANDLER"  
+        else:
+            return "TOOL_NODE"
+    workflow.add_conditional_edges("TOOL_HANDLER", can_skip_tools) # Once we have the DTXSID, we can call the tools
+
+
     workflow.add_edge("SKIP_HANDLER", "RAG_TOOL_NODE")
     workflow.add_edge("SKIP_HANDLER", "LITERATURE_TOOL_NODE")
 
