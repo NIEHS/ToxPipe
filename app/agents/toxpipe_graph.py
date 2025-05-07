@@ -481,6 +481,12 @@ def create_react_agent(
     # Define the function that calls the model
     def call_model(state: AgentState, config: RunnableConfig) -> AgentState:
         state["messages"] = _validate_chat_history(state["messages"])
+
+        # Clear individual history for each handler
+        state["tools_handler_messages"] = []
+        state["rag_handler_messages"] = []
+        state["literature_handler_messages"] = []
+
         response = model_start_runnable.invoke(state["messages"], config) # Generate tool calls
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
         
