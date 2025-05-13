@@ -48,8 +48,8 @@ from langchain_core.utils.json import (
     parse_json_markdown,
     parse_partial_json,
 )
-from .tools import make_tools, make_translate_tools, make_rag_tools, make_literature_tools
-from .prompts_chem import getInnerToolsPrompt, PromptAgentic
+from .tools import make_tools, make_translate_tools, make_rag_tools, make_literature_tools, make_disease_tools
+from .prompts_chem import getInnerToolsPrompt, getInnerDiseaseToolsPrompt, PromptAgentic, getRepeatDiseaseToolsPrompt, getRepeatToolsPrompt
 
 ANTHROPIC_MODELS = ['claude-3-5-sonnet', 'claude-3-sonnet', 'claude-3-haiku', 'claude-3-opus'] # haiku and opus work better
 OLLAMA_MODELS = ['llama3-1-70b', 'llama3-1-8b', 'openbiollm-llama3-70b'] # These have trouble with tools
@@ -132,18 +132,18 @@ You will be provided with the most recent response from the model and the user's
 - If a literature search cannot find information, please respond with "not sufficient" so the model can use its training data to find a more accurate answer.
 
 ----------------------------------------------
-** Response **
+**Response**
 {response}
 
 ----------------------------------------------
-** Query ** 
+**Query**
 {query}
 
 ----------------------------------------------
-** Possible Tools ** 
+**Possible Tools**
 {tools}
 
-** Output format **
+**Output format**
 You will always output either "sufficient" or "not sufficient" based on your decision.
 '''
 
@@ -169,14 +169,14 @@ Follow the instructions below ONLY for the training step:
 - Include all relevant information from your memory, tools, RAG search, literature search, and training data in your final response.
 
 ----------------------------------------------
-** Context **
+**Context**
 {context}
 
 ----------------------------------------------
-** Query ** 
+**Query**
 {query}
 
-** Output format **
+**Output format**
 Your output must follow the following format and rules:
 - Final Answer: (the final answer to the original input question after using the appropriate tools. You must include sources for each section of the information provided, which are typically given after the string "source:")
 - When sourcing information from ChemBioTox, you must specify which datasource in ChemBioTox was used (for example, CTD, PubChem, EPA, DrugBank, etc.).
@@ -189,19 +189,19 @@ Your output must follow the following format and rules:
 - If you find, at any time, that the most recent response sufficiently answers the user's query, you may stop evaluating early and return that response.
 - Do not answer in JSON format. Use the following string format:
 - Example:
-    ** Tools **
-    ** Topic 1 **
+   **Tools**
+   **Topic 1**
     (summary of data related to topic 1 from tools with sources)
-    ** Topic 2 **
+   **Topic 2**
     (summary of data related to topic 2 from tools with sources)
     ...
-    ** Topic N **
+   **Topic N**
     (summary of data related to topic N from tools with sources)
-    ** RAG **
+   **RAG**
     (summary of data from RAG search with sources)
-    ** Literature **
+   **Literature**
     (summary of data from scientific literature search with sources)
-    ** Training Data **
+   **Training Data**
     (summary of data from training data with warning that data was generated from training data)
 '''
 
@@ -397,7 +397,7 @@ def create_react_agent(
         ):
             raise ValueError(f"Missing required key(s) {missing_keys} in state_schema")
 
-    translate_tools = make_translate_tools()
+    translate_tools = make_translate_tools(llm=model)
     translate_tool_node = ToolNode(translate_tools, messages_key="tools_handler_messages")
     translate_tool_classes = list(translate_tool_node.tools_by_name.values())
     translate_tool_names = list(translate_tool_node.tools_by_name.keys())
@@ -412,6 +412,12 @@ def create_react_agent(
     literature_tool_classes = list(literature_tool_node.tools_by_name.values())
     literature_tool_names = list(literature_tool_node.tools_by_name.keys())
 
+    disease_tools = make_disease_tools(llm=model)
+    disease_tool_node = ToolNode(disease_tools, messages_key="tools_handler_messages")
+    disease_tool_classes = list(disease_tool_node.tools_by_name.values())
+    disease_tool_names = list(disease_tool_node.tools_by_name.keys())
+    
+
     tool_node = ToolNode(tools, messages_key="tools_handler_messages")
     tool_classes = list(tool_node.tools_by_name.values())
     tool_names = list(tool_node.tools_by_name.keys())
@@ -419,7 +425,10 @@ def create_react_agent(
     llm = model
 
     model_start = cast(BaseChatModel, model).bind_tools(translate_tool_classes + rag_tool_classes + literature_tool_classes)
-    model_inner = cast(BaseChatModel, model).bind_tools(tool_classes)
+    model_inner = cast(BaseChatModel, model).bind_tools(tool_classes, tool_choice="required")
+    model_repeat = cast(BaseChatModel, model).bind_tools(tool_classes, tool_choice="required")
+    model_disease_inner = cast(BaseChatModel, model).bind_tools(disease_tool_classes, tool_choice="required")
+    model_disease_repeat = cast(BaseChatModel, model).bind_tools(disease_tool_classes + translate_tool_classes, tool_choice="required")
     model_training = cast(BaseChatModel, model)
 
     # Truncate context window if too long
@@ -470,10 +479,27 @@ def create_react_agent(
         tools_prompt, messages_modifier, store
     )
 
+    disease_tools_prompt = getInnerDiseaseToolsPrompt(PromptAgentic)
+    disease_inner_preprocessor = _get_model_preprocessing_runnable(
+        disease_tools_prompt, messages_modifier, store
+    )
+
+    disease_repeat_prompt = getRepeatDiseaseToolsPrompt(PromptAgentic)
+    disease_repeat_preprocessor = _get_model_preprocessing_runnable(
+        disease_repeat_prompt, messages_modifier, store
+    )
+    
+    repeat_prompt = getRepeatToolsPrompt(PromptAgentic)
+    repeat_preprocessor = _get_model_preprocessing_runnable(
+        repeat_prompt, messages_modifier, store
+    )
+
     if model_name in OPENAI_MODELS:
         model_start_runnable = preprocessor | condense_prompt | model_start
-        #model_inner_runnable = preprocessor | condense_prompt | model_inner
         model_inner_runnable = inner_preprocessor | condense_prompt | model_inner
+        model_repeat_runnable = repeat_preprocessor | condense_prompt | model_repeat
+        model_disease_inner_runnable = disease_inner_preprocessor | condense_prompt | model_disease_inner
+        model_disease_repeat_runnable = disease_repeat_preprocessor | condense_prompt | model_disease_repeat
         model_training_runnable = training_prompt | model_training
     else:
         raise ValueError(f"Model {model_name} not supported.")
@@ -562,7 +588,12 @@ def create_react_agent(
     # Define the function that calls the model
     def call_skip(state: AgentState, config: RunnableConfig) -> AgentState:
         return state
-
+    
+    def call_disease(state: AgentState, config: RunnableConfig) -> AgentState:
+        return state
+    
+    def call_tools_capture(state: AgentState, config: RunnableConfig) -> AgentState:
+        return state
   
     def call_model_inner(state: AgentState, config: RunnableConfig) -> AgentState:
 
@@ -570,7 +601,6 @@ def create_react_agent(
 
         if isinstance(state["tools_handler_messages"][-1], ToolMessage):
             try:
-            
                 user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
 
                 dtxsid = [message for message in state["tools_handler_messages"] if isinstance(message, ToolMessage)]
@@ -617,6 +647,149 @@ def create_react_agent(
             "tools_handler_messages": [],
         }
     
+    def call_disease_inner(state: AgentState, config: RunnableConfig) -> AgentState:
+
+        state["tools_handler_messages"] = _validate_chat_history(state["tools_handler_messages"])
+
+        if isinstance(state["tools_handler_messages"][-1], ToolMessage):
+            try:
+            
+                user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
+
+                disease_name = [message for message in state["tools_handler_messages"] if isinstance(message, ToolMessage)]
+
+                response = model_disease_inner_runnable.invoke({"query": user_query, "name": disease_name, "tools": disease_tool_names, "messages": state["tools_handler_messages"]}, config=config) # Generate tool calls
+
+                has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
+
+                all_tools_return_direct = False
+                if (
+                    (
+                        "remaining_steps" not in state
+                        and state["is_last_step"]
+                        and has_tool_calls
+                    )
+                    or (
+                        "remaining_steps" in state
+                        and state["remaining_steps"] < 1
+                        and all_tools_return_direct
+                    )
+                    or (
+                        "remaining_steps" in state
+                        and state["remaining_steps"] < 2
+                        and has_tool_calls
+                    )
+                ):
+                    return {
+                        "tools_handler_messages": [
+                            AIMessage(
+                                id=response.id,
+                                content="Sorry, need more steps to process this request.",
+                            )
+                        ]
+                    }
+                return {"tools_handler_messages": [response]} 
+            
+            except:
+                return {
+                    "tools_handler_messages": [],
+                }
+
+
+        return {
+            "tools_handler_messages": [],
+        }
+    
+    def call_model_disease_repeat(state: AgentState, config: RunnableConfig) -> AgentState:
+        state["tools_handler_messages"] = _validate_chat_history(state["tools_handler_messages"])
+        if isinstance(state["tools_handler_messages"][-1], ToolMessage):
+            try:
+                user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
+                response = model_disease_repeat_runnable.invoke({"query": user_query, "tools": disease_tool_names + translate_tool_names, "messages": state["tools_handler_messages"]}, config=config) # Generate tool calls
+
+                has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
+                all_tools_return_direct = False
+                if (
+                    (
+                        "remaining_steps" not in state
+                        and state["is_last_step"]
+                        and has_tool_calls
+                    )
+                    or (
+                        "remaining_steps" in state
+                        and state["remaining_steps"] < 1
+                        and all_tools_return_direct
+                    )
+                    or (
+                        "remaining_steps" in state
+                        and state["remaining_steps"] < 2
+                        and has_tool_calls
+                    )
+                ):
+                    return {
+                        "tools_handler_messages": [
+                            AIMessage(
+                                id=response.id,
+                                content="Sorry, need more steps to process this request.",
+                            )
+                        ]
+                    }
+                return {"tools_handler_messages": [response]} 
+            
+            except Exception as e:
+                return {
+                    "tools_handler_messages": [],
+                }
+
+        return {
+            "tools_handler_messages": [],
+        }
+
+    def call_model_repeat(state: AgentState, config: RunnableConfig) -> AgentState:
+        state["tools_handler_messages"] = _validate_chat_history(state["tools_handler_messages"])
+        if isinstance(state["tools_handler_messages"][-1], ToolMessage):
+            try:
+                user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
+
+                response = model_repeat_runnable.invoke({"query": user_query, "tools": tool_names, "messages": state["tools_handler_messages"]}, config=config) # Generate tool calls
+
+                has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
+                all_tools_return_direct = False
+                if (
+                    (
+                        "remaining_steps" not in state
+                        and state["is_last_step"]
+                        and has_tool_calls
+                    )
+                    or (
+                        "remaining_steps" in state
+                        and state["remaining_steps"] < 1
+                        and all_tools_return_direct
+                    )
+                    or (
+                        "remaining_steps" in state
+                        and state["remaining_steps"] < 2
+                        and has_tool_calls
+                    )
+                ):
+                    return {
+                        "tools_handler_messages": [
+                            AIMessage(
+                                id=response.id,
+                                content="Sorry, need more steps to process this request.",
+                            )
+                        ]
+                    }
+                return {"tools_handler_messages": [response]} 
+            
+            except Exception as e:
+                return {
+                    "tools_handler_messages": [],
+                }
+
+        return {
+            "tools_handler_messages": [],
+        }
     
     def call_model_training(state: AgentState, config: RunnableConfig) -> AgentState:
         # Merge message histories from all handlers
@@ -665,8 +838,19 @@ def create_react_agent(
     # Dummy node to pass input to tools/search if tool calls exist
     workflow.add_node("SKIP_HANDLER", RunnableCallable(call_skip))
 
+    # Dummy node to pass input to tools/search if tool calls exist
+    workflow.add_node("DISEASE_SKIP_HANDLER", RunnableCallable(call_disease))
+
+    workflow.add_node("DISEASE_TOOL_HANDLER", RunnableCallable(call_disease_inner))
+
+    # Disease tool node - invokes tools
+    workflow.add_node("DISEASE_TOOL_NODE", disease_tool_node)
+
     # Invokes translation tools
     workflow.add_node("TRANSLATE_TOOL_NODE", translate_tool_node)
+
+    workflow.add_node("TRANSLATE_DISEASE_TOOL_NODE", translate_tool_node)
+    
 
     # Chooses which tools to call
     workflow.add_node("TOOL_HANDLER", RunnableCallable(call_model_inner))
@@ -683,42 +867,112 @@ def create_react_agent(
     # Training data node - formulate a last-ditch answer from the training data and summarize data from the context
     workflow.add_node("TRAINING_SUMMARY_HANDLER", RunnableCallable(call_model_training))
 
+    workflow.add_node("ALL_TOOL_CAPTURE_HANDLER", RunnableCallable(call_tools_capture))
+
+    workflow.add_node("DISEASE_TOOL_REPEAT_HANDLER", RunnableCallable(call_model_disease_repeat))
+    workflow.add_node("TOOL_REPEAT_HANDLER", RunnableCallable(call_model_repeat))
+
 
     workflow.add_edge(START, "INPUT_HANDLER") # Start with the agent node
 
     # If the initial node didn't produce any tool calls, we can skip to the training step and just answer based on the context
-    def can_skip_to_training(state: AgentState) -> Literal["SKIP_HANDLER", "TRAINING_SUMMARY_HANDLER"]:
+    def can_skip_to_training(state: AgentState) -> Literal["SKIP_HANDLER", "TRAINING_SUMMARY_HANDLER", "DISEASE_SKIP_HANDLER"]:
         messages = state["messages"]
         last_message = messages[-1]
         # Okay to skip to training if the last message has no tool calls
         if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
             return "TRAINING_SUMMARY_HANDLER"  
         else:
+            
+            if last_message.tool_calls:
+                # Check if the last message has any tool calls that are not in the translate tool names
+                for call in last_message.tool_calls:
+                    if call["name"] == "Query2Disease":
+                        return "DISEASE_SKIP_HANDLER"
             return "SKIP_HANDLER"
+        
     workflow.add_conditional_edges("INPUT_HANDLER", can_skip_to_training)
 
     workflow.add_edge("SKIP_HANDLER", "TRANSLATE_TOOL_NODE") # Start with the agent node
     workflow.add_edge("TRANSLATE_TOOL_NODE", "TOOL_HANDLER") # Once we have the DTXSID, we can call the tools
-
-    def can_skip_tools(state: AgentState) -> Literal["TOOL_NODE", "TRAINING_SUMMARY_HANDLER"]:
+    def can_skip_tools(state: AgentState) -> Literal["TOOL_NODE", "ALL_TOOL_CAPTURE_HANDLER"]:
         messages = state["tools_handler_messages"]
         last_message = messages[-1]
 
         if not hasattr(last_message, "tool_calls"):
-            return "TRAINING_SUMMARY_HANDLER"
+            return "ALL_TOOL_CAPTURE_HANDLER"
 
         # Okay to skip to training if the last message has no tool calls
         if not last_message.tool_calls:
-            return "TRAINING_SUMMARY_HANDLER"  
+            return "ALL_TOOL_CAPTURE_HANDLER"  
         else:
             return "TOOL_NODE"
     workflow.add_conditional_edges("TOOL_HANDLER", can_skip_tools) # Once we have the DTXSID, we can call the tools
+
+    workflow.add_edge("TOOL_NODE", "TOOL_REPEAT_HANDLER") 
+
+    def can_repeat_tools(state: AgentState) -> Literal["TOOL_HANDLER", "ALL_TOOL_CAPTURE_HANDLER"]:
+        messages = state["tools_handler_messages"]
+        last_message = messages[-1]
+
+        if not hasattr(last_message, "tool_calls"):
+            return "ALL_TOOL_CAPTURE_HANDLER"
+
+        # Okay to skip to training if the last message has no tool calls
+        if not last_message.tool_calls:
+            return "ALL_TOOL_CAPTURE_HANDLER"  
+        else:
+            return("TOOL_HANDLER")
+
+    workflow.add_conditional_edges("TOOL_REPEAT_HANDLER", can_repeat_tools) # Once we have the DTXSID, we can call the tools
+
+
+
+    workflow.add_edge("DISEASE_SKIP_HANDLER", "TRANSLATE_DISEASE_TOOL_NODE") # Start with the agent node
+    workflow.add_edge("TRANSLATE_DISEASE_TOOL_NODE", "DISEASE_TOOL_HANDLER") # Once we have the DTXSID, we can call the tools
+    def can_skip_disease_tools(state: AgentState) -> Literal["DISEASE_TOOL_NODE", "ALL_TOOL_CAPTURE_HANDLER"]:
+        messages = state["tools_handler_messages"]
+        last_message = messages[-1]
+
+        if not hasattr(last_message, "tool_calls"):
+            return "ALL_TOOL_CAPTURE_HANDLER"
+
+        # Okay to skip to training if the last message has no tool calls
+        if not last_message.tool_calls:
+            return "ALL_TOOL_CAPTURE_HANDLER"  
+        else:
+            return "DISEASE_TOOL_NODE"
+    workflow.add_conditional_edges("DISEASE_TOOL_HANDLER", can_skip_disease_tools) # Once we have the DTXSID, we can call the tools
+
+    workflow.add_edge("DISEASE_TOOL_NODE", "DISEASE_TOOL_REPEAT_HANDLER") 
+
+    def can_repeat_disease_tools(state: AgentState) -> Literal["DISEASE_TOOL_NODE", "TRANSLATE_TOOL_NODE", "ALL_TOOL_CAPTURE_HANDLER"]:
+        messages = state["tools_handler_messages"]
+        last_message = messages[-1]
+
+        if not hasattr(last_message, "tool_calls"):
+            return "ALL_TOOL_CAPTURE_HANDLER"
+
+        # Okay to skip to training if the last message has no tool calls
+        if not last_message.tool_calls:
+            return "ALL_TOOL_CAPTURE_HANDLER"  
+        else:
+            tool_call_names = [call["name"] for call in last_message.tool_calls]
+            if "Name2DTXSID" in tool_call_names or "SMILES2DTXSID" in tool_call_names or "CASRN2DTXSID" in tool_call_names:
+                return("TRANSLATE_TOOL_NODE")
+            return "DISEASE_TOOL_NODE"
+    workflow.add_conditional_edges("DISEASE_TOOL_REPEAT_HANDLER", can_repeat_disease_tools) # Once we have the DTXSID, we can call the tools
+
 
 
     workflow.add_edge("SKIP_HANDLER", "RAG_TOOL_NODE")
     workflow.add_edge("SKIP_HANDLER", "LITERATURE_TOOL_NODE")
 
-    workflow.add_edge(["TOOL_NODE", "RAG_TOOL_NODE", "LITERATURE_TOOL_NODE"], "TRAINING_SUMMARY_HANDLER") # Converge on training step to summarize the results of the tools and search
+    workflow.add_edge("DISEASE_SKIP_HANDLER", "RAG_TOOL_NODE")
+    workflow.add_edge("DISEASE_SKIP_HANDLER", "LITERATURE_TOOL_NODE")
+    
+
+    workflow.add_edge(["ALL_TOOL_CAPTURE_HANDLER", "RAG_TOOL_NODE", "LITERATURE_TOOL_NODE"], "TRAINING_SUMMARY_HANDLER") # Converge on training step to summarize the results of the tools and search
 
     workflow.add_edge("TRAINING_SUMMARY_HANDLER", END) # Always end after training, training step should be a last resort if the model couldn't find anything in the available tools & resources
     

@@ -73,13 +73,22 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
 
     return all_tools
 
-def make_translate_tools():
+def make_translate_tools(llm: BaseLanguageModel):
     translate_tools = [
         Name2DTXSID(),
         SMILES2DTXSID(),
         CASRN2DTXSID(),
+        Query2Disease(llm=llm),
     ]
     return translate_tools
+
+def make_disease_tools(llm: BaseLanguageModel):
+    disease_tools = [
+        QueryHMDBDisease2Chemicals(llm=llm),
+        QueryCTDDisease2Chemicals(llm=llm),
+    ]
+    return disease_tools
+
 
 def make_rag_tools(llm: BaseLanguageModel):
     rag_tools = [

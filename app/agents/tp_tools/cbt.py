@@ -20,6 +20,32 @@ def unique(l):
     unique_list = (list(ls))
     return unique_list
 
+class Query2Disease(BaseTool):
+    name: str = "Query2Disease"
+    description: str = "Extract a disease name from the user's query. This tool only returns the disease name and does not provide any other information and is required to use before tool use."
+    llm: BaseLLM = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, q: str, **kwargs) -> str:
+        """Input a query, return the disease name."""
+
+        disease_prompt = """
+            For the given query, extract ONLY the disease name. The query is: {query}
+        """
+        disease_prompt = ChatPromptTemplate.from_template(disease_prompt)
+
+        chain = disease_prompt | self.llm
+        res = chain.invoke({"query": q})
+
+        print("===res.rstrip()==")
+        print(res)
+
+        return res
+    
+
 
 class Query2DTXSID(BaseTool):
     name: str = "Query2DTXSID"
@@ -1306,6 +1332,10 @@ class QueryCPD(BaseTool):
             headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
         )
         res = res.json()
+
+        print("=== RES CPD ===")
+        print(res)
+
         if len(res) < 1:
             return(f"There was a problem completing the request.")
         exp = res
@@ -1782,6 +1812,84 @@ class QueryHMDBDiseases(BaseTool):
     async def _arun(self, dtxsid: str) -> str:
         """Use the tool asynchronously."""
         raise NotImplementedError()
+    
+# HMDB disease to chemical
+class QueryHMDBDisease2Chemicals(BaseTool):
+    name: str = "QueryHMDBDisease2Chemicals"
+    description: str = "Input a disease name to return associated chemicals from the HMDB. Chemicals returned may affect, influence, or cause the given disease."
+    llm: BaseLLM = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, disease: str, **kwargs) -> str:
+        """Input disease name, return a list of associated chemicals using the data available in ChemBioTox."""
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/diseases/chemicals?name={disease}&n=5&exact=FALSE",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+
+        res = res.json()
+
+        if len(res) < 1:
+            return(f"The disease {disease} is not known to be associated with any chemicals.")
+
+        response = []
+        for k in res.keys():
+            response_inner = []
+            for name in res[k]:
+                response_inner.append(f"{name['preferred_name']}")
+            response.append(f"The following chemicals are associated with {k}: {', '.join(response_inner)}")
+
+        response = "\n".join(response)
+        response = f"{response} (source: HMDB)"
+        
+        return(response)
+    
+    async def _arun(self, disease: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+
+
+# HMDB disease to chemical
+class QueryCTDDisease2Chemicals(BaseTool):
+    name: str = "QueryCTDDisease2Chemicals"
+    description: str = "Input a disease name to return associated chemicals from the CTD. Chemicals returned may affect, influence, or cause the given disease."
+    llm: BaseLLM = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, disease: str, **kwargs) -> str:
+        """Input disease name, return a list of associated chemicals using the data available in ChemBioTox."""
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/diseases/chemicals?name={disease}&n=5&exact=FALSE",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+
+        res = res.json()
+
+        if len(res) < 1:
+            return(f"The disease {disease} is not known to be associated with any chemicals.")
+
+        response = []
+        for k in res.keys():
+            response_inner = []
+            for name in res[k]:
+                response_inner.append(f"{name['preferred_name']}")
+            response.append(f"The following chemicals are associated with {k}: {', '.join(response_inner)}")
+
+        response = "\n".join(response)
+        response = f"{response} (source: CTD)"
+        
+        return(response)
+    
+    async def _arun(self, disease: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+
 
 # Superfund
 class QuerySuperfund(BaseTool):

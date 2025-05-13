@@ -11,7 +11,7 @@ from time import time
 from dotenv import load_dotenv
 load_dotenv('../../../.config/.env')
 
-N_PAPERS = 15
+N_PAPERS = os.environ.get("TOXPIPE_MAX_PAPERS")
 
 
 #### ADAPTED CODE FROM AMLAN'S PUBMED TOOL
