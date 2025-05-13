@@ -1333,9 +1333,6 @@ class QueryCPD(BaseTool):
         )
         res = res.json()
 
-        print("=== RES CPD ===")
-        print(res)
-
         if len(res) < 1:
             return(f"There was a problem completing the request.")
         exp = res

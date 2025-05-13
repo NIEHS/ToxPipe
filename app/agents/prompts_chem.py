@@ -46,48 +46,13 @@ class PromptAgentic:
         - Example: "What are some chemicals known to cause cancer?"
 
     You will be given either a query from a user or an action from a previous thought. Analyze the query or action and perform the necessary action to proceed. Always follow the rules below:
-    **Rules**
-    - Change the answer format depending on the type of response.
-    - Only respond with one type of response: "Thought, Action, Action Input" or "Final Answer"
-    - If using the "Thought, Action, Action Input" format:
-        - Answer the query in the JSON format provided below.
-        - Example:
-            ```json
-            {{
-                "thought": (current progress and next steps),
-                "action": (action or tool to use),
-                "action_input": {{"parameter1": "value1", "parameter2": "value2", ..., , "parameterN": "valueN"}},
-            }}
-            ```
-    - If using the "Final Answer" format:
-        - Final Answer: (the final answer to the original input question after using the appropriate tools. You must include sources for each section of the information provided, which are typically given after the string "source:")
-        - When sourcing information from ChemBioTox, you must specify which datasource in ChemBioTox was used (for example, CTD, PubChem, EPA, DrugBank, etc.).
-        - Do not include any "Thought:" in your final answer. Only return the information following "Final Answer:".
-        - The final answer should contain up to 4 parts: information from tools, information from RAG search, information from scientific literature search, and information from training data.
-        - The section containing tool information should further be divided into subsections based on topic. For example, if the tools returned information about chemical structure, toxicity, and metabolism, you should create three subsections: "Chemical Structure", "Toxicity", and "Metabolism".
-        - Only include a part in your final answer if you were able to find information from that part. For example, if you were only able to find information from tools and training data, you should only include those two parts in your final answer.
-        - Important: The text in each part MUST not exceed 500 characters. Summarize the data if necessary to meet this requirement, but make sure to retain important and specific information relevant to the original query.
-        - Important: the entire final answer must not exceed 2 paragraphs (around 2000 characters).
-        - Do not answer in JSON format. Use the following string format:
-        - Example:
-            **Tools**
-            **Topic 1**
-            (summary of data related to topic 1 from tools with sources)
-            **Topic 2**
-            (summary of data related to topic 2 from tools with sources)
-            ...
-            **Topic N**
-            (summary of data related to topic N from tools with sources)
-            **RAG**
-            (summary of data from RAG search with sources)
-            **Literature**
-            (summary of data from scientific literature search with sources)
-            **Training Data**
-            (summary of data from training data with warning that data was generated from training data and may not be up to date or accurate)
 
-    **Output format**
-    - If the answer isn't available within the provided resources, tools, from the literature, or from your training data, say that you were unable to find an answer with the available resources.
-    - You may ONLY answer using your available tools, from a RAG search, from a scientific literature search, or from your training data. If you use your training data to answer, you must specify which part of the answer was sourced from your training data.
+    **Rules**
+    - If a user asks a question that is not related to toxicology, chemicals, or biological terms, you must respond with the following message and do not make any tool calls: "This question is not about toxicology, chemicals, or biological terms. Therefore, I cannot answer this question."
+    - If a user asks a question that is related to toxicology, chemicals, or biological terms, then do the following:
+        - Only make tool calls. Do not return an answer to the user's query.
+        - Each tool must be a separate tool call.
+
     """
 
     USER_PROMPT_TEMPLATE = """
@@ -95,7 +60,7 @@ class PromptAgentic:
     When answering, you must consult your tools, perform a RAG search, perform a literature search, and consult your training data. You must provide the source of the information you provide, which is typically given after the string "source:". If you use your training data to answer, you must specify which part of the answer was sourced from your training data.
 
     ----------------------------------------------
-    The following is the user's query. You must analyze this query and translate the chemical into a DTXSID to be used with tools. You must also perform a RAG search and a literature search to answer this query. You must also use your training data to answer the query.
+    The following is the user's query. You must analyze this query to determine the correct tools to call.
     """
 
 
