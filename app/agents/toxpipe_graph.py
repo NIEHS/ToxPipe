@@ -53,7 +53,7 @@ from .prompts_chem import getInnerToolsPrompt, getInnerDiseaseToolsPrompt, Promp
 
 ANTHROPIC_MODELS = ['claude-3-5-sonnet', 'claude-3-sonnet', 'claude-3-haiku', 'claude-3-opus'] # haiku and opus work better
 OLLAMA_MODELS = ['llama3-1-70b', 'llama3-1-8b', 'openbiollm-llama3-70b'] # These have trouble with tools
-OPENAI_MODELS = ['azure-gpt-4o', 'azure-gpt-3.5-turbo', 'azure-gpt-4o-mini', 'azure-gpt-3.5-turbo-16k', 'azure-gpt-4-turbo-20240409', 'azure-gpt-4', 'azure-o1', 'azure-o1-mini', 'azure-o3-mini'] # These all work pretty well
+OPENAI_MODELS = ['azure-gpt-4o', 'azure-gpt-3.5-turbo', 'azure-gpt-4o-mini', 'azure-gpt-3.5-turbo-16k', 'azure-gpt-4-turbo-20240409', 'azure-gpt-4', 'azure-o1', 'azure-o1-mini', 'azure-o3-mini', 'azure-o3'] # These all work pretty well
 MISTRALAI_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', 'mixtral-8x7b-instruct'] # mistral-large-2 and mixtral-8x7b-instruct has issues accessing tools
 GOOGLE_MODELS = ['gemini-1.5-pro'] # TODO - VertexAIException BadRequestError - "Unable to submit request because one or more function parameters didn\'t specify the schema type field. Learn more: https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling
 AMAZON_MODELS = ['amazon-titan-text-premier']
@@ -424,11 +424,11 @@ def create_react_agent(
 
     llm = model
 
-    model_start = cast(BaseChatModel, model).bind_tools(translate_tool_classes + rag_tool_classes + literature_tool_classes)
-    model_inner = cast(BaseChatModel, model).bind_tools(tool_classes, tool_choice="required")
-    model_repeat = cast(BaseChatModel, model).bind_tools(tool_classes, tool_choice="required")
-    model_disease_inner = cast(BaseChatModel, model).bind_tools(disease_tool_classes, tool_choice="required")
-    model_disease_repeat = cast(BaseChatModel, model).bind_tools(disease_tool_classes + translate_tool_classes, tool_choice="required")
+    model_start = cast(BaseChatModel, model).bind_tools(translate_tool_classes + rag_tool_classes + literature_tool_classes, tool_choice="any")
+    model_inner = cast(BaseChatModel, model).bind_tools(tool_classes, tool_choice="any")
+    model_repeat = cast(BaseChatModel, model).bind_tools(tool_classes)
+    model_disease_inner = cast(BaseChatModel, model).bind_tools(disease_tool_classes, tool_choice="any")
+    model_disease_repeat = cast(BaseChatModel, model).bind_tools(disease_tool_classes + translate_tool_classes)
     model_training = cast(BaseChatModel, model)
 
     # Truncate context window if too long

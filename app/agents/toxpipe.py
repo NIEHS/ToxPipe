@@ -56,7 +56,9 @@ def _make_llm(model, api_version, temp, max_retries, max_tokens, seed):
         max_retries=max_retries,
         max_tokens=max_tokens,
         seed=seed,
-        tiktoken_model_name="gpt-4o" # use the gpt-4o tiktoken model for all models to avoid an error when calculating token limit
+        tiktoken_model_name="gpt-4o", # use the gpt-4o tiktoken model for all models to avoid an error when calculating token limit
+        #reasoning_effort="medium"
+        reasoning_effort="low"
     )
     return llm
 
