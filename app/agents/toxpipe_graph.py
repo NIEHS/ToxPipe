@@ -48,8 +48,8 @@ from langchain_core.utils.json import (
     parse_json_markdown,
     parse_partial_json,
 )
-from .tools import make_tools, make_translate_tools, make_rag_tools, make_literature_tools, make_disease_tools
-from .prompts_chem import getInnerToolsPrompt, getInnerDiseaseToolsPrompt, PromptAgentic, getRepeatDiseaseToolsPrompt, getRepeatToolsPrompt
+from .tools import make_tools, make_translate_tools, make_rag_tools, make_literature_tools, make_disease_tools, make_gene_tools
+from .prompts_chem import getInnerToolsPrompt, getInnerDiseaseToolsPrompt, getInnerGeneToolsPrompt, PromptAgentic, getRepeatDiseaseToolsPrompt, getRepeatToolsPrompt, getRepeatGeneToolsPrompt
 
 ANTHROPIC_MODELS = ['claude-3-5-sonnet', 'claude-3-sonnet', 'claude-3-haiku', 'claude-3-opus'] # haiku and opus work better
 OLLAMA_MODELS = ['llama3-1-70b', 'llama3-1-8b', 'openbiollm-llama3-70b'] # These have trouble with tools
@@ -417,6 +417,10 @@ def create_react_agent(
     disease_tool_classes = list(disease_tool_node.tools_by_name.values())
     disease_tool_names = list(disease_tool_node.tools_by_name.keys())
     
+    gene_tools = make_gene_tools(llm=model)
+    gene_tool_node = ToolNode(gene_tools, messages_key="tools_handler_messages")
+    gene_tool_classes = list(gene_tool_node.tools_by_name.values())
+    gene_tool_names = list(gene_tool_node.tools_by_name.keys())
 
     tool_node = ToolNode(tools, messages_key="tools_handler_messages")
     tool_classes = list(tool_node.tools_by_name.values())
@@ -429,6 +433,10 @@ def create_react_agent(
     model_repeat = cast(BaseChatModel, model).bind_tools(tool_classes)
     model_disease_inner = cast(BaseChatModel, model).bind_tools(disease_tool_classes, tool_choice="any")
     model_disease_repeat = cast(BaseChatModel, model).bind_tools(disease_tool_classes + translate_tool_classes)
+
+    model_gene_inner = cast(BaseChatModel, model).bind_tools(gene_tool_classes, tool_choice="any")
+    model_gene_repeat = cast(BaseChatModel, model).bind_tools(gene_tool_classes + translate_tool_classes)
+
     model_training = cast(BaseChatModel, model)
 
     # Truncate context window if too long
@@ -479,6 +487,11 @@ def create_react_agent(
         tools_prompt, messages_modifier, store
     )
 
+    repeat_prompt = getRepeatToolsPrompt(PromptAgentic)
+    repeat_preprocessor = _get_model_preprocessing_runnable(
+        repeat_prompt, messages_modifier, store
+    )
+
     disease_tools_prompt = getInnerDiseaseToolsPrompt(PromptAgentic)
     disease_inner_preprocessor = _get_model_preprocessing_runnable(
         disease_tools_prompt, messages_modifier, store
@@ -488,10 +501,15 @@ def create_react_agent(
     disease_repeat_preprocessor = _get_model_preprocessing_runnable(
         disease_repeat_prompt, messages_modifier, store
     )
-    
-    repeat_prompt = getRepeatToolsPrompt(PromptAgentic)
-    repeat_preprocessor = _get_model_preprocessing_runnable(
-        repeat_prompt, messages_modifier, store
+
+    gene_tools_prompt = getInnerGeneToolsPrompt(PromptAgentic)
+    gene_inner_preprocessor = _get_model_preprocessing_runnable(
+        gene_tools_prompt, messages_modifier, store
+    )
+
+    gene_repeat_prompt = getRepeatGeneToolsPrompt(PromptAgentic)
+    gene_repeat_preprocessor = _get_model_preprocessing_runnable(
+        gene_repeat_prompt, messages_modifier, store
     )
 
     if model_name in OPENAI_MODELS:
@@ -500,6 +518,8 @@ def create_react_agent(
         model_repeat_runnable = repeat_preprocessor | condense_prompt | model_repeat
         model_disease_inner_runnable = disease_inner_preprocessor | condense_prompt | model_disease_inner
         model_disease_repeat_runnable = disease_repeat_preprocessor | condense_prompt | model_disease_repeat
+        model_gene_inner_runnable = gene_inner_preprocessor | condense_prompt | model_gene_inner
+        model_gene_repeat_runnable = gene_repeat_preprocessor | condense_prompt | model_gene_repeat
         model_training_runnable = training_prompt | model_training
     else:
         raise ValueError(f"Model {model_name} not supported.")
@@ -590,6 +610,9 @@ def create_react_agent(
         return state
     
     def call_disease(state: AgentState, config: RunnableConfig) -> AgentState:
+        return state
+    
+    def call_gene(state: AgentState, config: RunnableConfig) -> AgentState:
         return state
     
     def call_tools_capture(state: AgentState, config: RunnableConfig) -> AgentState:
@@ -699,7 +722,7 @@ def create_react_agent(
         return {
             "tools_handler_messages": [],
         }
-    
+
     def call_model_disease_repeat(state: AgentState, config: RunnableConfig) -> AgentState:
         state["tools_handler_messages"] = _validate_chat_history(state["tools_handler_messages"])
         if isinstance(state["tools_handler_messages"][-1], ToolMessage):
@@ -744,6 +767,109 @@ def create_react_agent(
         return {
             "tools_handler_messages": [],
         }
+    
+
+    def call_gene_inner(state: AgentState, config: RunnableConfig) -> AgentState:
+
+        state["tools_handler_messages"] = _validate_chat_history(state["tools_handler_messages"])
+
+        if isinstance(state["tools_handler_messages"][-1], ToolMessage):
+            try:
+            
+                user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
+
+                gene_name = [message for message in state["tools_handler_messages"] if isinstance(message, ToolMessage)]
+
+                response = model_gene_inner_runnable.invoke({"query": user_query, "name": gene_name, "tools": gene_tool_names, "messages": state["tools_handler_messages"]}, config=config) # Generate tool calls
+
+                has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
+
+                print("=== GENE has_tool_calls ===")
+                print(has_tool_calls)
+
+                all_tools_return_direct = False
+                if (
+                    (
+                        "remaining_steps" not in state
+                        and state["is_last_step"]
+                        and has_tool_calls
+                    )
+                    or (
+                        "remaining_steps" in state
+                        and state["remaining_steps"] < 1
+                        and all_tools_return_direct
+                    )
+                    or (
+                        "remaining_steps" in state
+                        and state["remaining_steps"] < 2
+                        and has_tool_calls
+                    )
+                ):
+                    return {
+                        "tools_handler_messages": [
+                            AIMessage(
+                                id=response.id,
+                                content="Sorry, need more steps to process this request.",
+                            )
+                        ]
+                    }
+                return {"tools_handler_messages": [response]} 
+            
+            except:
+                return {
+                    "tools_handler_messages": [],
+                }
+
+        return {
+            "tools_handler_messages": [],
+        }
+    
+
+    def call_model_gene_repeat(state: AgentState, config: RunnableConfig) -> AgentState:
+        state["tools_handler_messages"] = _validate_chat_history(state["tools_handler_messages"])
+        if isinstance(state["tools_handler_messages"][-1], ToolMessage):
+            try:
+                user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
+                response = model_gene_repeat_runnable.invoke({"query": user_query, "tools": gene_tool_names + translate_tool_names, "messages": state["tools_handler_messages"]}, config=config) # Generate tool calls
+
+                has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
+                all_tools_return_direct = False
+                if (
+                    (
+                        "remaining_steps" not in state
+                        and state["is_last_step"]
+                        and has_tool_calls
+                    )
+                    or (
+                        "remaining_steps" in state
+                        and state["remaining_steps"] < 1
+                        and all_tools_return_direct
+                    )
+                    or (
+                        "remaining_steps" in state
+                        and state["remaining_steps"] < 2
+                        and has_tool_calls
+                    )
+                ):
+                    return {
+                        "tools_handler_messages": [
+                            AIMessage(
+                                id=response.id,
+                                content="Sorry, need more steps to process this request.",
+                            )
+                        ]
+                    }
+                return {"tools_handler_messages": [response]} 
+            
+            except Exception as e:
+                return {
+                    "tools_handler_messages": [],
+                }
+
+        return {
+            "tools_handler_messages": [],
+        }
+    
 
     def call_model_repeat(state: AgentState, config: RunnableConfig) -> AgentState:
         state["tools_handler_messages"] = _validate_chat_history(state["tools_handler_messages"])
@@ -840,16 +966,27 @@ def create_react_agent(
 
     # Dummy node to pass input to tools/search if tool calls exist
     workflow.add_node("DISEASE_SKIP_HANDLER", RunnableCallable(call_disease))
-
     workflow.add_node("DISEASE_TOOL_HANDLER", RunnableCallable(call_disease_inner))
-
     # Disease tool node - invokes tools
     workflow.add_node("DISEASE_TOOL_NODE", disease_tool_node)
+    # Handles repeated calls of disease tools and transition to chemical tools
+    workflow.add_node("DISEASE_TOOL_REPEAT_HANDLER", RunnableCallable(call_model_disease_repeat))
+
+
+    # Dummy node to pass input to tools/search if tool calls exist
+    workflow.add_node("GENE_SKIP_HANDLER", RunnableCallable(call_gene))
+    workflow.add_node("GENE_TOOL_HANDLER", RunnableCallable(call_gene_inner))
+    # Gene tool node - invokes tools
+    workflow.add_node("GENE_TOOL_NODE", gene_tool_node)
+    # Handles repeated calls of GENE tools and transition to chemical tools
+    workflow.add_node("GENE_TOOL_REPEAT_HANDLER", RunnableCallable(call_model_gene_repeat))
 
     # Invokes translation tools
     workflow.add_node("TRANSLATE_TOOL_NODE", translate_tool_node)
 
     workflow.add_node("TRANSLATE_DISEASE_TOOL_NODE", translate_tool_node)
+
+    workflow.add_node("TRANSLATE_GENE_TOOL_NODE", translate_tool_node)
     
 
     # Chooses which tools to call
@@ -869,14 +1006,14 @@ def create_react_agent(
 
     workflow.add_node("ALL_TOOL_CAPTURE_HANDLER", RunnableCallable(call_tools_capture))
 
-    workflow.add_node("DISEASE_TOOL_REPEAT_HANDLER", RunnableCallable(call_model_disease_repeat))
+    
     workflow.add_node("TOOL_REPEAT_HANDLER", RunnableCallable(call_model_repeat))
 
 
     workflow.add_edge(START, "INPUT_HANDLER") # Start with the agent node
 
     # If the initial node didn't produce any tool calls, we can skip to the training step and just answer based on the context
-    def can_skip_to_training(state: AgentState) -> Literal["SKIP_HANDLER", "TRAINING_SUMMARY_HANDLER", "DISEASE_SKIP_HANDLER"]:
+    def can_skip_to_training(state: AgentState) -> Literal["SKIP_HANDLER", "TRAINING_SUMMARY_HANDLER", "DISEASE_SKIP_HANDLER", "GENE_SKIP_HANDLER"]:
         messages = state["messages"]
         last_message = messages[-1]
         # Okay to skip to training if the last message has no tool calls
@@ -889,6 +1026,8 @@ def create_react_agent(
                 for call in last_message.tool_calls:
                     if call["name"] == "Query2Disease":
                         return "DISEASE_SKIP_HANDLER"
+                    elif call["name"] == "Query2Gene":
+                        return "GENE_SKIP_HANDLER"
             return "SKIP_HANDLER"
         
     workflow.add_conditional_edges("INPUT_HANDLER", can_skip_to_training)
@@ -927,7 +1066,7 @@ def create_react_agent(
     workflow.add_conditional_edges("TOOL_REPEAT_HANDLER", can_repeat_tools) # Once we have the DTXSID, we can call the tools
 
 
-
+    # disease pathway
     workflow.add_edge("DISEASE_SKIP_HANDLER", "TRANSLATE_DISEASE_TOOL_NODE") # Start with the agent node
     workflow.add_edge("TRANSLATE_DISEASE_TOOL_NODE", "DISEASE_TOOL_HANDLER") # Once we have the DTXSID, we can call the tools
     def can_skip_disease_tools(state: AgentState) -> Literal["DISEASE_TOOL_NODE", "ALL_TOOL_CAPTURE_HANDLER"]:
@@ -963,6 +1102,42 @@ def create_react_agent(
             return "DISEASE_TOOL_NODE"
     workflow.add_conditional_edges("DISEASE_TOOL_REPEAT_HANDLER", can_repeat_disease_tools) # Once we have the DTXSID, we can call the tools
 
+    # gene pathway
+    workflow.add_edge("GENE_SKIP_HANDLER", "TRANSLATE_GENE_TOOL_NODE") # Start with the agent node
+    workflow.add_edge("TRANSLATE_GENE_TOOL_NODE", "GENE_TOOL_HANDLER") # Once we have the DTXSID, we can call the tools
+    def can_skip_gene_tools(state: AgentState) -> Literal["GENE_TOOL_NODE", "ALL_TOOL_CAPTURE_HANDLER"]:
+        messages = state["tools_handler_messages"]
+        last_message = messages[-1]
+
+        if not hasattr(last_message, "tool_calls"):
+            return "ALL_TOOL_CAPTURE_HANDLER"
+
+        # Okay to skip to training if the last message has no tool calls
+        if not last_message.tool_calls:
+            return "ALL_TOOL_CAPTURE_HANDLER"  
+        else:
+            return "GENE_TOOL_NODE"
+    workflow.add_conditional_edges("GENE_TOOL_HANDLER", can_skip_gene_tools) # Once we have the DTXSID, we can call the tools
+
+    workflow.add_edge("GENE_TOOL_NODE", "GENE_TOOL_REPEAT_HANDLER") 
+
+    def can_repeat_gene_tools(state: AgentState) -> Literal["GENE_TOOL_NODE", "TRANSLATE_TOOL_NODE", "ALL_TOOL_CAPTURE_HANDLER"]:
+        messages = state["tools_handler_messages"]
+        last_message = messages[-1]
+
+        if not hasattr(last_message, "tool_calls"):
+            return "ALL_TOOL_CAPTURE_HANDLER"
+
+        # Okay to skip to training if the last message has no tool calls
+        if not last_message.tool_calls:
+            return "ALL_TOOL_CAPTURE_HANDLER"  
+        else:
+            tool_call_names = [call["name"] for call in last_message.tool_calls]
+            if "Name2DTXSID" in tool_call_names or "SMILES2DTXSID" in tool_call_names or "CASRN2DTXSID" in tool_call_names:
+                return("TRANSLATE_TOOL_NODE")
+            return "GENE_TOOL_NODE"
+    workflow.add_conditional_edges("GENE_TOOL_REPEAT_HANDLER", can_repeat_gene_tools) # Once we have the DTXSID, we can call the tools
+
 
 
     workflow.add_edge("SKIP_HANDLER", "RAG_TOOL_NODE")
@@ -970,6 +1145,9 @@ def create_react_agent(
 
     workflow.add_edge("DISEASE_SKIP_HANDLER", "RAG_TOOL_NODE")
     workflow.add_edge("DISEASE_SKIP_HANDLER", "LITERATURE_TOOL_NODE")
+
+    workflow.add_edge("GENE_SKIP_HANDLER", "RAG_TOOL_NODE")
+    workflow.add_edge("GENE_SKIP_HANDLER", "LITERATURE_TOOL_NODE")
     
 
     workflow.add_edge(["ALL_TOOL_CAPTURE_HANDLER", "RAG_TOOL_NODE", "LITERATURE_TOOL_NODE"], "TRAINING_SUMMARY_HANDLER") # Converge on training step to summarize the results of the tools and search

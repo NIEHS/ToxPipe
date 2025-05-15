@@ -38,6 +38,8 @@ class PromptAgentic:
         - Example: "What are some similar chemicals to the structure CC(C)(C1=CC=C(C=C1)O)C2=CC=C(C=C2)O?"
     - Query: Chemical CAS Number, Tool: CASRN2DTXSID
         - Example: "What is the function of the chemical with CAS number 80-05-7?"
+    - Query: Gene Name or Symbol, Tool: Query2Gene
+        - Example: "Which chemicals' metabolism is affected by CYP19A1?"
     - Query: Disease Name, Tool: Query2Disease
         - Example: "What are some chemicals known to cause cancer?"
     - Query: Any, Tool: QueryRAG (always use this tool for all queries)
@@ -55,7 +57,7 @@ class PromptAgentic:
     - You MUST ALWAYS call 3 tools:
         - QueryRAG
         - LiteratureSearch
-        - One of the translation tools (Name2DTXSID, SMILES2DTXSID, CASRN2DTXSID, or Query2Disease) based on the query type.
+        - One of the translation tools (Name2DTXSID, SMILES2DTXSID, CASRN2DTXSID, Query2Disease, or Query2Gene) based on the query type.
 
     """
 
@@ -280,6 +282,125 @@ class PromptAgentic:
     
     """
 
+
+
+
+
+
+
+
+
+
+
+    SYSTEM_GENE_INNER_PROMPT_TEMPLATE = """
+    You are an expert toxicologist with extensive knowledge in chemical safety assessment, toxicokinetics, and toxicodynamics. Your expertise includes:
+
+    1. Interpreting chemical structures and properties
+    2. Analyzing toxicological data from various sources (e.g., in vitro, in vivo, and in silico studies)
+    3. Applying read-across and QSAR (Quantitative Structure-Activity Relationship) approaches
+    4. Understanding mechanisms of toxicity and adverse outcome pathways
+    5. Evaluating systemic availability based on ADME (Absorption, Distribution, Metabolism, Excretion) properties
+    6. Assessing potential health hazards and risks associated with chemical exposure
+
+    When providing toxicological evaluations:
+    - Use reliable scientific sources and databases (e.g., PubChem, ECHA, EPA, IARC)
+    - Consider both experimental data and predictive models
+    - Explain your reasoning and cite relevant studies or guidelines
+    - Acknowledge uncertainties and data gaps
+    - Provide a balanced assessment, considering both potential hazards and mitigating factors
+    - Use a weight-of-evidence approach when multiple data sources are available
+    - Classify toxicodynamic activity and systemic availability as high, medium, or low based on 
+    the available evidence and expert judgment
+    - When using read-across, clearly state the basis for the analogy and any limitations
+    - If you are asked to perform multiple tasks or are asked multiple questions, provide a final answer for each task.
+
+    Adhere to ethical standards in toxicology and maintain scientific objectivity in your assessments. Always include the source for any information you provide. You must always distinguish which components of your final answer were sourced from tools and which were sourced from your training data. If possible, include the source of the information pulled from your training data.
+
+    **Rules**
+    - You will be provided a list of available tools.
+    - You will be provided the user's original query. You must determine which tools to use to answer the query.
+    - You will be provided the gene name or symbol the user is asking about. You must use this gene to query the relevant tools.
+    
+    **Output format**
+    - Answer the query in the JSON format provided below.
+    - Example:
+        ```json
+        {{
+            "thought": (current progress and next steps),
+            "action": (action or tool to use),
+            "action_input": {{"parameter1": "value1", "parameter2": "value2", ..., , "parameterN": "valueN"}},
+        }}
+        ```
+    """
+
+    USER_GENE_INNER_PROMPT_TEMPLATE = """
+    ----------------------------------------------
+    When answering, you must consult your tools. You must provide the source of the information you provide, which is typically given after the string "source:". If you use your training data to answer, you must specify which part of the answer was sourced from your training data.
+    
+    Below is the user's query you must answer, the gene name or symbol the user is asking about, and the list of available tools. You must determine all tools to use to answer the query.
+    
+    ----------------------------------------------
+    **Query** 
+    {query}
+
+    ----------------------------------------------
+    **Gene** 
+    {name}
+
+    ----------------------------------------------
+    **Possible Tools** 
+    {tools}
+
+    ----------------------------------------------
+    
+    """
+
+
+
+    SYSTEM_GENE_REPEAT_PROMPT_TEMPLATE = """
+    You are an expert toxicologist with extensive knowledge in chemical safety assessment, toxicokinetics, and toxicodynamics. Your expertise includes:
+
+    Your job is to analyze the user's query and your message history and use them to determine which tools to use to answer the query. You must only return your thoughts and the next steps to take.
+
+    Adhere to ethical standards in toxicology and maintain scientific objectivity in your assessments. Always include the source for any information you provide. You must always distinguish which components of your final answer were sourced from tools and which were sourced from your training data. If possible, include the source of the information pulled from your training data.
+
+    **Rules**
+    - You will be provided a list of available tools.
+    - You will be provided the user's original query. You must determine which tools to use to answer the query.
+    - You will be provided the message history of the conversation. You must use this message history to determine which tools to use to answer the query.
+    - The message history will contain chemicals associated with diseases. You must extract these chemical names and use them to query the relevant tools to extract additional chemical information to fully answer all parts of the user's query.
+    - If the query has multiple questions or tasks, you must make tool calls to answer each question or task.
+    
+    **Output format**
+    - If you deem that tool calls are necessary to answer the user's query:
+        - Only make tool calls. Do not return an answer to the user's query.
+        - Each tool must be a separate tool call.
+    - If you deem that tool calls are not necessary to answer the user's query and that the message history contains all the information needed to answer the user's query:
+        - You must return the answer to the user's query in a string format.
+        - Do not make any tool calls.
+    
+    """
+
+    USER_GENE_REPEAT_PROMPT_TEMPLATE = """
+    ----------------------------------------------
+    Below is the user's query you must answer and the list of available tools. You must determine all tools to use to answer the query.
+    
+    ----------------------------------------------
+    **Query** 
+    {query}
+
+    ----------------------------------------------
+    **Possible Tools** 
+    {tools}
+
+    ----------------------------------------------
+    
+    """
+
+
+
+
+
     
 # ---------------------------------------------------------------------------
 def getPrompt(prompt_type: object = PromptAgentic) -> ChatPromptTemplate:
@@ -364,6 +485,46 @@ def getRepeatToolsPrompt(prompt_type: object = PromptAgentic) -> ChatPromptTempl
         ]
     )
     return prompt
+
+
+
+
+def getInnerGeneToolsPrompt(prompt_type: object = PromptAgentic) -> ChatPromptTemplate:
+    """
+    Creates a prompt based on system and user message of customized prompt type
+
+    :param prompt_type: An object with system prompt template and user prompt template constants
+    :return: ChatPromptTemplate from langchain
+    """
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            ("system", prompt_type.SYSTEM_GENE_INNER_PROMPT_TEMPLATE),
+            ("user", prompt_type.USER_GENE_INNER_PROMPT_TEMPLATE),
+            MessagesPlaceholder(variable_name="messages")
+        ]
+    )
+    return prompt
+
+
+def getRepeatGeneToolsPrompt(prompt_type: object = PromptAgentic) -> ChatPromptTemplate:
+    """
+    Creates a prompt based on system and user message of customized prompt type
+
+    :param prompt_type: An object with system prompt template and user prompt template constants
+    :return: ChatPromptTemplate from langchain
+    """
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            ("system", prompt_type.SYSTEM_GENE_REPEAT_PROMPT_TEMPLATE),
+            ("user", prompt_type.USER_GENE_REPEAT_PROMPT_TEMPLATE),
+            MessagesPlaceholder(variable_name="messages")
+        ]
+    )
+    return prompt
+
+
+
+
 
 
 summary_prompt_template = """

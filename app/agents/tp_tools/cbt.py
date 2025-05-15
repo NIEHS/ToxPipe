@@ -39,12 +39,29 @@ class Query2Disease(BaseTool):
 
         chain = disease_prompt | self.llm
         res = chain.invoke({"query": q})
+        return res
 
-        print("===res.rstrip()==")
-        print(res)
+class Query2Gene(BaseTool):
+    name: str = "Query2Gene"
+    description: str = "Extract a gene name or symbol from the user's query. This tool only returns the gene name or symbol and does not provide any other information and is required to use before tool use."
+    llm: BaseLLM = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, q: str, **kwargs) -> str:
+        """Input a query, return the gene name."""
+
+        gene_prompt = """
+            For the given query, extract ONLY the gene name or symbol. The query is: {query}
+        """
+        gene_prompt = ChatPromptTemplate.from_template(gene_prompt)
+
+        chain = gene_prompt | self.llm
+        res = chain.invoke({"query": q})
 
         return res
-    
 
 
 class Query2DTXSID(BaseTool):
@@ -1849,7 +1866,7 @@ class QueryHMDBDisease2Chemicals(BaseTool):
         raise NotImplementedError()
 
 
-# HMDB disease to chemical
+# CTD disease to chemical
 class QueryCTDDisease2Chemicals(BaseTool):
     name: str = "QueryCTDDisease2Chemicals"
     description: str = "Input a disease name to return associated chemicals from the CTD. Chemicals returned may affect, influence, or cause the given disease."
@@ -1881,6 +1898,87 @@ class QueryCTDDisease2Chemicals(BaseTool):
         response = "\n".join(response)
         response = f"{response} (source: CTD)"
         
+        return(response)
+    
+    async def _arun(self, disease: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+
+
+
+# CTD gene to chemical
+class QueryCTDGene2Chemicals(BaseTool):
+    name: str = "QueryCTDGene2Chemicals"
+    description: str = "Input a gene name or symbol to return associated chemicals from the CTD. Chemicals returned may have an interaction with the given gene."
+    llm: BaseLLM = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, gene: str, **kwargs) -> str:
+        """Input gene name, return a list of associated chemicals using the data available in ChemBioTox."""
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/genes/chemicals?name={gene}&n=5&exact=FALSE",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+
+        res = res.json()
+
+        if len(res) < 1:
+            return(f"The gene {gene} is not known to be associated with any chemicals.")
+
+        response = []
+        for k in res.keys():
+            response_inner = []
+            for name in res[k].keys():
+                response_inner2 = []
+                for i in res[k][name]:
+                    response_inner2.append(f"{i['preferred_name']}")
+                response_inner.append(f"The following chemical(s) {name}: {', '.join(response_inner2)}")
+            response.append(f"{k}: {'; '.join(response_inner)}")
+        response = "\n".join(response)
+        response = f"{response} (source: CTD)"
+        return(response)
+    
+    async def _arun(self, disease: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+
+
+# HMDB gene to chemical
+class QueryHMDBGene2Chemicals(BaseTool):
+    name: str = "QueryHMDBGene2Chemicals"
+    description: str = "Input a gene name or symbol to return associated chemicals from the HMDB. Chemicals returned may have an interaction with the given gene."
+    llm: BaseLLM = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, gene: str, **kwargs) -> str:
+        """Input gene name, return a list of associated chemicals using the data available in ChemBioTox."""
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/genes/chemicals?name={gene}&n=5&exact=FALSE",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+
+        res = res.json()
+
+        if len(res) < 1:
+            return(f"The gene {gene} is not known to be associated with any chemicals.")
+
+        response = []
+        for k in res.keys():
+            response_inner = []
+            for name in res[k].keys():
+                response_inner2 = []
+                for i in res[k][name]:
+                    response_inner2.append(f"{i['preferred_name']}")
+                response_inner.append(f"The following chemical(s) {name}: {', '.join(response_inner2)}")
+            response.append(f"{k}: {'; '.join(response_inner)}")
+        response = "\n".join(response)
+        response = f"{response} (source: HMDB)"
         return(response)
     
     async def _arun(self, disease: str) -> str:

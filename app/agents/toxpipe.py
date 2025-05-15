@@ -53,6 +53,7 @@ def _make_llm(model, api_version, temp, max_retries, max_tokens, seed):
     llm = AzureChatOpenAI(
         model_name=model,
         temperature=temp,
+        api_version=api_version,
         max_retries=max_retries,
         max_tokens=max_tokens,
         seed=seed,

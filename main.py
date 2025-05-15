@@ -112,7 +112,7 @@ async def help(request: Request, response: Response):
 
 # Endpoint for creating an agent. Note that this will not actually create the agent object in memory, it just creates a JSON file with the agent parameters so that the API is "aware" that such an agent is defined and may be created later.
 @app.get("/agent/create/", tags=["agent"])
-async def create_agent(request: Request, response: Response, model: str = "azure-o3-mini", temp: float = 0, max_iterations: int = 20, max_retries: int = 100, max_tokens: int=4096, max_memory_tokens: int=4096, step_timeout: float = 0, n_threads: int = 1, summarize: bool = False, seed: int = 1):
+async def create_agent(request: Request, response: Response, model: str = "azure-o3", temp: float = 0, max_iterations: int = 20, max_retries: int = 100, max_tokens: int=4096, max_memory_tokens: int=4096, step_timeout: float = 0, n_threads: int = 1, summarize: bool = False, seed: int = 1):
     # Input validation
     if model not in ANTHROPIC_MODELS and model not in OLLAMA_MODELS and model not in OPENAI_MODELS and model not in MISTRALAI_MODELS and model not in GOOGLE_MODELS and model not in AMAZON_MODELS and model not in COHERE_MODELS:
         response.status_code = 400
@@ -120,9 +120,9 @@ async def create_agent(request: Request, response: Response, model: str = "azure
     if temp < 0 or temp > 1:
         response.status_code = 400
         return {"response": f"Error: temperature must be between 0 and 1 (inclusive)."}
-    if n_threads > 5:
+    if n_threads > 5 or n_threads < 1:
         response.status_code = 400
-        return {"response": f"Error: 'n_threads' must be 5 or less."}
+        return {"response": f"Error: 'n_threads' must be between 1 and 5 (inclusive)."}
     agentid = uuid.uuid4() # Generate UUID for the agent
     agent = {"agentid": str(agentid), "model": model, "temp": temp, "max_iterations": max_iterations, "max_retries":max_retries, "max_tokens":max_tokens, "max_memory_tokens":max_memory_tokens, "step_timeout":step_timeout, "n_threads":n_threads, "summarize":summarize, "seed":seed, "date_created":str(datetime.datetime.now())}
     # Create a JSON file with the agent parameters

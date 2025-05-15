@@ -79,6 +79,7 @@ def make_translate_tools(llm: BaseLanguageModel):
         SMILES2DTXSID(),
         CASRN2DTXSID(),
         Query2Disease(llm=llm),
+        Query2Gene(llm=llm),
     ]
     return translate_tools
 
@@ -89,6 +90,12 @@ def make_disease_tools(llm: BaseLanguageModel):
     ]
     return disease_tools
 
+def make_gene_tools(llm: BaseLanguageModel):
+    gene_tools = [
+        QueryHMDBGene2Chemicals(llm=llm),
+        QueryCTDGene2Chemicals(llm=llm),
+    ]
+    return gene_tools
 
 def make_rag_tools(llm: BaseLanguageModel):
     rag_tools = [
