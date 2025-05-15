@@ -61,7 +61,11 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
 
         QueryT3DB(llm=llm),
 
-        QueryToxRefDBStudies(llm=llm)
+        QueryToxRefDBStudies(llm=llm),
+
+        QueryStructuralAlertsOChem(llm=llm),
+        QueryStructuralAlertsChEMBL(llm=llm),
+        QueryStructuralAlertsSaagar(llm=llm)
 
     ]
 

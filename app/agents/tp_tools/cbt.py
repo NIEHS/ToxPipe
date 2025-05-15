@@ -759,9 +759,9 @@ class QueryCBTDrugBankTransporters(BaseTool):
         raise NotImplementedError()
     
 
-class QueryCBTAlerts(BaseTool):
-    name: str = "QueryStructuralAlerts"
-    description: str = "Input a SMILES string to find structural alerts from the OChem, ChEMBL, and Saagar datasources within the ChemBioTox database. These alerts can provide context to chemical behavior, transport, and interactions."
+class QueryStructuralAlertsOChem(BaseTool):
+    name: str = "QueryStructuralAlertsOChem"
+    description: str = "Input a chemical's DTXSID to find structural alerts from the OChem database. These alerts can provide context to chemical behavior, transport, and interactions."
 
     llm: BaseLLM = None
 
@@ -769,58 +769,70 @@ class QueryCBTAlerts(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, smiles: str, **kwargs) -> str:
-        """Input SMILES, return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
-        smiles = re.sub(r'\s+', '', smiles)
+    def _run(self, dtxsid: str, **kwargs) -> str:
+        """Input a chemical's DTXSID, return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        
+        # Convert DTXSID to SMILES
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/alerts?smiles={urllib.parse.quote_plus(smiles)}",
+            f"{os.environ.get('CBT_API_ENDPOINT')}/dtxsid2smiles?dtxsid={urllib.parse.quote_plus(dtxsid)}",
             headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
         )
         res = res.json()
-        if len(res) < 1:
-            return(f"There was a problem completing the request.")
+        smiles = res[0]["canonical_smiles"]
 
-        alerts = res
-        alerts_list = []
-        for i in alerts:
-            if 'alert' not in i:
-                continue
-            alert_str = f"{i['alert']} ({i['source']})"
-            alerts_list.append(alert_str)
+        ochem_res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/alerts/ochem?smiles={urllib.parse.quote_plus(smiles)}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+        ochem_res = ochem_res.json()
 
-        alerts_list = unique(alerts_list)
+        alert_prompt = """
+            You are an expert toxicologist with extensive knowledge in chemical safety assessment, toxicokinetics, and toxicodynamics. Your expertise includes:
 
-        response = f"The chemical given by the SMILES {smiles} has the following chemical substructures of note (sources: OChem, ChEMBL, Saagar): {';'.join(alerts_list)}."
-        if len(alerts_list) < 1:
-            response = f"The chemical given by the SMILES {smiles} does not have any notable chemical substructures."
+            1. Interpreting chemical structures and properties
+            2. Analyzing toxicological data from various sources (e.g., in vitro, in vivo, and in silico studies)
+            3. Applying read-across and QSAR (Quantitative Structure-Activity Relationship) approaches
+            4. Understanding mechanisms of toxicity and adverse outcome pathways
+            5. Evaluating systemic availability based on ADME (Absorption, Distribution, Metabolism, Excretion) properties
+            6. Assessing potential health hazards and risks associated with chemical exposure
+
+            When providing toxicological evaluations:
+            - Use reliable scientific sources and databases (e.g., PubChem, ECHA, EPA, IARC)
+            - Consider both experimental data and predictive models
+            - Explain your reasoning and cite relevant studies or guidelines
+            - Acknowledge uncertainties and data gaps
+            - Provide a balanced assessment, considering both potential hazards and mitigating factors
+            - Use a weight-of-evidence approach when multiple data sources are available
+            - Classify toxicodynamic activity and systemic availability as high, medium, or low based on 
+            the available evidence and expert judgment
+            - When using read-across, clearly state the basis for the analogy and any limitations
+            - If you are asked to perform multiple tasks or are asked multiple questions, provide a final answer for each task.
+
+            Adhere to ethical standards in toxicology and maintain scientific objectivity in your assessments. Always include the source for any information you provide. 
+
+            You will be given descriptions of chemical structural alerts from the OChem database that correspond to one or more chemicals. You must provide a formatted response that summarizes the effects of these alerts. This response must be no longer than 2 paragraphs (around 200 words).
+
+            **Structural Alert Descriptions**
+            {descriptions}
+        """
+        alert_prompt = ChatPromptTemplate.from_template(alert_prompt)
+
+        alert_pipeline = alert_prompt | self.llm
+        response = alert_pipeline.invoke({"descriptions": ochem_res})
+
+        if hasattr(response, "content"):
+            response = f"{response.content} (source: OChem, interpreted by LLM)"
 
         return(response)
-        
-
     async def _arun(self, dtxsid: str) -> str:
         """Use the tool asynchronously."""
         raise NotImplementedError()
+    
 
-def format_alerts(llm, response):
-    model = llm
-    alert_prompt = """
-        For the following list of chemical structural alerts, provide a formatted response. You MUST use the following rules:
-        1. Each alert in the list was found to be a chemical substructure of the given chemical.
-        2. Each alert in the list is followed by its source in parentheses.
-        3. You must group alerts together based on if they are from OChem, ChEMBL, or Saagar.
-        4. Each group of alerts must be separated by a new line.
-        5. For each group of alerts, your response must be in the format: "Source: [source] | Alert: [alert]."
-        The list of chemical structural alerts is as follows: {response}
-    """
-    alert_prompt = ChatPromptTemplate.from_template(alert_prompt)
 
-    chain = alert_prompt | model
-    res = chain.invoke({"response": response})
-    return res
-
-class QueryCBTAlertsMulti(BaseTool):
-    name: str = "QueryStructuralAlertsMulti"
-    description: str = "Given multiple SMILES strings that represent metabolites as input, separated by ';', find structural alerts from the OChem, ChEMBL, and Saagar datasources within the ChemBioTox database. Each metabolite's results will be separated by two newline characters: '\n\n'."
+class QueryStructuralAlertsChEMBL(BaseTool):
+    name: str = "QueryStructuralAlertsChEMBL"
+    description: str = "Input a chemical's DTXSID to find structural alerts from the ChEMBL database. These alerts can provide context to chemical behavior, transport, and interactions."
 
     llm: BaseLLM = None
 
@@ -828,72 +840,139 @@ class QueryCBTAlertsMulti(BaseTool):
         super().__init__()
         self.llm = llm
 
-    def _run(self, smiles: str, **kwargs) -> str:
-        """Input SMILES, return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
-        response_list = []
-        smiles = re.sub(r'\s+', '', smiles)
-        for metabolite in smiles.split(';'):
-            res = requests.get(
-                f"{os.environ.get('CBT_API_ENDPOINT')}/alerts?smiles={urllib.parse.quote_plus(metabolite)}",
-                headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
-            )
-            res = res.json()
-            if len(res) < 1:
-                return(f"There was a problem completing the request.")
-
-            alerts = res
-            alerts_list = []
-
-            alerts_list_ochem = []
-            alerts_list_chembl = []
-            alerts_list_saagar = []
-
-            for i in alerts:
-                if 'alert' not in i:
-                    continue
-                alert_str = f"{i['alert']} ({i['source']})"
-                if i['source'] == 'ochem':
-                    alerts_list_ochem.append(alert_str)
-                elif i['source'] == 'chembl':
-                    alerts_list_chembl.append(alert_str)
-                elif i['source'] == 'saagar':
-                    alerts_list_saagar.append(alert_str)
-
-            # taking subset makes the thought process much faster
-            alerts_list_ochem = unique(alerts_list_ochem)
-            if len(alerts_list_ochem) > MAX_RESULTS:
-                alerts_list_ochem = sample(alerts_list_ochem, MAX_RESULTS)
-
-            alerts_list_chembl = unique(alerts_list_chembl)
-            if len(alerts_list_chembl) > MAX_RESULTS:
-                alerts_list_chembl = sample(alerts_list_chembl, MAX_RESULTS)
-
-            alerts_list_saagar = unique(alerts_list_saagar)
-            if len(alerts_list_saagar) > MAX_RESULTS:
-                alerts_list_saagar = sample(alerts_list_saagar, MAX_RESULTS)
-
-            alerts_list = alerts_list_ochem + alerts_list_chembl + alerts_list_saagar
-
-            #tmp_response = f"The metabolite given by the SMILES {metabolite} has the following chemical substructures of note: {';'.join(alerts_list)}."
-            tmp_response = f"The metabolite given by the SMILES {metabolite} has the following chemical substructures of note:\n"
-            if len(alerts_list) < 1:
-                tmp_response = f"The metabolite given by the SMILES {metabolite} does not have any notable chemical substructures."
-            else:
-                for alert in alerts_list:
-                    tmp_response = f"{tmp_response}- {alert}\n"
-            #    tmp_response = format_alerts(self.llm, tmp_response)
-            
-            response_list.append(tmp_response)
-
-
-        return("\n\n".join(response_list))
+    def _run(self, dtxsid: str, **kwargs) -> str:
+        """Input a chemical's DTXSID, return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         
+        # Convert DTXSID to SMILES
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/dtxsid2smiles?dtxsid={urllib.parse.quote_plus(dtxsid)}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+        res = res.json()
+        smiles = res[0]["canonical_smiles"]
 
+        chembl_res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/alerts/chembl?smiles={urllib.parse.quote_plus(smiles)}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+        chembl_res = chembl_res.json()
+
+        alert_prompt = """
+            You are an expert toxicologist with extensive knowledge in chemical safety assessment, toxicokinetics, and toxicodynamics. Your expertise includes:
+
+            1. Interpreting chemical structures and properties
+            2. Analyzing toxicological data from various sources (e.g., in vitro, in vivo, and in silico studies)
+            3. Applying read-across and QSAR (Quantitative Structure-Activity Relationship) approaches
+            4. Understanding mechanisms of toxicity and adverse outcome pathways
+            5. Evaluating systemic availability based on ADME (Absorption, Distribution, Metabolism, Excretion) properties
+            6. Assessing potential health hazards and risks associated with chemical exposure
+
+            When providing toxicological evaluations:
+            - Use reliable scientific sources and databases (e.g., PubChem, ECHA, EPA, IARC)
+            - Consider both experimental data and predictive models
+            - Explain your reasoning and cite relevant studies or guidelines
+            - Acknowledge uncertainties and data gaps
+            - Provide a balanced assessment, considering both potential hazards and mitigating factors
+            - Use a weight-of-evidence approach when multiple data sources are available
+            - Classify toxicodynamic activity and systemic availability as high, medium, or low based on 
+            the available evidence and expert judgment
+            - When using read-across, clearly state the basis for the analogy and any limitations
+            - If you are asked to perform multiple tasks or are asked multiple questions, provide a final answer for each task.
+
+            Adhere to ethical standards in toxicology and maintain scientific objectivity in your assessments. Always include the source for any information you provide. 
+
+            You will be given descriptions of chemical structural alerts from the ChEMBL database that correspond to one or more chemicals. You must provide a formatted response that summarizes the effects of these alerts. This response must be no longer than 2 paragraphs (around 200 words).
+
+            **Structural Alert Descriptions**
+            {descriptions}
+        """
+        alert_prompt = ChatPromptTemplate.from_template(alert_prompt)
+
+        alert_pipeline = alert_prompt | self.llm
+        response = alert_pipeline.invoke({"descriptions": chembl_res})
+
+        if hasattr(response, "content"):
+            response = f"{response.content} (source: ChEMBL, interpreted by LLM)"
+
+        return(response)
     async def _arun(self, dtxsid: str) -> str:
         """Use the tool asynchronously."""
         raise NotImplementedError()
-    
-    
+
+
+
+class QueryStructuralAlertsSaagar(BaseTool):
+    name: str = "QueryStructuralAlertsSaagar"
+    description: str = "Input a chemical's DTXSID to find structural alerts from the Saagar database. These alerts can provide context to chemical behavior, transport, and interactions."
+
+    llm: BaseLLM = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str, **kwargs) -> str:
+        """Input a chemical's DTXSID, return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        
+        # Convert DTXSID to SMILES
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/dtxsid2smiles?dtxsid={urllib.parse.quote_plus(dtxsid)}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+        res = res.json()
+        smiles = res[0]["canonical_smiles"]
+
+        saagar_res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/alerts/saagar?smiles={urllib.parse.quote_plus(smiles)}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+        saagar_res = saagar_res.json()
+
+        alert_prompt = """
+            You are an expert toxicologist with extensive knowledge in chemical safety assessment, toxicokinetics, and toxicodynamics. Your expertise includes:
+
+            1. Interpreting chemical structures and properties
+            2. Analyzing toxicological data from various sources (e.g., in vitro, in vivo, and in silico studies)
+            3. Applying read-across and QSAR (Quantitative Structure-Activity Relationship) approaches
+            4. Understanding mechanisms of toxicity and adverse outcome pathways
+            5. Evaluating systemic availability based on ADME (Absorption, Distribution, Metabolism, Excretion) properties
+            6. Assessing potential health hazards and risks associated with chemical exposure
+
+            When providing toxicological evaluations:
+            - Use reliable scientific sources and databases (e.g., PubChem, ECHA, EPA, IARC)
+            - Consider both experimental data and predictive models
+            - Explain your reasoning and cite relevant studies or guidelines
+            - Acknowledge uncertainties and data gaps
+            - Provide a balanced assessment, considering both potential hazards and mitigating factors
+            - Use a weight-of-evidence approach when multiple data sources are available
+            - Classify toxicodynamic activity and systemic availability as high, medium, or low based on 
+            the available evidence and expert judgment
+            - When using read-across, clearly state the basis for the analogy and any limitations
+            - If you are asked to perform multiple tasks or are asked multiple questions, provide a final answer for each task.
+
+            Adhere to ethical standards in toxicology and maintain scientific objectivity in your assessments. Always include the source for any information you provide. 
+
+            You will be given descriptions of chemical structural alerts from the Saagar database that correspond to one or more chemicals. You must provide a formatted response that summarizes the effects of these alerts. This response must be no longer than 2 paragraphs (around 200 words).
+
+            **Structural Alert Descriptions**
+            {descriptions}
+        """
+        alert_prompt = ChatPromptTemplate.from_template(alert_prompt)
+
+        alert_pipeline = alert_prompt | self.llm
+        response = alert_pipeline.invoke({"descriptions": saagar_res})
+
+        if hasattr(response, "content"):
+            response = f"{response.content} (source: Saagar, interpreted by LLM)"
+
+        return(response)
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+
+
+
+
 ### Chemical Properties ###
 # Genra Properties - TODO
 # Genra Tests - TODO
@@ -1219,10 +1298,7 @@ class QueryPubChemFormula(BaseTool):
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        exp = res
-
-        print("===========!!!! exp !!!!===============")
-        print(exp)
+        exp = res[0]
 
         response = f"The chemical formula of {dtxsid} is (source: PubChem): {exp}"
         if len(exp) < 1:
