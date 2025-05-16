@@ -1955,7 +1955,7 @@ class QueryCTDDisease2Chemicals(BaseTool):
     def _run(self, disease: str, **kwargs) -> str:
         """Input disease name, return a list of associated chemicals using the data available in ChemBioTox."""
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/diseases/chemicals?name={disease}&n=5&exact=FALSE",
+            f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/diseases/chemicals?name={disease}&n=5&exact=FALSE&n_chem=5",
             headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
         )
 
