@@ -96,7 +96,7 @@ def make_disease_tools(llm: BaseLanguageModel):
 
 def make_gene_tools(llm: BaseLanguageModel):
     gene_tools = [
-        QueryHMDBGene2Chemicals(llm=llm),
+        #QueryHMDBGene2Chemicals(llm=llm),
         QueryCTDGene2Chemicals(llm=llm),
     ]
     return gene_tools

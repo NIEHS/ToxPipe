@@ -1995,7 +1995,7 @@ class QueryCTDGene2Chemicals(BaseTool):
     def _run(self, gene: str, **kwargs) -> str:
         """Input gene name, return a list of associated chemicals using the data available in ChemBioTox."""
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/genes/chemicals?name={gene}&n=5&exact=FALSE",
+            f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/genes/chemicals?name={gene}&n=50&exact=TRUE",
             headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
         )
 
@@ -2003,6 +2003,9 @@ class QueryCTDGene2Chemicals(BaseTool):
 
         if len(res) < 1:
             return(f"The gene {gene} is not known to be associated with any chemicals.")
+
+        print("=== RES ===")
+        print(res)
 
         response = []
         for k in res.keys():

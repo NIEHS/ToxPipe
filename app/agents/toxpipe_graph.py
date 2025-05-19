@@ -428,7 +428,8 @@ def create_react_agent(
 
     llm = model
 
-    model_start = cast(BaseChatModel, model).bind_tools(translate_tool_classes + rag_tool_classes + literature_tool_classes, tool_choice="any")
+    #model_start = cast(BaseChatModel, model).bind_tools(translate_tool_classes + rag_tool_classes + literature_tool_classes, tool_choice="any")
+    model_start = cast(BaseChatModel, model).bind_tools(translate_tool_classes + rag_tool_classes + literature_tool_classes)
     model_inner = cast(BaseChatModel, model).bind_tools(tool_classes, tool_choice="any")
     model_repeat = cast(BaseChatModel, model).bind_tools(tool_classes)
     model_disease_inner = cast(BaseChatModel, model).bind_tools(disease_tool_classes, tool_choice="any")
@@ -535,6 +536,10 @@ def create_react_agent(
 
         response = model_start_runnable.invoke(state["messages"], config) # Generate tool calls
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
+
+
+        print("=== FIRST MESSAGE TOOL CALLS ===")
+        print(response.tool_calls)
         
         if has_tool_calls:
 
