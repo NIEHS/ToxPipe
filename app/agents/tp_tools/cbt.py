@@ -301,7 +301,7 @@ class QueryCBTChemicalVendors(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/vendors?dtxsid={dtxsid}",
+            f"{os.environ.get('CBT_API_ENDPOINT')}/availability/vendors?dtxsid={dtxsid}",
             headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
         )
         res = res.json()
@@ -310,9 +310,8 @@ class QueryCBTChemicalVendors(BaseTool):
 
         vendor_list = []
         for i in res:
-            if 'Source Name' not in i:
-                continue
-            vendor_list.append(i['Source Name'])
+            if 'source_name' in i and 'url' in i:
+                vendor_list.append(f"{i['source_name']} ({i['url']})")
 
         vendor_list = unique(vendor_list)
 
@@ -351,9 +350,8 @@ class QueryCBTTox21Models(BaseTool):
 
         tox21_list = []
         for i in tox21:
-            if 'activity_score' not in i and 'assay_model' not in i and 'ad' not in i and 'tc' not in i:
-                continue
-            tox21_list.append(f"{i['assay_model']} (activity_score: {i['activity_score']})")
+            if 'activity_score' in i and 'assay_model' in i:
+                tox21_list.append(f"{i['assay_model']} (score: {i['activity_score']})")
         
         tox21_list = unique(tox21_list)
 
@@ -387,12 +385,15 @@ class QueryCBTGRAS(BaseTool):
         if len(res) < 1:
             return(f"There was a problem completing the request.")
 
-        gras = res['anno_gras']
+        gras = res
         gras_list = []
+
         for i in gras:
-            if 'prod_type' not in i:
-                continue
-            gras_list.append(i['prod_type'])
+            if 'scogs_interpretation' in i and 'preferred_name' in i:
+                tmp = i['scogs_interpretation']
+                name = i['preferred_name']
+                tmp = tmp.replace('[substance]', name)
+                gras_list.append(tmp)
         
         gras_list = unique(gras_list)
 
@@ -423,7 +424,7 @@ class QueryCTDDiseases(BaseTool):
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        ctd_diseases = res['anno_ctd_diseases']
+        ctd_diseases = res
 
         ctd_diseases_list_measured = []
         ctd_diseases_list_inferred = []
@@ -735,8 +736,6 @@ class QueryCBTDrugBankTransporters(BaseTool):
 
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-
-        res = res['anno_drugbank_transporters']
         
         transporters = res
         transporters_list = []
@@ -1037,7 +1036,7 @@ class QueryCTDBP(BaseTool):
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        exp = res['anno_ctd_bioprocess']
+        exp = res
 
         exp = pd.DataFrame(exp)
         exp = exp.loc[exp["corrected_pvalue"] < 0.05]
@@ -1076,7 +1075,7 @@ class QueryCTDCC(BaseTool):
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        exp = res['anno_ctd_cellcomp']
+        exp = res
         exp_list = []
         
         exp = pd.DataFrame(exp)
@@ -1115,7 +1114,7 @@ class QueryCTDMF(BaseTool):
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        exp = res['anno_ctd_molfunct']
+        exp = res
         exp = pd.DataFrame(exp)
         exp = exp.loc[exp["corrected_pvalue"] < 0.05]
         exp = exp.sort_values(by=["corrected_pvalue"])
@@ -1298,7 +1297,7 @@ class QueryPubChemFormula(BaseTool):
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        exp = res[0]
+        exp = res
 
         response = f"The chemical formula of {dtxsid} is (source: PubChem): {exp}"
         if len(exp) < 1:
@@ -1470,7 +1469,7 @@ class QueryFooDBEnzymes(BaseTool):
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        exp = res['anno_foodb_enzymes']
+        exp = res
         exp_list = []
         for i in exp:
             if 'enzyme_name' not in i:
@@ -1507,7 +1506,7 @@ class QueryFooDBFlavors(BaseTool):
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        exp = res['anno_foodb_flavors']
+        exp = res
         exp_list = []
         for i in exp:
             if 'flavor_name' not in i and 'category' not in i:
@@ -1544,7 +1543,7 @@ class QueryFooDBContent(BaseTool):
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        exp = res['anno_foodb_foodcontent']
+        exp = res
         exp_list = []
         for i in exp:
             if 'name' in i and 'orig_content' in i and 'orig_unit' in i:
@@ -1582,7 +1581,7 @@ class QueryFooDBEffects(BaseTool):
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        exp = res['anno_foodb_healtheffects']
+        exp = res
         exp_list = []
         for i in exp:
             if 'health_effect_name' not in i:
@@ -1622,7 +1621,7 @@ class QueryDrugBankCarriers(BaseTool):
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        exp = res['anno_drugbank_carriers']
+        exp = res
         exp_list = []
         for i in exp:
             if 'annotation' not in i:
@@ -1660,7 +1659,7 @@ class QueryDrugBankEnzymes(BaseTool):
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        exp = res['anno_drugbank_enzymes']
+        exp = res
         exp_list = []
         for i in exp:
             if 'annotation' not in i:
@@ -1697,7 +1696,7 @@ class QueryDrugBankTargets(BaseTool):
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        exp = res['anno_drugbank_targets']
+        exp = res
         exp_list = []
         for i in exp:
             if 'annotation' not in i:
@@ -1734,7 +1733,7 @@ class QueryDrugBankTransporters(BaseTool):
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        exp = res['anno_drugbank_transporters']
+        exp = res
         exp_list = []
         for i in exp:
             if 'annotation' not in i:
@@ -1774,7 +1773,7 @@ class QueryHMDBBS(BaseTool):
 
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        exp = res['anno_hmdb_biospecimenlocations']
+        exp = res
         exp_list = []
         for i in exp:
             if 'annotation' not in i:
@@ -1811,7 +1810,7 @@ class QueryHMDBC(BaseTool):
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        exp = res['anno_hmdb_cellularlocations']
+        exp = res
         exp_list = []
         for i in exp:
             if 'annotation' not in i:
@@ -1848,7 +1847,7 @@ class QueryHMDBT(BaseTool):
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        exp = res['anno_hmdb_tissuelocations']
+        exp = res
         exp_list = []
         for i in exp:
             if 'annotation' not in i:
@@ -1886,7 +1885,7 @@ class QueryHMDBDiseases(BaseTool):
         res = res.json()
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        exp = res["anno_hmdb_diseases"]
+        exp = res
         exp_list = []
         for i in exp:
             if 'annotation' not in i:
@@ -2003,9 +2002,6 @@ class QueryCTDGene2Chemicals(BaseTool):
 
         if len(res) < 1:
             return(f"The gene {gene} is not known to be associated with any chemicals.")
-
-        print("=== RES ===")
-        print(res)
 
         response = []
         for k in res.keys():
@@ -2166,7 +2162,7 @@ class QueryToxRefDBNonNP(BaseTool):
 
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        exp = res['anno_toxrefdb_nonneoplastic']
+        exp = res
         exp_list = []
         for i in exp:
             if 'annotation' not in i:
@@ -2204,7 +2200,7 @@ class QueryToxRefDBNP(BaseTool):
 
         if len(res) < 1:
             return(f"There was a problem completing the request.")
-        exp = res['anno_toxrefdb_neoplastic']
+        exp = res
         exp_list = []
         for i in exp:
             if 'annotation' not in i:
