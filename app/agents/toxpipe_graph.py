@@ -220,6 +220,46 @@ training_prompt = ChatPromptTemplate.from_messages(
 
 
 
+force_rag_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            'system',
+            (sufficient_system_prompt),
+        ),
+        (
+            'human',
+            (
+                """
+                    Below is the user's query. You must format the user's original query into a concise query to be used with the QueryRAG tool, then you must call the QueryRAG tool using this new query as input.
+                    
+                    ** User's Query **
+                    {query}
+                """
+            ),
+        ),
+    ]
+)
+
+force_literature_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            'system',
+            (sufficient_system_prompt),
+        ),
+        (
+            'human',
+            (
+                """
+                    Below is the user's query. You must format the user's original query into a concise query to be used with the LiteratureSearch tool, then you must call the LiteratureSearch tool using this new query as input.
+                    
+                    ** User's Query **
+                    {query}
+                """
+            ),
+        ),
+    ]
+)
+
 # We create the AgentState that we will pass around
 # This simply involves a list of messages
 # We want steps to return messages to append to the list
@@ -440,6 +480,9 @@ def create_react_agent(
 
     model_training = cast(BaseChatModel, model)
 
+    model_force_rag = cast(BaseChatModel, model).bind_tools(rag_tool_classes, tool_choice="QueryRAG")
+    model_force_literature = cast(BaseChatModel, model).bind_tools(literature_tool_classes, tool_choice="LiteratureSearch")
+
     # Truncate context window if too long
     def condense_prompt(prompt: ChatPromptValue) -> ChatPromptValue:        
         messages = prompt.to_messages()
@@ -522,6 +565,11 @@ def create_react_agent(
         model_gene_inner_runnable = gene_inner_preprocessor | condense_prompt | model_gene_inner
         model_gene_repeat_runnable = gene_repeat_preprocessor | condense_prompt | model_gene_repeat
         model_training_runnable = training_prompt | model_training
+
+        model_force_rag_runnable = force_rag_prompt | model_force_rag
+        model_force_literature_runnable = force_literature_prompt | model_force_literature
+
+
     else:
         raise ValueError(f"Model {model_name} not supported.")
 
@@ -537,10 +585,23 @@ def create_react_agent(
         response = model_start_runnable.invoke(state["messages"], config) # Generate tool calls
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
 
+        translation_messages = copy.deepcopy(response)
 
-        print("=== FIRST MESSAGE TOOL CALLS ===")
-        print(response.tool_calls)
-        
+        # Force RAG/lit tool calls
+        user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
+        first_tool_calls = [call['name'] for call in response.tool_calls]
+        if 'QueryRAG' not in first_tool_calls:
+            force_rag_resp = model_force_rag_runnable.invoke({"query": user_query})
+            rag_messages = copy.deepcopy(force_rag_resp)
+        else:
+            rag_messages = copy.deepcopy(response)
+
+        if 'LiteratureSearch' not in first_tool_calls:
+            force_literature_resp = model_force_literature_runnable.invoke({"query": user_query})
+            literature_messages = copy.deepcopy(force_literature_resp)
+        else:
+            literature_messages = copy.deepcopy(response)
+
         if has_tool_calls:
 
             all_tools_return_direct = False
@@ -571,7 +632,6 @@ def create_react_agent(
                 }
 
             # Parse out translation tool calls
-            translation_messages = copy.deepcopy(response)
             translation_messages.additional_kwargs = {
                 "tool_calls": [call for call in response.additional_kwargs["tool_calls"] if call["function"]["name"] in translate_tool_names],
                 "type": "function"
@@ -579,20 +639,18 @@ def create_react_agent(
             translation_messages.tool_calls = [call for call in response.tool_calls if call["name"] in translate_tool_names]
 
             # Parse out rag tool calls
-            rag_messages = copy.deepcopy(response)
             rag_messages.additional_kwargs = {
-                "tool_calls": [call for call in response.additional_kwargs["tool_calls"] if call["function"]["name"] in rag_tool_names],
+                "tool_calls": [call for call in rag_messages.additional_kwargs["tool_calls"] if call["function"]["name"] in rag_tool_names],
                 "type": "function"
             }
-            rag_messages.tool_calls = [call for call in response.tool_calls if call["name"] in rag_tool_names]
+            rag_messages.tool_calls = [call for call in rag_messages.tool_calls if call["name"] in rag_tool_names]
             
             # Parse out literature tool calls
-            literature_messages = copy.deepcopy(response)
             literature_messages.additional_kwargs = {
-                "tool_calls": [call for call in response.additional_kwargs["tool_calls"] if call["function"]["name"] in literature_tool_names],
+                "tool_calls": [call for call in literature_messages.additional_kwargs["tool_calls"] if call["function"]["name"] in literature_tool_names],
                 "type": "function"
             }
-            literature_messages.tool_calls = [call for call in response.tool_calls if call["name"] in literature_tool_names]
+            literature_messages.tool_calls = [call for call in literature_messages.tool_calls if call["name"] in literature_tool_names]
 
 
             return {
