@@ -223,6 +223,7 @@ class PromptAgentic:
     - You will be provided the message history of the conversation. You must use this message history to determine which tools to use to answer the query.
     - The message history will contain chemicals associated with diseases. You must extract these chemical names and use them to query the relevant tools to extract additional chemical information to fully answer all parts of the user's query.
     - If the query has multiple questions or tasks, you must make tool calls to answer each question or task.
+    - If a tool outputs no relevant data (i.e., if it outputs 'No data could be retrieved. There are likely no data available.'), then it is not necessary to call the tool again with the same input.
     
     **Output format**
     - If you deem that tool calls are necessary to answer the user's query:
@@ -265,6 +266,7 @@ class PromptAgentic:
     - You will be provided the message history of the conversation. You must use this message history to determine which tools to use to answer the query.
     - The message history will contain chemical data. You must extract relevant information to query the relevant tools to extract additional chemical information to fully answer all parts of the user's query.
     - If the query has multiple questions or tasks, you must make tool calls to answer each question or task.
+    - If a tool outputs no relevant data (i.e., if it outputs 'No data could be retrieved. There are likely no data available.'), then it is not necessary to call the tool again with the same input.
     
     **Output format**
     - If you deem that tool calls are necessary to answer the user's query:
@@ -380,6 +382,7 @@ class PromptAgentic:
     - You will be provided the message history of the conversation. You must use this message history to determine which tools to use to answer the query.
     - The message history will contain chemicals associated with diseases. You must extract these chemical names and use them to query the relevant tools to extract additional chemical information to fully answer all parts of the user's query.
     - If the query has multiple questions or tasks, you must make tool calls to answer each question or task.
+    - If a tool outputs no relevant data (i.e., if it outputs 'No data could be retrieved. There are likely no data available.'), then it is not necessary to call the tool again with the same input.
     
     **Output format**
     - If you deem that tool calls are necessary to answer the user's query:

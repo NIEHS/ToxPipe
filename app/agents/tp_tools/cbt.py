@@ -84,7 +84,7 @@ class Query2DTXSID(BaseTool):
 
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         response = f"The chemical {name} does not map to a DSSTox Substance ID in the ChemBioTox Database."
         if len(res) > 0:
             response = f"The chemical {name} has the following DSSTox Substance ID in the ChemBioTox Database: {res[0]['dsstox_substance_id']}."
@@ -110,7 +110,7 @@ class Name2DTXSID(BaseTool):
 
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         response = f"The chemical {name} does not map to a DSSTox Substance ID in the ChemBioTox Database."
         if len(res) > 0:
             response = f"The chemical {name} has the following DSSTox Substance ID in the ChemBioTox Database: {res[0]['dsstox_substance_id']}."
@@ -136,7 +136,7 @@ class CASRN2DTXSID(BaseTool):
         
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         response = f"The chemical {casrn} does not map to a DSSTox Substance ID in the ChemBioTox Database."
         if len(res) > 0:
             response = f"The chemical {casrn} has the following DSSTox Substance ID in the ChemBioTox Database: {res[0]['dsstox_substance_id']}."
@@ -200,7 +200,7 @@ class SMILES2DTXSID(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         response = f"The chemical {name} does not map to a DSSTox Substance ID in the ChemBioTox Database."
         if len(res) > 0:
             if 'similarity' in res[0]:
@@ -249,7 +249,7 @@ class StructuralSimilarity(BaseTool):
             outp.append(f"{i['preferred_name']} ({i['similarity']})")
 
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
 
         response = f"The chemical given by the SMILES {smiles} has the following similar chemicals, given as 'chemical name' (tanimoto similarity): {'; '.join(outp)}"                
         return(response)
@@ -274,7 +274,7 @@ class FunctionalSimilarity(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         response = f"The chemical given by the DSSTox Substance ID {dtxsid} does not have data for structurally similar chemicals in the ChemBioTox Database."
 
         outp = []
@@ -306,7 +306,7 @@ class QueryCBTChemicalVendors(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
 
         vendor_list = []
         for i in res:
@@ -344,7 +344,7 @@ class QueryCBTTox21Models(BaseTool):
 
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
 
         tox21 = res
 
@@ -383,7 +383,7 @@ class QueryCBTGRAS(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
 
         gras = res
         gras_list = []
@@ -423,7 +423,7 @@ class QueryCTDDiseases(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         ctd_diseases = res
 
         ctd_diseases_list_measured = []
@@ -481,7 +481,7 @@ class QueryCTDGenes(BaseTool):
         res = res.json()
 
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         ctd_genes = res
         ctd_genes = pd.DataFrame(ctd_genes)
         ctd_genes_list = ctd_genes[0].value_counts()
@@ -536,7 +536,7 @@ class QueryCBTLeadscope(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         
         leadscope = res
         leadscope_list = []
@@ -597,7 +597,7 @@ class QueryCBTADMET(BaseTool): # proprietary
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         
         admet = res
         admet_list = []
@@ -643,7 +643,7 @@ class QueryCBTMetabolites(BaseTool):
         res = res.json()
 
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         
         metabolites = res
         metabolites_list = []
@@ -691,7 +691,7 @@ class QueryCBTSEEM3(BaseTool):
         res = res.json()
 
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         
         exp = res
         exp_list = []
@@ -735,7 +735,7 @@ class QueryCBTDrugBankTransporters(BaseTool):
         res = res.json()
 
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         
         transporters = res
         transporters_list = []
@@ -995,7 +995,7 @@ class QueryCBTInVitroDB(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp_list = []
         for i in exp:
@@ -1035,7 +1035,7 @@ class QueryCTDBP(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
 
         exp = pd.DataFrame(exp)
@@ -1074,7 +1074,7 @@ class QueryCTDCC(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp_list = []
         
@@ -1113,7 +1113,7 @@ class QueryCTDMF(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp = pd.DataFrame(exp)
         exp = exp.loc[exp["corrected_pvalue"] < 0.05]
@@ -1152,7 +1152,7 @@ class QueryPubChemBioassays(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp_list = []
 
@@ -1196,7 +1196,7 @@ class QueryPubChemProperties(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp_list = []
         for i in exp:
@@ -1233,7 +1233,7 @@ class QueryPubChemSynonyms(BaseTool):
         res = res.json()
 
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         if len(exp) > 10:
             exp = exp[:10]
@@ -1265,7 +1265,7 @@ class QueryPubChemMass(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         response = f"The molecular mass of {dtxsid} is (source: PubChem): {exp}"
         if len(exp) < 1:
@@ -1296,7 +1296,7 @@ class QueryPubChemFormula(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
 
         response = f"The chemical formula of {dtxsid} is (source: PubChem): {exp}"
@@ -1327,7 +1327,7 @@ class QueryPubChemWeight(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         response = f"The molecular weight of {dtxsid} is (source: PubChem): {exp}"
         if len(exp) < 1:
@@ -1357,7 +1357,7 @@ class QueryPubChemXLogP(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         response = f"The octanol-water partition coefficient (LogP) of {dtxsid} is (source: PubChem): {exp}"
         if len(exp) < 1:
@@ -1387,7 +1387,7 @@ class QueryEPAProperties(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp_list = []
         for i in exp:
@@ -1426,7 +1426,7 @@ class QueryCPD(BaseTool):
         res = res.json()
 
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp_list = []
         for i in exp:
@@ -1468,7 +1468,7 @@ class QueryFooDBEnzymes(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp_list = []
         for i in exp:
@@ -1505,7 +1505,7 @@ class QueryFooDBFlavors(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp_list = []
         for i in exp:
@@ -1542,14 +1542,12 @@ class QueryFooDBContent(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp_list = []
         for i in exp:
             if 'name' in i and 'orig_content' in i and 'orig_unit' in i:
                 exp_list.append(f"{i['name']} ({i['orig_content']} {i['orig_unit']})")
-            else:
-                continue
 
         exp_list = unique(exp_list)
         response = f"The chemical {dtxsid} may be found in the following food products (source: FooDB): {'; '.join(exp_list)}"
@@ -1580,13 +1578,12 @@ class QueryFooDBEffects(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp_list = []
         for i in exp:
-            if 'health_effect_name' not in i:
-                continue
-            exp_list.append(f"{i['health_effect_name']}")
+            if 'health_effect_name' in i:
+                exp_list.append(f"{i['health_effect_name']}")
 
         exp_list = unique(exp_list)
         response = f"The chemical {dtxsid} may have the following health effects (source: FooDB): {'; '.join(exp_list)}"
@@ -1620,13 +1617,12 @@ class QueryDrugBankCarriers(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp_list = []
         for i in exp:
-            if 'annotation' not in i:
-                continue
-            exp_list.append(f"{i['annotation']}")
+            if 'annotation' in i:
+                exp_list.append(f"{i['annotation']}")
 
         exp_list = unique(exp_list)
         response = f"The chemical {dtxsid} may have the following carriers (source: DrugBank): {'; '.join(exp_list)}"
@@ -1658,13 +1654,12 @@ class QueryDrugBankEnzymes(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp_list = []
         for i in exp:
-            if 'annotation' not in i:
-                continue
-            exp_list.append(f"{i['annotation']}")
+            if 'annotation' in i:
+                exp_list.append(f"{i['annotation']}")
 
         exp_list = unique(exp_list)
         response = f"The chemical {dtxsid} may interact with the following enzymes (source: DrugBank): {'; '.join(exp_list)}"
@@ -1695,13 +1690,12 @@ class QueryDrugBankTargets(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp_list = []
         for i in exp:
-            if 'annotation' not in i:
-                continue
-            exp_list.append(f"{i['annotation']}")
+            if 'annotation' in i:
+                exp_list.append(f"{i['annotation']}")
 
         exp_list = unique(exp_list)
         response = f"The chemical {dtxsid} may have the following targets (source: DrugBank): {'; '.join(exp_list)}"
@@ -1732,13 +1726,12 @@ class QueryDrugBankTransporters(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp_list = []
         for i in exp:
-            if 'annotation' not in i:
-                continue
-            exp_list.append(f"{i['annotation']}")
+            if 'annotation' in i:
+                exp_list.append(f"{i['annotation']}")
 
         exp_list = unique(exp_list)
         response = f"The chemical {dtxsid} may have the following transporters (source: DrugBank): {'; '.join(exp_list)}"
@@ -1772,13 +1765,12 @@ class QueryHMDBBS(BaseTool):
         res = res.json()
 
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp_list = []
         for i in exp:
-            if 'annotation' not in i:
-                continue
-            exp_list.append(f"{i['annotation']}")
+            if 'annotation' in i:
+                exp_list.append(f"{i['annotation']}")
 
         exp_list = unique(exp_list)
         response = f"The chemical {dtxsid} may be found in the following biospecimen locations (source: HMDB): {'; '.join(exp_list)}"
@@ -1809,13 +1801,12 @@ class QueryHMDBC(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp_list = []
         for i in exp:
-            if 'annotation' not in i:
-                continue
-            exp_list.append(f"{i['annotation']}")
+            if 'annotation' in i:
+                exp_list.append(f"{i['annotation']}")
 
         exp_list = unique(exp_list)
         response = f"The chemical {dtxsid} may be found in the following cellular locations (source: HMDB): {'; '.join(exp_list)}"
@@ -1846,13 +1837,12 @@ class QueryHMDBT(BaseTool):
         )
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp_list = []
         for i in exp:
-            if 'annotation' not in i:
-                continue
-            exp_list.append(f"{i['annotation']}")
+            if 'annotation' in i:
+                exp_list.append(f"{i['annotation']}")
 
         exp_list = unique(exp_list)
         response = f"The chemical {dtxsid} may be found in the following tissue locations (source: HMDB): {'; '.join(exp_list)}"
@@ -1884,13 +1874,12 @@ class QueryHMDBDiseases(BaseTool):
 
         res = res.json()
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp_list = []
         for i in exp:
-            if 'annotation' not in i:
-                continue
-            exp_list.append(f"{i['annotation']}")
+            if 'annotation' in i:
+                exp_list.append(f"{i['annotation']}")
 
         exp_list = unique(exp_list)
         response = f"The chemical {dtxsid} may be associated with the following diseases (source: HMDB): {'; '.join(exp_list)}"
@@ -2081,7 +2070,7 @@ class QuerySuperfund(BaseTool):
         res = res.json()
 
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp_list = []
         for i in exp:
@@ -2123,7 +2112,7 @@ class QueryT3DB(BaseTool):
         res = res.json()
 
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp_list = []
         for i in exp:
@@ -2161,7 +2150,7 @@ class QueryToxRefDBNonNP(BaseTool):
         res = res.json()
 
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp_list = []
         for i in exp:
@@ -2199,7 +2188,7 @@ class QueryToxRefDBNP(BaseTool):
         res = res.json()
 
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         exp = res
         exp_list = []
         for i in exp:
@@ -2244,7 +2233,7 @@ class QueryToxRefDBStudies(BaseTool):
             study_data.append(i['effect_desc'])
 
         if len(res) < 1:
-            return(f"There was a problem completing the request.")
+            return(f"No data could be retrieved. There are likely no data available.")
         
         response = f"The chemical {dtxsid} may be associated with the following attributes (source: ToxRefDB): {', '.join(study_data)}."
         if len(study_data) < 1:
