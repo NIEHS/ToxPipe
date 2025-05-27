@@ -65,7 +65,11 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
 
         QueryStructuralAlertsOChem(llm=llm),
         QueryStructuralAlertsChEMBL(llm=llm),
-        QueryStructuralAlertsSaagar(llm=llm)
+        QueryStructuralAlertsSaagar(llm=llm),
+
+        QueryDrugBankGenes(llm=llm),
+        QueryHMDBGenes(llm=llm),
+        QueryHMDBProteins(llm=llm),
 
     ]
 
@@ -89,15 +93,16 @@ def make_translate_tools(llm: BaseLanguageModel):
 
 def make_disease_tools(llm: BaseLanguageModel):
     disease_tools = [
-        #QueryHMDBDisease2Chemicals(llm=llm),
+        QueryHMDBDisease2Chemicals(llm=llm),
         QueryCTDDisease2Chemicals(llm=llm),
     ]
     return disease_tools
 
 def make_gene_tools(llm: BaseLanguageModel):
     gene_tools = [
-        #QueryHMDBGene2Chemicals(llm=llm),
+        QueryHMDBGene2Chemicals(llm=llm),
         QueryCTDGene2Chemicals(llm=llm),
+        QueryDrugBankGene2Chemicals(llm=llm),
     ]
     return gene_tools
 

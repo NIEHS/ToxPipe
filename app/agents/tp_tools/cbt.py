@@ -1769,8 +1769,8 @@ class QueryHMDBBS(BaseTool):
         exp = res
         exp_list = []
         for i in exp:
-            if 'annotation' in i:
-                exp_list.append(f"{i['annotation']}")
+            if 'location' in i:
+                exp_list.append(f"{i['location']}")
 
         exp_list = unique(exp_list)
         response = f"The chemical {dtxsid} may be found in the following biospecimen locations (source: HMDB): {'; '.join(exp_list)}"
@@ -1805,8 +1805,8 @@ class QueryHMDBC(BaseTool):
         exp = res
         exp_list = []
         for i in exp:
-            if 'annotation' in i:
-                exp_list.append(f"{i['annotation']}")
+            if 'location' in i:
+                exp_list.append(f"{i['location']}")
 
         exp_list = unique(exp_list)
         response = f"The chemical {dtxsid} may be found in the following cellular locations (source: HMDB): {'; '.join(exp_list)}"
@@ -1841,8 +1841,8 @@ class QueryHMDBT(BaseTool):
         exp = res
         exp_list = []
         for i in exp:
-            if 'annotation' in i:
-                exp_list.append(f"{i['annotation']}")
+            if 'location' in i:
+                exp_list.append(f"{i['location']}")
 
         exp_list = unique(exp_list)
         response = f"The chemical {dtxsid} may be found in the following tissue locations (source: HMDB): {'; '.join(exp_list)}"
@@ -1878,18 +1878,95 @@ class QueryHMDBDiseases(BaseTool):
         exp = res
         exp_list = []
         for i in exp:
-            if 'annotation' in i:
-                exp_list.append(f"{i['annotation']}")
+            if 'disease_name' in i:
+                exp_list.append(f"{i['disease_name']}")
 
         exp_list = unique(exp_list)
         response = f"The chemical {dtxsid} may be associated with the following diseases (source: HMDB): {'; '.join(exp_list)}"
         if len(exp_list) < 1:
-            response = f"The chemical {dtxsid} does not have any HMDB disease data in the HMDB."
+            response = f"The chemical {dtxsid} does not have any disease data in the HMDB."
         return(response)
 
     async def _arun(self, dtxsid: str) -> str:
         """Use the tool asynchronously."""
         raise NotImplementedError()
+
+
+# HMDB genes
+class QueryHMDBGenes(BaseTool):
+    name: str = "QueryHMDBGenes"
+    description: str = "Input a DTXSID to return associated genes from the HMDB. These data provide toxicological, biological, and health effect data for chemicals. They may inform about a chemical's transportation and interactions with bodily systems."
+    llm: BaseLLM = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str, **kwargs) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/genes?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+
+        res = res.json()
+        if len(res) < 1:
+            return(f"No data could be retrieved. There are likely no data available.")
+        exp = res
+        exp_list = []
+        for i in exp:
+            if 'gene_name' in i:
+                exp_list.append(f"{i['gene_name']}")
+
+        exp_list = unique(exp_list)
+        response = f"The chemical {dtxsid} may interact with the following genes (source: HMDB): {'; '.join(exp_list)}"
+        if len(exp_list) < 1:
+            response = f"The chemical {dtxsid} does not have any gene data in the HMDB."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+
+    
+# HMDB proteins
+class QueryHMDBProteins(BaseTool):
+    name: str = "QueryHMDBProteins"
+    description: str = "Input a DTXSID to return associated proteins from the HMDB. These data provide toxicological, biological, and health effect data for chemicals. They may inform about a chemical's transportation and interactions with bodily systems."
+    llm: BaseLLM = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str, **kwargs) -> str:
+        """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
+        dtxsid = re.sub(r'\s+', '', dtxsid)
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/proteins?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+
+        res = res.json()
+        if len(res) < 1:
+            return(f"No data could be retrieved. There are likely no data available.")
+        exp = res
+        exp_list = []
+        for i in exp:
+            if 'protein_name' in i:
+                exp_list.append(f"{i['protein_name']}")
+
+        exp_list = unique(exp_list)
+        response = f"The chemical {dtxsid} may interact with the following proteins (source: HMDB): {'; '.join(exp_list)}"
+        if len(exp_list) < 1:
+            response = f"The chemical {dtxsid} does not have any protein data in the HMDB."
+        return(response)
+
+    async def _arun(self, dtxsid: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+
     
 # HMDB disease to chemical
 class QueryHMDBDisease2Chemicals(BaseTool):
@@ -2043,6 +2120,83 @@ class QueryHMDBGene2Chemicals(BaseTool):
             response.append(f"{k}: {'; '.join(response_inner)}")
         response = "\n".join(response)
         response = f"{response} (source: HMDB)"
+        return(response)
+    
+    async def _arun(self, disease: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+
+
+# DrugBank gene to chemical
+class QueryDrugBankGene2Chemicals(BaseTool):
+    name: str = "QueryDrugBankGene2Chemicals"
+    description: str = "Input a gene name or symbol to return associated chemicals from DrugBank. Chemicals returned may have an interaction with the given gene."
+    llm: BaseLLM = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, gene: str, **kwargs) -> str:
+        """Input gene name, return a list of associated chemicals using the data available in ChemBioTox."""
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/drugbank/genes/chemicals?name={gene}&n=5&exact=FALSE",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+
+        res = res.json()
+
+        if len(res) < 1:
+            return(f"The gene {gene} is not known to be associated with any chemicals.")
+
+        response = []
+        for k in res.keys():
+            response_inner = []
+            for name in res[k].keys():
+                response_inner2 = []
+                for i in res[k][name]:
+                    response_inner2.append(f"{i['preferred_name']}")
+                response_inner.append(f"The following chemical(s) {name}: {', '.join(response_inner2)}")
+            response.append(f"{k}: {'; '.join(response_inner)}")
+        response = "\n".join(response)
+        response = f"{response} (source: DrugBank)"
+        return(response)
+    
+    async def _arun(self, disease: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError()
+
+
+
+# DrugBank chemical to gene
+class QueryDrugBankGenes(BaseTool):
+    name: str = "QueryDrugBankGenes"
+    description: str = "Input a chemical DTXSID to get a list of associated genes. The input chemical may have interactions with these genes and can inform about transporters, enzymes, and targets."
+    llm: BaseLLM = None
+
+    def __init__(self, llm):
+        super().__init__()
+        self.llm = llm
+
+    def _run(self, dtxsid: str, **kwargs) -> str:
+        """Input dtxsid, return a list of associated chemicals using the data available in ChemBioTox."""
+        res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/drugbank/genes?dtxsid={dtxsid}",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+
+        res = res.json()
+
+        if len(res) < 1:
+            return(f"The chemical {dtxsid} is not known to be associated with any genes.")
+
+        response = [f"{dtxsid} has interactions with the following genes (source: DrugBank):"]
+        
+        for i in res:
+            if hasattr(i, "gene_symbol") and hasattr(i, "interaction"):
+                response.append(f"{i['gene_symbol']} ({i['interaction']})")
+            
+        response = "\n".join(response)
         return(response)
     
     async def _arun(self, disease: str) -> str:
