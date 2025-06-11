@@ -4,12 +4,12 @@ import atexit
 from fastapi import FastAPI, Request, Response
 
 # use locally
-from .app.agents import toxpipe as tp
-from .app.agents import tools as tl
+#from .app.agents import toxpipe as tp
+#from .app.agents import tools as tl
 
 # use on posit connect
-#from app.agents import toxpipe as tp
-#from app.agents import tools as tl
+from app.agents import toxpipe as tp
+from app.agents import tools as tl
 
 from langchain.tools.render import render_text_description
 import json
@@ -20,6 +20,7 @@ from psycopg_pool import ConnectionPool
 import os
 from dotenv import load_dotenv
 load_dotenv('.config/.env')
+import requests
 import traceback
 
 # Persistent memory
@@ -54,6 +55,10 @@ tags_metadata = [
     {
         "name": "models",
         "description": "Endpoints for viewing supported models and tools available to them.",
+    },
+    {
+        "name": "util",
+        "description": "Endpoints for API utility functions.",
     },
 ]
 
@@ -260,4 +265,23 @@ async def view_available_tools(request: Request, response: Response):
             tools_to_return.append({"tool_name": tmpsplit[0], "tool_description": tmpsplit[1]})    
     return tools_to_return
 
+
+# Check if this API can connect to the llm provider.
+@app.get("/heartbeat", tags=["util"])
+async def check_api_connections(request: Request, response: Response):
+
+    llm_res = requests.get(
+            f"{os.environ.get('OPENAI_BASE_URL')}/",
+            headers={'Authorization': f"Bearer {os.environ.get('OPENAI_API_KEY')}"}
+        )
+    
+    cbt_res = requests.get(
+            f"{os.environ.get('CBT_API_ENDPOINT')}/",
+            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+        )
+
+    return {
+        "LLM Provider API": llm_res.status_code,
+        "ChemBioTox API": cbt_res.status_code
+    }
 
