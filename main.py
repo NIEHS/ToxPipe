@@ -160,7 +160,6 @@ async def query_agent(request: Request, response: Response, agentid: uuid.UUID, 
             print("Error loading agent from file.")
             print(e)
             tpa = None
-
     # Otherwise, just load the agent from the cache.
     else:
         print("Fetching agent from cache")
