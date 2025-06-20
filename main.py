@@ -4,12 +4,12 @@ import atexit
 from fastapi import FastAPI, Request, Response
 
 # use locally
-#from .app.agents import toxpipe as tp
-#from .app.agents import tools as tl
+from .app.agents import toxpipe as tp
+from .app.agents import tools as tl
 
 # use on posit connect
-from app.agents import toxpipe as tp
-from app.agents import tools as tl
+#from app.agents import toxpipe as tp
+#from app.agents import tools as tl
 
 from langchain.tools.render import render_text_description
 import json
@@ -18,10 +18,17 @@ import uuid
 from langgraph.checkpoint.postgres import PostgresSaver, ShallowPostgresSaver 
 from psycopg_pool import ConnectionPool
 import os
+import ssl
+import tempfile
 from dotenv import load_dotenv
 load_dotenv('.config/.env')
 import requests
 import traceback
+
+# Force app to use system cert store instead of certifi
+import truststore
+truststore.inject_into_ssl()
+
 
 # Persistent memory
 # Establish Postgres Connection for ToxPipe
@@ -117,7 +124,7 @@ async def help(request: Request, response: Response):
 
 # Endpoint for creating an agent. Note that this will not actually create the agent object in memory, it just creates a JSON file with the agent parameters so that the API is "aware" that such an agent is defined and may be created later.
 @app.get("/agent/create/", tags=["agent"])
-async def create_agent(request: Request, response: Response, model: str = "azure-o3", temp: float = 0, max_iterations: int = 20, max_retries: int = 100, max_tokens: int=4096, max_memory_tokens: int=4096, step_timeout: float = 0, n_threads: int = 1, summarize: bool = False, seed: int = 1):
+async def create_agent(request: Request, response: Response, model: str = "azure-o3", temp: float = 0, max_iterations: int = 20, max_retries: int = 10, max_tokens: int=4096, max_memory_tokens: int=4096, step_timeout: float = 0, n_threads: int = 1, summarize: bool = False, seed: int = 1):
     # Input validation
     if model not in ANTHROPIC_MODELS and model not in OLLAMA_MODELS and model not in OPENAI_MODELS and model not in MISTRALAI_MODELS and model not in GOOGLE_MODELS and model not in AMAZON_MODELS and model not in COHERE_MODELS:
         response.status_code = 400
@@ -270,18 +277,41 @@ async def view_available_tools(request: Request, response: Response):
 @app.get("/heartbeat", tags=["util"])
 async def check_api_connections(request: Request, response: Response):
 
-    llm_res = requests.get(
+    llm_res = None
+    cbt_res = None
+
+    try:
+        llm_res = requests.get(
             f"{os.environ.get('OPENAI_BASE_URL')}/",
             headers={'Authorization': f"Bearer {os.environ.get('OPENAI_API_KEY')}"}
-        )
+        ).status_code
+        if llm_res == 200:
+            llm_res = "Connected!"
+        if llm_res >= 400 :
+            llm_res = "Connected but ran into an error!"
+    except requests.exceptions.SSLError as e:
+        llm_res = "Could not connect: SSLError!"
+    except:
+        llm_res = "Could not connect to API!"
+
     
-    cbt_res = requests.get(
+    
+    try:
+        cbt_res = requests.get(
             f"{os.environ.get('CBT_API_ENDPOINT')}/",
             headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
-        )
+        ).status_code
+        if cbt_res == 200:
+            cbt_res = "Connected!"
+        if cbt_res >= 400 :
+            cbt_res = "Connected but ran into an error!"
+    except requests.exceptions.SSLError as e:
+        cbt_res = "Could not connect: SSLError!"
+    except:
+        cbt_res = "Could not connect to API!"
 
     return {
-        "LLM Provider API": llm_res.status_code,
-        "ChemBioTox API": cbt_res.status_code
+        "LLM Provider API": llm_res,
+        "ChemBioTox API": cbt_res
     }
 

@@ -848,9 +848,6 @@ def create_react_agent(
 
                 has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
 
-                print("=== GENE has_tool_calls ===")
-                print(has_tool_calls)
-
                 all_tools_return_direct = False
                 if (
                     (

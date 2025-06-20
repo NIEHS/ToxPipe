@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field, model_validator
 import json
 import traceback
 import tiktoken
+import httpx
 
 # Create temporary working directory
 working_directory = TemporaryDirectory()
@@ -50,6 +51,7 @@ BAD_TOOL_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', 'm
 
 # Create LLM handler - always use AzureChatOpenAI since all models are accessed through NIEHS's litellm instance.
 def _make_llm(model, api_version, temp, max_retries, max_tokens, seed):
+
     llm = AzureChatOpenAI(
         model_name=model,
         temperature=temp,
@@ -58,8 +60,7 @@ def _make_llm(model, api_version, temp, max_retries, max_tokens, seed):
         max_tokens=max_tokens,
         seed=seed,
         tiktoken_model_name="gpt-4o", # use the gpt-4o tiktoken model for all models to avoid an error when calculating token limit
-        #reasoning_effort="medium"
-        reasoning_effort="low"
+        reasoning_effort="low",
     )
     return llm
 
