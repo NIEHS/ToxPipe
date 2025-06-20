@@ -40,6 +40,9 @@ from .prompts_chem import getPrompt, summary_prompt, PromptAgentic
 from typing import Sequence
 from typing_extensions import Annotated, TypedDict
 import os
+import truststore
+import httpx
+import ssl
 
 from ..rag import query
 
@@ -47,21 +50,19 @@ from ..rag import query
 BAD_TOOL_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', 'mixtral-8x7b-instruct', 'llama3-1-70b', 'claude-3-sonnet', 'amazon-titan-text-premier', 'cohere-command-r-plus']
 
 # Create LLM handler - always use AzureChatOpenAI since all models are accessed through NIEHS's litellm instance.
-def _make_llm(model, api_version, temp, max_retries, max_tokens, seed):
-
-    AzureChatOpenAI.model_rebuild()
-
-    llm = AzureChatOpenAI(
-        model_name=model,
-        temperature=temp,
-        api_version=api_version,
-        max_retries=max_retries,
-        max_tokens=max_tokens,
-        seed=seed,
-        tiktoken_model_name="gpt-4o", # use the gpt-4o tiktoken model for all models to avoid an error when calculating token limit
-        reasoning_effort="low"
-    )
-    return llm
+def _make_llm(model, api_version, temp, max_retries, max_tokens, seed, client):
+        llm = AzureChatOpenAI(
+            model_name=model,
+            temperature=temp,
+            api_version=api_version,
+            max_retries=max_retries,
+            max_tokens=max_tokens,
+            seed=seed,
+            tiktoken_model_name="gpt-4o", # use the gpt-4o tiktoken model for all models to avoid an error when calculating token limit
+            reasoning_effort="low",
+            http_client=client
+        )
+        return llm
 
 # format for output parser
 class Response(BaseModel):
@@ -85,6 +86,7 @@ class ToxPipeAgent:
         self,
         name, # UUID created by FastAPI
         model, # LLM name
+        client,
         api_version=os.environ.get("OPENAI_API_VERSION"), # from .config/.env
         temp=0.0, # higher temperature creates more answer variance, but this is potentially better if we are doing a multi-agent approach
         max_iterations=10, # maximum number of agent recursions in chain
@@ -101,7 +103,7 @@ class ToxPipeAgent:
         seed=1 # Random seed for LLM. Set the seed for more deterministic results.
     ):
         # Initialize parameters
-        self.llm = _make_llm(model, api_version, temp, max_retries, max_tokens, seed)
+        self.llm = _make_llm(model, api_version, temp, max_retries, max_tokens, seed, client)
         if cache == True:
             set_llm_cache(SQLiteCache(database_path=".langchain.db")) # set cache to avoid making the same API calls over and over again
         self.tools = make_tools(self.llm, verbose=verbose, auth=auth)

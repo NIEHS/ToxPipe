@@ -4,12 +4,12 @@ import atexit
 from fastapi import FastAPI, Request, Response
 
 # use locally
-#from .app.agents import toxpipe as tp
-#from .app.agents import tools as tl
+from .app.agents import toxpipe as tp
+from .app.agents import tools as tl
 
 # use on posit connect
-from app.agents import toxpipe as tp
-from app.agents import tools as tl
+#from app.agents import toxpipe as tp
+#from app.agents import tools as tl
 
 from langchain.tools.render import render_text_description
 import json
@@ -24,12 +24,16 @@ from dotenv import load_dotenv
 load_dotenv('.config/.env')
 import requests
 import traceback
+import httpx
 
 # Force app to use system cert store instead of certifi
 import truststore
 truststore.inject_into_ssl()
 
+ctx = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 
+
+    
 # Persistent memory
 # Establish Postgres Connection for ToxPipe
 postgres_host = os.environ.get("TOXPIPE_POSTGRES_HOST")
@@ -46,6 +50,9 @@ pool = ConnectionPool(conninfo=DB_URI, max_size=20, kwargs=connection_kwargs,)
 checkpointer = ShallowPostgresSaver(pool)
 #checkpointer = PostgresSaver(pool)
 checkpointer.setup()
+
+
+client = httpx.Client(verify=ctx)
 
 def exit_handler():
     print("Shutting down...")
@@ -153,7 +160,7 @@ async def query_agent(request: Request, response: Response, agentid: uuid.UUID, 
         try:
             with open(f"./created_agents/{agentid}.json", 'r') as fp:
                 agent = json.load(fp)
-                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"],  max_tokens=agent["max_tokens"], max_memory_tokens=agent["max_memory_tokens"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE, seed=agent["seed"])
+                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], client=client, temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"],  max_tokens=agent["max_tokens"], max_memory_tokens=agent["max_memory_tokens"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE, seed=agent["seed"])
                 MODEL_CACHE[agentid] = tpa
 
         except Exception as e:
