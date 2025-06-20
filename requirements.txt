@@ -13,6 +13,7 @@ rdkit==2024.3.5
 Requests==2.32.3
 RXN4Chemistry==1.14.0
 tiktoken==0.8.0
+truststore==0.10.1
 typing_extensions==4.12.2
 xmltodict==0.14.2
 langgraph-checkpoint==2.0.15
