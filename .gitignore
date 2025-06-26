@@ -8,6 +8,7 @@
 .config/heimdall/www/app.sqlite
 .config/.env
 .config/*.cer
+.config/*.pem
 .vscode/saddlerto.code-workspace
 docs/data/
 .Rproj.user

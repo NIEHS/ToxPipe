@@ -1,3 +1,7 @@
+# Force app to use system cert store instead of certifi
+import truststore
+#truststore.inject_into_ssl()
+
 import atexit
 
 # -*- coding: utf-8 -*-
@@ -25,14 +29,16 @@ load_dotenv('.config/.env')
 import requests
 import traceback
 import httpx
+import certifi
 
-# Force app to use system cert store instead of certifi
-import truststore
-truststore.inject_into_ssl()
+ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+ctx.load_verify_locations("./.config/NIH-FULL.pem")
+ctx.verify_mode = ssl.CERT_REQUIRED
+client = httpx.Client(verify=ctx)
 
-ctx = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-
-
+#ctx = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+#client = httpx.Client(verify=ctx)
+print(certifi.where())
     
 # Persistent memory
 # Establish Postgres Connection for ToxPipe
@@ -50,9 +56,6 @@ pool = ConnectionPool(conninfo=DB_URI, max_size=20, kwargs=connection_kwargs,)
 checkpointer = ShallowPostgresSaver(pool)
 #checkpointer = PostgresSaver(pool)
 checkpointer.setup()
-
-
-client = httpx.Client(verify=ctx)
 
 def exit_handler():
     print("Shutting down...")
