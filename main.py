@@ -8,12 +8,12 @@ import atexit
 from fastapi import FastAPI, Request, Response
 
 # use locally
-from .app.agents import toxpipe as tp
-from .app.agents import tools as tl
+#from .app.agents import toxpipe as tp
+#from .app.agents import tools as tl
 
 # use on posit connect
-#from app.agents import toxpipe as tp
-#from app.agents import tools as tl
+from app.agents import toxpipe as tp
+from app.agents import tools as tl
 
 from langchain.tools.render import render_text_description
 import json
@@ -36,8 +36,11 @@ ctx.load_verify_locations("./.config/NIH-FULL.pem")
 ctx.verify_mode = ssl.CERT_REQUIRED
 client = httpx.Client(verify=ctx)
 
+
+truststore.inject_into_ssl()
+ 
+
 #ctx = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-#client = httpx.Client(verify=ctx)
 print(certifi.where())
     
 # Persistent memory
