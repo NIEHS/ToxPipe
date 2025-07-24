@@ -8,12 +8,12 @@ import atexit
 from fastapi import FastAPI, Request, Response
 
 # use locally
-#from .app.agents import toxpipe as tp
-#from .app.agents import tools as tl
+from .app.agents import toxpipe as tp
+from .app.agents import tools as tl
 
 # use on posit connect
-from app.agents import toxpipe as tp
-from app.agents import tools as tl
+#from app.agents import toxpipe as tp
+#from app.agents import tools as tl
 
 from langchain.tools.render import render_text_description
 import json
@@ -201,7 +201,7 @@ async def query_rag(request: Request, response: Response, agentid: uuid.UUID, q:
         try:
             with open(f"./created_agents/{agentid}.json", 'r') as fp:
                 agent = json.load(fp)
-                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"],  max_tokens=agent["max_tokens"], max_memory_tokens=agent["max_memory_tokens"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE, seed=agent["seed"])
+                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], client=client, temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"],  max_tokens=agent["max_tokens"], max_memory_tokens=agent["max_memory_tokens"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE, seed=agent["seed"])
                 MODEL_CACHE[agentid] = tpa
 
         except Exception as e:
@@ -237,7 +237,7 @@ async def query_literature(request: Request, response: Response, agentid: uuid.U
         try:
             with open(f"./created_agents/{agentid}.json", 'r') as fp:
                 agent = json.load(fp)
-                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"],  max_tokens=agent["max_tokens"], max_memory_tokens=agent["max_memory_tokens"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE, seed=agent["seed"])
+                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], client=client, temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"],  max_tokens=agent["max_tokens"], max_memory_tokens=agent["max_memory_tokens"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE, seed=agent["seed"])
                 MODEL_CACHE[agentid] = tpa
 
         except Exception as e:
