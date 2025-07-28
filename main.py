@@ -8,12 +8,14 @@ import atexit
 from fastapi import FastAPI, Request, Response
 
 # use locally
-#from .app.agents import toxpipe as tp
-#from .app.agents import tools as tl
+from .app.agents import toxpipe as tp
+from .app.agents import tools as tl
+from .app.rag import query
 
 # use on posit connect
-from app.agents import toxpipe as tp
-from app.agents import tools as tl
+#from app.agents import toxpipe as tp
+#from app.agents import tools as tl
+#from app.rag import query
 
 from langchain.tools.render import render_text_description
 import json
@@ -32,7 +34,7 @@ import httpx
 import certifi
 
 ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-ctx.load_verify_locations("./.config/NIH-FULL.pem")
+ctx.load_verify_locations(f"{os.environ.get('SSL_CERT_DIR')}NIH-FULL.pem")
 ctx.verify_mode = ssl.CERT_REQUIRED
 client = httpx.Client(verify=ctx)
 
@@ -75,6 +77,10 @@ tags_metadata = [
     {
         "name": "models",
         "description": "Endpoints for viewing supported models and tools available to them.",
+    },
+    {
+        "name": "rag",
+        "description": "Endpoints for searching through text embeddings created from documents processed with OCR.",
     },
     {
         "name": "util",
@@ -264,6 +270,24 @@ async def query_literature(request: Request, response: Response, agentid: uuid.U
         print(e)
         response.status_code = 400
         return {"response": f"Error: agent {agentid} failed to run with message: {e}."}
+    
+    return {"response": res}
+
+
+
+# Endpoint for directly querying the RAG search
+@app.get("/rag/", tags=["rag"])
+async def query_rag(request: Request, response: Response, model: str, q: str, use_training_data: bool = True):    
+    tpa = None
+    res = None
+
+    try:
+        res = query(q, llm=model, use_training_data=use_training_data)
+    except Exception as e:
+        print("Error performing search.")
+        print(e)
+        response.status_code = 400
+        return {"response": f"Error: query failed to run with message: {e}."}
     
     return {"response": res}
 
