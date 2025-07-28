@@ -36,8 +36,11 @@ ctx.load_verify_locations("./.config/NIH-FULL.pem")
 ctx.verify_mode = ssl.CERT_REQUIRED
 client = httpx.Client(verify=ctx)
 
+
+truststore.inject_into_ssl()
+ 
+
 #ctx = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-#client = httpx.Client(verify=ctx)
 print(certifi.where())
     
 # Persistent memory

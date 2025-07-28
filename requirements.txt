@@ -1,7 +1,7 @@
 fastapi==0.115.8
-langchain==0.3.19
+langchain==0.3.27
 langchain_community==0.3.17
-langchain_core==0.3.35
+langchain_core==0.3.72
 langchain_openai==0.3.6
 langgraph==0.2.73
 molbloom==2.2.1
@@ -20,4 +20,5 @@ xmltodict==0.14.2
 langgraph-checkpoint==2.0.15
 langgraph-checkpoint-postgres==2.0.15
 langfuse==2.59.3
-langchain-chroma==0.2.2
+langchain-chroma==0.2.5
+chromadb==1.0.15
