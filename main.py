@@ -177,7 +177,7 @@ async def query_agent(request: Request, response: Response, agentid: uuid.UUID, 
 
         except Exception as e:
             print("Error loading agent from file.")
-            print(e)
+            print(f'error: Line number: {e.__traceback__.tb_lineno}, Description: {e}\n\n{traceback.format_exc()}')
             tpa = None
     # Otherwise, just load the agent from the cache.
     else:
@@ -215,6 +215,7 @@ async def query_rag(request: Request, response: Response, agentid: uuid.UUID, q:
 
         except Exception as e:
             print("Error loading agent from file.")
+            print(f'error: Line number: {e.__traceback__.tb_lineno}, Description: {e}\n\n{traceback.format_exc()}')
             print(e)
             tpa = None
     else:
@@ -251,7 +252,7 @@ async def query_literature(request: Request, response: Response, agentid: uuid.U
 
         except Exception as e:
             print("Error loading agent from file.")
-            print(e)
+            print(f'error: Line number: {e.__traceback__.tb_lineno}, Description: {e}\n\n{traceback.format_exc()}')
             tpa = None
     else:
         print("Fetching agent from cache")
