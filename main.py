@@ -168,7 +168,7 @@ async def query_agent(request: Request, response: Response, agentid: uuid.UUID, 
 
         except Exception as e:
             print("Error loading agent from file.")
-            print(e)
+            print(f'error: Line number: {e.__traceback__.tb_lineno}, Description: {e}\n\n{traceback.format_exc()}')
             tpa = None
     # Otherwise, just load the agent from the cache.
     else:
@@ -201,11 +201,12 @@ async def query_rag(request: Request, response: Response, agentid: uuid.UUID, q:
         try:
             with open(f"./created_agents/{agentid}.json", 'r') as fp:
                 agent = json.load(fp)
-                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"],  max_tokens=agent["max_tokens"], max_memory_tokens=agent["max_memory_tokens"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE, seed=agent["seed"])
+                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], client=client, temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"],  max_tokens=agent["max_tokens"], max_memory_tokens=agent["max_memory_tokens"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE, seed=agent["seed"])
                 MODEL_CACHE[agentid] = tpa
 
         except Exception as e:
             print("Error loading agent from file.")
+            print(f'error: Line number: {e.__traceback__.tb_lineno}, Description: {e}\n\n{traceback.format_exc()}')
             print(e)
             tpa = None
     else:
@@ -237,7 +238,7 @@ async def query_literature(request: Request, response: Response, agentid: uuid.U
         try:
             with open(f"./created_agents/{agentid}.json", 'r') as fp:
                 agent = json.load(fp)
-                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"],  max_tokens=agent["max_tokens"], max_memory_tokens=agent["max_memory_tokens"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE, seed=agent["seed"])
+                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], client=client, temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"],  max_tokens=agent["max_tokens"], max_memory_tokens=agent["max_memory_tokens"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE, seed=agent["seed"])
                 MODEL_CACHE[agentid] = tpa
 
         except Exception as e:
