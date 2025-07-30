@@ -13,6 +13,7 @@ load_dotenv('../../../.config/.env')
 
 N_PAPERS = os.environ.get("TOXPIPE_MAX_PAPERS")
 PAPER_CONTENT_SIZE = os.environ.get("TOXPIPE_PAPER_CONTENT_MAX_SIZE")
+PUBMED_API_KEY = os.environ.get("TOXPIPE_PUBMED_API_KEY")
 
 #### ADAPTED CODE FROM AMLAN'S PUBMED TOOL
 def search_pubmed_article(query: str, 
@@ -215,7 +216,7 @@ def search_pubmed_article(query: str,
 
 def paper_scraper(search: str, pdir: str = "query") -> dict:
     try:
-        res = search_pubmed_article(query=search, max_results=N_PAPERS, content_size=PAPER_CONTENT_SIZE)
+        res = search_pubmed_article(query=search, max_results=N_PAPERS, content_size=PAPER_CONTENT_SIZE, api_key=PUBMED_API_KEY)
         return res
     except Exception:
         return {}
