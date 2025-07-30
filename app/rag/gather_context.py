@@ -1,8 +1,8 @@
 
 from langchain_chroma import Chroma
-from langchain_openai import OpenAIEmbeddings
 from chromadb import HttpClient
 from .utils import Config, State
+from .llms import getAIModel
 
 # ---------------------------------------------------------------------------
 class CustomRetriever():
@@ -10,17 +10,15 @@ class CustomRetriever():
     docs_res: dict = {}
 
     def __init__(self):
-        embedding = OpenAIEmbeddings(
-            model='text-embedding-ada-002', 
-            base_url=Config.env_config['OPENAI_BASE_URL'], 
-            api_key=Config.env_config['OPENAI_API_KEY']
-        )
+        embedding = getAIModel(model_name='text-embedding-ada-002', is_embedding=True)
+
         # Local use
         #db = Chroma(collection_name='quickstart', persist_directory=str(Config.DIR_DATA), embedding_function=embedding)
 
         # Remote use
         chroma_client = HttpClient(host=Config.env_config['CHROMA_HOST'],  port=Config.env_config['CHROMA_PORT'])
         db = Chroma(client=chroma_client, collection_name='quickstart', embedding_function=embedding)
+        
         self.retriever = db.as_retriever(search_type='similarity_score_threshold', search_kwargs={'k': Config.MAX_NUM_DOCS, 'score_threshold': Config.SIMILARITY_THRESHOLD})
 
     def getResources(self, keyphrases):

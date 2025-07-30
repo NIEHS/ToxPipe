@@ -21,4 +21,3 @@ langgraph-checkpoint==2.0.15
 langgraph-checkpoint-postgres==2.0.15
 langfuse==2.59.3
 langchain-chroma==0.2.5
-chromadb==1.0.15

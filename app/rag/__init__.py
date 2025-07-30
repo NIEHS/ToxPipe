@@ -1,4 +1,4 @@
-from .llms import getOpenAIModel
+from .llms import getAIModel
 from .utils import State
 from langchain.llms import BaseLLM
 from langgraph.graph import END, START, StateGraph
@@ -33,7 +33,7 @@ def createGraph(llm, use_training_data):
     # -----------------------------------------------------------------------
     # If agentic LLM is not provided, use a new one with model name = llm
     if isinstance(llm, str):
-        llm = getOpenAIModel(llm)
+        llm = getAIModel(model_name=llm)
 
     # -----------------------------------------------------------------------
     # Langgraph
