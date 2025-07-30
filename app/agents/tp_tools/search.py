@@ -8,12 +8,16 @@ from langchain.llms import BaseLLM
 from langchain.tools import BaseTool
 from langchain_core.prompts import ChatPromptTemplate
 from time import time
-from dotenv import load_dotenv
-load_dotenv('../../../.config/.env')
+from dotenv import load_dotenv, dotenv_values
+#load_dotenv()
+#load_dotenv('../../../.config/.env')
 
-N_PAPERS = os.environ.get("TOXPIPE_MAX_PAPERS")
-PAPER_CONTENT_SIZE = os.environ.get("TOXPIPE_PAPER_CONTENT_MAX_SIZE")
-PUBMED_API_KEY = os.environ.get("TOXPIPE_PUBMED_API_KEY")
+DIR_HOME = Path(__file__).parent.parent.parent.parent
+env_config = dotenv_values(DIR_HOME / ".config" / ".env")
+
+N_PAPERS = env_config["TOXPIPE_MAX_PAPERS"]
+PAPER_CONTENT_SIZE = env_config["TOXPIPE_PAPER_CONTENT_MAX_SIZE"]
+PUBMED_API_KEY = env_config["TOXPIPE_PUBMED_API_KEY"]
 
 #### ADAPTED CODE FROM AMLAN'S PUBMED TOOL
 def search_pubmed_article(query: str, 
@@ -174,6 +178,7 @@ def search_pubmed_article(query: str,
     
     def searchLiterature(query, retstart=1, retmax=5):
         qstring = f'db=pmc&term={query}&sort=relevance&retstart={retstart}&retmax={retmax}&api_key={api_key}'
+
         url = f'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?{qstring}'
         response = requests.get(url)
         if not response.ok: raise Exception(response.text)
@@ -181,9 +186,6 @@ def search_pubmed_article(query: str,
             return xmltodict.parse(response.text)
         except:
             raise Exception(response.text)
-
-    print(query)
-
     try:
         res = searchLiterature(query)
         ids = res['eSearchResult']['IdList']
