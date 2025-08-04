@@ -1,0 +1,4 @@
+- source: project
+  connect:
+    - id: ed79735b-3430-4bf8-9aac-727a9f65c1aa
+      url: 'https://dev.posit.niehs.nih.gov/content/ed79735b-3430-4bf8-9aac-727a9f65c1aa/'

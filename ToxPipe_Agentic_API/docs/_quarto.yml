@@ -1,0 +1,34 @@
+project:
+  type: website
+  render:
+    - "*.qmd"
+  output-dir: _site
+
+execute:
+  freeze: auto
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+
+website:
+  title: "ToxPipe"
+  navbar:
+    left:
+      - href: evaluations/index.qmd
+        text: "{{< iconify carbon chart-evaluation >}} Evaluations"
+      - href: architecture/index.qmd
+        text: "{{< iconify material-symbols architecture >}} Architecture"
+      - href: decisions/index.qmd
+        text: "{{< iconify arcticons decisions >}} Decisions"
+      - href: deployment/index.qmd
+        text: "{{< iconify carbon deploy >}} Deployment"
+    right:
+      - href: manuscript.qmd
+        text: "{{< iconify carbon document >}} Manuscript"
+      - about.qmd
+
+filters:
+  - iconify

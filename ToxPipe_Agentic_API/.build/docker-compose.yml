@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  dashy:
+    # container_name: dashy
+    image: lissy93/dashy
+    # volumes:
+      # - /path/to/my-config.yml:/app/public/conf.yml
+      # - /path/to/item-icons:/app/public/item-icons
+    networks:
+      - autonomous
+    ports:
+      - "4000:80"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
+      traefik.http.routers.dashy.entrypoints: "https"
+      traefik.http.routers.dashy.service: "dashy@docker"
+      traefik.http.routers.dashy.rule: "Host(`toxpipe.niehs.nih.gov`)"
+      traefik.http.routers.dashy.tls: "true"
+      traefik.http.routers.dashy.priority: 1
+      # traefik.http.services.dashy.loadbalancer.server.port: 4000
+      traefik.http.services.dashy.loadbalancer.server.scheme: "http"
+
+    healthcheck:
+      test: ['CMD', 'node', '/app/services/healthcheck']
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+  
+
+networks:
+  autonomous:
+    driver: overlay
+    external: true

@@ -1,0 +1,3 @@
+# Docs
+
+The documentation folder
