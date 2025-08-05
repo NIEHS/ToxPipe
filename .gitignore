@@ -165,4 +165,7 @@ LibreChat/!/client/src/@types/i18next.d.ts
 # SAML Idp cert
 LibreChat/*.cert
 
-LibreChat/config
+LibreChat/config/*
+
+LibreChat/ntp_docs_rag_db/*
+LibreChat/meili_data_v*
