@@ -1,0 +1,197 @@
+# For more information, see the Configuration Guide:
+# https://docs.librechat.ai/install/configuration/custom_config.html
+
+# Configuration version (required)
+version: 1.1.7
+
+cache: false
+
+fileConfig:
+  serverFileSizeLimit: 2000 # in MB
+  endpoints:
+    assistants:
+      fileLimit: 5
+      fileSizeLimit: 2000
+      totalSizeLimit: 2000
+    openAI:
+      disabled: false
+      fileLimit: 5
+      fileSizeLimit: 2000
+      totalSizeLimit: 2000
+    azureOpenAI:
+      disabled: false
+      fileLimit: 5
+      fileSizeLimit: 2000
+      totalSizeLimit: 2000
+    google:
+      disabled: false
+      fileLimit: 5
+      fileSizeLimit: 2000
+      totalSizeLimit: 2000
+    default:
+      fileLimit: 5
+      fileSizeLimit: 2000
+      totalSizeLimit: 2000
+
+filteredTools: ["traversaal_search", "google", "e2b_code_interpreter", "codesherpa_tools", "serpapi", "dall-e", "tavily_search_results_json", "stable-diffusion", "zapier", "Ai_PDF", "Dr_Thoths_Tarot", "DreamInterpreter", "drink_maestro", "earthImagesAndVisualizations", "uberchord", "VoxScript"]
+
+interface:
+  privacyPolicy:
+    externalUrl: 'https://librechat.ai/privacy-policy'
+    openNewTab: true
+  termsOfService:
+    externalUrl: 'https://librechat.ai/tos'
+    openNewTab: true
+
+registration:
+  socialLogins: ['openid']
+
+endpoints:
+  azureOpenAI:
+    titleModel: "gpt-35-turbo" # Model used to create conversation titles
+    plugins: true
+    assistants: false
+    # summarize: true
+    # summaryModel: "gpt-35-turbo"
+    # titleConvo: true
+    # titleMethod: "completion"
+    groups:
+    - group: "toxpipe-chat"
+      apiKey: "${EASTUS2_API_KEY}"
+      instanceName: "toxpipe-chat"
+      version: "2024-02-15-preview"
+      assistants: false
+      models:
+        # gpt-4-1:
+        #   deploymentName: gpt-4.1
+        # gpt-4-1-nano:
+        #   deploymentName: gpt-4.1-nano
+        gpt-4o:
+          deploymentName: gpt-4o
+        # gpt-4-5-preview:
+        #   deploymentName: gpt-4.5-preview
+        # gpt-4-1:
+        #   deploymentName: gpt-4.1-nano
+        gpt-4-turbo-20240409:
+          deploymentName: gpt-4-turbo-20240409
+        gpt-4-1106-preview:
+          deploymentName: gpt-4-1106-preview
+        gpt-4-32k:
+          deploymentName: gpt-4-32k
+        gpt-35-turbo:
+          deploymentName: gpt-35-turbo
+        gpt-35-turbo-16k:
+          deploymentName: gpt-35-turbo-16k
+    - group: "toxpipe"
+      apiKey: "${EASTUS_API_KEY}"
+      instanceName: "toxpipe"
+      version: "2024-02-01"
+      assistants: false
+      models:
+        gpt-4o-mini:
+          deploymentName: gpt-4o-mini
+    - group: "toxpipe-chat-o3"
+      apiKey: "${EASTUS2_API_KEY}"
+      instanceName: "toxpipe-chat"
+      version: "2024-12-01-preview"
+      assistants: false
+      addParams:
+        stream: true
+      models:
+        o4-mini:
+          deploymentName: o4-mini
+        o3:
+          deploymentName: o3
+        o3-mini:
+          deploymentName: o3-mini
+    - group: "toxpipe-chat-o1"
+      apiKey: "${EASTUS2_API_KEY}"
+      instanceName: "toxpipe-chat"
+      version: "2024-12-01-preview"
+      assistants: false
+      addParams:
+        stream: false
+      models:
+        o1:
+          deploymentName: o1
+        o1-preview:
+          deploymentName: o1-preview
+        o1-mini:
+          deploymentName: o1-mini
+
+  # azureAssistants:
+  #   capabilities: ["code_interpreter", "retrieval", "actions", "tools"]
+  #   disableBuilder: false
+  #   retrievalModels: ["gpt-4o", "gpt-4-turbo-20240409", "gpt-4-1106-preview", "gpt-4-32k", "gpt-35-turbo", "gpt-35-turbo-16k"]
+  #   timeoutMs: 20000
+
+  agents:
+    plugins: true
+
+  custom:
+
+    - name: "Anthropic"
+      apiKey: "12345"
+      iconURL: "https://chat.toxpipe.niehs.nih.gov/assets/anthropic_white.png"
+      baseURL: "http://host.docker.internal:8000"
+      models:
+        default: ["claude-4-sonnet", "claude-4-opus", "claude-3-7-sonnet", "claude-3-5-sonnet", "claude-3-opus", "claude-3-haiku", "claude-3-sonnet", "claude-v2", "claude-instant"]
+        fetch: false
+        userIdQuery: True
+      titleConvo: true
+      titleModel: "claude-instant"
+      titleMethod: "functions"
+      titleMessageRole: "user"
+      modelDisplayLabel: "Claude"
+      dropParams:
+        - "stop"
+        - "presence_penalty"
+        - "frequency_penalty"
+
+    - name: "Mistral"
+      apiKey: "12345"
+      baseURL: "http://host.docker.internal:8000"
+      models:
+        default: ["mistral-large", "mistral-7b-instruct", "mistral-8x7b-instruct"]
+        # Attempt to dynamically fetch available models
+        fetch: false
+        userIdQuery: True
+      iconURL: "https://chat.toxpipe.niehs.nih.gov/assets/mistral.png"
+      titleConvo: true
+      titleModel: "mistral-large"
+      modelDisplayLabel: "Mistral AI"
+      # addParams:
+      # Mistral API specific value for moderating messages
+      #   safe_prompt: true 
+      dropParams:
+        - "stop"
+        - "user"
+        - "presence_penalty"
+        - "frequency_penalty"
+      # headers:
+      #    x-custom-header: "${CUSTOM_HEADER_VALUE}
+
+    - name: "Meta AI"
+      apiKey: "12345"
+      baseURL: "http://host.docker.internal:8000"
+      models:
+        default: ["llama4-scout-17b-instruct", "llama4-maverick-17b-instruct", "llama3-3-70b", "llama3-2-90b", "llama3-2-11b", "llama3-1-405b", "llama3-1-70b", "llama3-1-8b", "llama3-70b", "llama3-8b"]
+        fetch: false
+        userIdQuery: True
+      iconURL: "https://chat.toxpipe.niehs.nih.gov/assets/meta-logo.png"
+      titleConvo: true
+      titleModel: "ollama-llama3"
+      modelDisplayLabel: "Meta AI"
+
+    - name: "Custom Models"
+      apiKey: "12345"
+      baseURL: "http://host.docker.internal:8000/v1"
+      models:
+        default: ["reflection", "openbiollm-llama3-70b"]
+        fetch: false
+        userIdQuery: True
+      # iconURL: ""
+      titleConvo: false
+      # titleModel: "openbiollm-llama3-70b"
+      forcePrompt: false
+      modelDisplayLabel: "Custom Model"

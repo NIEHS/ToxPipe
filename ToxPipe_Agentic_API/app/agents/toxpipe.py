@@ -1,0 +1,172 @@
+# LangChain/Graph agent creation
+from .toxpipe_graph import create_react_agent
+
+from langgraph.graph.message import add_messages
+# Model interface
+from langchain_openai import AzureChatOpenAI
+# Memory & Cache
+from langchain_core.messages import BaseMessage
+from langchain.globals import set_llm_cache
+from langchain_community.cache import SQLiteCache
+# File management & Tools
+from tempfile import TemporaryDirectory
+from langchain_community.agent_toolkits import FileManagementToolkit
+from langchain_core.output_parsers import PydanticOutputParser
+from pydantic import BaseModel, Field, model_validator
+from langchain_core.caches import BaseCache 
+
+# Create temporary working directory
+working_directory = TemporaryDirectory()
+toolkit = FileManagementToolkit(
+    root_dir=str(working_directory.name)
+)  # If you don't provide a root_dir, operations will default to the current working directory
+tools = FileManagementToolkit(
+    root_dir=str(working_directory.name),
+    selected_tools=["read_file", "write_file", "list_directory"],
+).get_tools()
+read_tool, write_tool, list_tool = tools
+
+from .tools import make_tools, make_translate_tools, make_rag_tools, make_literature_tools
+# Multiprocessing
+import concurrent.futures
+from .multi import *
+# Load environment variables
+from dotenv import load_dotenv
+load_dotenv('../.config/.env')
+# Prompts
+from .prompts_chem import getPrompt, summary_prompt, PromptAgentic
+
+# Other
+from typing import Sequence
+from typing_extensions import Annotated, TypedDict
+import os
+import truststore
+import httpx
+import ssl
+
+from ..rag import query
+
+# Handle models that have issues reading tools via LangChain's tool API. We will have to add these manually as a prompt.
+BAD_TOOL_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', 'mixtral-8x7b-instruct', 'llama3-1-70b', 'claude-3-sonnet', 'amazon-titan-text-premier', 'cohere-command-r-plus']
+
+# Create LLM handler - always use AzureChatOpenAI since all models are accessed through NIEHS's litellm instance.
+def _make_llm(model, api_version, temp, max_retries, max_tokens, seed, client):
+        llm = AzureChatOpenAI(
+            model_name=model,
+            temperature=temp,
+            api_version=api_version,
+            max_retries=max_retries,
+            max_tokens=max_tokens,
+            seed=seed,
+            tiktoken_model_name="gpt-4o", # use the gpt-4o tiktoken model for all models to avoid an error when calculating token limit
+            reasoning_effort="low",
+            http_client=client
+        )
+        return llm
+
+# format for output parser
+class Response(BaseModel):
+    thought: str = Field(description="Response from the LLM based on the previous message(s).")
+    action: str = Field(description="Which action to take or which tool to use next based on the thought.")
+    action_input: str = Field(description="Response from the LLM containing information from tools, literature, RAG, or training data.")
+    response: str = Field(description="Final response from the LLM containing information from tools, literature, RAG, and training data.")
+    @model_validator(mode="before")
+    @classmethod
+    def valid_response(cls, values: dict) -> dict:
+        return values
+
+class State(TypedDict):
+    messages: Annotated[Sequence[BaseMessage], add_messages]
+
+class ToxPipeAgent:
+    """
+    ToxPipeAgent is based on the ChemCrow agent that provides a simple interface for querying a LLM using the agent on a given prompt.
+    """
+    def __init__(
+        self,
+        name, # UUID created by FastAPI
+        model, # LLM name
+        client,
+        api_version=os.environ.get("OPENAI_API_VERSION"), # from .config/.env
+        temp=0.0, # higher temperature creates more answer variance, but this is potentially better if we are doing a multi-agent approach
+        max_iterations=10, # maximum number of agent recursions in chain
+        max_retries=100, # maximum number of retries upon LLM failure - set this to finite to avoid token limit errors from OpenAI
+        max_tokens=4096, # maximum number of tokens to use per query
+        max_memory_tokens=4096, # maximum number of tokens to consider in the context window - this is the maximum number of tokens to use for the LLM's memory
+        step_timeout=0, # maximum time in seconds to take per recursion
+        n_agents=1, # number of parallel agents to run - set to 1 for no parallelism. Higher values better for more complicated queries to help reduce variance
+        summarize=False, # if True, will summarize output. Ignored and always treated as True if n_agents > 1.
+        verbose=False, # If True, will produce verbose output but can drastically slow down the agent
+        auth=False, # If True, the agent will use the proprietary internal CBT tools. When in doubt, keep False.
+        checkpointer=None, # If not None, will save the agent state to the specified checkpointer
+        cache=False, # If true, will cache repeat requests to avoid making duplicate API calls
+        seed=1 # Random seed for LLM. Set the seed for more deterministic results.
+    ):
+        # Initialize parameters
+        self.llm = _make_llm(model, api_version, temp, max_retries, max_tokens, seed, client)
+        if cache == True:
+            set_llm_cache(SQLiteCache(database_path=".langchain.db")) # set cache to avoid making the same API calls over and over again
+        self.tools = make_tools(self.llm, verbose=verbose, auth=auth)
+        self.n_agents = n_agents
+        self.summarize = summarize
+        self.max_iterations = max_iterations
+        self.max_retries = max_retries
+        self.max_tokens = max_tokens
+        self.max_memory_tokens = max_memory_tokens
+        self.step_timeout = step_timeout
+        self.thread_id = name
+        self.checkpointer = checkpointer
+        self.seed = seed
+
+        # Define parser
+        self.parser = PydanticOutputParser(pydantic_object=Response)
+
+        self.prompt_template = getPrompt(PromptAgentic)
+
+        # Initialize agent to add tools to model
+        agent_executor = create_react_agent(self.llm, self.tools, state_modifier=self.prompt_template, checkpointer=checkpointer, debug=verbose, model_name=model, max_memory_tokens=max_memory_tokens) # state_modifier=PROMPT adds the prompt instructions to the agent
+        if step_timeout > 0:
+            agent_executor.step_timeout = step_timeout
+
+        self.agent_with_chat_history = agent_executor
+        self.config = {"configurable": {"thread_id": self.thread_id}, "recursion_limit": self.max_iterations}
+
+    # Not currently used, but meant to force the agent to be serializable for pickling
+    @classmethod
+    def is_lc_serializable(cls) -> bool:
+        return True
+
+    # Run the agent - i.e., query the LLM
+    def run(self, input):
+        n_agents = self.n_agents
+        proc = []
+        res = []
+        with concurrent.futures.ThreadPoolExecutor(max_workers=n_agents) as executor:
+            for i in range(0, n_agents):
+                proc.append(executor.submit(run_parallel, self, input, i))
+
+        # Join the results of each thread into a single response
+        for future in concurrent.futures.as_completed(proc):
+            fr = future.result()
+            res.append(fr)
+        res = "\n\n".join(res)
+
+        # If we are summarizing or running multiple agents, we need to summarize the results into a single result using the following conditions
+        if self.summarize == True or n_agents > 1:
+            
+            
+            summary_chain = summary_prompt | self.llm
+            summary = summary_chain.invoke({"n_agents": n_agents, "input": input, "res": res})
+
+            res = summary.content
+
+        return(res)
+        
+    
+    def run_rag(self, input, use_training_data):
+        return query(input, llm=self.llm, use_training_data=use_training_data)
+    
+    def run_lit(self, input):
+        literature_tools = make_literature_tools(self.llm)[0]
+        return literature_tools._run(input)
+    

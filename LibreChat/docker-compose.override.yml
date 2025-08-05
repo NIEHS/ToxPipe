@@ -1,0 +1,223 @@
+version: '3.4'
+
+# Please consult our docs for more info: https://docs.librechat.ai/install/configuration/docker_override.html
+
+services:
+
+# USE LIBRECHAT CONFIG FILE
+  api:
+    image: librechat
+    build:
+      context: .
+      target: node
+    volumes:
+      - ./librechat.yaml:/app/librechat.yaml
+    # image: ghcr.io/danny-avila/librechat-dev:latest
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
+    networks:
+      - autonomous
+
+  mongodb:
+    networks:
+      - autonomous
+  meilisearch:
+    networks:
+      - autonomous
+
+# USE RAG API IMAGE WITH LOCAL EMBEDDINGS SUPPORT
+  rag_api:
+    image: ghcr.io/danny-avila/librechat-rag-api-dev:latest
+    environment:
+      - AZURE_OPENAI_ENDPOINT=https://toxpipe-chat.openai.azure.com
+      - OPENAI_API_VERSION=2024-02-01
+    networks:
+      - autonomous
+    ports:
+      - 8001:8000
+
+  vectordb:
+    image: pgvector/pgvector:pg16
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=12345
+      - POSTGRES_DB=postgres
+    volumes:
+      - librechat-pg:/var/lib/postgresql/data
+    networks:
+      - autonomous
+
+  langfuse-server:
+    container_name: langfuse
+    image: ghcr.io/langfuse/langfuse:latest
+    depends_on:
+      - langfuse-db
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    environment:
+      - DATABASE_URL=postgresql://12345
+      - NEXTAUTH_SECRET=12345
+      - SALT=12345
+      - NEXTAUTH_URL=https://langfuse.toxpipe.niehs.nih.gov
+      - TELEMETRY_ENABLED=${TELEMETRY_ENABLED:-true}
+      - NEXT_PUBLIC_SIGN_UP_DISABLED=${NEXT_PUBLIC_SIGN_UP_DISABLED:-false}
+      - LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES=${LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES:-false}
+      - AUTH_DISABLE_USERNAME_PASSWORD=true
+      - AUTH_AZURE_AD_CLIENT_ID=${LANGFUSE_AZURE_AD_CLIENT_ID}
+      - AUTH_AZURE_AD_CLIENT_SECRET=${LANGFUSE_AZURE_AD_CLIENT_SECRET}
+      - AUTH_AZURE_AD_TENANT_ID=${LANGFUSE_AZURE_AD_TENANT_ID}
+      - AUTH_AZURE_ALLOW_ACCOUNT_LINKING=true
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
+    networks:
+      - autonomous
+
+  ollama:
+    container_name: ollama
+    image: ollama/ollama:latest
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [compute, utility]
+    ports:
+      - "11434:11434"
+    volumes:
+      - /data/models:/root/models
+      - ollama:/root/.ollama
+    networks:
+      - autonomous
+
+  # ADD LITELLM BASIC - NEED TO CONFIGURE litellm-config.yaml, ONLY NEED ENV TO ENABLE REDIS FOR CACHING OR LANGFUSE FOR MONITORING
+  litellm:
+    container_name: litellm
+    image: ghcr.io/berriai/litellm:main-latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./.litellm/litellm-config.yaml:/app/config.yaml
+      - ./api/data/auth.json:/app/application_default_credentials.json
+    depends_on:
+      - litellm-db
+    restart: unless-stopped
+    command: [ "--config", "/app/config.yaml", "--port", "8000", "--num_workers", "8" ]
+    environment:
+      UI_USERNAME: admin
+      UI_PASSWORD: 12345
+      GOOGLE_APPLICATION_CREDENTIALS: /app/application_default_credentials.json
+      OPENAI_API_KEY: ollama ## needs to be set if ollama's openai api compatibility is used
+      DATABASE_URL: postgresql://12345
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: 12345
+      LANGFUSE_PUBLIC_KEY: 12345
+      LANGFUSE_SECRET_KEY: 12345
+      LANGFUSE_HOST: http://langfuse-server:3000
+      #LITELLM_LOG: DEBUG
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
+    networks:
+      - autonomous
+
+  # ADD LITELLM CACHING
+  redis:
+    image: redis:7-alpine
+    command:
+    - sh
+    - -c # this is to evaluate the $REDIS_PASSWORD from the env
+    - redis-server --appendonly yes --requirepass $$REDIS_PASSWORD ## $$ because of docker-compose
+    environment:
+      REDIS_PASSWORD: 12345
+    volumes:
+      - ./redis:/data
+    networks:
+      - autonomous
+
+# langfuse and litellm db's separated because litellm crashing takes down langfuse db
+  langfuse-db:
+    image: postgres:16.4
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=12345
+      - POSTGRES_DB=postgres
+    ports:
+      - 5435:5432
+    volumes:
+      - langfuse-pg:/var/lib/postgresql/data
+      # - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    networks:
+      - autonomous
+  
+  litellm-db:
+    image: postgres:16.4
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=12345
+      - POSTGRES_DB=postgres
+    ports:
+      - 5434:5432
+    volumes:
+      - litellm-pg:/var/lib/postgresql/data
+    networks:
+      - autonomous
+
+  # Live log monitoring
+  dozzle:
+    container_name: dozzle
+    image: amir20/dozzle:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - 8888:8080
+    networks:
+      - autonomous
+
+# ADD MONGO-EXPRESS
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: password
+    ports:
+      - '8081:8081'
+    depends_on:
+      - mongodb
+    restart: always
+    networks:
+      - autonomous
+
+  # ChromaDB database that hosts embeddings for NTP documents
+  chromadb:
+    image: ghcr.io/chroma-core/chroma:latest
+    #image: ghcr.io/chroma-core/chroma:0.6.4.dev361 # use specific version to avoid breaking changes, updating this causes a key error in the agentic API 
+    container_name: chromadb
+    restart: always
+    ports:
+      - "8009:8000" # LiteLLM already uses 8000, so we use 8009 for ChromaDB
+    volumes:
+      - ./ntp_docs_rag_db/chroma-data:/data
+    networks:
+      - autonomous
+
+# Traefik network
+networks:
+  autonomous:
+    driver: overlay
+    external: true
+
+volumes:
+  librechat-pg:
+  langfuse-pg:
+  litellm-pg:
+  ollama:
