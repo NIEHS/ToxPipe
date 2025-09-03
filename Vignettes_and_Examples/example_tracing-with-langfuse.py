@@ -18,7 +18,7 @@ langfuse_handler = CallbackHandler()
 # Define langchain model to use
 from langchain_openai import AzureChatOpenAI
 from langchain.prompts import ChatPromptTemplate
-OPENAI_API_KEY="sk-_CVbg7aCU6GeswYMzTP_Kw"
+OPENAI_API_KEY="sk-_..."
 OPENAI_BASE_URL="https://litellm.toxpipe.niehs.nih.gov"
 OPENAI_API_VERSION="2024-12-01-preview"
 
