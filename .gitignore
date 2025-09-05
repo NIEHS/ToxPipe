@@ -108,9 +108,7 @@ Backend/librechat.yml
 
 # Environment
 Backend/.npmrc
-Backend/.env*
 Backend/my.secrets
-Backend/!**/.env.example
 Backend/!**/.env.test.example
 Backend/cache.json
 Backend/api/data/
@@ -242,9 +240,7 @@ Backend/librechat.yml.bak
 
 # Environment
 Backend/.npmrc
-Backend/.env*
 Backend/my.secrets
-Backend/!**/.env.example
 Backend/!**/.env.test.example
 Backend/cache.json
 Backend/api/data/
