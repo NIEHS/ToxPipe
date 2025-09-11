@@ -92,8 +92,8 @@ services:
     ports:
       - "11434:11434"
     volumes:
-      - /data/models:/root/models
-      - ollama:/root/.ollama
+      - ./models:/root/models
+      - ./ollama:/root/.ollama
     networks:
       - autonomous
 
@@ -477,4 +477,5 @@ volumes:
   langflow-postgres:
   langflow-data:
   toxpipe-agent-postgres:
+  models:
 
