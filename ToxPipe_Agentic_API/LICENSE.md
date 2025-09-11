@@ -1,3 +1,0 @@
-# License
-
-Currently thinking MIT license, but need to gather feedback first.
