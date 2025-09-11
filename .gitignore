@@ -326,3 +326,5 @@ backup/
 backup/*
 Backend/docker-compose.override.yml
 Backend/docker-compose.yml
+
+toxpipe-test-env/*
