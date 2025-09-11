@@ -323,8 +323,11 @@ Backend/docker-compose.yml
 .Backend/docker-compose.override.yml
 
 backup/
+.backup/
+.backup/*
 backup/*
-Backend/docker-compose.override.yml
-Backend/docker-compose.yml
-
+./Backend/docker-compose.override.yml
+./Backend/docker-compose.yml
+./toxpipe-test-env
+toxpipe-test-env
 toxpipe-test-env/*
