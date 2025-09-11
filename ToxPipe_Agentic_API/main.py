@@ -38,7 +38,7 @@ truststore.inject_into_ssl()
 
 #ctx = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 print(certifi.where())
-    
+
 # Persistent memory
 # Establish Postgres Connection for ToxPipe
 postgres_host = os.environ.get("TOXPIPE_POSTGRES_HOST")
