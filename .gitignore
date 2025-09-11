@@ -319,3 +319,6 @@ Backend/toxpipe-agent-postgres/*
 Backend/traefik/*
 Backend/user-data/*
 Backend/docker-compose.yml
+
+backup/
+backup/*
