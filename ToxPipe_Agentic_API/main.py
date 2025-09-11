@@ -1,6 +1,5 @@
 # Force app to use system cert store instead of certifi
 import truststore
-#truststore.inject_into_ssl()
 
 import atexit
 
@@ -20,32 +19,29 @@ from psycopg_pool import ConnectionPool
 import os
 import ssl
 import tempfile
-from dotenv import load_dotenv
-load_dotenv('.config/.env')
+from dotenv import dotenv_values
+from pathlib import Path
+DIR_HOME = Path(__file__).parent
+env_config = dotenv_values(DIR_HOME / ".config" / ".env")
 import requests
 import traceback
 import httpx
 import certifi
 
+# For NIEHS cert issue
 ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-ctx.load_verify_locations(f"{os.environ.get('SSL_CERT_DIR')}NIH-FULL.pem")
+ctx.load_verify_locations(f"{DIR_HOME}/{env_config['SSL_CERT_DIR']}/NIH-FULL.pem")
 ctx.verify_mode = ssl.CERT_REQUIRED
 client = httpx.Client(verify=ctx)
-
-
 truststore.inject_into_ssl()
  
-
-#ctx = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-print(certifi.where())
-
 # Persistent memory
 # Establish Postgres Connection for ToxPipe
-postgres_host = os.environ.get("TOXPIPE_POSTGRES_HOST")
-postgres_port = os.environ.get("TOXPIPE_POSTGRES_PORT")
-postgres_name = os.environ.get("TOXPIPE_POSTGRES_DATABASE")
-postgres_user = os.environ.get("TOXPIPE_POSTGRES_USER")
-postgres_pass = os.environ.get("TOXPIPE_POSTGRES_PASSWORD")
+postgres_host = env_config["TOXPIPE_POSTGRES_HOST"]
+postgres_port = env_config["TOXPIPE_POSTGRES_PORT"]
+postgres_name = env_config["TOXPIPE_POSTGRES_DATABASE"]
+postgres_user = env_config["TOXPIPE_POSTGRES_USER"]
+postgres_pass = env_config["TOXPIPE_POSTGRES_PASSWORD"]
 DB_URI = f"postgresql://{postgres_user}:{postgres_pass}@{postgres_host}:{postgres_port}/{postgres_name}"
 connection_kwargs = {
     "autocommit": True,
@@ -102,9 +98,9 @@ AMAZON_MODELS = ['amazon-titan-text-premier']
 COHERE_MODELS = ['cohere-command-r-plus']
 
 # Load environment variables from .config/.env
-AUTH_MODE = os.environ.get("TOXPIPE_AUTH_MODE") # Should usually be false unless running a secure, internal-to-NIEHS version of this API
-VERBOSE = os.environ.get("TOXPIPE_VERBOSE") # Should be false on production
-CACHE = os.environ.get("TOXPIPE_CACHE") 
+AUTH_MODE = env_config["TOXPIPE_AUTH_MODE"] # Should usually be false unless running a secure, internal-to-NIEHS version of this API
+VERBOSE = env_config["TOXPIPE_VERBOSE"] # Should be false on production
+CACHE = env_config["TOXPIPE_CACHE"] 
 
 # Convert environment variables to boolean if they are strings
 if AUTH_MODE == "True":
@@ -313,8 +309,8 @@ async def check_api_connections(request: Request, response: Response):
 
     try:
         llm_res = requests.get(
-            f"{os.environ.get('OPENAI_BASE_URL')}/",
-            headers={'Authorization': f"Bearer {os.environ.get('OPENAI_API_KEY')}"}
+            f"{env_config['OPENAI_BASE_URL']}/",
+            headers={'Authorization': f"Bearer {env_config['OPENAI_API_KEY']}"}
         ).status_code
         if llm_res == 200:
             llm_res = "Connected!"
@@ -329,8 +325,8 @@ async def check_api_connections(request: Request, response: Response):
     
     try:
         cbt_res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{env_config['CBT_API_ENDPOINT']}/",
+            headers={'Authorization': f"Key {env_config['CONNECT_API_KEY']}"}
         ).status_code
         if cbt_res == 200:
             cbt_res = "Connected!"

@@ -14,9 +14,11 @@ import os
 
 from .utils import is_smiles
 
-from dotenv import load_dotenv
-load_dotenv('../../../.config/.env')
-
+# Load environment variables
+from dotenv import dotenv_values
+from pathlib import Path
+DIR_HOME = Path(__file__).parent.parent.parent.parent
+env_config = dotenv_values(DIR_HOME / ".config" / ".env")
 
 __all__ = ["RXNPredict", "RXNRetrosynthesis"]
 
@@ -41,7 +43,7 @@ class RXN4Chem(BaseTool):
         )
         
         try:
-            self.rxn4chem.project_id = os.environ.get("RXN4CHEM_PROJECT_ID")
+            self.rxn4chem.project_id = env_config["RXN4CHEM_PROJECT_ID"]
         except KeyError:
             return {}
 

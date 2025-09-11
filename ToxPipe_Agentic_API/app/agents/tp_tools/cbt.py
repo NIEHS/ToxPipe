@@ -6,14 +6,21 @@ import urllib.parse
 from langchain.tools import BaseTool
 from langchain.llms import BaseLLM
 from langchain_core.prompts import ChatPromptTemplate
-from dotenv import load_dotenv
 from random import sample
-load_dotenv('../../../.config/.env')
 
-MAX_RESULTS = os.environ.get("TOXPIPE_CBT_MAX_RESULTS")
+# Load environment variables
+from dotenv import dotenv_values
+from pathlib import Path
+DIR_HOME = Path(__file__).parent.parent.parent.parent
+env_config = dotenv_values(DIR_HOME / ".config" / ".env")
+
+CBT_API_ENDPOINT = env_config["CBT_API_ENDPOINT"]
+CONNECT_API_KEY = env_config["CONNECT_API_KEY"]
+headers = {'Authorization': f"Key {CONNECT_API_KEY}"}
+
+MAX_RESULTS = env_config["TOXPIPE_CBT_MAX_RESULTS"]
 if type(MAX_RESULTS) == str:
     MAX_RESULTS = int(MAX_RESULTS)
-
 
 def unique(l):
     ls = set(l)
@@ -78,8 +85,8 @@ class Query2DTXSID(BaseTool):
         name = name.rstrip()
 
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/synonym2dtxsid?name={name}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/synonym2dtxsid?name={name}",
+            headers=headers
         )
 
         res = res.json()
@@ -104,8 +111,8 @@ class Name2DTXSID(BaseTool):
         name = name.rstrip()
 
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/synonym2dtxsid?name={name}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/synonym2dtxsid?name={name}",
+            headers=headers
         )
 
         res = res.json()
@@ -130,8 +137,8 @@ class CASRN2DTXSID(BaseTool):
         casrn = casrn.rstrip()
 
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/casrn2dtxsid?casrn={casrn}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/casrn2dtxsid?casrn={casrn}",
+            headers=headers
         )
         
         res = res.json()
@@ -155,8 +162,8 @@ class Name2SMILES(BaseTool):
         """Input a chemical name, return its corresponding SMILES string available in ChemBioTox."""
         name = name.rstrip()
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/synonym2dtxsid?name={name}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/synonym2dtxsid?name={name}",
+            headers=headers
         )
         res = res.json()
 
@@ -166,8 +173,8 @@ class Name2SMILES(BaseTool):
 
         dtxsid = res[0]["dsstox_substance_id"]
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/dtxsid2smiles?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/dtxsid2smiles?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
 
@@ -195,8 +202,8 @@ class SMILES2DTXSID(BaseTool):
         """Input a SMILES string, return its DSSTox substance ID (DTXSID) if available in ChemBioTox."""
         name = name.rstrip()
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/smiles2dtxsid?smiles={urllib.parse.quote_plus(name)}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/smiles2dtxsid?smiles={urllib.parse.quote_plus(name)}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -234,14 +241,14 @@ class StructuralSimilarity(BaseTool):
 
         # Convert DTXSID to SMILES
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/dtxsid2smiles?dtxsid={urllib.parse.quote_plus(dtxsid)}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/dtxsid2smiles?dtxsid={urllib.parse.quote_plus(dtxsid)}",
+            headers=headers
         )
         res = res.json()
         smiles = res[0]["canonical_smiles"]
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/similarity/structural?smiles={urllib.parse.quote_plus(smiles)}&fp=morgan&threshold=0.5&n={MAX_RESULTS}&exact=false",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/similarity/structural?smiles={urllib.parse.quote_plus(smiles)}&fp=morgan&threshold=0.5&n={MAX_RESULTS}&exact=false",
+            headers=headers
         )
         res = res.json()
         outp = []
@@ -269,8 +276,8 @@ class FunctionalSimilarity(BaseTool):
         """Input a SMILES string, return its DSSTox substance ID (DTXSID) if available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/similarity/functional?dtxsid={dtxsid}&fp=leadscope&threshold=0.1&n=10",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/similarity/functional?dtxsid={dtxsid}&fp=leadscope&threshold=0.1&n=10",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -301,8 +308,8 @@ class QueryCBTChemicalVendors(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/availability/vendors?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/availability/vendors?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -338,8 +345,8 @@ class QueryCBTTox21Models(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/models/tox21?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/models/tox21?dtxsid={dtxsid}",
+            headers=headers
         )
 
         res = res.json()
@@ -378,8 +385,8 @@ class QueryCBTGRAS(BaseTool):
         """Input a DTXSID to return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/gras?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/gras?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -418,8 +425,8 @@ class QueryCTDDiseases(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/diseases?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/ctd/diseases?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -475,8 +482,8 @@ class QueryCTDGenes(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/genes/llm?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/ctd/genes/llm?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
 
@@ -531,8 +538,8 @@ class QueryCBTLeadscope(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/models/leadscope?dtxsid={dtxsid}&positives=TRUE",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/models/leadscope?dtxsid={dtxsid}&positives=TRUE",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -592,8 +599,8 @@ class QueryCBTADMET(BaseTool): # proprietary
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/models/admet/qsar?dtxsid={dtxsid}&positives=TRUE",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/models/admet/qsar?dtxsid={dtxsid}&positives=TRUE",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -636,8 +643,8 @@ class QueryCBTMetabolites(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/models/admet/metabolites?dtxsid={dtxsid}&enzyme=both&maxlevel=3",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/models/admet/metabolites?dtxsid={dtxsid}&enzyme=both&maxlevel=3",
+            headers=headers
         )
 
         res = res.json()
@@ -685,8 +692,8 @@ class QueryCBTSEEM3(BaseTool):
         dtxsid = re.sub(r'\s+', '', dtxsid)
 
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/seem3?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/seem3?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
 
@@ -728,8 +735,8 @@ class QueryCBTDrugBankTransporters(BaseTool):
         dtxsid = re.sub(r'\s+', '', dtxsid)
 
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/drugbank?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/drugbank?dtxsid={dtxsid}",
+            headers=headers
         )
 
         res = res.json()
@@ -773,15 +780,15 @@ class QueryStructuralAlertsOChem(BaseTool):
         
         # Convert DTXSID to SMILES
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/dtxsid2smiles?dtxsid={urllib.parse.quote_plus(dtxsid)}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/dtxsid2smiles?dtxsid={urllib.parse.quote_plus(dtxsid)}",
+            headers=headers
         )
         res = res.json()
         smiles = res[0]["canonical_smiles"]
 
         ochem_res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/alerts/ochem?smiles={urllib.parse.quote_plus(smiles)}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/alerts/ochem?smiles={urllib.parse.quote_plus(smiles)}",
+            headers=headers
         )
         ochem_res = ochem_res.json()
 
@@ -844,15 +851,15 @@ class QueryStructuralAlertsChEMBL(BaseTool):
         
         # Convert DTXSID to SMILES
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/dtxsid2smiles?dtxsid={urllib.parse.quote_plus(dtxsid)}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/dtxsid2smiles?dtxsid={urllib.parse.quote_plus(dtxsid)}",
+            headers=headers
         )
         res = res.json()
         smiles = res[0]["canonical_smiles"]
 
         chembl_res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/alerts/chembl?smiles={urllib.parse.quote_plus(smiles)}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/alerts/chembl?smiles={urllib.parse.quote_plus(smiles)}",
+            headers=headers
         )
         chembl_res = chembl_res.json()
 
@@ -915,15 +922,15 @@ class QueryStructuralAlertsSaagar(BaseTool):
         
         # Convert DTXSID to SMILES
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/dtxsid2smiles?dtxsid={urllib.parse.quote_plus(dtxsid)}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/dtxsid2smiles?dtxsid={urllib.parse.quote_plus(dtxsid)}",
+            headers=headers
         )
         res = res.json()
         smiles = res[0]["canonical_smiles"]
 
         saagar_res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/alerts/saagar?smiles={urllib.parse.quote_plus(smiles)}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/alerts/saagar?smiles={urllib.parse.quote_plus(smiles)}",
+            headers=headers
         )
         saagar_res = saagar_res.json()
 
@@ -990,8 +997,8 @@ class QueryCBTInVitroDB(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/invitrodb?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/invitrodb?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -1030,8 +1037,8 @@ class QueryCTDBP(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/bp?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/ctd/bp?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -1069,8 +1076,8 @@ class QueryCTDCC(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/cc?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/ctd/cc?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -1108,8 +1115,8 @@ class QueryCTDMF(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/mf?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/ctd/mf?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -1147,8 +1154,8 @@ class QueryPubChemBioassays(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/pubchem/bioassays?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/pubchem/bioassays?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -1191,8 +1198,8 @@ class QueryPubChemProperties(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/pubchem/properties?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/pubchem/properties?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -1227,8 +1234,8 @@ class QueryPubChemSynonyms(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/pubchem/properties/synonyms?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/pubchem/properties/synonyms?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
 
@@ -1260,8 +1267,8 @@ class QueryPubChemMass(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/pubchem/properties/mass?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/pubchem/properties/mass?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -1291,8 +1298,8 @@ class QueryPubChemFormula(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/pubchem/properties/formula?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/pubchem/properties/formula?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -1322,8 +1329,8 @@ class QueryPubChemWeight(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/pubchem/properties/weight?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/pubchem/properties/weight?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -1352,8 +1359,8 @@ class QueryPubChemXLogP(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/pubchem/properties/xlogp?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/pubchem/properties/xlogp?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -1382,8 +1389,8 @@ class QueryEPAProperties(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/epa/properties?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/epa/properties?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -1420,8 +1427,8 @@ class QueryCPD(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/cpdat?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/cpdat?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
 
@@ -1463,8 +1470,8 @@ class QueryFooDBEnzymes(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/foodb/enzymes?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/foodb/enzymes?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -1500,8 +1507,8 @@ class QueryFooDBFlavors(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/foodb/flavors?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/foodb/flavors?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -1537,8 +1544,8 @@ class QueryFooDBContent(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/foodb/content?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/foodb/content?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -1573,8 +1580,8 @@ class QueryFooDBEffects(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/foodb/effects?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/foodb/effects?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -1612,8 +1619,8 @@ class QueryDrugBankCarriers(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/drugbank/carriers?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/drugbank/carriers?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -1649,8 +1656,8 @@ class QueryDrugBankEnzymes(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/drugbank/enzymes?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/drugbank/enzymes?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -1685,8 +1692,8 @@ class QueryDrugBankTargets(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/drugbank/targets?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/drugbank/targets?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -1721,8 +1728,8 @@ class QueryDrugBankTransporters(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/drugbank/transporters?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/drugbank/transporters?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -1759,8 +1766,8 @@ class QueryHMDBBS(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/locations/biospecimen?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/hmdb/locations/biospecimen?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
 
@@ -1796,8 +1803,8 @@ class QueryHMDBC(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/locations/cell?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/hmdb/locations/cell?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -1832,8 +1839,8 @@ class QueryHMDBT(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/locations/tissue?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/hmdb/locations/tissue?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
         if len(res) < 1:
@@ -1868,8 +1875,8 @@ class QueryHMDBDiseases(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/diseases?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/hmdb/diseases?dtxsid={dtxsid}",
+            headers=headers
         )
 
         res = res.json()
@@ -1906,8 +1913,8 @@ class QueryHMDBGenes(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/genes?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/hmdb/genes?dtxsid={dtxsid}",
+            headers=headers
         )
 
         res = res.json()
@@ -1944,8 +1951,8 @@ class QueryHMDBProteins(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/proteins?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/hmdb/proteins?dtxsid={dtxsid}",
+            headers=headers
         )
 
         res = res.json()
@@ -1981,8 +1988,8 @@ class QueryHMDBDisease2Chemicals(BaseTool):
     def _run(self, disease: str, **kwargs) -> str:
         """Input disease name, return a list of associated chemicals using the data available in ChemBioTox."""
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/diseases/chemicals?name={disease}&n=5&exact=FALSE",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/hmdb/diseases/chemicals?name={disease}&n=5&exact=FALSE",
+            headers=headers
         )
 
         res = res.json()
@@ -2020,8 +2027,8 @@ class QueryCTDDisease2Chemicals(BaseTool):
     def _run(self, disease: str, **kwargs) -> str:
         """Input disease name, return a list of associated chemicals using the data available in ChemBioTox."""
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/diseases/chemicals?name={disease}&n=5&exact=FALSE&n_chem=5",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/ctd/diseases/chemicals?name={disease}&n=5&exact=FALSE&n_chem=5",
+            headers=headers
         )
 
         res = res.json()
@@ -2060,8 +2067,8 @@ class QueryCTDGene2Chemicals(BaseTool):
     def _run(self, gene: str, **kwargs) -> str:
         """Input gene name, return a list of associated chemicals using the data available in ChemBioTox."""
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/ctd/genes/chemicals?name={gene}&n=50&exact=TRUE",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/ctd/genes/chemicals?name={gene}&n=50&exact=TRUE",
+            headers=headers
         )
 
         res = res.json()
@@ -2100,8 +2107,8 @@ class QueryHMDBGene2Chemicals(BaseTool):
     def _run(self, gene: str, **kwargs) -> str:
         """Input gene name, return a list of associated chemicals using the data available in ChemBioTox."""
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/hmdb/genes/chemicals?name={gene}&n=5&exact=FALSE",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/hmdb/genes/chemicals?name={gene}&n=5&exact=FALSE",
+            headers=headers
         )
 
         res = res.json()
@@ -2140,8 +2147,8 @@ class QueryDrugBankGene2Chemicals(BaseTool):
     def _run(self, gene: str, **kwargs) -> str:
         """Input gene name, return a list of associated chemicals using the data available in ChemBioTox."""
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/drugbank/genes/chemicals?name={gene}&n=5&exact=FALSE",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/drugbank/genes/chemicals?name={gene}&n=5&exact=FALSE",
+            headers=headers
         )
 
         res = res.json()
@@ -2181,8 +2188,8 @@ class QueryDrugBankGenes(BaseTool):
     def _run(self, dtxsid: str, **kwargs) -> str:
         """Input dtxsid, return a list of associated chemicals using the data available in ChemBioTox."""
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/drugbank/genes?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/drugbank/genes?dtxsid={dtxsid}",
+            headers=headers
         )
 
         res = res.json()
@@ -2218,8 +2225,8 @@ class QuerySuperfund(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/superfund?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/superfund?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
 
@@ -2260,8 +2267,8 @@ class QueryT3DB(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/t3db?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/t3db?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
 
@@ -2298,8 +2305,8 @@ class QueryToxRefDBNonNP(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/toxrefdb/neoplasticity?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/toxrefdb/neoplasticity?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
 
@@ -2336,8 +2343,8 @@ class QueryToxRefDBNP(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/toxrefdb/neoplasticity?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/toxrefdb/neoplasticity?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
 
@@ -2375,8 +2382,8 @@ class QueryToxRefDBStudies(BaseTool):
         """Input DSSTox substance ID (DTXSID), return an annotated/enriched dataset for that chemical using the data available in ChemBioTox."""
         dtxsid = re.sub(r'\s+', '', dtxsid)
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/toxrefdb/studies/llm?dtxsid={dtxsid}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/toxrefdb/studies/llm?dtxsid={dtxsid}",
+            headers=headers
         )
         res = res.json()
 

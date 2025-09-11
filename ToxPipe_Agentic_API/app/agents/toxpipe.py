@@ -15,6 +15,23 @@ from langchain_core.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field, model_validator
 from langchain_core.caches import BaseCache 
 
+# Load environment variables
+from dotenv import dotenv_values
+from pathlib import Path
+DIR_HOME = Path(__file__).parent.parent.parent
+env_config = dotenv_values(DIR_HOME / ".config" / ".env")
+
+# LangFuse Tracing
+from langfuse import Langfuse, get_client
+from langfuse.langchain import CallbackHandler
+lf = Langfuse(
+    public_key=env_config["LANGFUSE_PUBLIC_KEY"],
+    secret_key=env_config["LANGFUSE_SECRET_KEY"],
+    host=env_config["LANGFUSE_HOST"]
+)
+langfuse = get_client()
+langfuse_handler = CallbackHandler()
+
 # Create temporary working directory
 working_directory = TemporaryDirectory()
 toolkit = FileManagementToolkit(
@@ -30,9 +47,7 @@ from .tools import make_tools, make_translate_tools, make_rag_tools, make_litera
 # Multiprocessing
 import concurrent.futures
 from .multi import *
-# Load environment variables
-from dotenv import load_dotenv
-load_dotenv('../.config/.env')
+
 # Prompts
 from .prompts_chem import getPrompt, summary_prompt, PromptAgentic
 
@@ -52,6 +67,8 @@ BAD_TOOL_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', 'm
 # Create LLM handler - always use AzureChatOpenAI since all models are accessed through NIEHS's litellm instance.
 def _make_llm(model, api_version, temp, max_retries, max_tokens, seed, client):
         llm = AzureChatOpenAI(
+            azure_endpoint=env_config["AZURE_OPENAI_ENDPOINT"], # load from .env
+            openai_api_key=env_config["AZURE_OPENAI_API_KEY"], # load from .env
             model_name=model,
             temperature=temp,
             api_version=api_version,
@@ -87,7 +104,7 @@ class ToxPipeAgent:
         name, # UUID created by FastAPI
         model, # LLM name
         client,
-        api_version=os.environ.get("OPENAI_API_VERSION"), # from .config/.env
+        api_version=env_config["OPENAI_API_VERSION"], # from .config/.env
         temp=0.0, # higher temperature creates more answer variance, but this is potentially better if we are doing a multi-agent approach
         max_iterations=10, # maximum number of agent recursions in chain
         max_retries=100, # maximum number of retries upon LLM failure - set this to finite to avoid token limit errors from OpenAI
@@ -129,7 +146,7 @@ class ToxPipeAgent:
             agent_executor.step_timeout = step_timeout
 
         self.agent_with_chat_history = agent_executor
-        self.config = {"configurable": {"thread_id": self.thread_id}, "recursion_limit": self.max_iterations}
+        self.config = {"configurable": {"thread_id": self.thread_id}, "recursion_limit": self.max_iterations, "callbacks": [langfuse_handler]}
 
     # Not currently used, but meant to force the agent to be serializable for pickling
     @classmethod

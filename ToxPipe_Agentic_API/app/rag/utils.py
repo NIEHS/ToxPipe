@@ -1,6 +1,8 @@
 from pathlib import Path
 from dotenv import dotenv_values
-from langfuse.callback import CallbackHandler
+#from langfuse.callback import CallbackHandler
+from langfuse import Langfuse, get_client
+from langfuse.langchain import CallbackHandler
 
 from operator import add
 from typing import Annotated, List
@@ -15,7 +17,7 @@ class Config:
 
     env_config = dotenv_values(DIR_HOME / ".config" / ".env")
 
-    langfuse_handler = CallbackHandler(
+    langfuse_handler = Langfuse(
         public_key=env_config["LANGFUSE_PUBLIC_KEY"],
         secret_key=env_config["LANGFUSE_SECRET_KEY"],
         host=env_config["LANGFUSE_HOST"]

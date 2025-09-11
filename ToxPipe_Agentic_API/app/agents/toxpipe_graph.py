@@ -15,13 +15,13 @@ from typing_extensions import Annotated, TypedDict
 
 import copy
 
-from langgraph._api.deprecation import deprecated_parameter
+#from langgraph._api.deprecation import deprecated_parameter
 from langgraph.errors import ErrorCode, create_error_message
 from langgraph.graph import StateGraph, START, END
-from langgraph.graph.graph import CompiledGraph
+#from langgraph.graph.graph import CompiledGraph
 from langgraph.graph.message import add_messages
 from langgraph.managed import IsLastStep, RemainingSteps
-from langgraph.prebuilt.tool_executor import ToolExecutor
+#from langgraph.prebuilt.tool_executor import ToolExecutor
 from langgraph.prebuilt.tool_node import ToolNode
 from langgraph.store.base import BaseStore
 from langgraph.types import Checkpointer
@@ -59,6 +59,28 @@ GOOGLE_MODELS = ['gemini-1.5-pro'] # TODO - VertexAIException BadRequestError - 
 AMAZON_MODELS = ['amazon-titan-text-premier']
 COHERE_MODELS = ['cohere-command-r-plus']
 BAD_TOOL_MODELS = []
+
+import truststore
+truststore.inject_into_ssl()
+
+# Load environment variables
+from dotenv import dotenv_values
+from pathlib import Path
+DIR_HOME = Path(__file__).parent.parent.parent
+env_config = dotenv_values(DIR_HOME / ".config" / ".env")
+
+print("===env_config===")
+print(env_config)
+
+# LangFuse Tracing
+from langfuse import Langfuse, get_client
+from langfuse.langchain import CallbackHandler
+langfuse = Langfuse(
+    public_key=env_config["LANGFUSE_PUBLIC_KEY"],
+    secret_key=env_config["LANGFUSE_SECRET_KEY"],
+    host=env_config["LANGFUSE_HOST"]
+)
+langfuse_handler = CallbackHandler()
 
 
 
@@ -414,10 +436,11 @@ def _validate_chat_history(
     return messages
 
 
-@deprecated_parameter("messages_modifier", "0.1.9", "state_modifier", removal="0.3.0")
+#@deprecated_parameter("messages_modifier", "0.1.9", "state_modifier", removal="0.3.0")
 def create_react_agent(
     model: LanguageModelLike,
-    tools: Union[ToolExecutor, Sequence[BaseTool], ToolNode],
+    #tools: Union[ToolExecutor, Sequence[BaseTool], ToolNode],
+    tools: Union[Sequence[BaseTool], ToolNode],
     *,
     state_schema: Optional[StateSchemaType] = None,
     messages_modifier: Optional[MessagesModifier] = None,
@@ -428,8 +451,8 @@ def create_react_agent(
     interrupt_after: Optional[list[str]] = None,
     debug: bool = False,
     model_name: Optional[str] = None,
-    max_memory_tokens: Optional[int] = 0,
-) -> CompiledGraph:
+    max_memory_tokens: Optional[int] = 0
+):# -> CompiledGraph:
 
     if state_schema is not None:
         if missing_keys := {"messages", "is_last_step"} - set(
@@ -582,7 +605,9 @@ def create_react_agent(
         state["rag_handler_messages"] = []
         state["literature_handler_messages"] = []
 
-        response = model_start_runnable.invoke(state["messages"], config) # Generate tool calls
+        
+
+        response = model_start_runnable.invoke(state["messages"], config=config) # Generate tool calls
 
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
 
@@ -592,13 +617,13 @@ def create_react_agent(
         user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
         first_tool_calls = [call['name'] for call in response.tool_calls]
         if 'QueryRAG' not in first_tool_calls:
-            force_rag_resp = model_force_rag_runnable.invoke({"query": user_query})
+            force_rag_resp = model_force_rag_runnable.invoke({"query": user_query}, config)
             rag_messages = copy.deepcopy(force_rag_resp)
         else:
             rag_messages = copy.deepcopy(response)
 
         if 'LiteratureSearch' not in first_tool_calls:
-            force_literature_resp = model_force_literature_runnable.invoke({"query": user_query})
+            force_literature_resp = model_force_literature_runnable.invoke({"query": user_query}, config)
             literature_messages = copy.deepcopy(force_literature_resp)
         else:
             literature_messages = copy.deepcopy(response)
@@ -691,7 +716,8 @@ def create_react_agent(
                 user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
 
                 dtxsid = [message for message in state["tools_handler_messages"] if isinstance(message, ToolMessage)]
-
+                
+                
                 response = model_inner_runnable.invoke({"query": user_query, "dtxsid": dtxsid, "tools": tool_names, "messages": state["tools_handler_messages"]}, config=config) # Generate tool calls
 
                 has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
@@ -745,6 +771,7 @@ def create_react_agent(
 
                 disease_name = [message for message in state["tools_handler_messages"] if isinstance(message, ToolMessage)]
 
+                
                 response = model_disease_inner_runnable.invoke({"query": user_query, "name": disease_name, "tools": disease_tool_names, "messages": state["tools_handler_messages"]}, config=config) # Generate tool calls
 
                 has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
@@ -792,6 +819,8 @@ def create_react_agent(
         if isinstance(state["tools_handler_messages"][-1], ToolMessage):
             try:
                 user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
+
+                
                 response = model_disease_repeat_runnable.invoke({"query": user_query, "tools": disease_tool_names + translate_tool_names, "messages": state["tools_handler_messages"]}, config=config) # Generate tool calls
 
                 has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
@@ -844,6 +873,7 @@ def create_react_agent(
 
                 gene_name = [message for message in state["tools_handler_messages"] if isinstance(message, ToolMessage)]
 
+                
                 response = model_gene_inner_runnable.invoke({"query": user_query, "name": gene_name, "tools": gene_tool_names, "messages": state["tools_handler_messages"]}, config=config) # Generate tool calls
 
                 has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
@@ -891,6 +921,8 @@ def create_react_agent(
         if isinstance(state["tools_handler_messages"][-1], ToolMessage):
             try:
                 user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
+
+                
                 response = model_gene_repeat_runnable.invoke({"query": user_query, "tools": gene_tool_names + translate_tool_names, "messages": state["tools_handler_messages"]}, config=config) # Generate tool calls
 
                 has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
@@ -938,6 +970,7 @@ def create_react_agent(
             try:
                 user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
 
+                
                 response = model_repeat_runnable.invoke({"query": user_query, "tools": tool_names, "messages": state["tools_handler_messages"]}, config=config) # Generate tool calls
 
                 has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
@@ -984,7 +1017,8 @@ def create_react_agent(
         state["messages"] = _validate_chat_history(state["messages"])
         user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]#.content
         context = [message for message in state["messages"] if isinstance(message, ToolMessage)]
-        response = model_training_runnable.invoke({"context": context, "query": user_query})
+        
+        response = model_training_runnable.invoke({"context": context, "query": user_query}, config=config) # Final answer from training data and context
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
         all_tools_return_direct = False
         if (

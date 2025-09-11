@@ -8,9 +8,7 @@ from langchain.llms import BaseLLM
 from langchain.tools import BaseTool
 from langchain_core.prompts import ChatPromptTemplate
 from time import time
-from dotenv import load_dotenv, dotenv_values
-#load_dotenv()
-#load_dotenv('../../../.config/.env')
+from dotenv import dotenv_values
 
 DIR_HOME = Path(__file__).parent.parent.parent.parent
 env_config = dotenv_values(DIR_HOME / ".config" / ".env")

@@ -1,14 +1,9 @@
 import os
 import re
 import pandas as pd
-import requests
-import urllib.parse
 from langchain.tools import BaseTool
 from langchain.llms import BaseLLM
-from langchain_core.prompts import ChatPromptTemplate
-from dotenv import load_dotenv
 from random import sample
-load_dotenv('../../../.config/.env')
 from ...rag import query
 
 def query_rag(q: str, llm: BaseLLM, use_training_data: bool) -> str:
@@ -31,7 +26,7 @@ def query_rag(q: str, llm: BaseLLM, use_training_data: bool) -> str:
 
 class QueryRAG(BaseTool):
     name: str = "QueryRAG"
-    description: str = "Search for chemical information using RAG across known documents that include NTP reports. These contain data about: carcinogenicity, developmental and reproductive toxicity, immunotoxicity, cancer and noncancer health effects, research, toxicity, and technical reports."
+    description: str = "Search for chemical information using RAG across known documents that include NTP and ChEMBL reports. These contain data about: carcinogenicity, developmental and reproductive toxicity, immunotoxicity, cancer and noncancer health effects, research, toxicity, and technical reports."
     llm: BaseLLM = None
 
     def __init__(self, llm):

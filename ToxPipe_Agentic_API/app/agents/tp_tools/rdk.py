@@ -4,10 +4,17 @@ from rdkit.Chem import rdMolDescriptors
 import requests
 import os
 import urllib.parse
-from dotenv import load_dotenv
-load_dotenv('../../../.config/.env')
 from .utils import *
 
+# Load environment variables
+from dotenv import dotenv_values
+from pathlib import Path
+DIR_HOME = Path(__file__).parent.parent.parent.parent
+env_config = dotenv_values(DIR_HOME / ".config" / ".env")
+
+CBT_API_ENDPOINT = env_config["CBT_API_ENDPOINT"]
+CONNECT_API_KEY = env_config["CONNECT_API_KEY"]
+headers = {'Authorization': f"Key {CONNECT_API_KEY}"}
 
 class MolSimilarity(BaseTool):
     name: str = "MolSimilarity"
@@ -145,8 +152,8 @@ class FuncGroups(BaseTool):
 
         # Convert DTXSID to SMILES
         res = requests.get(
-            f"{os.environ.get('CBT_API_ENDPOINT')}/dtxsid2smiles?dtxsid={urllib.parse.quote_plus(dtxsid)}",
-            headers={'Authorization': f"Key {os.environ.get('CONNECT_API_KEY')}"}
+            f"{CBT_API_ENDPOINT}/dtxsid2smiles?dtxsid={urllib.parse.quote_plus(dtxsid)}",
+            headers=headers
         )
         res = res.json()
         smiles = res[0]["canonical_smiles"]
