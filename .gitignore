@@ -324,3 +324,5 @@ Backend/docker-compose.yml
 
 backup/
 backup/*
+Backend/docker-compose.override.yml
+Backend/docker-compose.yml
