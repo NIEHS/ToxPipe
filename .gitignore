@@ -165,7 +165,6 @@ Backend/*.cert
 
 Backend/config/*
 
-Backend/ntp_docs_rag_db/*
 Backend/meili_data_v*
 
 ### node etc ###
@@ -309,7 +308,10 @@ Backend/logs_debug.txt
 Backend/meili_data_v*/*
 Backend/mongohistory.txt
 Backend/ntp_docs_rag/*
-Backend/ntp_docs_rag_db/*
+Backend/ntp_docs_rag_db/*.sqlite
+Backend/ntp_docs_rag_db/*/*.sqlite
+Backend/ntp_docs_rag_db/*.db
+Backend/ntp_docs_rag_db/*/*.db
 Backend/rag.yml
 Backend/redis/*
 Backend/redis-langfuse/*
