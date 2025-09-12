@@ -69,9 +69,6 @@ from pathlib import Path
 DIR_HOME = Path(__file__).parent.parent.parent
 env_config = dotenv_values(DIR_HOME / ".config" / ".env")
 
-print("===env_config===")
-print(env_config)
-
 # LangFuse Tracing
 from langfuse import Langfuse, get_client
 from langfuse.langchain import CallbackHandler
@@ -199,7 +196,7 @@ Follow the instructions below ONLY for the training step:
 {query}
 
 **Output format**
-Your output must follow the following format and rules:
+Your output must follow the following rules and format UNLESS the prompt specifies a different format. If the prompt specifies a different format, you must follow the format specified in the prompt.
 - Final Answer: (the final answer to the original input question after using the appropriate tools. You must include sources for each section of the information provided, which are typically given after the string "source:")
 - When sourcing information from ChemBioTox, you must specify which datasource in ChemBioTox was used (for example, CTD, PubChem, EPA, DrugBank, etc.).
 - Do not include any "Thought:" in your final answer. Only return the information following "Final Answer:".
