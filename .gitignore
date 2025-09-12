@@ -320,7 +320,7 @@ Backend/redis-langfuse/*
 Backend/saddler_bash_history*.txt
 Backend/.tool-versions
 Backend/toxpipe-agent-postgres/*
-Backend/traefik/*
+Backend/traefik/*.yml
 Backend/user-data/*
 Backend/docker-compose.yml
 .Backend/docker-compose.yml
