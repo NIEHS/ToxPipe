@@ -321,7 +321,7 @@ Backend/saddler_bash_history*.txt
 Backend/.tool-versions
 Backend/toxpipe-agent-postgres/*
 Backend/traefik/*.yml
-Backend/user-data/*
+Backend/user-data/*.yml
 Backend/docker-compose.yml
 .Backend/docker-compose.yml
 .Backend/docker-compose.override.yml
