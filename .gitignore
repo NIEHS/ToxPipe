@@ -298,7 +298,9 @@ Backend/*.cert
 Backend/.litellm/*
 
 # certs
-Backend/cert/*
+Backend/cert/*.key
+Backend/cert/*.crt
+Backend/cert/*.pem
 
 # volumes
 Backend/data-node*/*
