@@ -24,7 +24,7 @@ services:
 
 # LibreChat API service
   api:
-    image: ghcr.io/danny-avila/librechat-dev:latest
+    image: ghcr.io/danny-avila/librechat:latest
     volumes:
       - ./librechat.yaml:/app/librechat.yaml
       - ./.env:/app/.env
