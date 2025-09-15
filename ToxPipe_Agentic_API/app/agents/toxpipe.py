@@ -61,9 +61,6 @@ import ssl
 
 from ..rag import query
 
-# Handle models that have issues reading tools via LangChain's tool API. We will have to add these manually as a prompt.
-BAD_TOOL_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', 'mixtral-8x7b-instruct', 'llama3-1-70b', 'claude-3-sonnet', 'amazon-titan-text-premier', 'cohere-command-r-plus']
-
 # Create LLM handler - always use AzureChatOpenAI since all models are accessed through NIEHS's litellm instance.
 def _make_llm(model, api_version, temp, max_retries, max_tokens, seed, client):
         llm = AzureChatOpenAI(
@@ -79,6 +76,22 @@ def _make_llm(model, api_version, temp, max_retries, max_tokens, seed, client):
             reasoning_effort="low",
             http_client=client
         )
+
+        if "gpt-5" in model:
+            llm = AzureChatOpenAI(
+                azure_endpoint=env_config["AZURE_OPENAI_ENDPOINT"], # load from .env
+                openai_api_key=env_config["AZURE_OPENAI_API_KEY"], # load from .env
+                model_name=model,
+                temperature=1,
+                api_version=api_version,
+                max_retries=max_retries,
+                max_completion_tokens=max_tokens,
+                seed=seed,
+                tiktoken_model_name="gpt-4o", # use the gpt-4o tiktoken model for all models to avoid an error when calculating token limit
+                reasoning_effort="low",
+                http_client=client
+            )
+
         return llm
 
 # format for output parser

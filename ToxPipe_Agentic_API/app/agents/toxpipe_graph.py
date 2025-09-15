@@ -184,7 +184,7 @@ sufficient_prompt = ChatPromptTemplate.from_messages(
 training_human_prompt = '''
 Follow the instructions below ONLY for the training step:
 - You will be provided with the context needed to answer the user's original query. Please review the responses from your memory, the tools, RAG search, and literature search.
-- You will supplement the information from the tools, RAG search, and literature search with your training data to provide a complete answer to the user's query.
+- You will supplement the information from your memory, the tools, RAG search, and literature search with your training data to provide a complete answer to the user's query.
 - Include all relevant information from your memory, tools, RAG search, literature search, and training data in your final response.
 
 ----------------------------------------------
@@ -196,7 +196,7 @@ Follow the instructions below ONLY for the training step:
 {query}
 
 **Output format**
-Your output must follow the following rules and format UNLESS the prompt specifies a different format. If the prompt specifies a different format, you must follow the format specified in the prompt.
+Your output must follow the following rules and format UNLESS the user's query specifies a different format. If the user's query specifies a different format, you must follow the format specified in the user's query.
 - Final Answer: (the final answer to the original input question after using the appropriate tools. You must include sources for each section of the information provided, which are typically given after the string "source:")
 - When sourcing information from ChemBioTox, you must specify which datasource in ChemBioTox was used (for example, CTD, PubChem, EPA, DrugBank, etc.).
 - Do not include any "Thought:" in your final answer. Only return the information following "Final Answer:".
@@ -576,22 +576,18 @@ def create_react_agent(
         gene_repeat_prompt, messages_modifier, store
     )
 
-    if model_name in OPENAI_MODELS:
-        model_start_runnable = preprocessor | condense_prompt | model_start
-        model_inner_runnable = inner_preprocessor | condense_prompt | model_inner
-        model_repeat_runnable = repeat_preprocessor | condense_prompt | model_repeat
-        model_disease_inner_runnable = disease_inner_preprocessor | condense_prompt | model_disease_inner
-        model_disease_repeat_runnable = disease_repeat_preprocessor | condense_prompt | model_disease_repeat
-        model_gene_inner_runnable = gene_inner_preprocessor | condense_prompt | model_gene_inner
-        model_gene_repeat_runnable = gene_repeat_preprocessor | condense_prompt | model_gene_repeat
-        model_training_runnable = training_prompt | model_training
+    
+    model_start_runnable = preprocessor | condense_prompt | model_start
+    model_inner_runnable = inner_preprocessor | condense_prompt | model_inner
+    model_repeat_runnable = repeat_preprocessor | condense_prompt | model_repeat
+    model_disease_inner_runnable = disease_inner_preprocessor | condense_prompt | model_disease_inner
+    model_disease_repeat_runnable = disease_repeat_preprocessor | condense_prompt | model_disease_repeat
+    model_gene_inner_runnable = gene_inner_preprocessor | condense_prompt | model_gene_inner
+    model_gene_repeat_runnable = gene_repeat_preprocessor | condense_prompt | model_gene_repeat
+    model_training_runnable = training_prompt | model_training
 
-        model_force_rag_runnable = force_rag_prompt | model_force_rag
-        model_force_literature_runnable = force_literature_prompt | model_force_literature
-
-
-    else:
-        raise ValueError(f"Model {model_name} not supported.")
+    model_force_rag_runnable = force_rag_prompt | model_force_rag
+    model_force_literature_runnable = force_literature_prompt | model_force_literature
 
     # Define the function that calls the model
     def call_model(state: AgentState, config: RunnableConfig) -> AgentState:

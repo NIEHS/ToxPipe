@@ -135,9 +135,9 @@ async def help(request: Request, response: Response):
 @app.get("/agent/create/", tags=["agent"])
 async def create_agent(request: Request, response: Response, model: str = "azure-o3", temp: float = 0, max_iterations: int = 20, max_retries: int = 10, max_tokens: int=4096, max_memory_tokens: int=4096, step_timeout: float = 0, n_threads: int = 1, summarize: bool = False, seed: int = 1):
     # Input validation
-    if model not in ANTHROPIC_MODELS and model not in OLLAMA_MODELS and model not in OPENAI_MODELS and model not in MISTRALAI_MODELS and model not in GOOGLE_MODELS and model not in AMAZON_MODELS and model not in COHERE_MODELS:
-        response.status_code = 400
-        return {"response": f"Error: model '{model}' is not supported by ToxPipe. Please check your spelling and try again. Use the /models endpoint to view a list of supported models."}
+    #if model not in ANTHROPIC_MODELS and model not in OLLAMA_MODELS and model not in OPENAI_MODELS and model not in MISTRALAI_MODELS and model not in GOOGLE_MODELS and model not in AMAZON_MODELS and model not in COHERE_MODELS:
+    #    response.status_code = 400
+    #    return {"response": f"Error: model '{model}' is not supported by ToxPipe. Please check your spelling and try again. Use the /models endpoint to view a list of supported models."}
     if temp < 0 or temp > 1:
         response.status_code = 400
         return {"response": f"Error: temperature must be between 0 and 1 (inclusive)."}
