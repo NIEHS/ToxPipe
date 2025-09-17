@@ -104,11 +104,16 @@ def search_pubmed_article(query: str,
                 if d_xml: text.append(d_xml)
 
             return text
+        
+        def parseTextField(val):
+            if isinstance(val, dict):
+                return val.get('#text', '')
+            return val
 
         try:
             d = getPubMedArticleEutils(pmcid=pmcid)
         except Exception as exp:
-            raise Exception(f'In getPubMedArticleEutils({pmcid}), Line number: {exp.__traceback__.tb_lineno}, Description: {exp}\n\n{traceback.format_exc()}')
+            raise Exception(f'In getPubMedArticleEutils(pmcid={pmcid}), Line number: {exp.__traceback__.tb_lineno}, Description: {exp}\n\n{traceback.format_exc()}')
             
         assert 'front' in d['pmc-articleset']['article'], 'Reference not available'
         assert 'body' in d['pmc-articleset']['article'], 'Content not available'
@@ -117,17 +122,15 @@ def search_pubmed_article(query: str,
 
         front = d['pmc-articleset']['article']['front']
 
-        ref['journal'] = front['journal-meta']['journal-title-group']['journal-title']
-
+        ref['journal'] = parseTextField(front['journal-meta']['journal-title-group']['journal-title'])
+        
         for article_id in front['article-meta']['article-id']:
             ref[article_id['@pub-id-type']] = article_id['#text'].strip()
             
         assert 'doi' in ref, 'DOI not found'
 
-        ref['title'] = front['article-meta']['title-group']['article-title']
-        if isinstance(ref['title'], dict):
-            ref['title'] = ref['title']['#text']
-
+        ref['title'] = parseTextField(front['article-meta']['title-group']['article-title'])
+    
         authors = []
         contrib_group = front['article-meta']['contrib-group']
         if isinstance(contrib_group, list):
@@ -157,16 +160,16 @@ def search_pubmed_article(query: str,
         else:
             ref['year'] = front['article-meta']['pub-date']['year']
 
-        ref['volume'] = front['article-meta']['volume']
-        issue = front['article-meta'].get('issue', '1')
-        if isinstance(issue, str):
-            ref['issue'] = issue
-        else:
-            ref['issue'] = issue['#text']
+        ref['year'] = parseTextField(ref['year'])
+        ref['volume'] = parseTextField(front['article-meta']['volume'])
+        ref['issue'] = parseTextField(front['article-meta'].get('issue', '1'))
+        
         if 'elocation-id' in front['article-meta']:
             ref['pages'] = front['article-meta']['elocation-id']
         else:
-            ref['pages'] = f"{front['article-meta']['fpage']}-{front['article-meta']['lpage']}"
+            ref['pages'] = f'{front['article-meta']['fpage']}-{front['article-meta']['lpage']}'
+
+        ref['pages'] = parseTextField(ref['pages'])
 
         body = d['pmc-articleset']['article']['body']
         
@@ -176,7 +179,6 @@ def search_pubmed_article(query: str,
     
     def searchLiterature(query, retstart=1, retmax=5):
         qstring = f'db=pmc&term={query}&sort=relevance&retstart={retstart}&retmax={retmax}&api_key={api_key}'
-
         url = f'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?{qstring}'
         response = requests.get(url)
         if not response.ok: raise Exception(response.text)
@@ -184,11 +186,14 @@ def search_pubmed_article(query: str,
             return xmltodict.parse(response.text)
         except:
             raise Exception(response.text)
+
+    print(query)
+
     try:
         res = searchLiterature(query)
         ids = res['eSearchResult']['IdList']
 
-        if not ids: return {"ref": '', "content": ''}
+        if not ids: return []
         ids = ids['Id']
         if isinstance(ids, str): ids = [ids]
     except Exception as exp:
@@ -200,7 +205,7 @@ def search_pubmed_article(query: str,
         try:
             ref, content = getArticleEutils(pmcid=id)
         except Exception as exp:
-            print(f'pmcid: {id}, Line number: {exp.__traceback__.tb_lineno}, Description: {exp}\n\n{traceback.format_exc()}')
+            print(f'In getArticleEutils(pmcid={id}):, Line number: {exp.__traceback__.tb_lineno}, Description: {exp}\n\n{traceback.format_exc()}')
             continue
 
         if content_size is not None: content = content[:content_size]
