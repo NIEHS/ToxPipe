@@ -12,7 +12,6 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
         FuncGroups(),
         ExplosiveCheck(),
         ControlChemCheck(),
-        SafetySummary(llm=llm),
         QueryCBTChemicalVendors(),
         QueryCBTGRAS(),
         QueryCBTTox21Models(),
@@ -72,12 +71,6 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
         QueryHMDBProteins(llm=llm),
 
     ]
-
-    if auth == True: # If authenticated, append proprietary tools
-        all_tools.append(FunctionalSimilarity())
-        all_tools.append(QueryCBTLeadscope(llm=llm))
-        all_tools.append(QueryCBTADMET(llm=llm))
-        all_tools.append(QueryCBTMetabolites(llm=llm))
 
     return all_tools
 

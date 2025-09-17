@@ -79,7 +79,9 @@ langfuse = Langfuse(
 )
 langfuse_handler = CallbackHandler()
 
+CURRENT_DELIBERATION_STEP = 0
 
+MAX_DELIBERATION_STEPS = int(env_config["MAX_DELIBERATION_STEPS"])
 
 class DeliberationSchema(BaseModel):
     '''
@@ -182,46 +184,27 @@ sufficient_prompt = ChatPromptTemplate.from_messages(
 
 
 training_human_prompt = '''
-Follow the instructions below ONLY for the training step:
-- You will be provided with the context needed to answer the user's original query. Please review the responses from your memory, the tools, RAG search, and literature search.
-- You will supplement the information from your memory, the tools, RAG search, and literature search with your training data to provide a complete answer to the user's query.
-- Include all relevant information from your memory, tools, RAG search, literature search, and training data in your final response.
+**Instructions**
+- Review the provided context to determine if it adequately addresses the user's query.
+- You must generate a final answer using both your training data and relevant parts of the provided context that are relevant to the user's query.
+- You must always supplement the context with a thorough answer from your training data.
+
+**Output format**
+Your output must follow the following rules and format UNLESS the user's query specifies a different format. If the user's query specifies a different format, you must follow the format specified in the user's query.
+- Final Answer: (the final answer to the original input question after using the appropriate tools. You must include sources for each section of the information provided.
+- When sourcing information from ChemBioTox, you must specify which datasource in ChemBioTox was used (for example, CTD, PubChem, EPA, DrugBank, etc.).
+- Do not include any "Thought:" in your final answer. Only return the information following "Final Answer:".
+- Important: the entire final answer must not exceed 2 paragraphs (around 2000-3000 characters). Summarize the data if necessary to meet this requirement, but make sure to retain important and specific information relevant to the original query.
+- Unless specified otherwise, do not answer in JSON format.
 
 ----------------------------------------------
 **Context**
 {context}
 
-----------------------------------------------
 **Query**
 {query}
 
-**Output format**
-Your output must follow the following rules and format UNLESS the user's query specifies a different format. If the user's query specifies a different format, you must follow the format specified in the user's query.
-- Final Answer: (the final answer to the original input question after using the appropriate tools. You must include sources for each section of the information provided, which are typically given after the string "source:")
-- When sourcing information from ChemBioTox, you must specify which datasource in ChemBioTox was used (for example, CTD, PubChem, EPA, DrugBank, etc.).
-- Do not include any "Thought:" in your final answer. Only return the information following "Final Answer:".
-- The final answer should contain up to 4 parts: information from tools, information from RAG search, information from scientific literature search, and information from training data.
-- The section containing tool information should further be divided into subsections based on topic. For example, if the tools returned information about chemical structure, toxicity, and metabolism, you should create three subsections: "Chemical Structure", "Toxicity", and "Metabolism".
-- Only include a part in your final answer if you were able to find information from that part. For example, if you were only able to find information from tools and training data, you should only include those two parts in your final answer.
-- Important: The text in each part MUST not exceed 500 characters. Summarize the data if necessary to meet this requirement, but make sure to retain important and specific information relevant to the original query.
-- Important: the entire final answer must not exceed 2 paragraphs (around 2000 characters).
-- If you find, at any time, that the most recent response sufficiently answers the user's query, you may stop evaluating early and return that response.
-- Do not answer in JSON format. Use the following string format:
-- Example:
-   **Tools**
-   **Topic 1**
-    (summary of data related to topic 1 from tools with sources)
-   **Topic 2**
-    (summary of data related to topic 2 from tools with sources)
-    ...
-   **Topic N**
-    (summary of data related to topic N from tools with sources)
-   **RAG**
-    (summary of data from RAG search with sources)
-   **Literature**
-    (summary of data from scientific literature search with sources)
-   **Training Data**
-    (summary of data from training data with warning that data was generated from training data)
+
 '''
 
 training_prompt = ChatPromptTemplate.from_messages(
@@ -433,10 +416,8 @@ def _validate_chat_history(
     return messages
 
 
-#@deprecated_parameter("messages_modifier", "0.1.9", "state_modifier", removal="0.3.0")
 def create_react_agent(
     model: LanguageModelLike,
-    #tools: Union[ToolExecutor, Sequence[BaseTool], ToolNode],
     tools: Union[Sequence[BaseTool], ToolNode],
     *,
     state_schema: Optional[StateSchemaType] = None,
@@ -449,7 +430,7 @@ def create_react_agent(
     debug: bool = False,
     model_name: Optional[str] = None,
     max_memory_tokens: Optional[int] = 0
-):# -> CompiledGraph:
+):
 
     if state_schema is not None:
         if missing_keys := {"messages", "is_last_step"} - set(
@@ -458,38 +439,41 @@ def create_react_agent(
             raise ValueError(f"Missing required key(s) {missing_keys} in state_schema")
 
     translate_tools = make_translate_tools(llm=model)
-    translate_tool_node = ToolNode(translate_tools, messages_key="tools_handler_messages")
+    translate_tool_node = ToolNode(translate_tools, messages_key="messages")
     translate_tool_classes = list(translate_tool_node.tools_by_name.values())
     translate_tool_names = list(translate_tool_node.tools_by_name.keys())
 
     rag_tools = make_rag_tools(llm=model)
-    rag_tool_node = ToolNode(rag_tools, messages_key="rag_handler_messages")
+    rag_tool_node = ToolNode(rag_tools, messages_key="messages")
     rag_tool_classes = list(rag_tool_node.tools_by_name.values())
     rag_tool_names = list(rag_tool_node.tools_by_name.keys())
 
     literature_tools = make_literature_tools(llm=model)
-    literature_tool_node = ToolNode(literature_tools, messages_key="literature_handler_messages")
+    literature_tool_node = ToolNode(literature_tools, messages_key="messages")
     literature_tool_classes = list(literature_tool_node.tools_by_name.values())
     literature_tool_names = list(literature_tool_node.tools_by_name.keys())
 
     disease_tools = make_disease_tools(llm=model)
-    disease_tool_node = ToolNode(disease_tools, messages_key="tools_handler_messages")
+    disease_tool_node = ToolNode(disease_tools, messages_key="messages")
     disease_tool_classes = list(disease_tool_node.tools_by_name.values())
     disease_tool_names = list(disease_tool_node.tools_by_name.keys())
     
     gene_tools = make_gene_tools(llm=model)
-    gene_tool_node = ToolNode(gene_tools, messages_key="tools_handler_messages")
+    gene_tool_node = ToolNode(gene_tools, messages_key="messages")
     gene_tool_classes = list(gene_tool_node.tools_by_name.values())
     gene_tool_names = list(gene_tool_node.tools_by_name.keys())
 
-    tool_node = ToolNode(tools, messages_key="tools_handler_messages")
+    #tool_node = ToolNode(tools, messages_key="tools_handler_messages")
+    #tool_classes = list(tool_node.tools_by_name.values())
+    #tool_names = list(tool_node.tools_by_name.keys())
+
+    tool_node = ToolNode(translate_tools + tools + rag_tools + literature_tools + gene_tools + disease_tools, messages_key="messages")
     tool_classes = list(tool_node.tools_by_name.values())
     tool_names = list(tool_node.tools_by_name.keys())
 
     llm = model
 
-    #model_start = cast(BaseChatModel, model).bind_tools(translate_tool_classes + rag_tool_classes + literature_tool_classes, tool_choice="any")
-    model_start = cast(BaseChatModel, model).bind_tools(translate_tool_classes + rag_tool_classes + literature_tool_classes)
+    model_start = cast(BaseChatModel, model).bind_tools(translate_tool_classes + tool_classes + rag_tool_classes + literature_tool_classes + gene_tool_classes + disease_tool_classes, tool_choice="any")
     model_inner = cast(BaseChatModel, model).bind_tools(tool_classes, tool_choice="any")
     model_repeat = cast(BaseChatModel, model).bind_tools(tool_classes)
     model_disease_inner = cast(BaseChatModel, model).bind_tools(disease_tool_classes, tool_choice="any")
@@ -589,14 +573,24 @@ def create_react_agent(
     model_force_rag_runnable = force_rag_prompt | model_force_rag
     model_force_literature_runnable = force_literature_prompt | model_force_literature
 
+    def call_start(state: AgentState, config: RunnableConfig) -> AgentState:
+        global CURRENT_DELIBERATION_STEP
+        CURRENT_DELIBERATION_STEP = 0
+        return state
+    
+
+
     # Define the function that calls the model
     def call_model(state: AgentState, config: RunnableConfig) -> AgentState:
+        global CURRENT_DELIBERATION_STEP
+        CURRENT_DELIBERATION_STEP = CURRENT_DELIBERATION_STEP + 1
+
         state["messages"] = _validate_chat_history(state["messages"])
 
         # Clear individual history for each handler
         state["tools_handler_messages"] = []
-        state["rag_handler_messages"] = []
-        state["literature_handler_messages"] = []
+        #state["rag_handler_messages"] = []
+        #state["literature_handler_messages"] = []
 
         
 
@@ -606,6 +600,7 @@ def create_react_agent(
 
         translation_messages = copy.deepcopy(response)
 
+        """
         # Force RAG/lit tool calls
         user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
         first_tool_calls = [call['name'] for call in response.tool_calls]
@@ -620,6 +615,8 @@ def create_react_agent(
             literature_messages = copy.deepcopy(force_literature_resp)
         else:
             literature_messages = copy.deepcopy(response)
+
+        """
 
         if has_tool_calls:
 
@@ -650,6 +647,7 @@ def create_react_agent(
                     ]
                 }
 
+            """
             # Parse out translation tool calls
             translation_messages.additional_kwargs = {
                 "tool_calls": [call for call in response.additional_kwargs["tool_calls"] if call["function"]["name"] in translate_tool_names],
@@ -657,6 +655,7 @@ def create_react_agent(
             }
             translation_messages.tool_calls = [call for call in response.tool_calls if call["name"] in translate_tool_names]
 
+            
             # Parse out rag tool calls
             rag_messages.additional_kwargs = {
                 "tool_calls": [call for call in rag_messages.additional_kwargs["tool_calls"] if call["function"]["name"] in rag_tool_names],
@@ -670,21 +669,21 @@ def create_react_agent(
                 "type": "function"
             }
             literature_messages.tool_calls = [call for call in literature_messages.tool_calls if call["name"] in literature_tool_names]
-
+            """
 
             return {
                 "messages": [response],
-                "tools_handler_messages": [translation_messages],
-                "rag_handler_messages": [rag_messages],
-                "literature_handler_messages": [literature_messages]
+                #"tools_handler_messages": [translation_messages],
+                #"rag_handler_messages": [rag_messages],
+                #"literature_handler_messages": [literature_messages]
             }
         
         else:
             return {
                 "messages": [response],
                 "tools_handler_messages": [],
-                "rag_handler_messages": [],
-                "literature_handler_messages": []
+                #"rag_handler_messages": [],
+                #"literature_handler_messages": []
             }
         
     # Define the function that calls the model
@@ -1006,7 +1005,7 @@ def create_react_agent(
     
     def call_model_training(state: AgentState, config: RunnableConfig) -> AgentState:
         # Merge message histories from all handlers
-        state["messages"] = state["messages"] + state["tools_handler_messages"] + state["rag_handler_messages"] + state["literature_handler_messages"]
+        state["messages"] = state["messages"]
         state["messages"] = _validate_chat_history(state["messages"])
         user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]#.content
         context = [message for message in state["messages"] if isinstance(message, ToolMessage)]
@@ -1043,205 +1042,37 @@ def create_react_agent(
         return {"messages": [response]} 
 
 
+    
+
     # Define a new graph
     workflow = StateGraph(state_schema or AgentState)
-
-    # Determine initial tool calls
-    workflow.add_node("INPUT_HANDLER", RunnableCallable(call_model))
-
-    # Dummy node to pass input to tools/search if tool calls exist
-    workflow.add_node("SKIP_HANDLER", RunnableCallable(call_skip))
-
-    # Dummy node to pass input to tools/search if tool calls exist
-    workflow.add_node("DISEASE_SKIP_HANDLER", RunnableCallable(call_disease))
-    workflow.add_node("DISEASE_TOOL_HANDLER", RunnableCallable(call_disease_inner))
-    # Disease tool node - invokes tools
-    workflow.add_node("DISEASE_TOOL_NODE", disease_tool_node)
-    # Handles repeated calls of disease tools and transition to chemical tools
-    workflow.add_node("DISEASE_TOOL_REPEAT_HANDLER", RunnableCallable(call_model_disease_repeat))
-
-
-    # Dummy node to pass input to tools/search if tool calls exist
-    workflow.add_node("GENE_SKIP_HANDLER", RunnableCallable(call_gene))
-    workflow.add_node("GENE_TOOL_HANDLER", RunnableCallable(call_gene_inner))
-    # Gene tool node - invokes tools
-    workflow.add_node("GENE_TOOL_NODE", gene_tool_node)
-    # Handles repeated calls of GENE tools and transition to chemical tools
-    workflow.add_node("GENE_TOOL_REPEAT_HANDLER", RunnableCallable(call_model_gene_repeat))
-
-    # Invokes translation tools
-    workflow.add_node("TRANSLATE_TOOL_NODE", translate_tool_node)
-
-    workflow.add_node("TRANSLATE_DISEASE_TOOL_NODE", translate_tool_node)
-
-    workflow.add_node("TRANSLATE_GENE_TOOL_NODE", translate_tool_node)
     
-
-    # Chooses which tools to call
-    workflow.add_node("TOOL_HANDLER", RunnableCallable(call_model_inner))
-
-    # Tool node - invokes tools
+    workflow.add_node("START_NODE", RunnableCallable(call_start))
+    workflow.add_node("DELIBERATION_NODE", RunnableCallable(call_model))
     workflow.add_node("TOOL_NODE", tool_node)
+    workflow.add_node("SUMMARY_NODE", RunnableCallable(call_model_training))
 
-    # RAG node - invokes RAG search tool
-    workflow.add_node("RAG_TOOL_NODE", rag_tool_node)  
+    workflow.add_edge(START, "START_NODE") # Start with the agent node
 
-    # Literature node - invokes literature search tool
-    workflow.add_node("LITERATURE_TOOL_NODE", literature_tool_node)
-
-    # Training data node - formulate a last-ditch answer from the training data and summarize data from the context
-    workflow.add_node("TRAINING_SUMMARY_HANDLER", RunnableCallable(call_model_training))
-
-    workflow.add_node("ALL_TOOL_CAPTURE_HANDLER", RunnableCallable(call_tools_capture))
-
+    workflow.add_edge("START_NODE", "DELIBERATION_NODE") # Start with the agent node
     
-    workflow.add_node("TOOL_REPEAT_HANDLER", RunnableCallable(call_model_repeat))
-
-
-    workflow.add_edge(START, "INPUT_HANDLER") # Start with the agent node
-
-    # If the initial node didn't produce any tool calls, we can skip to the training step and just answer based on the context
-    def can_skip_to_training(state: AgentState) -> Literal["SKIP_HANDLER", "TRAINING_SUMMARY_HANDLER", "DISEASE_SKIP_HANDLER", "GENE_SKIP_HANDLER"]:
+    def can_repeat_tools(state: AgentState) -> Literal["TOOL_NODE", "SUMMARY_NODE"]:
         messages = state["messages"]
         last_message = messages[-1]
-        # Okay to skip to training if the last message has no tool calls
-        if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
-            return "TRAINING_SUMMARY_HANDLER"  
-        else:
-            
-            if last_message.tool_calls:
-                # Check if the last message has any tool calls that are not in the translate tool names
-                for call in last_message.tool_calls:
-                    if call["name"] == "Query2Disease":
-                        return "DISEASE_SKIP_HANDLER"
-                    elif call["name"] == "Query2Gene":
-                        return "GENE_SKIP_HANDLER"
-            return "SKIP_HANDLER"
-        
-    workflow.add_conditional_edges("INPUT_HANDLER", can_skip_to_training)
 
-    workflow.add_edge("SKIP_HANDLER", "TRANSLATE_TOOL_NODE") # Start with the agent node
-    workflow.add_edge("TRANSLATE_TOOL_NODE", "TOOL_HANDLER") # Once we have the DTXSID, we can call the tools
-    def can_skip_tools(state: AgentState) -> Literal["TOOL_NODE", "ALL_TOOL_CAPTURE_HANDLER"]:
-        messages = state["tools_handler_messages"]
-        last_message = messages[-1]
+        global CURRENT_DELIBERATION_STEP
 
-        if not hasattr(last_message, "tool_calls"):
-            return "ALL_TOOL_CAPTURE_HANDLER"
+        if CURRENT_DELIBERATION_STEP > MAX_DELIBERATION_STEPS:
+            return "SUMMARY_NODE"
 
-        # Okay to skip to training if the last message has no tool calls
-        if not last_message.tool_calls:
-            return "ALL_TOOL_CAPTURE_HANDLER"  
-        else:
+        if hasattr(last_message, "tool_calls"):
             return "TOOL_NODE"
-    workflow.add_conditional_edges("TOOL_HANDLER", can_skip_tools) # Once we have the DTXSID, we can call the tools
-
-    workflow.add_edge("TOOL_NODE", "TOOL_REPEAT_HANDLER") 
-
-    def can_repeat_tools(state: AgentState) -> Literal["TOOL_HANDLER", "ALL_TOOL_CAPTURE_HANDLER"]:
-        messages = state["tools_handler_messages"]
-        last_message = messages[-1]
-
-        if not hasattr(last_message, "tool_calls"):
-            return "ALL_TOOL_CAPTURE_HANDLER"
-
-        # Okay to skip to training if the last message has no tool calls
-        if not last_message.tool_calls:
-            return "ALL_TOOL_CAPTURE_HANDLER"  
         else:
-            return("TOOL_HANDLER")
-
-    workflow.add_conditional_edges("TOOL_REPEAT_HANDLER", can_repeat_tools) # Once we have the DTXSID, we can call the tools
-
-
-    # disease pathway
-    workflow.add_edge("DISEASE_SKIP_HANDLER", "TRANSLATE_DISEASE_TOOL_NODE") # Start with the agent node
-    workflow.add_edge("TRANSLATE_DISEASE_TOOL_NODE", "DISEASE_TOOL_HANDLER") # Once we have the DTXSID, we can call the tools
-    def can_skip_disease_tools(state: AgentState) -> Literal["DISEASE_TOOL_NODE", "ALL_TOOL_CAPTURE_HANDLER"]:
-        messages = state["tools_handler_messages"]
-        last_message = messages[-1]
-
-        if not hasattr(last_message, "tool_calls"):
-            return "ALL_TOOL_CAPTURE_HANDLER"
-
-        # Okay to skip to training if the last message has no tool calls
-        if not last_message.tool_calls:
-            return "ALL_TOOL_CAPTURE_HANDLER"  
-        else:
-            return "DISEASE_TOOL_NODE"
-    workflow.add_conditional_edges("DISEASE_TOOL_HANDLER", can_skip_disease_tools) # Once we have the DTXSID, we can call the tools
-
-    workflow.add_edge("DISEASE_TOOL_NODE", "DISEASE_TOOL_REPEAT_HANDLER") 
-
-    def can_repeat_disease_tools(state: AgentState) -> Literal["DISEASE_TOOL_NODE", "TRANSLATE_TOOL_NODE", "ALL_TOOL_CAPTURE_HANDLER"]:
-        messages = state["tools_handler_messages"]
-        last_message = messages[-1]
-
-        if not hasattr(last_message, "tool_calls"):
-            return "ALL_TOOL_CAPTURE_HANDLER"
-
-        # Okay to skip to training if the last message has no tool calls
-        if not last_message.tool_calls:
-            return "ALL_TOOL_CAPTURE_HANDLER"  
-        else:
-            tool_call_names = [call["name"] for call in last_message.tool_calls]
-            if "Name2DTXSID" in tool_call_names or "SMILES2DTXSID" in tool_call_names or "CASRN2DTXSID" in tool_call_names:
-                return("TRANSLATE_TOOL_NODE")
-            return "DISEASE_TOOL_NODE"
-    workflow.add_conditional_edges("DISEASE_TOOL_REPEAT_HANDLER", can_repeat_disease_tools) # Once we have the DTXSID, we can call the tools
-
-    # gene pathway
-    workflow.add_edge("GENE_SKIP_HANDLER", "TRANSLATE_GENE_TOOL_NODE") # Start with the agent node
-    workflow.add_edge("TRANSLATE_GENE_TOOL_NODE", "GENE_TOOL_HANDLER") # Once we have the DTXSID, we can call the tools
-    def can_skip_gene_tools(state: AgentState) -> Literal["GENE_TOOL_NODE", "ALL_TOOL_CAPTURE_HANDLER"]:
-        messages = state["tools_handler_messages"]
-        last_message = messages[-1]
-
-        if not hasattr(last_message, "tool_calls"):
-            return "ALL_TOOL_CAPTURE_HANDLER"
-
-        # Okay to skip to training if the last message has no tool calls
-        if not last_message.tool_calls:
-            return "ALL_TOOL_CAPTURE_HANDLER"  
-        else:
-            return "GENE_TOOL_NODE"
-    workflow.add_conditional_edges("GENE_TOOL_HANDLER", can_skip_gene_tools) # Once we have the DTXSID, we can call the tools
-
-    workflow.add_edge("GENE_TOOL_NODE", "GENE_TOOL_REPEAT_HANDLER") 
-
-    def can_repeat_gene_tools(state: AgentState) -> Literal["GENE_TOOL_NODE", "TRANSLATE_TOOL_NODE", "ALL_TOOL_CAPTURE_HANDLER"]:
-        messages = state["tools_handler_messages"]
-        last_message = messages[-1]
-
-        if not hasattr(last_message, "tool_calls"):
-            return "ALL_TOOL_CAPTURE_HANDLER"
-
-        # Okay to skip to training if the last message has no tool calls
-        if not last_message.tool_calls:
-            return "ALL_TOOL_CAPTURE_HANDLER"  
-        else:
-            tool_call_names = [call["name"] for call in last_message.tool_calls]
-            if "Name2DTXSID" in tool_call_names or "SMILES2DTXSID" in tool_call_names or "CASRN2DTXSID" in tool_call_names:
-                return("TRANSLATE_TOOL_NODE")
-            return "GENE_TOOL_NODE"
-    workflow.add_conditional_edges("GENE_TOOL_REPEAT_HANDLER", can_repeat_gene_tools) # Once we have the DTXSID, we can call the tools
-
-
-
-    workflow.add_edge("SKIP_HANDLER", "RAG_TOOL_NODE")
-    workflow.add_edge("SKIP_HANDLER", "LITERATURE_TOOL_NODE")
-
-    workflow.add_edge("DISEASE_SKIP_HANDLER", "RAG_TOOL_NODE")
-    workflow.add_edge("DISEASE_SKIP_HANDLER", "LITERATURE_TOOL_NODE")
-
-    workflow.add_edge("GENE_SKIP_HANDLER", "RAG_TOOL_NODE")
-    workflow.add_edge("GENE_SKIP_HANDLER", "LITERATURE_TOOL_NODE")
+            return "SUMMARY_NODE"
+    workflow.add_conditional_edges("DELIBERATION_NODE", can_repeat_tools) # Once we have the DTXSID, we can call the tools
     
+    workflow.add_edge("TOOL_NODE", "DELIBERATION_NODE")
 
-    workflow.add_edge(["ALL_TOOL_CAPTURE_HANDLER", "RAG_TOOL_NODE", "LITERATURE_TOOL_NODE"], "TRAINING_SUMMARY_HANDLER") # Converge on training step to summarize the results of the tools and search
-
-    workflow.add_edge("TRAINING_SUMMARY_HANDLER", END) # Always end after training, training step should be a last resort if the model couldn't find anything in the available tools & resources
-    
     # Compile graph
     workflow = workflow.compile(
         checkpointer=checkpointer,
