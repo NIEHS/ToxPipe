@@ -11,10 +11,10 @@ def query_rag(q: str, llm: BaseLLM, use_training_data: bool) -> str:
         rag_res = query(q, llm=llm, use_training_data=use_training_data)["response"]
         if type(rag_res) == dict:
             if rag_res["decision"] == "irrelevant":
-                return f"RAG did not find any results for query: {q}."
+                return f""
 
         if(len(rag_res) < 1):
-            return f"RAG did not find any results for query: {q}."
+            return f""
         else: 
             rag_res = f"{rag_res} (source: https://ntp.niehs.nih.gov/publications)"
 
@@ -22,7 +22,7 @@ def query_rag(q: str, llm: BaseLLM, use_training_data: bool) -> str:
     except Exception as e:
         print("Error running RAG.")
         print(e)
-        return f"Error: RAG failed to run with message: {e}."
+        return f""
 
 class QueryRAG(BaseTool):
     name: str = "QueryRAG"

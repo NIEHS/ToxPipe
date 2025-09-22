@@ -114,11 +114,7 @@ def search_pubmed_article(query: str,
             d = getPubMedArticleEutils(pmcid=pmcid)
         except Exception as exp:
             raise Exception(f'In getPubMedArticleEutils(pmcid={pmcid}), Line number: {exp.__traceback__.tb_lineno}, Description: {exp}\n\n{traceback.format_exc()}')
-            
 
-        print("===== ARTICLE ======")
-        print(d['pmc-articleset']['article'])
-    
         assert 'front' in d['pmc-articleset']['article'], 'Reference not available'
         assert 'body' in d['pmc-articleset']['article'], 'Content not available'
         
@@ -192,8 +188,6 @@ def search_pubmed_article(query: str,
         except:
             raise Exception(response.text)
 
-    print(query)
-
     try:
         res = searchLiterature(query)
         ids = res['eSearchResult']['IdList']
@@ -254,7 +248,7 @@ def scholar2result_llm(llm, query: str):
     papers = paper_search(llm, query)
     if len(papers) == 0:
         #return "Not enough papers found"
-        return "The Literature Search tool was unable to find any relevant papers to answer the query. Other tools may be better equipped to answer this query."
+        return ""
     answer=[f"The following are summaries of scientific literature that answer the prompt: '{query}':"]
 
     summary_prompt_template = """
