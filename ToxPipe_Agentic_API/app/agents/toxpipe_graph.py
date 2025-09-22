@@ -201,10 +201,6 @@ Your output must follow the following rules and format UNLESS the user's query s
 **Context**
 {context}
 
-**Query**
-{query}
-
-
 '''
 
 training_prompt = ChatPromptTemplate.from_messages(
