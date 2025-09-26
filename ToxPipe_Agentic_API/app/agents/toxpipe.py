@@ -22,7 +22,7 @@ DIR_HOME = Path(__file__).parent.parent.parent
 env_config = dotenv_values(DIR_HOME / ".config" / ".env")
 
 # LangFuse Tracing
-if env_config["LANGFUSE_TRACING"]:
+if bool(env_config["LANGFUSE_TRACING"]):
     from langfuse import Langfuse, get_client
     from langfuse.langchain import CallbackHandler
     lf = Langfuse(
@@ -160,7 +160,7 @@ class ToxPipeAgent:
             agent_executor.step_timeout = step_timeout
 
         self.agent_with_chat_history = agent_executor
-        if env_config["LANGFUSE_TRACING"]:
+        if bool(env_config["LANGFUSE_TRACING"]):
             self.config = {"configurable": {"thread_id": self.thread_id}, "recursion_limit": self.max_iterations, "callbacks": [langfuse_handler]}
         else:
             self.config = {"configurable": {"thread_id": self.thread_id}, "recursion_limit": self.max_iterations}

@@ -29,11 +29,15 @@ import httpx
 import certifi
 
 # For NIEHS cert issue
-ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-ctx.load_verify_locations(f"{DIR_HOME}/{env_config['SSL_CERT_DIR']}/NIH-FULL.pem")
-ctx.verify_mode = ssl.CERT_REQUIRED
+#ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+#ctx.load_verify_locations(f"{DIR_HOME}/{env_config['SSL_CERT_DIR']}/NIH-FULL.pem")
+#ctx.verify_mode = ssl.CERT_REQUIRED
+#ctx = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+#ctx = ssl.create_default_context()
+#ctx.load_cert_chain(certfile=f"{DIR_HOME}/{env_config['SSL_CERT_DIR']}/NIH-FULL.pem") 
+ctx = ssl.create_default_context(cafile=f"{DIR_HOME}/{env_config['SSL_CERT_DIR']}/NIH-FULL.pem")  # Either cafile or capath.
 client = httpx.Client(verify=ctx)
-truststore.inject_into_ssl()
+#truststore.inject_into_ssl()
  
 # Persistent memory
 # Establish Postgres Connection for ToxPipe

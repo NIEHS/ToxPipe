@@ -17,11 +17,12 @@ class Config:
 
     env_config = dotenv_values(DIR_HOME / ".config" / ".env")
 
-    langfuse_handler = Langfuse(
-        public_key=env_config["LANGFUSE_PUBLIC_KEY"],
-        secret_key=env_config["LANGFUSE_SECRET_KEY"],
-        host=env_config["LANGFUSE_HOST"]
-    )
+    if bool(env_config["LANGFUSE_TRACING"]):
+        langfuse_handler = Langfuse(
+            public_key=env_config["LANGFUSE_PUBLIC_KEY"],
+            secret_key=env_config["LANGFUSE_SECRET_KEY"],
+            host=env_config["LANGFUSE_HOST"]
+        )
 
     TOKENS_PER_LLM_CALL = 5000
     MAX_KEYWORDS = 10

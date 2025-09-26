@@ -60,24 +60,11 @@ AMAZON_MODELS = ['amazon-titan-text-premier']
 COHERE_MODELS = ['cohere-command-r-plus']
 BAD_TOOL_MODELS = []
 
-import truststore
-truststore.inject_into_ssl()
-
 # Load environment variables
 from dotenv import dotenv_values
 from pathlib import Path
 DIR_HOME = Path(__file__).parent.parent.parent
 env_config = dotenv_values(DIR_HOME / ".config" / ".env")
-
-# LangFuse Tracing
-from langfuse import Langfuse, get_client
-from langfuse.langchain import CallbackHandler
-langfuse = Langfuse(
-    public_key=env_config["LANGFUSE_PUBLIC_KEY"],
-    secret_key=env_config["LANGFUSE_SECRET_KEY"],
-    host=env_config["LANGFUSE_HOST"]
-)
-langfuse_handler = CallbackHandler()
 
 CURRENT_DELIBERATION_STEP = 0
 
