@@ -22,15 +22,16 @@ DIR_HOME = Path(__file__).parent.parent.parent
 env_config = dotenv_values(DIR_HOME / ".config" / ".env")
 
 # LangFuse Tracing
-from langfuse import Langfuse, get_client
-from langfuse.langchain import CallbackHandler
-lf = Langfuse(
-    public_key=env_config["LANGFUSE_PUBLIC_KEY"],
-    secret_key=env_config["LANGFUSE_SECRET_KEY"],
-    host=env_config["LANGFUSE_HOST"]
-)
-langfuse = get_client()
-langfuse_handler = CallbackHandler()
+if env_config["LANGFUSE_TRACING"]:
+    from langfuse import Langfuse, get_client
+    from langfuse.langchain import CallbackHandler
+    lf = Langfuse(
+        public_key=env_config["LANGFUSE_PUBLIC_KEY"],
+        secret_key=env_config["LANGFUSE_SECRET_KEY"],
+        host=env_config["LANGFUSE_HOST"]
+    )
+    langfuse = get_client()
+    langfuse_handler = CallbackHandler()
 
 # Create temporary working directory
 working_directory = TemporaryDirectory()
@@ -159,7 +160,10 @@ class ToxPipeAgent:
             agent_executor.step_timeout = step_timeout
 
         self.agent_with_chat_history = agent_executor
-        self.config = {"configurable": {"thread_id": self.thread_id}, "recursion_limit": self.max_iterations, "callbacks": [langfuse_handler]}
+        if env_config["LANGFUSE_TRACING"]:
+            self.config = {"configurable": {"thread_id": self.thread_id}, "recursion_limit": self.max_iterations, "callbacks": [langfuse_handler]}
+        else:
+            self.config = {"configurable": {"thread_id": self.thread_id}, "recursion_limit": self.max_iterations}
 
     # Not currently used, but meant to force the agent to be serializable for pickling
     @classmethod
