@@ -133,18 +133,36 @@ def search_pubmed_article(query: str,
     
         authors = []
         contrib_group = front['article-meta']['contrib-group']
+
+        print("== contrib_group====")
+        print(contrib_group)
+
         if isinstance(contrib_group, list):
             for contrib_group_element in contrib_group:
                 if isinstance(contrib_group_element['contrib'], list):
                     for contrib in contrib_group_element['contrib']:
                         if contrib['@contrib-type'] == 'author':
-                            authors.append({'first_name': contrib['name']['given-names']['#text'].strip(), 
-                                            'last_name': contrib['name']['surname'].strip()})
+                            if 'name' in contrib:
+                                authors.append({'first_name': contrib['name']['given-names']['#text'].strip(), 
+                                                'last_name': contrib['name']['surname'].strip()})
+                            elif 'collab' in contrib:
+                                authors.append({'first_name': '', 
+                                                'last_name': contrib['collab'].strip()})
+                            else: 
+                                authors.append({'first_name': '', 
+                                                'last_name': ''})
         elif isinstance(contrib_group['contrib'], list):
             for contrib in contrib_group['contrib']:
                 if contrib['@contrib-type'] == 'author':
-                    authors.append({'first_name': contrib['name']['given-names']['#text'].strip(), 
-                                    'last_name': contrib['name']['surname'].strip()})
+                    if 'name' in contrib:
+                        authors.append({'first_name': contrib['name']['given-names']['#text'].strip(), 
+                                        'last_name': contrib['name']['surname'].strip()})
+                    elif 'collab' in contrib:
+                        authors.append({'first_name': '', 
+                                        'last_name': contrib['collab'].strip()})
+                    else: 
+                        authors.append({'first_name': '', 
+                                        'last_name': ''})
         else:
             if contrib_group['contrib']['@contrib-type'] == 'author':
                 if 'collab' in contrib_group['contrib']:
