@@ -102,11 +102,6 @@ Deployment information is contained in [`docs/deployment`](docs/deployment/index
 ## Related Repositories
 
 - [ToxPipe LLM Model Comparisons](https://github.com/NIEHS/toxpipe-model-comparison)
-- [LibreChat](https://github.com/NIEHS/LibreChat)
-
-## Useful Links
-
-- [ToxPipe | 2024 NCBI AIxML Codeathon]
 
 <p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
     <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
@@ -131,9 +126,6 @@ Deployment information is contained in [`docs/deployment`](docs/deployment/index
 ## 🛠️ Built With
 
 ![FastAPI Badge](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=fff&style=plastic)
-
-- [NIEHS Librechat](https://github.com/NIEHS/LibreChat)
-- [NIEHS LLM Comparison](https://github.com/NIEHS/ToxPipe-Model-Comparison)
 
 <p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
     <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
