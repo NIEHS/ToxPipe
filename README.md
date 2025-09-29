@@ -58,7 +58,7 @@ ToxPipe is meant to be a platform for interacting with various toxicological dat
 
 Large language models (LLMs), such as [OpenAI’s GPT-based models](https://openai.com/blog/chatgpt), can be used to solve complicated tasks with natural language as a generic interface. By using techniques like retrieval augmented generation (RAG), LLMs can be given a set of instructions and can (semi-)autonomously explore various data sources. The LLMs will then generate responses or interpretations based on information stored inside the models along with the contextual data retrieved through RAG.
 
-ToxPipe aims to repurpose (semi-)autonomous AI agents, such as JARVIS and Auto-GPT, for AI-augmented exploration of existing toxicological data and literature. Some of the tasks that we believe are possible with autonomous agents and RAG are:
+ToxPipe aims to repurpose (semi-)autonomous AI agents for AI-augmented exploration of existing toxicological data and literature. Some of the tasks that we believe are possible with autonomous agents and RAG are:
 
 - Generation of toxicological narratives with deep explanatory context
 - Analysis of chemical structure
