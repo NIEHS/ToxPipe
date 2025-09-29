@@ -34,6 +34,7 @@ __pycache__
 
 src/toxpipe-api/.config/*
 !src/toxpipe-api/.config/README.md
+!src/toxpipe-api/.config/example.env
 src/toxpipe-api/.build/*
 src/toxpipe-api/.vscode/*
 
