@@ -116,15 +116,11 @@ Deployment information is contained in [`docs/deployment`](docs/deployment/index
 
 ## Repo Structure
 
-- `.build`: This folder should contain all scripts related to build process (PowerShell, Docker compose…).
-- `.config`: It should contain local configuration related to setup on local machine.
-- `dep`: This is the directory where all your dependencies should be stored.
-- `doc`: The documentation folder.
-- `res`: For all static resources in your project. For example, images.
-- `samples`: Providing “Hello World” & Co code that supports the documentation.
-- `src`: The source code folder! However, in languages that use headers (or if you have a framework for your application) don’t put those files in here.
-- `test`: Unit tests, integration tests… go here.
-- `tools`: Convenience directory for your use. Should contain scripts to automate tasks in the project, for example, build scripts, rename scripts. Usually contains .sh, .cmd files for example.
+- `docs`: Documentation and guides
+- `examples`: Example code and vignettes for common use cases
+- `src`: Source code for the backend and frontend components of ToxPipe
+  - `web`: Containers (Docker) and configuration for ToxPipe's contituent services (LibreChat, LiteLLM, Langflow, Langfuse, Ollama, etc.) 
+  - `toxpipe-api`: Source code for the ToxPipe FastAPI web API and RAG/literature search features
 
 <p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
     <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
