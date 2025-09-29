@@ -79,7 +79,7 @@ By offloading these tasks to ToxPipe, it would allow toxicologists to repurpose 
 
 The following diagram demonstrates an overall structure of ToxPipe. This model is subject to change as the project develops.
 
-![ToxPipe Overview](res/diagrams/toxpipe-simple.svg)
+![ToxPipe Overview](toxpipe-ecosystem-new-2025.png)
 
 Architecture documentation is in [`docs/architecture`](docs/architecture/index.qmd). Stack decisions are saved in [`docs/decisions`](docs/decisions/index.md). This is where we will document the reasoning behind our stack decisions.
 
