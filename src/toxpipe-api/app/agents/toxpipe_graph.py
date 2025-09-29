@@ -1049,6 +1049,7 @@ def create_react_agent(
         last_message = messages[-1]
 
         global CURRENT_DELIBERATION_STEP
+        CURRENT_DELIBERATION_STEP = CURRENT_DELIBERATION_STEP
 
         if CURRENT_DELIBERATION_STEP > MAX_DELIBERATION_STEPS:
             return "SUMMARY_NODE"
