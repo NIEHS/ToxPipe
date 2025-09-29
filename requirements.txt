@@ -90,7 +90,6 @@ mypy_extensions==1.1.0
 nbclient==0.10.2
 nbconvert==7.16.6
 nbformat==5.10.4
-numpy==2.3.3
 oauthlib==3.3.1
 onnxruntime==1.22.1
 openai==1.107.1
