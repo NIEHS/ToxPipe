@@ -33,6 +33,7 @@ __pycache__
 .posit
 
 src/toxpipe-api/.config/*
+!src/toxpipe-api/.config/README.md
 src/toxpipe-api/.build/*
 src/toxpipe-api/.vscode/*
 
