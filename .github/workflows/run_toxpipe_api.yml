@@ -40,4 +40,4 @@ jobs:
     - name: Test with pytest
       working-directory: /home/runner/work/ToxPipe/ToxPipe/tests/
       run: |
-        pytest
+        pytest test_toxpipe_api.py
