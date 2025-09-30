@@ -38,6 +38,6 @@ jobs:
       working-directory: /home/runner/work/ToxPipe/ToxPipe/src/toxpipe-api
       run: |
         fastapi run main.py &
-        echo 20
-        curl -i http://localhost:8000/help/
+        sleep 20
+        curl -i http://127.0.0.1:8000/help/
         
