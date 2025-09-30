@@ -39,5 +39,5 @@ jobs:
       run: |
         fastapi run main.py
         sleep 20
-        curl -i http://localhost:8000/help/
+        curl -i http://0.0.0.0:8000/help/
         
