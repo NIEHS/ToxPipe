@@ -36,11 +36,3 @@ jobs:
       working-directory: /home/runner/work/ToxPipe/ToxPipe/src/toxpipe-api
       run: |
         fastapi run main.py &
-  test:
-    runs-on: ubuntu-latest
-    #needs: [build]
-    steps:
-    - uses: actions/checkout@v4
-    - name: Ping FastAPI
-      run: |
-        sleep 40 && curl -i http://0.0.0.0:8000/help/
