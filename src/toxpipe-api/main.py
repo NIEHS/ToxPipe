@@ -62,13 +62,12 @@ try:
     }
     pool = ConnectionPool(conninfo=DB_URI, max_size=20, kwargs=connection_kwargs,)
     checkpointer = ShallowPostgresSaver(pool)
+    checkpointer.setup()
 except Exception as e:
     print("Warning: Unable to connect to Postgres database. Checkpointing will be done in memory only.")
     print(f'error: Line number: {e.__traceback__.tb_lineno}, Description: {e}\n\n{traceback.format_exc()}')
     checkpointer = InMemorySaver() # by default, just save checkpoints to memory, unless superseded by Postgres config
     pool = None
-
-checkpointer.setup()
 
 def exit_handler():
     print("Shutting down...")
