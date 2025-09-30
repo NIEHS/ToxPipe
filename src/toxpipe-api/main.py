@@ -14,7 +14,7 @@ from langchain.tools.render import render_text_description
 import json
 import datetime
 import uuid
-from langgraph.checkpoint.postgres import PostgresSaver, ShallowPostgresSaver 
+from langgraph.checkpoint.postgres import ShallowPostgresSaver, InMemorySaver
 from psycopg_pool import ConnectionPool
 import os
 import ssl
@@ -44,26 +44,35 @@ if os.path.exists(f"{DIR_HOME}/{env_config['SSL_CERT_DIR']}/NIH-FULL.pem"):
     client = httpx.Client(verify=ctx)
 #truststore.inject_into_ssl()
  
-# Persistent memory
-# Establish Postgres Connection for ToxPipe
-postgres_host = env_config["TOXPIPE_POSTGRES_HOST"]
-postgres_port = env_config["TOXPIPE_POSTGRES_PORT"]
-postgres_name = env_config["TOXPIPE_POSTGRES_DATABASE"]
-postgres_user = env_config["TOXPIPE_POSTGRES_USER"]
-postgres_pass = env_config["TOXPIPE_POSTGRES_PASSWORD"]
-DB_URI = f"postgresql://{postgres_user}:{postgres_pass}@{postgres_host}:{postgres_port}/{postgres_name}"
-connection_kwargs = {
-    "autocommit": True,
-    "prepare_threshold": 0,
-}
-pool = ConnectionPool(conninfo=DB_URI, max_size=20, kwargs=connection_kwargs,)
-checkpointer = ShallowPostgresSaver(pool)
-#checkpointer = PostgresSaver(pool)
+# Setup checkpointing for agents
+checkpointer = InMemorySaver() # by default, just save checkpoints to memory, unless superseded by Postgres config
+pool = None
+try:
+    # Establish Postgres Connection for ToxPipe
+    postgres_host = env_config["TOXPIPE_POSTGRES_HOST"]
+    postgres_port = env_config["TOXPIPE_POSTGRES_PORT"]
+    postgres_name = env_config["TOXPIPE_POSTGRES_DATABASE"]
+    postgres_user = env_config["TOXPIPE_POSTGRES_USER"]
+    postgres_pass = env_config["TOXPIPE_POSTGRES_PASSWORD"]
+    DB_URI = f"postgresql://{postgres_user}:{postgres_pass}@{postgres_host}:{postgres_port}/{postgres_name}"
+    connection_kwargs = {
+        "autocommit": True,
+        "prepare_threshold": 0,
+    }
+    pool = ConnectionPool(conninfo=DB_URI, max_size=20, kwargs=connection_kwargs,)
+    checkpointer = ShallowPostgresSaver(pool)
+except Exception as e:
+    print("Warning: Unable to connect to Postgres database. Checkpointing will be done in memory only.")
+    print(f'error: Line number: {e.__traceback__.tb_lineno}, Description: {e}\n\n{traceback.format_exc()}')
+    checkpointer = InMemorySaver() # by default, just save checkpoints to memory, unless superseded by Postgres config
+    pool = None
+
 checkpointer.setup()
 
 def exit_handler():
     print("Shutting down...")
-    pool.close()
+    if pool is not None:
+        pool.close()
     print("Connection pool closed.")
 
 atexit.register(exit_handler)
