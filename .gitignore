@@ -334,6 +334,6 @@ backup/
 backup/*
 ./src/web/docker-compose.override.yml
 ./src/web/docker-compose.yml
-./toxpipe-test-env
-toxpipe-test-env
-toxpipe-test-env/*
+./.toxpipe-test-env
+.toxpipe-test-env
+.toxpipe-test-env/*
