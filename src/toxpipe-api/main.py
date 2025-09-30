@@ -14,7 +14,8 @@ from langchain.tools.render import render_text_description
 import json
 import datetime
 import uuid
-from langgraph.checkpoint.postgres import ShallowPostgresSaver, InMemorySaver
+from langgraph.checkpoint.postgres import ShallowPostgresSaver
+from langgraph.checkpoint.memory import InMemorySaver
 from psycopg_pool import ConnectionPool
 import os
 import ssl
