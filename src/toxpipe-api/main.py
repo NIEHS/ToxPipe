@@ -147,7 +147,7 @@ MODEL_CACHE = {}
 # Endpoint for basic API instructions
 @app.get("/help/")
 async def help(request: Request, response: Response):
-    return {"response": f"Use the /agent/create/ endpoint to define an agent with the specified parameters. If the agent was successfully created, this endpoint will return a UUID for the agent. Use the /agent/query/ endpoint to query the agent with the specified UUID and query string. Increasing agent temperature may increase answer variance, but may also increase the likelihood of nonsensical answers. Increasing max iterations may help for complex queries that need many steps to process. Increasing max retries may help if queries to the agent repeatedly fail. Setting n_threads > 1 spawns n_threads copies of the agent to process the query in parallel, which may generate a more comprehensive answer; when n_threads = 1, only a single instance of the agent is run. When summarize is set to True, the agent will attempt to summarize the output of the query: this is automaticalyl set to true when n_threads > 1."}
+    return {"response": f"Use the /agent/create/ endpoint to define an agent with the specified parameters. If the agent was successfully created, this endpoint will return a UUID for the agent. Use the /agent/query/ endpoint to query the agent with the specified UUID and query string. Increasing agent temperature may increase answer variance, but may also increase the likelihood of nonsensical answers. Increasing max iterations may help for complex queries that need many steps to process. Increasing max retries may help if queries to the agent repeatedly fail. Setting n_threads > 1 spawns n_threads copies of the agent to process the query in parallel, which may generate a more comprehensive answer; when n_threads = 1, only a single instance of the agent is run. When summarize is set to True, the agent will attempt to summarize the output of the query: this is automatically set to true when n_threads > 1."}
 
 # Endpoint for creating an agent. Note that this will not actually create the agent object in memory, it just creates a JSON file with the agent parameters so that the API is "aware" that such an agent is defined and may be created later.
 @app.get("/agent/create/", tags=["agent"])
@@ -319,7 +319,7 @@ async def view_available_tools(request: Request, response: Response):
 
 
 # Check if this API can connect to the llm provider.
-@app.get("/heartbeat", tags=["util"])
+@app.get("/checkapis", tags=["util"])
 async def check_api_connections(request: Request, response: Response):
 
     llm_res = None
@@ -360,3 +360,9 @@ async def check_api_connections(request: Request, response: Response):
         "ChemBioTox API": cbt_res
     }
 
+# Help
+@app.get("/help", tags=["util"])
+async def help(request: Request, response: Response):
+    return {
+        "response": f"Use the /agent/create/ endpoint to define an agent with the specified parameters. If the agent was successfully created, this endpoint will return a UUID for the agent. Use the /agent/query/ endpoint to query the agent with the specified UUID and query string. Increasing agent temperature may increase answer variance, but may also increase the likelihood of nonsensical answers. Increasing max iterations may help for complex queries that need many steps to process. Increasing max retries may help if queries to the agent repeatedly fail. Setting n_threads > 1 spawns n_threads copies of the agent to process the query in parallel, which may generate a more comprehensive answer; when n_threads = 1, only a single instance of the agent is run. When summarize is set to True, the agent will attempt to summarize the output of the query: this is automatically set to true when n_threads > 1."
+    }
