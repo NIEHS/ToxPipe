@@ -42,8 +42,5 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Ping FastAPI
-      #working-directory: /home/runner/work/ToxPipe/ToxPipe/src/toxpipe-api
       run: |
-        pwd 
-        ls -alhF
-      #sleep 20 && curl -i http://0.0.0.0:8000/help/
+        sleep 10 && curl -i http://0.0.0.0:8000/help/
