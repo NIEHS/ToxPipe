@@ -41,6 +41,6 @@ jobs:
     needs: [build]
     steps:
     - name: Ping FastAPI
+      working-directory: /home/runner/work/ToxPipe/ToxPipe/src/toxpipe-api
       run: |
-        working-directory: /home/runner/work/ToxPipe/ToxPipe/src/toxpipe-api
         sleep 20 && curl -i http://0.0.0.0:8000/help/
