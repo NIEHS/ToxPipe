@@ -11,7 +11,9 @@ from time import time
 from dotenv import dotenv_values
 
 DIR_HOME = Path(__file__).parent.parent.parent.parent
-env_config = dotenv_values(DIR_HOME / ".config" / ".env")
+env_config = dotenv_values(DIR_HOME / ".config" / "example.env")
+if os.path.exists(DIR_HOME / ".config" / ".env"):
+    env_config = dotenv_values(DIR_HOME / ".config" / ".env")
 
 N_PAPERS = env_config["TOXPIPE_MAX_PAPERS"]
 PAPER_CONTENT_SIZE = env_config["TOXPIPE_PAPER_CONTENT_MAX_SIZE"]

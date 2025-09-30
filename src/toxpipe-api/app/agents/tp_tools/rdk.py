@@ -10,7 +10,9 @@ from .utils import *
 from dotenv import dotenv_values
 from pathlib import Path
 DIR_HOME = Path(__file__).parent.parent.parent.parent
-env_config = dotenv_values(DIR_HOME / ".config" / ".env")
+env_config = dotenv_values(DIR_HOME / ".config" / "example.env")
+if os.path.exists(DIR_HOME / ".config" / ".env"):
+    env_config = dotenv_values(DIR_HOME / ".config" / ".env")
 
 CBT_API_ENDPOINT = env_config["CBT_API_ENDPOINT"]
 CONNECT_API_KEY = env_config["CONNECT_API_KEY"]

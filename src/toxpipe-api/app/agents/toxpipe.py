@@ -15,11 +15,15 @@ from langchain_core.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field, model_validator
 from langchain_core.caches import BaseCache 
 
+import os
+
 # Load environment variables
 from dotenv import dotenv_values
 from pathlib import Path
 DIR_HOME = Path(__file__).parent.parent.parent
-env_config = dotenv_values(DIR_HOME / ".config" / ".env")
+env_config = dotenv_values(DIR_HOME / ".config" / "example.env")
+if os.path.exists(DIR_HOME / ".config" / ".env"):
+    env_config = dotenv_values(DIR_HOME / ".config" / ".env")
 
 # LangFuse Tracing
 if bool(env_config["LANGFUSE_TRACING"]):

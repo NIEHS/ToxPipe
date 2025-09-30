@@ -5,6 +5,7 @@ from langfuse import Langfuse, get_client
 from langfuse.langchain import CallbackHandler
 
 from operator import add
+import os
 from typing import Annotated, List
 
 from typing_extensions import TypedDict
@@ -15,7 +16,9 @@ class Config:
     DIR_HOME = Path(__file__).parent.parent.parent
     DIR_DATA = (DIR_HOME / 'app' / 'rag' / 'resources')
 
-    env_config = dotenv_values(DIR_HOME / ".config" / ".env")
+    env_config = dotenv_values(DIR_HOME / ".config" / "example.env")
+    if os.path.exists(DIR_HOME / ".config" / ".env"):
+        env_config = dotenv_values(DIR_HOME / ".config" / ".env")
 
     if bool(env_config["LANGFUSE_TRACING"]):
         langfuse_handler = Langfuse(

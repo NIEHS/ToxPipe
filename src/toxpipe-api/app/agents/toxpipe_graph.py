@@ -36,6 +36,7 @@ from langgraph.graph.message import add_messages
 from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
 from langchain.tools.render import render_text_description
 from operator import itemgetter
+import os
 import json
 from json import JSONDecodeError
 from langchain_core.outputs import Generation
@@ -64,7 +65,9 @@ BAD_TOOL_MODELS = []
 from dotenv import dotenv_values
 from pathlib import Path
 DIR_HOME = Path(__file__).parent.parent.parent
-env_config = dotenv_values(DIR_HOME / ".config" / ".env")
+env_config = dotenv_values(DIR_HOME / ".config" / "example.env")
+if os.path.exists(DIR_HOME / ".config" / ".env"):
+    env_config = dotenv_values(DIR_HOME / ".config" / ".env")
 
 CURRENT_DELIBERATION_STEP = 0
 
