@@ -38,6 +38,7 @@ jobs:
       working-directory: /home/runner/work/ToxPipe/ToxPipe/src/toxpipe-api
       run: |
         nohup fastapi run main.py &
+        ps aux | grep ".py"
         sleep 20
         curl -i http://0.0.0.0:8000/help/
         
