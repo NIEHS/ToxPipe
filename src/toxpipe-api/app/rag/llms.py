@@ -1,12 +1,16 @@
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from .utils import Config
 from pathlib import Path
-
+import os
 import httpx
+import ssl
 import truststore
 truststore.inject_into_ssl()
-cert_path = str(Path(Config.DIR_HOME) / '.config'/ 'NIH-FULL.pem')
-client = httpx.Client(verify=cert_path)
+cert_path = None
+client = None
+if os.path.exists(str(Path(Config.DIR_HOME) / '.config'/ 'NIH-FULL.pem')):
+    cert_path = ssl.create_default_context(cafile=str(Path(Config.DIR_HOME) / '.config'/ 'NIH-FULL.pem'))  # Either cafile or capath.
+    client = httpx.Client(verify=cert_path)
 
 # ---------------------------------------------------------------------------
 def getAIModel(model_name: str, temperature: int = 0, is_embedding=False) -> ChatOpenAI | OpenAIEmbeddings:

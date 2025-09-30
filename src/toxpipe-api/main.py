@@ -37,8 +37,11 @@ import certifi
 #ctx = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 #ctx = ssl.create_default_context()
 #ctx.load_cert_chain(certfile=f"{DIR_HOME}/{env_config['SSL_CERT_DIR']}/NIH-FULL.pem") 
-ctx = ssl.create_default_context(cafile=f"{DIR_HOME}/{env_config['SSL_CERT_DIR']}/NIH-FULL.pem")  # Either cafile or capath.
-client = httpx.Client(verify=ctx)
+ctx = None
+client = None
+if os.path.exists(f"{DIR_HOME}/{env_config['SSL_CERT_DIR']}/NIH-FULL.pem"):
+    ctx = ssl.create_default_context(cafile=f"{DIR_HOME}/{env_config['SSL_CERT_DIR']}/NIH-FULL.pem")  # Either cafile or capath.
+    client = httpx.Client(verify=ctx)
 #truststore.inject_into_ssl()
  
 # Persistent memory
