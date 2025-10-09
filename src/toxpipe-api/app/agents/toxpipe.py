@@ -48,7 +48,7 @@ tools = FileManagementToolkit(
 ).get_tools()
 read_tool, write_tool, list_tool = tools
 
-from .tools import make_tools, make_translate_tools, make_rag_tools, make_literature_tools
+from .tools import make_tools, make_literature_tools
 # Multiprocessing
 import concurrent.futures
 from .multi import *
@@ -68,21 +68,26 @@ from ..rag import query
 
 # Create LLM handler - always use AzureChatOpenAI since all models are accessed through NIEHS's litellm instance.
 def _make_llm(model, api_version, temp, max_retries, max_tokens, seed, client):
-        llm = AzureChatOpenAI(
-            azure_endpoint=env_config["AZURE_OPENAI_ENDPOINT"], # load from .env
-            openai_api_key=env_config["AZURE_OPENAI_API_KEY"], # load from .env
-            model_name=model,
-            temperature=temp,
-            api_version=api_version,
-            max_retries=max_retries,
-            max_tokens=max_tokens,
-            seed=seed,
-            tiktoken_model_name="gpt-4o", # use the gpt-4o tiktoken model for all models to avoid an error when calculating token limit
-            reasoning_effort="low",
-            http_client=client
-        )
+        
+        
 
-        if "gpt-5" in model:
+        llm = None
+
+        if model in ["azure-gpt-5-chat"]:
+            llm = AzureChatOpenAI(
+                azure_endpoint=env_config["AZURE_OPENAI_ENDPOINT"], # load from .env
+                openai_api_key=env_config["AZURE_OPENAI_API_KEY"], # load from .env
+                model_name=model,
+                temperature=temp,
+                api_version=api_version,
+                max_retries=max_retries,
+                max_completion_tokens=max_tokens,
+                seed=seed,
+                tiktoken_model_name="gpt-4o", # use the gpt-4o tiktoken model for all models to avoid an error when calculating token limit
+                http_client=client
+            )
+
+        elif model in ["azure-gpt-5"]:
             llm = AzureChatOpenAI(
                 azure_endpoint=env_config["AZURE_OPENAI_ENDPOINT"], # load from .env
                 openai_api_key=env_config["AZURE_OPENAI_API_KEY"], # load from .env
@@ -96,6 +101,50 @@ def _make_llm(model, api_version, temp, max_retries, max_tokens, seed, client):
                 reasoning_effort="low",
                 http_client=client
             )
+
+        elif model in ["claude-4.1-opus", "claude-4-sonnet", "claude-4-opus"]:
+            llm = AzureChatOpenAI(
+                azure_endpoint=env_config["AZURE_OPENAI_ENDPOINT"], # load from .env
+                openai_api_key=env_config["AZURE_OPENAI_API_KEY"], # load from .env
+                model_name=model,
+                temperature=1, # Thinking Claude models require temperature to be 1
+                api_version=api_version,
+                max_retries=max_retries,
+                max_completion_tokens=max_tokens,
+                seed=seed,
+                tiktoken_model_name="gpt-4o", # use the gpt-4o tiktoken model for all models to avoid an error when calculating token limit
+                http_client=client
+            )
+
+        elif model in ["azure-gpt-5-nano"]:
+            llm = AzureChatOpenAI(
+            azure_endpoint=env_config["AZURE_OPENAI_ENDPOINT"], # load from .env
+            openai_api_key=env_config["AZURE_OPENAI_API_KEY"], # load from .env
+            model_name=model,
+            temperature=temp,
+            api_version=api_version,
+            max_retries=max_retries,
+            max_tokens=max_tokens,
+            seed=seed,
+            tiktoken_model_name="gpt-4o", # use the gpt-4o tiktoken model for all models to avoid an error when calculating token limit
+            reasoning_effort="low",
+            http_client=client
+        )
+
+        else:
+            llm = AzureChatOpenAI(
+            azure_endpoint=env_config["AZURE_OPENAI_ENDPOINT"], # load from .env
+            openai_api_key=env_config["AZURE_OPENAI_API_KEY"], # load from .env
+            model_name=model,
+            temperature=temp,
+            api_version=api_version,
+            max_retries=max_retries,
+            max_tokens=max_tokens,
+            seed=seed,
+            tiktoken_model_name="gpt-4o", # use the gpt-4o tiktoken model for all models to avoid an error when calculating token limit
+            #reasoning_effort="low",
+            http_client=client
+        )
 
         return llm
 

@@ -1,23 +1,18 @@
 # This is a custom, cloned implementation of LangChain's AgentExecutor so that we can modify it to better handle non-OpenAI models and for other debugging purposes.
 
-from typing import Callable, Literal, Optional, Sequence, Type, TypeVar, Union, cast, Annotated, Any, List
+from typing import Callable, Literal, Optional, Sequence, Type, TypeVar, Union, cast, Annotated
 
 from langchain_core.language_models import BaseChatModel, LanguageModelLike
 from langchain_core.messages import AIMessage, BaseMessage, SystemMessage, ToolMessage
 from langchain_core.runnables import (
     Runnable,
-    RunnableBinding,
     RunnableConfig,
-    RunnablePassthrough,
 )
 from langchain_core.tools import BaseTool
 from typing_extensions import Annotated, TypedDict
 
-import copy
-
 #from langgraph._api.deprecation import deprecated_parameter
-from langgraph.errors import ErrorCode, create_error_message
-from langgraph.graph import StateGraph, START, END
+from langgraph.graph import StateGraph, START
 #from langgraph.graph.graph import CompiledGraph
 from langgraph.graph.message import add_messages
 from langgraph.managed import IsLastStep, RemainingSteps
@@ -27,39 +22,16 @@ from langgraph.store.base import BaseStore
 from langgraph.types import Checkpointer
 from langgraph.utils.runnable import RunnableCallable
 from langchain_core.prompt_values import ChatPromptValue
-from langchain.agents.output_parsers import OpenAIFunctionsAgentOutputParser
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from langchain_core.exceptions import OutputParserException
-from langchain_core.prompts import ChatPromptTemplate, PromptTemplate, MessagesPlaceholder
+from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.message import add_messages
-from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
-from langchain.tools.render import render_text_description
-from operator import itemgetter
+from langchain_core.output_parsers import StrOutputParser
 import os
-import json
-from json import JSONDecodeError
-from langchain_core.outputs import Generation
-import re
-import uuid
 import itertools
 from pydantic import BaseModel, Field
-from langchain_core.utils.json import (
-    parse_and_check_json_markdown,
-    parse_json_markdown,
-    parse_partial_json,
-)
-from .tools import make_tools, make_translate_tools, make_rag_tools, make_literature_tools, make_disease_tools, make_gene_tools
+from .tools import make_tools
 from .prompts_chem import getInnerToolsPrompt, getInnerDiseaseToolsPrompt, getInnerGeneToolsPrompt, PromptAgentic, getRepeatDiseaseToolsPrompt, getRepeatToolsPrompt, getRepeatGeneToolsPrompt
-
-ANTHROPIC_MODELS = ['claude-3-5-sonnet', 'claude-3-sonnet', 'claude-3-haiku', 'claude-3-opus'] # haiku and opus work better
-OLLAMA_MODELS = ['llama3-1-70b', 'llama3-1-8b', 'openbiollm-llama3-70b'] # These have trouble with tools
-OPENAI_MODELS = ['azure-gpt-4o', 'azure-gpt-3.5-turbo', 'azure-gpt-4o-mini', 'azure-gpt-3.5-turbo-16k', 'azure-gpt-4-turbo-20240409', 'azure-gpt-4', 'azure-o1', 'azure-o1-mini', 'azure-o3-mini', 'azure-o3'] # These all work pretty well
-MISTRALAI_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', 'mixtral-8x7b-instruct'] # mistral-large-2 and mixtral-8x7b-instruct has issues accessing tools
-GOOGLE_MODELS = ['gemini-1.5-pro'] # TODO - VertexAIException BadRequestError - "Unable to submit request because one or more function parameters didn\'t specify the schema type field. Learn more: https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling
-AMAZON_MODELS = ['amazon-titan-text-premier']
-COHERE_MODELS = ['cohere-command-r-plus']
-BAD_TOOL_MODELS = []
 
 # Load environment variables
 from dotenv import dotenv_values
@@ -207,48 +179,6 @@ training_prompt = ChatPromptTemplate.from_messages(
         (
             'human',
             (training_human_prompt),
-        ),
-    ]
-)
-
-
-
-force_rag_prompt = ChatPromptTemplate.from_messages(
-    [
-        (
-            'system',
-            (sufficient_system_prompt),
-        ),
-        (
-            'human',
-            (
-                """
-                    Below is the user's query. You must format the user's original query into a concise query to be used with the QueryRAG tool, then you must call the QueryRAG tool using this new query as input.
-                    
-                    ** User's Query **
-                    {query}
-                """
-            ),
-        ),
-    ]
-)
-
-force_literature_prompt = ChatPromptTemplate.from_messages(
-    [
-        (
-            'system',
-            (sufficient_system_prompt),
-        ),
-        (
-            'human',
-            (
-                """
-                    Below is the user's query. You must format the user's original query into a concise query to be used with the LiteratureSearch tool, then you must call the LiteratureSearch tool using this new query as input.
-                    
-                    ** User's Query **
-                    {query}
-                """
-            ),
         ),
     ]
 )
@@ -429,54 +359,19 @@ def create_react_agent(
         ):
             raise ValueError(f"Missing required key(s) {missing_keys} in state_schema")
 
-    translate_tools = make_translate_tools(llm=model)
-    translate_tool_node = ToolNode(translate_tools, messages_key="messages")
-    translate_tool_classes = list(translate_tool_node.tools_by_name.values())
-    translate_tool_names = list(translate_tool_node.tools_by_name.keys())
-
-    rag_tools = make_rag_tools(llm=model)
-    rag_tool_node = ToolNode(rag_tools, messages_key="messages")
-    rag_tool_classes = list(rag_tool_node.tools_by_name.values())
-    rag_tool_names = list(rag_tool_node.tools_by_name.keys())
-
-    literature_tools = make_literature_tools(llm=model)
-    literature_tool_node = ToolNode(literature_tools, messages_key="messages")
-    literature_tool_classes = list(literature_tool_node.tools_by_name.values())
-    literature_tool_names = list(literature_tool_node.tools_by_name.keys())
-
-    disease_tools = make_disease_tools(llm=model)
-    disease_tool_node = ToolNode(disease_tools, messages_key="messages")
-    disease_tool_classes = list(disease_tool_node.tools_by_name.values())
-    disease_tool_names = list(disease_tool_node.tools_by_name.keys())
-    
-    gene_tools = make_gene_tools(llm=model)
-    gene_tool_node = ToolNode(gene_tools, messages_key="messages")
-    gene_tool_classes = list(gene_tool_node.tools_by_name.values())
-    gene_tool_names = list(gene_tool_node.tools_by_name.keys())
-
-    #tool_node = ToolNode(tools, messages_key="tools_handler_messages")
-    #tool_classes = list(tool_node.tools_by_name.values())
-    #tool_names = list(tool_node.tools_by_name.keys())
-
-    tool_node = ToolNode(translate_tools + tools + rag_tools + literature_tools + gene_tools + disease_tools, messages_key="messages")
+    all_tools = make_tools(llm=model)
+    tool_node = ToolNode(all_tools, messages_key="messages")
     tool_classes = list(tool_node.tools_by_name.values())
     tool_names = list(tool_node.tools_by_name.keys())
 
     llm = model
 
-    model_start = cast(BaseChatModel, model).bind_tools(translate_tool_classes + tool_classes + rag_tool_classes + literature_tool_classes + gene_tool_classes + disease_tool_classes, tool_choice="any")
-    model_inner = cast(BaseChatModel, model).bind_tools(tool_classes, tool_choice="any")
-    model_repeat = cast(BaseChatModel, model).bind_tools(tool_classes)
-    model_disease_inner = cast(BaseChatModel, model).bind_tools(disease_tool_classes, tool_choice="any")
-    model_disease_repeat = cast(BaseChatModel, model).bind_tools(disease_tool_classes + translate_tool_classes)
-
-    model_gene_inner = cast(BaseChatModel, model).bind_tools(gene_tool_classes, tool_choice="any")
-    model_gene_repeat = cast(BaseChatModel, model).bind_tools(gene_tool_classes + translate_tool_classes)
-
+    model_start = cast(BaseChatModel, model)
+    if model_name in ["claude-4.1-opus", "claude-4-sonnet", "claude-4-opus"]:
+        model_start = cast(BaseChatModel, model).bind_tools(tool_classes) # Newer Claude models cannot force a tool call
+    else:
+        model_start = cast(BaseChatModel, model).bind_tools(tool_classes, tool_choice="any")
     model_training = cast(BaseChatModel, model)
-
-    model_force_rag = cast(BaseChatModel, model).bind_tools(rag_tool_classes, tool_choice="QueryRAG")
-    model_force_literature = cast(BaseChatModel, model).bind_tools(literature_tool_classes, tool_choice="LiteratureSearch")
 
     # Truncate context window if too long
     def condense_prompt(prompt: ChatPromptValue) -> ChatPromptValue:        
@@ -521,52 +416,16 @@ def create_react_agent(
         state_modifier, messages_modifier, store
     )
     
-    tools_prompt = getInnerToolsPrompt(PromptAgentic)
-    inner_preprocessor = _get_model_preprocessing_runnable(
-        tools_prompt, messages_modifier, store
+    training_preprocessor = _get_model_preprocessing_runnable(
+        training_prompt, messages_modifier, store
     )
-
-    repeat_prompt = getRepeatToolsPrompt(PromptAgentic)
-    repeat_preprocessor = _get_model_preprocessing_runnable(
-        repeat_prompt, messages_modifier, store
-    )
-
-    disease_tools_prompt = getInnerDiseaseToolsPrompt(PromptAgentic)
-    disease_inner_preprocessor = _get_model_preprocessing_runnable(
-        disease_tools_prompt, messages_modifier, store
-    )
-
-    disease_repeat_prompt = getRepeatDiseaseToolsPrompt(PromptAgentic)
-    disease_repeat_preprocessor = _get_model_preprocessing_runnable(
-        disease_repeat_prompt, messages_modifier, store
-    )
-
-    gene_tools_prompt = getInnerGeneToolsPrompt(PromptAgentic)
-    gene_inner_preprocessor = _get_model_preprocessing_runnable(
-        gene_tools_prompt, messages_modifier, store
-    )
-
-    gene_repeat_prompt = getRepeatGeneToolsPrompt(PromptAgentic)
-    gene_repeat_preprocessor = _get_model_preprocessing_runnable(
-        gene_repeat_prompt, messages_modifier, store
-    )
-
     
     model_start_runnable = preprocessor | condense_prompt | model_start
-    model_inner_runnable = inner_preprocessor | condense_prompt | model_inner
-    model_repeat_runnable = repeat_preprocessor | condense_prompt | model_repeat
-    model_disease_inner_runnable = disease_inner_preprocessor | condense_prompt | model_disease_inner
-    model_disease_repeat_runnable = disease_repeat_preprocessor | condense_prompt | model_disease_repeat
-    model_gene_inner_runnable = gene_inner_preprocessor | condense_prompt | model_gene_inner
-    model_gene_repeat_runnable = gene_repeat_preprocessor | condense_prompt | model_gene_repeat
-    model_training_runnable = training_prompt | model_training
-
-    model_force_rag_runnable = force_rag_prompt | model_force_rag
-    model_force_literature_runnable = force_literature_prompt | model_force_literature
+    model_training_runnable = training_preprocessor | condense_prompt | model_training
 
     def call_start(state: AgentState, config: RunnableConfig) -> AgentState:
         global CURRENT_DELIBERATION_STEP
-        CURRENT_DELIBERATION_STEP = 0
+        CURRENT_DELIBERATION_STEP = 0 # Reset deliberation step count at start of new query
         return state
     
 
@@ -578,36 +437,18 @@ def create_react_agent(
 
         state["messages"] = _validate_chat_history(state["messages"])
 
-        # Clear individual history for each handler
+        # Clear history for handler
         state["tools_handler_messages"] = []
-        #state["rag_handler_messages"] = []
-        #state["literature_handler_messages"] = []
 
-        
+        # Special handling for models that won't accept a blank content message (e.g., Amazon-nova-lite)
+        if model_name in ["amazon-nova-lite", "amazon-nova-pro", "llama3-3-70b"]:
+            for msg in state["messages"]:
+                if msg.content.rstrip() == "":
+                    msg.content = "no response" # Replace blank message with a single space
 
         response = model_start_runnable.invoke(state["messages"], config=config) # Generate tool calls
 
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
-
-        translation_messages = copy.deepcopy(response)
-
-        """
-        # Force RAG/lit tool calls
-        user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
-        first_tool_calls = [call['name'] for call in response.tool_calls]
-        if 'QueryRAG' not in first_tool_calls:
-            force_rag_resp = model_force_rag_runnable.invoke({"query": user_query}, config)
-            rag_messages = copy.deepcopy(force_rag_resp)
-        else:
-            rag_messages = copy.deepcopy(response)
-
-        if 'LiteratureSearch' not in first_tool_calls:
-            force_literature_resp = model_force_literature_runnable.invoke({"query": user_query}, config)
-            literature_messages = copy.deepcopy(force_literature_resp)
-        else:
-            literature_messages = copy.deepcopy(response)
-
-        """
 
         if has_tool_calls:
 
@@ -638,361 +479,16 @@ def create_react_agent(
                     ]
                 }
 
-            """
-            # Parse out translation tool calls
-            translation_messages.additional_kwargs = {
-                "tool_calls": [call for call in response.additional_kwargs["tool_calls"] if call["function"]["name"] in translate_tool_names],
-                "type": "function"
-            }
-            translation_messages.tool_calls = [call for call in response.tool_calls if call["name"] in translate_tool_names]
-
-            
-            # Parse out rag tool calls
-            rag_messages.additional_kwargs = {
-                "tool_calls": [call for call in rag_messages.additional_kwargs["tool_calls"] if call["function"]["name"] in rag_tool_names],
-                "type": "function"
-            }
-            rag_messages.tool_calls = [call for call in rag_messages.tool_calls if call["name"] in rag_tool_names]
-            
-            # Parse out literature tool calls
-            literature_messages.additional_kwargs = {
-                "tool_calls": [call for call in literature_messages.additional_kwargs["tool_calls"] if call["function"]["name"] in literature_tool_names],
-                "type": "function"
-            }
-            literature_messages.tool_calls = [call for call in literature_messages.tool_calls if call["name"] in literature_tool_names]
-            """
-
             return {
-                "messages": [response],
-                #"tools_handler_messages": [translation_messages],
-                #"rag_handler_messages": [rag_messages],
-                #"literature_handler_messages": [literature_messages]
+                "messages": [response]
             }
         
         else:
             return {
                 "messages": [response],
-                "tools_handler_messages": [],
-                #"rag_handler_messages": [],
-                #"literature_handler_messages": []
+                "tools_handler_messages": []
             }
         
-    # Define the function that calls the model
-    def call_skip(state: AgentState, config: RunnableConfig) -> AgentState:
-        return state
-    
-    def call_disease(state: AgentState, config: RunnableConfig) -> AgentState:
-        return state
-    
-    def call_gene(state: AgentState, config: RunnableConfig) -> AgentState:
-        return state
-    
-    def call_tools_capture(state: AgentState, config: RunnableConfig) -> AgentState:
-        return state
-  
-    def call_model_inner(state: AgentState, config: RunnableConfig) -> AgentState:
-
-        state["tools_handler_messages"] = _validate_chat_history(state["tools_handler_messages"])
-
-        if isinstance(state["tools_handler_messages"][-1], ToolMessage):
-            try:
-                user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
-
-                dtxsid = [message for message in state["tools_handler_messages"] if isinstance(message, ToolMessage)]
-                
-                
-                response = model_inner_runnable.invoke({"query": user_query, "dtxsid": dtxsid, "tools": tool_names, "messages": state["tools_handler_messages"]}, config=config) # Generate tool calls
-
-                has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
-
-                all_tools_return_direct = False
-                if (
-                    (
-                        "remaining_steps" not in state
-                        and state["is_last_step"]
-                        and has_tool_calls
-                    )
-                    or (
-                        "remaining_steps" in state
-                        and state["remaining_steps"] < 1
-                        and all_tools_return_direct
-                    )
-                    or (
-                        "remaining_steps" in state
-                        and state["remaining_steps"] < 2
-                        and has_tool_calls
-                    )
-                ):
-                    return {
-                        "tools_handler_messages": [
-                            AIMessage(
-                                id=response.id,
-                                content="Sorry, need more steps to process this request.",
-                            )
-                        ]
-                    }
-                return {"tools_handler_messages": [response]} 
-            
-            except:
-                return {
-                    "tools_handler_messages": [],
-                }
-
-
-        return {
-            "tools_handler_messages": [],
-        }
-    
-    def call_disease_inner(state: AgentState, config: RunnableConfig) -> AgentState:
-
-        state["tools_handler_messages"] = _validate_chat_history(state["tools_handler_messages"])
-
-        if isinstance(state["tools_handler_messages"][-1], ToolMessage):
-            try:
-            
-                user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
-
-                disease_name = [message for message in state["tools_handler_messages"] if isinstance(message, ToolMessage)]
-
-                
-                response = model_disease_inner_runnable.invoke({"query": user_query, "name": disease_name, "tools": disease_tool_names, "messages": state["tools_handler_messages"]}, config=config) # Generate tool calls
-
-                has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
-
-                all_tools_return_direct = False
-                if (
-                    (
-                        "remaining_steps" not in state
-                        and state["is_last_step"]
-                        and has_tool_calls
-                    )
-                    or (
-                        "remaining_steps" in state
-                        and state["remaining_steps"] < 1
-                        and all_tools_return_direct
-                    )
-                    or (
-                        "remaining_steps" in state
-                        and state["remaining_steps"] < 2
-                        and has_tool_calls
-                    )
-                ):
-                    return {
-                        "tools_handler_messages": [
-                            AIMessage(
-                                id=response.id,
-                                content="Sorry, need more steps to process this request.",
-                            )
-                        ]
-                    }
-                return {"tools_handler_messages": [response]} 
-            
-            except:
-                return {
-                    "tools_handler_messages": [],
-                }
-
-
-        return {
-            "tools_handler_messages": [],
-        }
-
-    def call_model_disease_repeat(state: AgentState, config: RunnableConfig) -> AgentState:
-        state["tools_handler_messages"] = _validate_chat_history(state["tools_handler_messages"])
-        if isinstance(state["tools_handler_messages"][-1], ToolMessage):
-            try:
-                user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
-
-                
-                response = model_disease_repeat_runnable.invoke({"query": user_query, "tools": disease_tool_names + translate_tool_names, "messages": state["tools_handler_messages"]}, config=config) # Generate tool calls
-
-                has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
-                all_tools_return_direct = False
-                if (
-                    (
-                        "remaining_steps" not in state
-                        and state["is_last_step"]
-                        and has_tool_calls
-                    )
-                    or (
-                        "remaining_steps" in state
-                        and state["remaining_steps"] < 1
-                        and all_tools_return_direct
-                    )
-                    or (
-                        "remaining_steps" in state
-                        and state["remaining_steps"] < 2
-                        and has_tool_calls
-                    )
-                ):
-                    return {
-                        "tools_handler_messages": [
-                            AIMessage(
-                                id=response.id,
-                                content="Sorry, need more steps to process this request.",
-                            )
-                        ]
-                    }
-                return {"tools_handler_messages": [response]} 
-            
-            except Exception as e:
-                return {
-                    "tools_handler_messages": [],
-                }
-
-        return {
-            "tools_handler_messages": [],
-        }
-    
-
-    def call_gene_inner(state: AgentState, config: RunnableConfig) -> AgentState:
-
-        state["tools_handler_messages"] = _validate_chat_history(state["tools_handler_messages"])
-
-        if isinstance(state["tools_handler_messages"][-1], ToolMessage):
-            try:
-            
-                user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
-
-                gene_name = [message for message in state["tools_handler_messages"] if isinstance(message, ToolMessage)]
-
-                
-                response = model_gene_inner_runnable.invoke({"query": user_query, "name": gene_name, "tools": gene_tool_names, "messages": state["tools_handler_messages"]}, config=config) # Generate tool calls
-
-                has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
-
-                all_tools_return_direct = False
-                if (
-                    (
-                        "remaining_steps" not in state
-                        and state["is_last_step"]
-                        and has_tool_calls
-                    )
-                    or (
-                        "remaining_steps" in state
-                        and state["remaining_steps"] < 1
-                        and all_tools_return_direct
-                    )
-                    or (
-                        "remaining_steps" in state
-                        and state["remaining_steps"] < 2
-                        and has_tool_calls
-                    )
-                ):
-                    return {
-                        "tools_handler_messages": [
-                            AIMessage(
-                                id=response.id,
-                                content="Sorry, need more steps to process this request.",
-                            )
-                        ]
-                    }
-                return {"tools_handler_messages": [response]} 
-            
-            except:
-                return {
-                    "tools_handler_messages": [],
-                }
-
-        return {
-            "tools_handler_messages": [],
-        }
-    
-
-    def call_model_gene_repeat(state: AgentState, config: RunnableConfig) -> AgentState:
-        state["tools_handler_messages"] = _validate_chat_history(state["tools_handler_messages"])
-        if isinstance(state["tools_handler_messages"][-1], ToolMessage):
-            try:
-                user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
-
-                
-                response = model_gene_repeat_runnable.invoke({"query": user_query, "tools": gene_tool_names + translate_tool_names, "messages": state["tools_handler_messages"]}, config=config) # Generate tool calls
-
-                has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
-                all_tools_return_direct = False
-                if (
-                    (
-                        "remaining_steps" not in state
-                        and state["is_last_step"]
-                        and has_tool_calls
-                    )
-                    or (
-                        "remaining_steps" in state
-                        and state["remaining_steps"] < 1
-                        and all_tools_return_direct
-                    )
-                    or (
-                        "remaining_steps" in state
-                        and state["remaining_steps"] < 2
-                        and has_tool_calls
-                    )
-                ):
-                    return {
-                        "tools_handler_messages": [
-                            AIMessage(
-                                id=response.id,
-                                content="Sorry, need more steps to process this request.",
-                            )
-                        ]
-                    }
-                return {"tools_handler_messages": [response]} 
-            
-            except Exception as e:
-                return {
-                    "tools_handler_messages": [],
-                }
-
-        return {
-            "tools_handler_messages": [],
-        }
-    
-
-    def call_model_repeat(state: AgentState, config: RunnableConfig) -> AgentState:
-        state["tools_handler_messages"] = _validate_chat_history(state["tools_handler_messages"])
-        if isinstance(state["tools_handler_messages"][-1], ToolMessage):
-            try:
-                user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]
-
-                
-                response = model_repeat_runnable.invoke({"query": user_query, "tools": tool_names, "messages": state["tools_handler_messages"]}, config=config) # Generate tool calls
-
-                has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
-                all_tools_return_direct = False
-                if (
-                    (
-                        "remaining_steps" not in state
-                        and state["is_last_step"]
-                        and has_tool_calls
-                    )
-                    or (
-                        "remaining_steps" in state
-                        and state["remaining_steps"] < 1
-                        and all_tools_return_direct
-                    )
-                    or (
-                        "remaining_steps" in state
-                        and state["remaining_steps"] < 2
-                        and has_tool_calls
-                    )
-                ):
-                    return {
-                        "tools_handler_messages": [
-                            AIMessage(
-                                id=response.id,
-                                content="Sorry, need more steps to process this request.",
-                            )
-                        ]
-                    }
-                return {"tools_handler_messages": [response]} 
-            
-            except Exception as e:
-                return {
-                    "tools_handler_messages": [],
-                }
-
-        return {
-            "tools_handler_messages": [],
-        }
     
     def call_model_training(state: AgentState, config: RunnableConfig) -> AgentState:
         # Merge message histories from all handlers
@@ -1002,6 +498,10 @@ def create_react_agent(
         context = [message for message in state["messages"] if isinstance(message, ToolMessage)]
         
         response = model_training_runnable.invoke({"context": context, "query": user_query}, config=config) # Final answer from training data and context
+
+        print("=== FINAL RESPONSE ===")
+        print(response)
+
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
         all_tools_return_direct = False
         if (

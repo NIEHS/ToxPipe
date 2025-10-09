@@ -70,43 +70,22 @@ def make_tools(llm: BaseLanguageModel, verbose=True, auth=False):
         QueryHMDBGenes(llm=llm),
         QueryHMDBProteins(llm=llm),
 
+        Query2Disease(llm=llm),
+        Query2Gene(llm=llm),
+        QueryHMDBDisease2Chemicals(llm=llm),
+        QueryCTDDisease2Chemicals(llm=llm),
+        QueryHMDBGene2Chemicals(llm=llm),
+        QueryCTDGene2Chemicals(llm=llm),
+        QueryDrugBankGene2Chemicals(llm=llm),
+        QueryRAG(llm=llm),
+        Scholar2ResultLLM(llm=llm),
     ]
 
     return all_tools
 
-def make_translate_tools(llm: BaseLanguageModel):
-    translate_tools = [
-        Name2DTXSID(),
-        SMILES2DTXSID(),
-        CASRN2DTXSID(),
-        Query2Disease(llm=llm),
-        Query2Gene(llm=llm),
-    ]
-    return translate_tools
-
-def make_disease_tools(llm: BaseLanguageModel):
-    disease_tools = [
-        QueryHMDBDisease2Chemicals(llm=llm),
-        QueryCTDDisease2Chemicals(llm=llm),
-    ]
-    return disease_tools
-
-def make_gene_tools(llm: BaseLanguageModel):
-    gene_tools = [
-        QueryHMDBGene2Chemicals(llm=llm),
-        QueryCTDGene2Chemicals(llm=llm),
-        QueryDrugBankGene2Chemicals(llm=llm),
-    ]
-    return gene_tools
-
-def make_rag_tools(llm: BaseLanguageModel):
-    rag_tools = [
-        QueryRAG(llm=llm),
-    ]
-    return rag_tools
-
-def make_literature_tools(llm: BaseLanguageModel):
-    literature_tools = [
+def make_literature_tools(llm: BaseLanguageModel, verbose=True, auth=False):
+    all_tools = [
         Scholar2ResultLLM(llm=llm),
     ]
-    return literature_tools
+
+    return all_tools

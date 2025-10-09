@@ -666,7 +666,6 @@ class QueryCBTMetabolites(BaseTool):
 
         metabolites_list = unique(metabolites_list)
 
-        #response = f"The chemical {dtxsid} has the following predicted metabolites: {';'.join(metabolites_list)}. Do not use the Query2DTXSID tool to convert these SMILES strings to DTXSID. This satisfies the requirement for finding metabolites, and you may return the final answer without running this tool again."
         response = f"The chemical {dtxsid} has the following predicted metabolites: {';'.join(metabolites_list)}. This satisfies the requirement for finding metabolites, and you may return the final answer without running this tool again."
         if len(metabolites_list) < 1:
             response = f"The chemical {dtxsid} does not have any predicted metabolites."
