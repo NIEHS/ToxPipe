@@ -1,0 +1,64 @@
+from langchain_core.prompts import ChatPromptTemplate
+from pydantic import BaseModel, Field
+from .utils import Config, State, OutputParser
+
+class UserQueryKeywordsSchema(BaseModel):
+    '''
+    Represents the list of keyphrases extracted from user query
+    to get context on.
+    '''
+    keyphrases: list[str] = Field(f'List of maximum {Config.MAX_KEYWORDS} keywords', max_length=Config.MAX_KEYWORDS)
+
+class AnalyzeQuery:
+
+    analyze_query_system_prompt = (f'''
+        You will be given a query. Analyze the query and find a list of independent 'keyphrases' on which you need information to answer the query. Always follow the rules below
+
+        ** Rules **
+        - List maximum of {Config.MAX_KEYWORDS} key phrases. THE LIST MUST NOT BE MORE THAN {Config.MAX_KEYWORDS}.
+        - Answer the query in the JSON format
+        '''
+        +
+        '''
+        ```json
+        {{
+            "keyphrases": ["keyphrase 1", "keyphrase 2", "keyphrase 3", ...]
+        }}
+        ```
+        ''')
+
+    analyze_query_user_prompt = '''Given a query text, find a list of independent 'keyphrases' on which you need information to answer the query.
+
+        ** Query **
+        {query}
+        '''
+
+    analyze_query_prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                'system',
+                analyze_query_system_prompt,
+            ),
+            (
+                'human',
+                analyze_query_user_prompt,
+            ),
+        ]
+    )
+
+    def __init__(self, llm):
+        # Will be used in future
+        #self.analyze_query_chain = self.analyze_query_prompt | llm.with_structured_output(UserQueryKeywordsSchema)
+        self.analyze_query_chain = self.analyze_query_prompt | llm | OutputParser(UserQueryKeywordsSchema)
+
+    def analyze_query(self, state: State) -> State:
+        '''
+        Extracts keyphrases from user query
+        '''
+
+        keyphrases = self.analyze_query_chain.invoke(
+            {
+                'query': state.get('query')
+            }
+        )
+        return {**keyphrases, **{'steps': ['analyze_query']}}

@@ -1,0 +1,481 @@
+version: '3.4'
+
+# Please consult our docs for more info: https://docs.librechat.ai/install/configuration/docker_override.html
+
+services:
+
+# Traefik reverse proxy
+  traefik:
+    image: traefik:v2.11.2
+    ports:
+      - "80:80" # for HTTP
+      - "443:443" # for HTTPS
+      - "8080:8080" # for Traefik dashboard
+    restart: always
+    volumes:
+      - cert.key:/etc/traefik/tls/toxpipe_niehs_nih_gov.key # CHANGEME - use your own certs
+      - cert.crt:/etc/traefik/tls/toxpipe_niehs_nih_gov.crt # CHANGEME
+      - chain.crt:/etc/traefik/tls/nih-dpki-chain.crt # CHANGEME
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik/config.yml:/etc/traefik/config.yml
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml
+    networks:
+      - autonomous
+
+# LibreChat API service
+  api:
+    image: ghcr.io/danny-avila/librechat:latest
+    volumes:
+      - ./librechat.yaml:/app/librechat.yaml
+      - ./.env:/app/.env
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
+    networks:
+      - autonomous
+
+# MongoDB instance for LibreChat
+  mongodb:
+    networks:
+      - autonomous
+
+# Meilisearch instance for LibreChat
+  meilisearch:
+    networks:
+      - autonomous
+
+# Dashy dashboard for all services
+  dashy:
+    image: lissy93/dashy:latest
+    networks:
+      - autonomous
+    ports:
+      - 8082:8080
+    volumes:
+      - ./user-data/:/app/user-data/
+
+# RAG API with embeddings support for LibreChat
+  rag_api:
+    image: ghcr.io/danny-avila/librechat-rag-api-dev:latest
+    environment:
+      - AZURE_OPENAI_ENDPOINT=https://toxpipe-chat.openai.azure.com
+      - OPENAI_API_VERSION=2024-02-01
+    networks:
+      - autonomous
+    ports:
+      - 8001:8000
+
+# Postgres with pgvector for vector DB support
+  vectordb:
+    image: pgvector/pgvector:pg16
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres # CHANGEME
+      - POSTGRES_DB=postgres
+    volumes:
+      - librechat-pg:/var/lib/postgresql/data
+    networks:
+      - autonomous
+
+# Ollama for local model deployment, requires NVIDIA GPU with docker support
+  ollama:
+    container_name: ollama
+    image: ollama/ollama:latest
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [compute, utility]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./models:/root/models
+      - ./ollama:/root/.ollama
+    networks:
+      - autonomous
+
+# LiteLLM - NEED TO CONFIGURE litellm-config.yaml, ONLY NEED ENV TO ENABLE REDIS FOR CACHING OR LANGFUSE FOR MONITORING
+  litellm:
+    container_name: litellm
+    image: ghcr.io/berriai/litellm:main-latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./.litellm/litellm-config.yaml:/app/config.yaml
+      - ./api/data/auth.json:/app/application_default_credentials.json
+    depends_on:
+      - litellm-db
+    restart: unless-stopped
+    command: [ "--config", "/app/config.yaml", "--port", "8000", "--num_workers", "8" ]
+    environment:
+      UI_USERNAME: admin # CHANGEME
+      UI_PASSWORD: password # CHANGEME
+      GOOGLE_APPLICATION_CREDENTIALS: /app/application_default_credentials.json
+      OPENAI_API_KEY: ollama # needs to be set if ollama's openai api compatibility is used
+      DATABASE_URL: postgresql://postgres:password@litellm-db:5432/postgres # CHANGEME
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: password # CHANGEME
+      LANGFUSE_PUBLIC_KEY: pk-xxxx # CHANGEME
+      LANGFUSE_SECRET_KEY: sk-xxxx # CHANGEME
+      LANGFUSE_HOST: http://langfuse-server:3000
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
+    networks:
+      - autonomous
+
+# Redis for LiteLLM caching
+  redis:
+    image: redis:7-alpine
+    command:
+    - sh
+    - -c # this is to evaluate the $REDIS_PASSWORD from the env
+    - redis-server --appendonly yes --requirepass $$REDIS_PASSWORD ## $$ because of docker-compose
+    environment:
+      REDIS_PASSWORD: password # CHANGEME
+    volumes:
+      - ./redis:/data
+    networks:
+      - autonomous
+
+# Postgres for LiteLLM
+  litellm-db:
+    image: postgres:16.4
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password # CHANGEME
+      - POSTGRES_DB=postgres
+    ports:
+      - 5434:5432
+    volumes:
+      - litellm-pg:/var/lib/postgresql/data
+    networks:
+      - autonomous
+
+# Dozzle for live log monitoring
+  dozzle:
+    container_name: dozzle
+    image: amir20/dozzle:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - 8888:8080
+    networks:
+      - autonomous
+
+# Mongo Express for LibreChat's MongoDB instance
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_BASICAUTH_USERNAME: admin # CHANGEME
+      ME_CONFIG_BASICAUTH_PASSWORD: password # CHANGEME
+    ports:
+      - '8081:8081'
+    depends_on:
+      - mongodb
+    restart: always
+    networks:
+      - autonomous
+
+# ChromaDB database that hosts embeddings for NTP documents
+  chromadb:
+    image: ghcr.io/chroma-core/chroma:latest
+    #image: ghcr.io/chroma-core/chroma:0.6.4.dev361 # use specific version to avoid breaking changes, updating this causes a key error in the agentic API 
+    container_name: chromadb
+    restart: always
+    ports:
+      - "8009:8000" # LiteLLM already uses 8000, so we use 8009 for ChromaDB
+    volumes:
+      - ./ntp_docs_rag_db/chroma-data:/data
+    networks:
+      - autonomous
+
+# Langfuse worker 
+  langfuse-worker:
+    image: docker.io/langfuse/langfuse-worker:3
+    restart: always
+    depends_on: &langfuse-depends-on
+      langfuse-db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      redis-langfuse:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+    ports:
+      - 3030:3030
+    environment: &langfuse-worker-env
+      NEXTAUTH_URL: localhost:3000 # CHANGEME - should be address where langfuse-server is reachable from browser
+      DATABASE_URL: postgresql://postgres:passowrd@langfuse-db:5432/postgres # CHANGEME
+      SALT: "S/...." # CHANGEME
+      ENCRYPTION_KEY: "key" # CHANGEME
+      TELEMETRY_ENABLED: ${TELEMETRY_ENABLED:-true}
+      LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES: ${LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES:-true}
+      CLICKHOUSE_MIGRATION_URL: ${CLICKHOUSE_MIGRATION_URL:-clickhouse://clickhouse:9000}
+      CLICKHOUSE_URL: ${CLICKHOUSE_URL:-http://clickhouse:8123}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-clickhouse} # CHANGEME
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-clickhouse} # CHANGEME
+      CLICKHOUSE_CLUSTER_ENABLED: ${CLICKHOUSE_CLUSTER_ENABLED:-false}
+      LANGFUSE_USE_AZURE_BLOB: ${LANGFUSE_USE_AZURE_BLOB:-false}
+      LANGFUSE_S3_EVENT_UPLOAD_BUCKET: ${LANGFUSE_S3_EVENT_UPLOAD_BUCKET:-langfuse}
+      LANGFUSE_S3_EVENT_UPLOAD_REGION: ${LANGFUSE_S3_EVENT_UPLOAD_REGION:-auto}
+      LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID: ${LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID:-minio}
+      LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY: ${LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY:-miniosecret} # CHANGEME
+      LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT: ${LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT:-http://minio:9000}
+      LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE: ${LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE:-true}
+      LANGFUSE_S3_EVENT_UPLOAD_PREFIX: ${LANGFUSE_S3_EVENT_UPLOAD_PREFIX:-events/}
+      LANGFUSE_S3_MEDIA_UPLOAD_BUCKET: ${LANGFUSE_S3_MEDIA_UPLOAD_BUCKET:-langfuse}
+      LANGFUSE_S3_MEDIA_UPLOAD_REGION: ${LANGFUSE_S3_MEDIA_UPLOAD_REGION:-auto}
+      LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID: ${LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID:-minio}
+      LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY: ${LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY:-miniosecret} # CHANGEME
+      LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT: ${LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT:-http://localhost:9090}
+      LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE: ${LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE:-true}
+      LANGFUSE_S3_MEDIA_UPLOAD_PREFIX: ${LANGFUSE_S3_MEDIA_UPLOAD_PREFIX:-media/}
+      LANGFUSE_S3_BATCH_EXPORT_ENABLED: ${LANGFUSE_S3_BATCH_EXPORT_ENABLED:-false}
+      LANGFUSE_S3_BATCH_EXPORT_BUCKET: ${LANGFUSE_S3_BATCH_EXPORT_BUCKET:-langfuse}
+      LANGFUSE_S3_BATCH_EXPORT_PREFIX: ${LANGFUSE_S3_BATCH_EXPORT_PREFIX:-exports/}
+      LANGFUSE_S3_BATCH_EXPORT_REGION: ${LANGFUSE_S3_BATCH_EXPORT_REGION:-auto}
+      LANGFUSE_S3_BATCH_EXPORT_ENDPOINT: ${LANGFUSE_S3_BATCH_EXPORT_ENDPOINT:-http://minio:9000}
+      LANGFUSE_S3_BATCH_EXPORT_EXTERNAL_ENDPOINT: ${LANGFUSE_S3_BATCH_EXPORT_EXTERNAL_ENDPOINT:-http://localhost:9090}
+      LANGFUSE_S3_BATCH_EXPORT_ACCESS_KEY_ID: ${LANGFUSE_S3_BATCH_EXPORT_ACCESS_KEY_ID:-minio}
+      LANGFUSE_S3_BATCH_EXPORT_SECRET_ACCESS_KEY: ${LANGFUSE_S3_BATCH_EXPORT_SECRET_ACCESS_KEY:-miniosecret} # CHANGEME
+      LANGFUSE_S3_BATCH_EXPORT_FORCE_PATH_STYLE: ${LANGFUSE_S3_BATCH_EXPORT_FORCE_PATH_STYLE:-true}
+      LANGFUSE_INGESTION_QUEUE_DELAY_MS: ${LANGFUSE_INGESTION_QUEUE_DELAY_MS:-}
+      LANGFUSE_INGESTION_CLICKHOUSE_WRITE_INTERVAL_MS: ${LANGFUSE_INGESTION_CLICKHOUSE_WRITE_INTERVAL_MS:-}
+      REDIS_HOST: ${REDIS_HOST:-redis-langfuse}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_AUTH: ${REDIS_AUTH:-password} # CHANGEME
+      REDIS_TLS_ENABLED: ${REDIS_TLS_ENABLED:-false}
+      REDIS_TLS_CA: ${REDIS_TLS_CA:-/certs/ca.crt} # CHANGEME
+      REDIS_TLS_CERT: ${REDIS_TLS_CERT:-/certs/redis.crt} # CHANGEME
+      REDIS_TLS_KEY: ${REDIS_TLS_KEY:-/certs/redis.key} # CHANGEME
+      EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:-}
+      SMTP_CONNECTION_URL: ${SMTP_CONNECTION_URL:-}
+      AUTH_AZURE_AD_CLIENT_ID: ${LANGFUSE_AZURE_AD_CLIENT_ID}
+      AUTH_AZURE_AD_CLIENT_SECRET: ${LANGFUSE_AZURE_AD_CLIENT_SECRET}
+      AUTH_AZURE_AD_TENANT_ID: ${LANGFUSE_AZURE_AD_TENANT_ID}
+      AUTH_AZURE_ALLOW_ACCOUNT_LINKING: true
+      LANGFUSE_DEBUG: true
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
+    networks:
+      - autonomous
+
+# Langfuse web service - this is what an end user connects to
+  langfuse-server:
+    image: docker.io/langfuse/langfuse:3
+    restart: always
+    depends_on: *langfuse-depends-on
+    ports:
+      - 3000:3000
+    environment:
+      <<: *langfuse-worker-env
+      NEXTAUTH_URL: localhost:3000 # CHANGEME - should be address where langfuse-server is reachable from browser
+      NEXTAUTH_SECRET: S/.... # CHANGEME
+      LANGFUSE_INIT_ORG_ID: ${LANGFUSE_INIT_ORG_ID:-}
+      LANGFUSE_INIT_ORG_NAME: ${LANGFUSE_INIT_ORG_NAME:-}
+      LANGFUSE_INIT_PROJECT_ID: ${LANGFUSE_INIT_PROJECT_ID:-}
+      LANGFUSE_INIT_PROJECT_NAME: ${LANGFUSE_INIT_PROJECT_NAME:-}
+      LANGFUSE_INIT_PROJECT_PUBLIC_KEY: ${LANGFUSE_INIT_PROJECT_PUBLIC_KEY:-}
+      LANGFUSE_INIT_PROJECT_SECRET_KEY: ${LANGFUSE_INIT_PROJECT_SECRET_KEY:-}
+      LANGFUSE_INIT_USER_EMAIL: ${LANGFUSE_INIT_USER_EMAIL:-}
+      LANGFUSE_INIT_USER_NAME: ${LANGFUSE_INIT_USER_NAME:-}
+      LANGFUSE_INIT_USER_PASSWORD: ${LANGFUSE_INIT_USER_PASSWORD:-}
+      AUTH_DISABLE_USERNAME_PASSWORD: false
+      AUTH_AZURE_AD_CLIENT_ID: ${LANGFUSE_AZURE_AD_CLIENT_ID}
+      AUTH_AZURE_AD_CLIENT_SECRET: ${LANGFUSE_AZURE_AD_CLIENT_SECRET}
+      AUTH_AZURE_AD_TENANT_ID: ${LANGFUSE_AZURE_AD_TENANT_ID}
+      AUTH_AZURE_ALLOW_ACCOUNT_LINKING: true
+      LANGFUSE_DEBUG: true
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
+    networks:
+      - autonomous
+
+# Clickhouse - required by Langfuse
+  clickhouse:
+    image: docker.io/clickhouse/clickhouse-server
+    restart: always
+    user: "101:101"
+    environment:
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_USER: clickhouse # CHANGEME
+      CLICKHOUSE_PASSWORD: clickhouse # CHANGEME
+    volumes:
+      - langfuse_clickhouse_data:/var/lib/clickhouse
+      - langfuse_clickhouse_logs:/var/log/clickhouse-server
+    ports:
+      - 8123:8123
+      - 9000:9000
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 1s
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
+    networks:
+      - autonomous
+
+# Minio - required by Langfuse
+  minio:
+    image: docker.io/minio/minio
+    restart: always
+    entrypoint: sh
+    # create the 'langfuse' bucket before starting the service
+    command: -c 'mkdir -p /data/langfuse && minio server --address ":9000" --console-address ":9001" /data'
+    environment:
+      MINIO_ROOT_USER: minio # CHANGEME
+      MINIO_ROOT_PASSWORD: miniosecret # CHANGEME
+    ports:
+      - 9090:9000
+      - 127.0.0.1:9091:9001
+    volumes:
+      - langfuse_minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+      start_period: 1s
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
+    networks:
+      - autonomous
+
+# Redis for Langfuse caching
+  redis-langfuse:
+    image: docker.io/redis:7
+    restart: always
+    # CHANGEME: row below to secure redis password
+    command: >
+      --requirepass ${REDIS_AUTH:-password} # CHANGEME
+    ports:
+      - 127.0.0.1:6379:6379
+    volumes:
+      - ./redis-langfuse:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 10s
+      retries: 10
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
+    networks:
+      - autonomous
+
+# postgres for Langfuse
+  langfuse-db:
+    image: docker.io/postgres:${POSTGRES_VERSION:-latest}
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    environment:
+      - POSTGRES_USER=postgres # CHANGEME
+      - POSTGRES_PASSWORD=password # CHANGEME
+      - POSTGRES_DB=postgres
+    ports:
+      - 5435:5432
+    volumes:
+      - langfuse_postgres_data:/var/lib/postgresql/data
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
+    networks:
+      - autonomous
+
+# Langflow - visual editor for LLM workflows
+  langflow:
+    container_name: langflow
+    image: langflowai/langflow:latest # or another version tag on https://hub.docker.com/r/langflowai/langflow 
+    pull_policy: always               # set to 'always' when using 'latest' image
+    ports:
+      - "7860:7860"
+    depends_on:
+      - postgres-langflow
+    environment:
+      - LANGFLOW_SUPERUSER=admin # CHANGEME
+      - LANGFLOW_SUPERUSER_PASSWORD=password # CHANGEME
+      - LANGFLOW_AUTO_LOGIN=false
+      - LANGFLOW_DATABASE_URL=postgresql://langflow:langflow@postgres-langflow:5432/langflow
+      # This variable defines where the logs, file storage, monitor data and secret keys are stored.
+    restart: always
+    volumes:
+      - langflow-data:/app/langflow
+    networks:
+      - autonomous
+
+# Postgres for Langflow
+  postgres-langflow:
+    container_name: postgres-langflow
+    image: postgres:16
+    environment:
+      POSTGRES_USER: langflow # CHANGEME
+      POSTGRES_PASSWORD: langflow # CHANGEME
+      POSTGRES_DB: langflow
+    restart: always
+    volumes:
+      - langflow-postgres:/var/lib/postgresql/data
+    ports:
+      - "5438:5432"
+    networks:
+      - autonomous
+
+# Postgres for ToxPipe Agentic API
+  postgres-toxpipe-agent:
+    container_name: postgres-toxpipe-agent
+    image: postgres:16
+    environment:
+      POSTGRES_USER: toxpipe-agent # CHANGEME
+      POSTGRES_PASSWORD: password # CHANGEME
+      POSTGRES_DB: toxpipe-agent
+    restart: always
+    volumes:
+      - ./toxpipe-agent-postgres:/var/lib/postgresql/data
+    ports:
+      - "5439:5432"
+    networks:
+      - autonomous
+
+# Define Traefik network
+networks:
+  autonomous:
+    driver: overlay
+    external: true
+
+# Volumes
+volumes:
+  librechat-pg:
+  langfuse-pg:
+  litellm-pg:
+  ollama:
+  langfuse_postgres_data:
+    driver: local
+  langfuse_clickhouse_data:
+    driver: local
+  langfuse_clickhouse_logs:
+    driver: local
+  langfuse_minio_data:
+    driver: local
+  langflow-postgres:
+  langflow-data:
+  toxpipe-agent-postgres:
+  models:
+

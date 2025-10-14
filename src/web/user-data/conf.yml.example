@@ -1,0 +1,106 @@
+pageInfo:
+  title: ToxPipe
+sections:
+  - name: ToxPipe Tools
+    icon: far fa-toolbox
+    items:
+      - title: LibreChat
+        description: A ChatGPT-like interface for conversing with an AI model or agent
+        icon: far fa-robot
+        url: http://localhost:3080
+        id: 0_1274_librechat
+      - title: LiteLLM
+        description: API for unified LLM access
+        icon: far fa-code
+        url: http://localhost:8000
+        id: 1_1274_litellm
+      - title: Agentic API
+        description: >-
+          API for creating and calling agents with tool, RAG search, and
+          literature search support
+        icon: far fa-code
+        url: http://localhost
+        id: 2_1274_agenticapi
+      - title: ToxPipe Evaluations
+        description: Application for testing and auditing models and agents
+        icon: far fa-vial
+        url: http://localhost
+        id: 3_1274_toxpipeevaluations
+      - title: ChemBioTox API
+        description: >-
+          API for interfacing with the ChemBioTox database, which contains
+          experimental and predicted chemical toxicology data
+        icon: far fa-code
+        url: http://localhost
+        id: 4_1274_chembiotoxapi
+      - title: RAG API
+        description: API for performing RAG, used internally by LibreChat
+        icon: far fa-code
+        url: http://localhost:8001
+        id: 5_1274_ragapi
+      - title: LangFlow
+        description: Interface for visually creating AI workflows
+        icon: far fa-robot
+        url: http://localhost:7860
+  - name: ToxPipe Backend
+    icon: far fa-database
+    items:
+      - title: Mongo Express
+        description: >-
+          Interface for MongoDB instance that stores history and config for
+          LibreChat
+        icon: far fa-database
+        url: http://localhost:8081
+        id: 0_1425_mongoexpress
+      - title: Ollama
+        description: Local hosting of AI models (no web interface)
+        icon: far fa-robot
+        url: http://localhost:11434
+        id: 1_1425_ollama
+      - title: ChromaDB
+        description: >-
+          Database that stores text embeddings for the NTP documents at
+          https://ntp.niehs.nih.gov/publications (no web interface)
+        icon: far fa-database
+        url: hhttp://localhost:8009
+        id: 2_1425_chromadb
+  - name: ToxPipe Management
+    icon: far fa-wrench
+    items:
+      - title: Traefik
+        description: Interface for monitoring web traffic and activity
+        icon: far fa-traffic-light
+        url: http://localhost:8080
+        id: 0_1766_traefik
+      - title: Dozzle
+        description: Interface for monitoring logs
+        icon: far fa-file
+        url: http://localhost:8888
+        id: 1_1766_dozzle
+      - title: LangFuse
+        description: Interface for monitoring LLM queries
+        icon: far fa-file
+        url: http://localhost:3000
+      - title: Secret Server
+        description: >-
+          Server for securely storing secrets like API keys, login credentials,
+          etc.
+        icon: far fa-lock
+        url: http://localhost
+        id: 2_1766_secretserver
+  - name: ToxPipe Documentation
+    icon: far fa-book
+    items:
+      - title: ToxPipe Repository
+        description: Code repository for ToxPipe tools, backend infrastructure, and APIs
+        icon: fab fa-github
+        url: https://github.com/NIEHS/ToxPipe
+        id: 0_2115_toxpiperepository
+      - title: ChemBioTox API Repository
+        description: Code repository for the ChemBioTox API
+        icon: fab fa-github
+        url: https://github.com/combspk/chembiotox-api
+        id: 1_2115_chembiotoxapirepository
+appConfig:
+  layout: horizontal
+  iconSize: large
