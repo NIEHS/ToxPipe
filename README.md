@@ -10,7 +10,7 @@
 
 <!-- PROJECT LOGO -->
 <div align="center">
-  <img src="./res/toxpipe-logo-v2.png" alt="ToxPipe Logo" width="200" height="200">
+  <img src="./toxpipe-logo-v2.png" alt="ToxPipe Logo" width="412" height="178">
   <h1 align="center">ToxPipe: Semi-autonomous AI integration of diverse toxicological data streams</h1>
 </div>
 
@@ -24,6 +24,8 @@
 -->
 
 [![](https://img.shields.io/badge/Microsoft%20Teams-6264A7?logo=microsoftteams&logoColor=fff&style=plastic)](https://teams.microsoft.com/l/channel/19%3a5aa8e5c5ac6a400da6b57916a96083ee%40thread.skype/ToxPipe?groupId=af61690e-7397-48d4-947c-8a0444e36e90&tenantId=14b77578-9773-42d5-8507-251ca2dc2b06)
+
+[![Python application](https://github.com/NIEHS/ToxPipe/actions/workflows/run_toxpipe_api.yml/badge.svg)](https://github.com/NIEHS/ToxPipe/actions/workflows/run_toxpipe_api.yml)
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -56,7 +58,7 @@ ToxPipe is meant to be a platform for interacting with various toxicological dat
 
 Large language models (LLMs), such as [OpenAI’s GPT-based models](https://openai.com/blog/chatgpt), can be used to solve complicated tasks with natural language as a generic interface. By using techniques like retrieval augmented generation (RAG), LLMs can be given a set of instructions and can (semi-)autonomously explore various data sources. The LLMs will then generate responses or interpretations based on information stored inside the models along with the contextual data retrieved through RAG.
 
-ToxPipe aims to repurpose (semi-)autonomous AI agents, such as JARVIS and Auto-GPT, for AI-augmented exploration of existing toxicological data and literature. Some of the tasks that we believe are possible with autonomous agents and RAG are:
+ToxPipe aims to repurpose (semi-)autonomous AI agents for AI-augmented exploration of existing toxicological data and literature. Some of the tasks that we believe are possible with autonomous agents and RAG are:
 
 - Generation of toxicological narratives with deep explanatory context
 - Analysis of chemical structure
@@ -77,7 +79,7 @@ By offloading these tasks to ToxPipe, it would allow toxicologists to repurpose 
 
 The following diagram demonstrates an overall structure of ToxPipe. This model is subject to change as the project develops.
 
-![ToxPipe Overview](res/diagrams/toxpipe-simple.svg)
+![ToxPipe Overview](toxpipe-ecosystem-new-2025.png)
 
 Architecture documentation is in [`docs/architecture`](docs/architecture/index.qmd). Stack decisions are saved in [`docs/decisions`](docs/decisions/index.md). This is where we will document the reasoning behind our stack decisions.
 
@@ -100,11 +102,6 @@ Deployment information is contained in [`docs/deployment`](docs/deployment/index
 ## Related Repositories
 
 - [ToxPipe LLM Model Comparisons](https://github.com/NIEHS/toxpipe-model-comparison)
-- [LibreChat](https://github.com/NIEHS/LibreChat)
-
-## Useful Links
-
-- [ToxPipe | 2024 NCBI AIxML Codeathon]
 
 <p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
     <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
@@ -114,15 +111,11 @@ Deployment information is contained in [`docs/deployment`](docs/deployment/index
 
 ## Repo Structure
 
-- `.build`: This folder should contain all scripts related to build process (PowerShell, Docker compose…).
-- `.config`: It should contain local configuration related to setup on local machine.
-- `dep`: This is the directory where all your dependencies should be stored.
-- `doc`: The documentation folder.
-- `res`: For all static resources in your project. For example, images.
-- `samples`: Providing “Hello World” & Co code that supports the documentation.
-- `src`: The source code folder! However, in languages that use headers (or if you have a framework for your application) don’t put those files in here.
-- `test`: Unit tests, integration tests… go here.
-- `tools`: Convenience directory for your use. Should contain scripts to automate tasks in the project, for example, build scripts, rename scripts. Usually contains .sh, .cmd files for example.
+- `docs`: Documentation and guides
+- `examples`: Example code and vignettes for common use cases
+- `src`: Source code for the backend and frontend components of ToxPipe
+  - `web`: Containers (Docker) and configuration for ToxPipe's contituent services (LibreChat, LiteLLM, Langflow, Langfuse, Ollama, etc.) 
+  - `toxpipe-api`: Source code for the ToxPipe FastAPI web API and RAG/literature search features
 
 <p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
     <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
@@ -133,9 +126,6 @@ Deployment information is contained in [`docs/deployment`](docs/deployment/index
 ## 🛠️ Built With
 
 ![FastAPI Badge](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=fff&style=plastic)
-
-- [NIEHS Librechat](https://github.com/NIEHS/LibreChat)
-- [NIEHS LLM Comparison](https://github.com/NIEHS/ToxPipe-Model-Comparison)
 
 <p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
     <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
