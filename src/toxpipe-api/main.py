@@ -292,13 +292,18 @@ async def query_rag(request: Request, response: Response, model: str, q: str, us
 
     try:
         res = query(q, llm=model, use_training_data=use_training_data)
+        used_rag_context = res['steps_taken'] and (res['steps_taken'][-1] == 'query_with_context')
+        response = (f'#[The following response was taken from {("RAG resources" if used_rag_context else "model's training knowledge")}]\n\n' + 
+                    res['response'] + '\n\n' +
+                    '#Searched Keyphrases:\n' + '\n'.join([f'- {x}' for x in res['searched_keyphrases']]))
+        error = res['error']
     except Exception as e:
         print("Error performing search.")
         print(e)
         response.status_code = 400
         return {"response": f"Error: query failed to run with message: {e}."}
     
-    return {"response": res}
+    return {"response": res, "error": error}
 
 # Endpoint for viewing a list of supported models.
 @app.get("/models", tags=["models"])
