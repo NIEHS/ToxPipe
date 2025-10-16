@@ -1,0 +1,47 @@
+# LiteLLM configuration file
+
+model_list:
+  # AWS format
+  - model_name: model-name
+    litellm_params:
+      model: bedrock/model-name
+      aws_region_name: us-east-1
+      aws_access_key_id: 12345
+      aws_secret_access_key: 12345
+  
+  # Azure OpenAI format
+  - model_name: model-name
+    litellm_params:
+      model: azure/model-name
+      api_base: https://example.openai.azure.com
+      api_key: 12345
+      api_version: 2024-12-01-preview
+
+  # Google Vertex AI format
+  - model_name: model-name
+    litellm_params:
+      model: vertex_ai/model-name
+      vertex_project: project-name
+      vertex_location: us-central1
+
+  # Ollama format
+  - model_name: model-name
+    litellm_params:
+      model: ollama/model-name
+      api_base: http://ollama:11434
+
+litellm_settings:
+  success_callback: ["langfuse"]
+  cache: False
+  drop_params: True
+  cache_params:
+    supported_call_types: ["acompletion", "completion", "embedding", "aembedding"]
+
+general_settings:
+  master_key: 12345
+
+assistant_settings:
+  custom_llm_provider: azure
+  litellm_params: 
+    api_key: 12345
+    api_base: https://example.openai.azure.com

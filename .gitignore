@@ -298,6 +298,7 @@ src/web/*.cert
 
 # LiteLLM config
 src/web/.litellm/*
+!src/web/.litellm/litellm-config.yaml.example
 
 # certs
 src/web/cert/*.key
