@@ -145,7 +145,7 @@ class Query:
                     'next_action': END, 
                     'steps': ['query_with_context']}
 
-        return {'response': response,
+        return {'response': response['response'],
                 'next_action': 'query_without_context',
                 'steps': ['query_with_context']} 
 
