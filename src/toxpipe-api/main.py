@@ -97,7 +97,7 @@ tags_metadata = [
 ]
 
 app = FastAPI(
-    title="ToxPipe Agentic API",
+    title="ToxPipe API",
     description="An API for creating custom LLM agents for performing chat completions with specialized tool access. Part of the ToxPipe ecosystem.",
     version="0.0.1",
     openapi_tags=tags_metadata,
