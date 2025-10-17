@@ -107,13 +107,6 @@ app = FastAPI(
 AGENT_DICT = {}
 
 # Supported models
-ANTHROPIC_MODELS = ['claude-3-7-sonnet', 'claude-3-5-sonnet', 'claude-3-sonnet', 'claude-3-haiku', 'claude-3-opus'] # haiku and opus work better
-OLLAMA_MODELS = ['llama3-3-70b', 'llama3-1-70b', 'llama3-1-8b', 'openbiollm-llama3-70b'] # These have trouble with tools
-OPENAI_MODELS = ['azure-gpt-4o', 'azure-gpt-3.5-turbo', 'azure-gpt-4o-mini', 'azure-gpt-3.5-turbo-16k', 'azure-gpt-4-turbo-20240409', 'azure-gpt-4', 'azure-o3', 'azure-o3-mini', 'azure-o1', 'azure-o1-mini'] # These all work pretty well
-MISTRALAI_MODELS = ['mistral-large-2', 'mistral-large', 'mistral-7b-instruct', 'mixtral-8x7b-instruct'] # mistral-large-2 and mixtral-8x7b-instruct has issues accessing tools
-GOOGLE_MODELS = ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-1.5-pro'] # TODO - VertexAIException BadRequestError - "Unable to submit request because one or more function parameters didn\'t specify the schema type field. Learn more: https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling
-AMAZON_MODELS = ['amazon-titan-text-premier']
-COHERE_MODELS = ['cohere-command-r-plus']
 
 # Load environment variables from .config/.env
 AUTH_MODE = env_config["TOXPIPE_AUTH_MODE"] # Should usually be false unless running a secure, internal-to-NIEHS version of this API
@@ -153,9 +146,6 @@ async def help(request: Request, response: Response):
 @app.get("/agent/create/", tags=["agent"])
 async def create_agent(request: Request, response: Response, model: str = "azure-gpt-5-nano", temp: float = 0, max_iterations: int = 20, max_retries: int = 10, max_tokens: int=4096, max_memory_tokens: int=4096, step_timeout: float = 0, n_threads: int = 1, summarize: bool = False, seed: int = 1):
     # Input validation
-    #if model not in ANTHROPIC_MODELS and model not in OLLAMA_MODELS and model not in OPENAI_MODELS and model not in MISTRALAI_MODELS and model not in GOOGLE_MODELS and model not in AMAZON_MODELS and model not in COHERE_MODELS:
-    #    response.status_code = 400
-    #    return {"response": f"Error: model '{model}' is not supported by ToxPipe. Please check your spelling and try again. Use the /models endpoint to view a list of supported models."}
     if temp < 0 or temp > 1:
         response.status_code = 400
         return {"response": f"Error: temperature must be between 0 and 1 (inclusive)."}
@@ -305,11 +295,6 @@ async def query_rag(request: Request, response: Response, model: str, q: str, us
         error = f"Error: query failed to run with message: {e}."
     
     return {"response": response, "error": error}
-
-# Endpoint for viewing a list of supported models.
-@app.get("/models", tags=["models"])
-async def view_supported_models(request: Request, response: Response):
-    return {"ANTHROPIC_MODELS": ANTHROPIC_MODELS, "OLLAMA_MODELS": OLLAMA_MODELS, "OPENAI_MODELS": OPENAI_MODELS, "MISTRALAI_MODELS": MISTRALAI_MODELS, "GOOGLE_MODELS": GOOGLE_MODELS, "AMAZON_MODELS": AMAZON_MODELS, "COHERE_MODELS": COHERE_MODELS}
 
 # Endpoint for viewing a list of supported tools for an agent.
 @app.get("/models/tools", tags=["models"])
