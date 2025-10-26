@@ -1,5 +1,5 @@
 from .llms import getAIModel
-from .utils import State
+from .utils import State, Config
 from langchain.llms import BaseLLM
 from langgraph.graph import END, START, StateGraph
 from typing import Literal
@@ -94,8 +94,8 @@ def createGraph(llm, use_training_data):
         langgraph.add_edge('gather_context', 'query_with_context')
         langgraph.add_edge('query_with_context', END)
 
-    langgraph = langgraph.compile()
-
+    langgraph = langgraph.compile().with_config({"callbacks": [Config.langfuse_handler]})
+    
     return langgraph
 
 # -----------------------------------------------------------------------
@@ -115,7 +115,7 @@ def query(query_text: str, llm: BaseLLM | str = 'azure-gpt-4o', use_training_dat
 
     try:
         langgraph = createGraph(llm=llm, use_training_data=use_training_data)
-        response = dict(langgraph.invoke(dict(query=query_text)))#, config={"callbacks": [Config.langfuse_handler]})
+        response = dict(langgraph.invoke(dict(query=query_text)), config={"callbacks": [Config.langfuse_handler]})
     except Exception as exp:
         response = {'error': f'Line number: {exp.__traceback__.tb_lineno}, Description: {exp}\n\n{traceback.format_exc()}'}
         print(response['error'])

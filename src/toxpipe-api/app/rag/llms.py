@@ -1,16 +1,5 @@
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from .utils import Config
-from pathlib import Path
-import os
-import httpx
-import ssl
-import truststore
-truststore.inject_into_ssl()
-cert_path = None
-client = None
-if os.path.exists(str(Path(Config.DIR_HOME) / '.config'/ 'NIH-FULL.pem')):
-    cert_path = ssl.create_default_context(cafile=str(Path(Config.DIR_HOME) / '.config'/ 'NIH-FULL.pem'))  # Either cafile or capath.
-    client = httpx.Client(verify=cert_path)
 
 # ---------------------------------------------------------------------------
 def getAIModel(model_name: str, temperature: int = 0, is_embedding=False) -> ChatOpenAI | OpenAIEmbeddings:
@@ -35,7 +24,7 @@ def getAIModel(model_name: str, temperature: int = 0, is_embedding=False) -> Cha
             timeout=None,
             max_retries=2,
             seed=1000,
-            http_client=client
+            http_client=Config.httpx_client
         )
     
     return OpenAIEmbeddings(
@@ -44,5 +33,5 @@ def getAIModel(model_name: str, temperature: int = 0, is_embedding=False) -> Cha
         api_key=Config.env_config['OPENAI_API_KEY'],
         request_timeout=None,
         max_retries=2,
-        http_client=client,
+        http_client=Config.httpx_client
     )
