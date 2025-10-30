@@ -1,10 +1,11 @@
     
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
+from langchain_core.output_parsers import PydanticOutputParser, StrOutputParser
+from langchain.output_parsers import OutputFixingParser
 from typing import Literal
 from pydantic import BaseModel, Field
 from langgraph.graph import END
-from .utils import Config, State
+from .utils import Config, State, setPrompt
 
 class QueryWithContextSchema(BaseModel):
     '''
@@ -16,16 +17,6 @@ class QueryWithContextSchema(BaseModel):
     response: str = Field(
         description="The appropriate answer to the query based on the provided resources" 
     )
-
-class QueryWithContextOutputParser(JsonOutputParser):
-
-    def __init__(self, output_parser=QueryWithContextSchema):
-        super().__init__(pydantic_object=output_parser)
-
-    def parseOutput(self, data):
-        response = self.parse(data.content)
-        if isinstance(response['response'], list): response['response'] = ', '.join(response['response'])
-        return response
 
 class Query:
 
@@ -55,40 +46,29 @@ class Query:
 
     human_prompt_with_context = ''' 
     ----------------------------------------------
-    **Query**
+    <Query>
     {query}
+    </Query>
 
-    **Resources** 
     ----------------------------------------------
+    <Resources>
     {resources}
+    </Resources>
 
-    **Instructions**
     ----------------------------------------------
+    <Instructions>
     You are given a query followed by resources above. You will STRICTLY follow the two steps below.
     1. Decide if the resources are 'relevant' to answer the query. Answer either 'relevant' or 'irrelevant'.
     2. If your answer in step 1 is 'relevant', answer the query based on the resources. DO NOT ANSWER from your training data.
-
-    **Output format**
+    </Instructions>
+    
     ----------------------------------------------
-    Answer the query in JSON format following the examples below,
+    <Output format>
+                            
+    {format_instructions_example}
 
-    *Example 1:*
-
-    ```json
-    {{
-        "decision": "relevant",
-        "response": "This field represents an appropriate answer to the user query based on the resources. This field must be in string format"
-    }}
-    ```
-
-    *Example 2:*
-
-    ```json
-    {{
-        "decision": "irrelevant",
-        "response": ""
-    }}
-    ```
+    - The answer must be in JSON format within `json` tags.
+    </Output format>
     '''
 
     human_prompt_without_context = '''
@@ -127,17 +107,17 @@ class Query:
     )
 
     def __init__(self, llm):
-        if llm.model_name in Config.models_with_structured_output_support:
-            self.query_with_context_chain = self.query_with_context_prompt | llm.with_structured_output(QueryWithContextSchema)
-        else:
-            self.query_with_context_chain = self.query_with_context_prompt | llm | QueryWithContextOutputParser().parseOutput
+        parser = OutputFixingParser.from_llm(parser=PydanticOutputParser(pydantic_object=QueryWithContextSchema), llm=llm, max_retries=Config.RETRY_COUNTER)
+        query_with_context_prompt = setPrompt(system_prompt=self.system_prompt,
+                                         human_prompt=self.human_prompt_with_context).partial(format_instructions_example=parser.get_format_instructions())
+        self.query_with_context_chain = query_with_context_prompt | llm | parser
         self.query_without_context_chain = self.query_without_context_prompt | llm | StrOutputParser()
+        
 
     def query_with_context(self, state: State) -> State:
         '''
         Get llm response with context
         '''
-        
         response = dict(self.query_with_context_chain.invoke({'query': state.get('query'), 'resources': state.get('resources')}))
         
         if response['decision'] == 'relevant': 

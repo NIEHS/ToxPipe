@@ -57,7 +57,7 @@ class CustomRetriever():
             return docs_str
         
         self.docs_res = {}
-        for kw in keyphrases[:Config.MAX_KEYWORDS]:
+        for kw in keyphrases[:Config.MAX_KEYPHRASES]:
             try:
                 docs = self.retriever.invoke(kw)
                 if len(docs): self.docs_res[kw] = docs

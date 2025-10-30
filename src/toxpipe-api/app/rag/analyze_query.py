@@ -1,64 +1,61 @@
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import PydanticOutputParser
+from langchain.output_parsers import OutputFixingParser
 from pydantic import BaseModel, Field
-from .utils import Config, State, OutputParser
+from .utils import Config, State, setPrompt
 
-class UserQueryKeywordsSchema(BaseModel):
+# ---------------------------------------------------------------------------
+class AnalyzeQuerySchema(BaseModel):
     '''
-    Represents the list of keyphrases extracted from user query
-    to get context on.
+    Represents the list of keyphrases extracted from user query to get context on.
     '''
-    keyphrases: list[str] = Field(f'List of maximum {Config.MAX_KEYWORDS} keywords', max_length=Config.MAX_KEYWORDS)
+    keyphrases: list[str] = Field(f'List of maximum {Config.MAX_KEYPHRASES} keywords', max_length=Config.MAX_KEYPHRASES)
 
+# ---------------------------------------------------------------------------
 class AnalyzeQuery:
 
+    # ---------------------------------------------------------------------------
     analyze_query_system_prompt = (f'''
-        You will be given a query. Analyze the query and find a list of independent 'keyphrases' on which you need information to answer the query. Always follow the rules below
+        You will be given a query. Analyze the query and find a list of independent 'keyphrases' on which you need information to answer the query. Always follow the rules below,
 
-        ** Rules **
-        - List maximum of {Config.MAX_KEYWORDS} key phrases. THE LIST MUST NOT BE MORE THAN {Config.MAX_KEYWORDS}.
-        - Answer the query in the JSON format
-        '''
-        +
-        '''
-        ```json
-        {{
-            "keyphrases": ["keyphrase 1", "keyphrase 2", "keyphrase 3", ...]
-        }}
-        ```
+        <Instructions>
+        - List maximum of {Config.MAX_KEYPHRASES} key phrases. THE LIST MUST NOT BE MORE THAN {Config.MAX_KEYPHRASES}.
+        - Each key phrase must be relevant to the query.
+        - Each key phrase must be semantically independent of the query.
+        </Instructions>
         ''')
 
-    analyze_query_user_prompt = '''Given a query text, find a list of independent 'keyphrases' on which you need information to answer the query.
+    # ---------------------------------------------------------------------------
+    analyze_query_human_prompt = '''Given a query text, find a list of independent 'keyphrases' on which you need information to answer the query.
 
-        ** Query **
+        <Query>
         {query}
+        </Query>
+
+        ----------------------------------------------
+        <Output format>
+                                
+        {format_instructions_example}
+
+        - The answer must be in JSON format within `json` tags.
+        </Output format>
         '''
 
-    analyze_query_prompt = ChatPromptTemplate.from_messages(
-        [
-            (
-                'system',
-                analyze_query_system_prompt,
-            ),
-            (
-                'human',
-                analyze_query_user_prompt,
-            ),
-        ]
-    )
-
+    # ---------------------------------------------------------------------------
     def __init__(self, llm):
-        # Will be used in future
-        #self.analyze_query_chain = self.analyze_query_prompt | llm.with_structured_output(UserQueryKeywordsSchema)
-        self.analyze_query_chain = self.analyze_query_prompt | llm | OutputParser(UserQueryKeywordsSchema)
+        
+        parser = OutputFixingParser.from_llm(parser=PydanticOutputParser(pydantic_object=AnalyzeQuerySchema), 
+                                                  llm=llm, max_retries=Config.RETRY_COUNTER)
+        
+        analyze_query_prompt = setPrompt(system_prompt=self.analyze_query_system_prompt,
+                                         human_prompt=self.analyze_query_human_prompt).partial(format_instructions_example=parser.get_format_instructions())
 
+        self.analyze_query_chain = analyze_query_prompt | llm | parser
+
+    # ---------------------------------------------------------------------------
     def analyze_query(self, state: State) -> State:
         '''
         Extracts keyphrases from user query
         '''
-
-        keyphrases = self.analyze_query_chain.invoke(
-            {
-                'query': state.get('query')
-            }
-        )
-        return {**keyphrases, **{'steps': ['analyze_query']}}
+        
+        keyphrases = dict(self.analyze_query_chain.invoke({'query': state.get('query')}))['keyphrases']                
+        return {'keyphrases': [state.get('query')] + keyphrases, 'steps': ['Analyze query']}
