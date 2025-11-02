@@ -35,7 +35,8 @@ class Guardrails:
 
     def __init__(self, llm):
         parser = OutputFixingParser.from_llm(parser=PydanticOutputParser(pydantic_object=GuardrailsSchema), llm=llm, max_retries=Config.RETRY_COUNTER)
-        guardrails_prompt = setPrompt(system_prompt=self.system_prompt, human_prompt=self.human_prompt).partial(format_instructions_example=parser.get_format_instructions())
+        guardrails_prompt = setPrompt(system_prompt=self.system_prompt, 
+                                      human_prompt=self.human_prompt).partial(format_instructions_example=parser.get_format_instructions())
         self.guardrails_chain = guardrails_prompt | llm | parser
 
     def guardrails(self, state: State) -> State:

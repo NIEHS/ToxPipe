@@ -43,12 +43,9 @@ class AnalyzeQuery:
     # ---------------------------------------------------------------------------
     def __init__(self, llm):
         
-        parser = OutputFixingParser.from_llm(parser=PydanticOutputParser(pydantic_object=AnalyzeQuerySchema), 
-                                                  llm=llm, max_retries=Config.RETRY_COUNTER)
-        
+        parser = OutputFixingParser.from_llm(parser=PydanticOutputParser(pydantic_object=AnalyzeQuerySchema), llm=llm, max_retries=Config.RETRY_COUNTER)
         analyze_query_prompt = setPrompt(system_prompt=self.analyze_query_system_prompt,
                                          human_prompt=self.analyze_query_human_prompt).partial(format_instructions_example=parser.get_format_instructions())
-
         self.analyze_query_chain = analyze_query_prompt | llm | parser
 
     # ---------------------------------------------------------------------------
