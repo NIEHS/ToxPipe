@@ -4,12 +4,13 @@ sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 from .llms import getAIModel
 from .utils import State, Config
 from langchain.llms import BaseLLM
+from langchain_core.exceptions import OutputParserException
 from langgraph.graph import END, START, StateGraph
+from langgraph.types import RetryPolicy
 from typing import Literal
 from .guardrails import Guardrails
 from .analyze_query import AnalyzeQuery
 from .gather_context import GatherContext
-from .find_context_relevance import FindContextRelevance
 from .query import Query
 import traceback
 
@@ -44,22 +45,21 @@ def createGraph(llm, use_training_data):
     gr = Guardrails(llm)
     aq = AnalyzeQuery(llm)
     gc = GatherContext()
-    fc = FindContextRelevance(llm)
     qr = Query(llm)
 
     langgraph = StateGraph(State, input=State, output=State)
+    retry_policy = RetryPolicy(retry_on=OutputParserException, max_attempts=Config.RETRY_COUNTER)
 
     if use_training_data:
 
-        langgraph.add_node(aq.analyze_query)
+        langgraph.add_node(aq.analyze_query, retry_policy=retry_policy)
         langgraph.add_node(gc.gather_context)
-        #langgraph.add_node(find_context_relevance)
-        langgraph.add_node(qr.query_with_context)
-        langgraph.add_node(qr.query_without_context)
+        langgraph.add_node(qr.query_with_context, retry_policy=retry_policy)
+        langgraph.add_node(qr.query_without_context, retry_policy=retry_policy)
 
         use_guardrail = False
         if use_guardrail:
-            langgraph.add_node(gr.guardrails)
+            langgraph.add_node(gr.guardrails, retry_policy=retry_policy)
             langgraph.add_edge(START, 'guardrails')
             langgraph.add_conditional_edges(
                 'guardrails',
@@ -78,13 +78,13 @@ def createGraph(llm, use_training_data):
 
     else:
 
-        langgraph.add_node(aq.analyze_query)
+        langgraph.add_node(aq.analyze_query, retry_policy=retry_policy)
         langgraph.add_node(gc.gather_context)
-        langgraph.add_node(qr.query_with_context)
+        langgraph.add_node(qr.query_with_context, retry_policy=retry_policy)
         
         use_guardrail = False
         if use_guardrail:
-            langgraph.add_node(gr.guardrails)
+            langgraph.add_node(gr.guardrails, retry_policy=retry_policy)
             langgraph.add_edge(START, 'guardrails')
             langgraph.add_conditional_edges(
                 'guardrails',
@@ -97,7 +97,7 @@ def createGraph(llm, use_training_data):
         langgraph.add_edge('gather_context', 'query_with_context')
         langgraph.add_edge('query_with_context', END)
 
-    langgraph = langgraph.compile().with_config({"callbacks": [Config.langfuse_handler]})
+    langgraph = langgraph.compile()#.with_config({"callbacks": [Config.langfuse_handler]})
     
     return langgraph
 
@@ -118,7 +118,7 @@ def query(query_text: str, llm: BaseLLM | str = 'azure-gpt-4o', use_training_dat
 
     try:
         langgraph = createGraph(llm=llm, use_training_data=use_training_data)
-        response = dict(langgraph.invoke(dict(query=query_text)), config={"callbacks": [Config.langfuse_handler]})
+        response = dict(langgraph.invoke(dict(query=query_text)))#, config={"callbacks": [Config.langfuse_handler]})
     except Exception as exp:
         response = {'error': f'Line number: {exp.__traceback__.tb_lineno}, Description: {exp}\n\n{traceback.format_exc()}'}
         print(response['error'])
