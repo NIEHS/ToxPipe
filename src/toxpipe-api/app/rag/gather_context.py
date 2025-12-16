@@ -1,4 +1,3 @@
-
 from langchain_chroma import Chroma
 from chromadb import HttpClient
 from .utils import Config, State
