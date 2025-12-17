@@ -148,7 +148,7 @@ async def help(request: Request, response: Response):
 
 # Endpoint for creating an agent. Note that this will not actually create the agent object in memory, it just creates a JSON file with the agent parameters so that the API is "aware" that such an agent is defined and may be created later.
 @app.get("/agent/create/", tags=["agent"])
-async def create_agent(request: Request, response: Response, model: str = "azure-gpt-5-nano", temp: float = 0, max_iterations: int = 20, max_retries: int = 10, max_tokens: int=4096, max_memory_tokens: int=4096, step_timeout: float = 0, n_threads: int = 1, summarize: bool = False, seed: int = 1):
+async def create_agent(request: Request, response: Response, model: str = "azure-gpt-5-nano", temp: float = 0, max_iterations: int = 20, max_retries: int = 10, max_tokens: int=4096, max_memory_tokens: int=4096, step_timeout: float = 0, n_threads: int = 1, summarize: bool = False, seed: int = 1, reasoning_effort: str = "low"):
     # Input validation
     if temp < 0 or temp > 1:
         response.status_code = 400
@@ -157,7 +157,7 @@ async def create_agent(request: Request, response: Response, model: str = "azure
         response.status_code = 400
         return {"response": f"Error: 'n_threads' must be between 1 and 5 (inclusive)."}
     agentid = uuid.uuid4() # Generate UUID for the agent
-    agent = {"agentid": str(agentid), "model": model, "temp": temp, "max_iterations": max_iterations, "max_retries":max_retries, "max_tokens":max_tokens, "max_memory_tokens":max_memory_tokens, "step_timeout":step_timeout, "n_threads":n_threads, "summarize":summarize, "seed":seed, "date_created":str(datetime.datetime.now())}
+    agent = {"agentid": str(agentid), "model": model, "temp": temp, "max_iterations": max_iterations, "max_retries":max_retries, "max_tokens":max_tokens, "max_memory_tokens":max_memory_tokens, "step_timeout":step_timeout, "n_threads":n_threads, "summarize":summarize, "seed":seed, "reasoning_effort":reasoning_effort, "date_created":str(datetime.datetime.now())}
     # Create a JSON file with the agent parameters
     os.makedirs("./created_agents", exist_ok=True)
     with open(f"./created_agents/{agentid}.json", 'w') as fp:
@@ -174,7 +174,7 @@ async def query_agent(request: Request, response: Response, agentid: uuid.UUID, 
         try:
             with open(f"./created_agents/{agentid}.json", 'r') as fp:
                 agent = json.load(fp)
-                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], client=client, temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"],  max_tokens=agent["max_tokens"], max_memory_tokens=agent["max_memory_tokens"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE, seed=agent["seed"])
+                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], client=client, temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"],  max_tokens=agent["max_tokens"], max_memory_tokens=agent["max_memory_tokens"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], reasoning_effort=agent["reasoning_effort"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE, seed=agent["seed"])
                 MODEL_CACHE[agentid] = tpa
 
         except Exception as e:
@@ -212,7 +212,7 @@ async def query_rag(request: Request, response: Response, agentid: uuid.UUID, q:
         try:
             with open(f"./created_agents/{agentid}.json", 'r') as fp:
                 agent = json.load(fp)
-                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], client=client, temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"],  max_tokens=agent["max_tokens"], max_memory_tokens=agent["max_memory_tokens"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE, seed=agent["seed"])
+                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], client=client, temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"],  max_tokens=agent["max_tokens"], max_memory_tokens=agent["max_memory_tokens"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], reasoning_effort=agent["reasoning_effort"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE, seed=agent["seed"])
                 MODEL_CACHE[agentid] = tpa
 
         except Exception as e:
@@ -249,7 +249,7 @@ async def query_literature(request: Request, response: Response, agentid: uuid.U
         try:
             with open(f"./created_agents/{agentid}.json", 'r') as fp:
                 agent = json.load(fp)
-                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], client=client, temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"],  max_tokens=agent["max_tokens"], max_memory_tokens=agent["max_memory_tokens"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE, seed=agent["seed"])
+                tpa = tp.ToxPipeAgent(name=agent["agentid"], model=agent["model"], client=client, temp=agent["temp"], max_iterations=agent["max_iterations"], max_retries=agent["max_retries"],  max_tokens=agent["max_tokens"], max_memory_tokens=agent["max_memory_tokens"], step_timeout=agent["step_timeout"], n_agents=agent["n_threads"], summarize=agent["summarize"], reasoning_effort=agent["reasoning_effort"], verbose=VERBOSE, auth=AUTH_MODE, checkpointer=checkpointer, cache=CACHE, seed=agent["seed"])
                 MODEL_CACHE[agentid] = tpa
 
         except Exception as e:

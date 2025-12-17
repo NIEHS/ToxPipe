@@ -67,7 +67,7 @@ import ssl
 from ..rag import query
 
 # Create LLM handler - always use AzureChatOpenAI since all models are accessed through NIEHS's litellm instance.
-def _make_llm(model, api_version, temp, max_retries, max_tokens, seed, client):
+def _make_llm(model, api_version, temp, max_retries, max_tokens, reasoning_effort, seed, client):
         
         
 
@@ -98,7 +98,7 @@ def _make_llm(model, api_version, temp, max_retries, max_tokens, seed, client):
                 max_completion_tokens=max_tokens,
                 seed=seed,
                 tiktoken_model_name="gpt-4o", # use the gpt-4o tiktoken model for all models to avoid an error when calculating token limit
-                reasoning_effort="low",
+                reasoning_effort=reasoning_effort,
                 http_client=client
             )
 
@@ -127,7 +127,7 @@ def _make_llm(model, api_version, temp, max_retries, max_tokens, seed, client):
             max_tokens=max_tokens,
             seed=seed,
             tiktoken_model_name="gpt-4o", # use the gpt-4o tiktoken model for all models to avoid an error when calculating token limit
-            reasoning_effort="low",
+            reasoning_effort=reasoning_effort,
             http_client=client
         )
 
@@ -142,7 +142,7 @@ def _make_llm(model, api_version, temp, max_retries, max_tokens, seed, client):
             max_tokens=max_tokens,
             seed=seed,
             tiktoken_model_name="gpt-4o", # use the gpt-4o tiktoken model for all models to avoid an error when calculating token limit
-            #reasoning_effort="low",
+            #reasoning_effort="high",
             http_client=client
         )
 
@@ -180,6 +180,7 @@ class ToxPipeAgent:
         step_timeout=0, # maximum time in seconds to take per recursion
         n_agents=1, # number of parallel agents to run - set to 1 for no parallelism. Higher values better for more complicated queries to help reduce variance
         summarize=False, # if True, will summarize output. Ignored and always treated as True if n_agents > 1.
+        reasoning_effort="low", # level of reasoning effort for the models that support it
         verbose=False, # If True, will produce verbose output but can drastically slow down the agent
         auth=False, # If True, the agent will use the proprietary internal CBT tools. When in doubt, keep False.
         checkpointer=None, # If not None, will save the agent state to the specified checkpointer
@@ -187,7 +188,7 @@ class ToxPipeAgent:
         seed=1 # Random seed for LLM. Set the seed for more deterministic results.
     ):
         # Initialize parameters
-        self.llm = _make_llm(model, api_version, temp, max_retries, max_tokens, seed, client)
+        self.llm = _make_llm(model, api_version, temp, max_retries, max_tokens, reasoning_effort, seed, client)
         if cache == True:
             set_llm_cache(SQLiteCache(database_path=".langchain.db")) # set cache to avoid making the same API calls over and over again
         self.tools = make_tools(self.llm, verbose=verbose, auth=auth)
