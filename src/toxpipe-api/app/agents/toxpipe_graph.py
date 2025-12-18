@@ -43,7 +43,7 @@ if os.path.exists(DIR_HOME / ".config" / ".env"):
 
 CURRENT_DELIBERATION_STEP = 0
 
-MAX_DELIBERATION_STEPS = int(env_config["MAX_DELIBERATION_STEPS"])
+MAX_DELIBERATION_STEPS = 5
 
 class DeliberationSchema(BaseModel):
     '''
@@ -350,8 +350,10 @@ def create_react_agent(
     interrupt_after: Optional[list[str]] = None,
     debug: bool = False,
     model_name: Optional[str] = None,
-    max_memory_tokens: Optional[int] = 0
+    max_memory_tokens: Optional[int] = 0,
+    deliberation_steps: Optional[int] = 5
 ):
+    MAX_DELIBERATION_STEPS = deliberation_steps
 
     if state_schema is not None:
         if missing_keys := {"messages", "is_last_step"} - set(
@@ -440,9 +442,14 @@ def create_react_agent(
         # Clear history for handler
         state["tools_handler_messages"] = []
 
+        print("============= HISTORY =============")
+        print(state["messages"])
+
         # Special handling for models that won't accept a blank content message (e.g., Amazon-nova-lite)
         if model_name in ["amazon-nova-lite", "amazon-nova-pro", "llama3-3-70b"]:
             for msg in state["messages"]:
+                #print(msg)
+                #print("--------------------------------")
                 if msg.content.rstrip() == "":
                     msg.content = "no response" # Replace blank message with a single space
 
@@ -450,6 +457,12 @@ def create_react_agent(
 
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
 
+        print("=======response=========")
+        print(response)
+        print(has_tool_calls)
+        print("== tool calls ==")
+        print(response.tool_calls)
+        
         if has_tool_calls:
 
             all_tools_return_direct = False
@@ -551,8 +564,16 @@ def create_react_agent(
         messages = state["messages"]
         last_message = messages[-1]
 
+        print("====last_message====")
+        print(last_message)
+
         global CURRENT_DELIBERATION_STEP
         CURRENT_DELIBERATION_STEP = CURRENT_DELIBERATION_STEP # This is just so the Python linter doesn't complain
+
+        print("===CURRENT_DELIBERATION_STEP===")
+        print(CURRENT_DELIBERATION_STEP)
+        print("===MAX_DELIBERATION_STEPS===")
+        print(MAX_DELIBERATION_STEPS)
 
         if CURRENT_DELIBERATION_STEP > MAX_DELIBERATION_STEPS:
             return "SUMMARY_NODE"

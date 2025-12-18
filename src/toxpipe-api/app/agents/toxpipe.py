@@ -181,6 +181,7 @@ class ToxPipeAgent:
         n_agents=1, # number of parallel agents to run - set to 1 for no parallelism. Higher values better for more complicated queries to help reduce variance
         summarize=False, # if True, will summarize output. Ignored and always treated as True if n_agents > 1.
         reasoning_effort="low", # level of reasoning effort for the models that support it
+        deliberation_steps=5, # number of deliberation steps to take before answering
         verbose=False, # If True, will produce verbose output but can drastically slow down the agent
         auth=False, # If True, the agent will use the proprietary internal CBT tools. When in doubt, keep False.
         checkpointer=None, # If not None, will save the agent state to the specified checkpointer
@@ -202,6 +203,8 @@ class ToxPipeAgent:
         self.thread_id = name
         self.checkpointer = checkpointer
         self.seed = seed
+        self.deliberation_steps = deliberation_steps
+        self.reasoning_effort = reasoning_effort
 
         # Define parser
         self.parser = PydanticOutputParser(pydantic_object=Response)
@@ -209,7 +212,7 @@ class ToxPipeAgent:
         self.prompt_template = getPrompt(PromptAgentic)
 
         # Initialize agent to add tools to model
-        agent_executor = create_react_agent(self.llm, self.tools, state_modifier=self.prompt_template, checkpointer=checkpointer, debug=verbose, model_name=model, max_memory_tokens=max_memory_tokens) # state_modifier=PROMPT adds the prompt instructions to the agent
+        agent_executor = create_react_agent(self.llm, self.tools, state_modifier=self.prompt_template, checkpointer=checkpointer, debug=verbose, model_name=model, max_memory_tokens=max_memory_tokens, deliberation_steps=deliberation_steps) # state_modifier=PROMPT adds the prompt instructions to the agent
         if step_timeout > 0:
             agent_executor.step_timeout = step_timeout
 
