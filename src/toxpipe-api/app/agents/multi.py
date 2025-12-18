@@ -10,6 +10,7 @@ def run_parallel(self=None, input="", user_id=""):
             self.config,
             stream_mode="values",
         ):
+
             if(len(chunk["messages"][-1].content) > 0): # only update final answer if it isn't blank
                 last = chunk["messages"][-1].content # Just get last message in the chain - this is the LLM's final answer
 

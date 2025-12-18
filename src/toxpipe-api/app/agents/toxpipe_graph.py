@@ -150,6 +150,8 @@ training_human_prompt = '''
 - Review the provided context to determine if it adequately addresses the user's query.
 - You must generate a final answer using both your training data and relevant parts of the provided context that are relevant to the user's query.
 - You must always supplement the context with a thorough answer from your training data.
+- If your provided context only contains tool calls, intermediate steps, or does not contain sufficient information to answer the user's query, you MUST still generate a thorough answer using your training data.
+- Do not simply repeat the context back to the user; instead, synthesize an answer, prioritizing information from your training data, to provide a comprehensive response.
 
 **Output format**
 Your output must follow the following rules and format UNLESS the user's query specifies a different format. If the user's query specifies a different format, you must follow the format specified in the user's query.
@@ -305,7 +307,7 @@ def _validate_chat_history(
         for tool_call in message.tool_calls
     ]
     tool_call_ids_with_results = {
-        message.tool_call_id for message in messages if isinstance(message, ToolMessage)
+        message.tool_call_id for message in messages if isinstance(message, ToolMessage) and message.status != "error"
     }
     tool_calls_without_results = [
         tool_call
@@ -391,10 +393,16 @@ def create_react_agent(
 
         # Prune any tool messages without a tool call
         tool_messages = [message.tool_call_id for message in messages if isinstance(message, ToolMessage)]
+
+        pruned_messages = []
+
+        if len(tool_messages) == 0:
+            return ChatPromptValue(messages=messages)
+        
         tool_call_messages = [[i['id'] for i in message.tool_calls] for message in messages if isinstance(message, AIMessage) and message.tool_calls]
         tool_call_messages = list(itertools.chain.from_iterable(tool_call_messages)) # flatten the list of tool call messages
         good_tool_calls = list(set(tool_messages) & set(tool_call_messages)) # get only tool calls that have a corresponding tool message
-        pruned_messages = []
+        
         for message in messages:
             if isinstance(message, ToolMessage) and message.tool_call_id not in good_tool_calls:
                 continue
@@ -442,26 +450,15 @@ def create_react_agent(
         # Clear history for handler
         state["tools_handler_messages"] = []
 
-        print("============= HISTORY =============")
-        print(state["messages"])
-
         # Special handling for models that won't accept a blank content message (e.g., Amazon-nova-lite)
         if model_name in ["amazon-nova-lite", "amazon-nova-pro", "llama3-3-70b"]:
             for msg in state["messages"]:
-                #print(msg)
-                #print("--------------------------------")
                 if msg.content.rstrip() == "":
                     msg.content = "no response" # Replace blank message with a single space
 
         response = model_start_runnable.invoke(state["messages"], config=config) # Generate tool calls
 
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
-
-        print("=======response=========")
-        print(response)
-        print(has_tool_calls)
-        print("== tool calls ==")
-        print(response.tool_calls)
         
         if has_tool_calls:
 
@@ -507,13 +504,10 @@ def create_react_agent(
         # Merge message histories from all handlers
         state["messages"] = state["messages"]
         state["messages"] = _validate_chat_history(state["messages"])
-        user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1]#.content
+        user_query = [message for message in state["messages"] if isinstance(message, HumanMessage)][-1].content
         context = [message for message in state["messages"] if isinstance(message, ToolMessage)]
-        
-        response = model_training_runnable.invoke({"context": context, "query": user_query}, config=config) # Final answer from training data and context
 
-        print("=== FINAL RESPONSE ===")
-        print(response)
+        response = model_training_runnable.invoke({"context": context, "query": user_query}, config=config) # Final answer from training data and context
 
         has_tool_calls = isinstance(response, AIMessage) and response.tool_calls
         all_tools_return_direct = False
@@ -564,16 +558,8 @@ def create_react_agent(
         messages = state["messages"]
         last_message = messages[-1]
 
-        print("====last_message====")
-        print(last_message)
-
         global CURRENT_DELIBERATION_STEP
         CURRENT_DELIBERATION_STEP = CURRENT_DELIBERATION_STEP # This is just so the Python linter doesn't complain
-
-        print("===CURRENT_DELIBERATION_STEP===")
-        print(CURRENT_DELIBERATION_STEP)
-        print("===MAX_DELIBERATION_STEPS===")
-        print(MAX_DELIBERATION_STEPS)
 
         if CURRENT_DELIBERATION_STEP > MAX_DELIBERATION_STEPS:
             return "SUMMARY_NODE"
