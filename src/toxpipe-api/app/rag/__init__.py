@@ -30,14 +30,14 @@ def validate_context_condition(
     return state.get('next_action')
 
 # -----------------------------------------------------------------------
-def createGraph(llm, use_training_data):
+def createGraph(llm, use_training_data, **kwargs) -> StateGraph:
 
     # -----------------------------------------------------------------------
     # LLM
     # -----------------------------------------------------------------------
     # If agentic LLM is not provided, use a new one with model name = llm
     if isinstance(llm, str):
-        llm = getAIModel(model_name=llm)
+        llm = getAIModel(model_name=llm, **kwargs)
 
     # -----------------------------------------------------------------------
     # Langgraph
@@ -102,7 +102,7 @@ def createGraph(llm, use_training_data):
     return langgraph
 
 # -----------------------------------------------------------------------
-def query(query_text: str, llm: BaseLLM | str = 'azure-gpt-4o', use_training_data: bool = True) -> str:
+def query(query_text: str, llm: BaseLLM | str = 'azure-gpt-4o', use_training_data: bool = True, **kwargs) -> str:
     '''
     Provides response to user query
     
@@ -117,7 +117,7 @@ def query(query_text: str, llm: BaseLLM | str = 'azure-gpt-4o', use_training_dat
     '''
 
     try:
-        langgraph = createGraph(llm=llm, use_training_data=use_training_data)
+        langgraph = createGraph(llm=llm, use_training_data=use_training_data, **kwargs)
         response = dict(langgraph.invoke(dict(query=query_text)))#, config={"callbacks": [Config.langfuse_handler]})
     except Exception as exp:
         response = {'error': f'Line number: {exp.__traceback__.tb_lineno}, Description: {exp}\n\n{traceback.format_exc()}'}
