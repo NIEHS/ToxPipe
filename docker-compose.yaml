@@ -1,0 +1,25 @@
+services:
+  toxpipe1:
+    build: .
+    ports:
+      - "8021:8001"
+
+  toxpipe2:
+    build: .
+    ports:
+      - "8022:8001"
+
+  toxpipe3:
+    build: .
+    ports:
+      - "8023:8001"
+
+  toxpipe4:
+    build: .
+    ports:
+      - "8024:8001"
+
+  toxpipe5:
+    build: .
+    ports:
+      - "8025:8001"

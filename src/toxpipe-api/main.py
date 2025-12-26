@@ -280,12 +280,12 @@ async def query_literature(request: Request, response: Response, agentid: uuid.U
 
 # Endpoint for directly querying the RAG search
 @app.get("/rag/", tags=["rag"])
-async def query_rag(request: Request, response: Response, model: str, q: str, use_training_data: bool = True):    
+async def query_rag(request: Request, response: Response, model: str, q: str, use_training_data: bool = True, reasoning_effort: str = "low"):    
     tpa = None
     res = None
 
     try:
-        res = query(q, llm=model, use_training_data=use_training_data)
+        res = query(q, llm=model, use_training_data=use_training_data, reasoning_effort=reasoning_effort)
         used_rag_context = res['steps_taken'] and (res['steps_taken'][-1] == 'query_with_context')
         response = (f'*[The following response was taken from ' + ("RAG resources" if used_rag_context else "model's training knowledge") + ']*\n\n' + 
                     '**Response:**\n' + res['response'] + '\n\n' +
