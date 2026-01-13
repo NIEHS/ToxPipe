@@ -96,8 +96,12 @@ def search_pubmed_article(query: str,
     def getArticleEutils(pmcid):
 
         def parseText(d_xml, text = []):
+            
+            text = text.copy()
+            
             if isinstance(d_xml, dict):
                 for k in d_xml:
+                    if k not in ['title', 'sec', 'p', '#text']: continue
                     text = parseText(d_xml[k], text=text)
             elif isinstance(d_xml, list):
                 for k in d_xml:
@@ -116,7 +120,7 @@ def search_pubmed_article(query: str,
             d = getPubMedArticleEutils(pmcid=pmcid)
         except Exception as exp:
             raise Exception(f'In getPubMedArticleEutils(pmcid={pmcid}), Line number: {exp.__traceback__.tb_lineno}, Description: {exp}\n\n{traceback.format_exc()}')
-
+            
         assert 'front' in d['pmc-articleset']['article'], 'Reference not available'
         assert 'body' in d['pmc-articleset']['article'], 'Content not available'
         
@@ -135,36 +139,18 @@ def search_pubmed_article(query: str,
     
         authors = []
         contrib_group = front['article-meta']['contrib-group']
-
-        print("== contrib_group====")
-        print(contrib_group)
-
         if isinstance(contrib_group, list):
             for contrib_group_element in contrib_group:
                 if isinstance(contrib_group_element['contrib'], list):
                     for contrib in contrib_group_element['contrib']:
                         if contrib['@contrib-type'] == 'author':
-                            if 'name' in contrib:
-                                authors.append({'first_name': contrib['name']['given-names']['#text'].strip(), 
-                                                'last_name': contrib['name']['surname'].strip()})
-                            elif 'collab' in contrib:
-                                authors.append({'first_name': '', 
-                                                'last_name': contrib['collab'].strip()})
-                            else: 
-                                authors.append({'first_name': '', 
-                                                'last_name': ''})
+                            authors.append({'first_name': contrib['name']['given-names']['#text'].strip(), 
+                                            'last_name': contrib['name']['surname'].strip()})
         elif isinstance(contrib_group['contrib'], list):
             for contrib in contrib_group['contrib']:
                 if contrib['@contrib-type'] == 'author':
-                    if 'name' in contrib:
-                        authors.append({'first_name': contrib['name']['given-names']['#text'].strip(), 
-                                        'last_name': contrib['name']['surname'].strip()})
-                    elif 'collab' in contrib:
-                        authors.append({'first_name': '', 
-                                        'last_name': contrib['collab'].strip()})
-                    else: 
-                        authors.append({'first_name': '', 
-                                        'last_name': ''})
+                    authors.append({'first_name': contrib['name']['given-names']['#text'].strip(), 
+                                    'last_name': contrib['name']['surname'].strip()})
         else:
             if contrib_group['contrib']['@contrib-type'] == 'author':
                 if 'collab' in contrib_group['contrib']:
@@ -181,8 +167,8 @@ def search_pubmed_article(query: str,
             ref['year'] = front['article-meta']['pub-date']['year']
 
         ref['year'] = parseTextField(ref['year'])
-        ref['volume'] = parseTextField(front['article-meta']['volume'])
-        ref['issue'] = parseTextField(front['article-meta'].get('issue', '1'))
+        ref['volume'] = parseTextField(front['article-meta'].get('volume', ''))
+        ref['issue'] = parseTextField(front['article-meta'].get('issue', ''))
         
         if 'elocation-id' in front['article-meta']:
             ref['pages'] = front['article-meta']['elocation-id']
@@ -191,12 +177,13 @@ def search_pubmed_article(query: str,
 
         ref['pages'] = parseTextField(ref['pages'])
 
-        if "body" in d['pmc-articleset']['article']:
-            body = d['pmc-articleset']['article']['body']
+        abstract = front['article-meta']['abstract']
+        body = d['pmc-articleset']['article']['body']
         
-        content = ' '.join(parseText(body))
+        abstract = ' '.join(parseText(abstract))
+        body = ' '.join(parseText(body))
         
-        return ref, content
+        return ref, abstract, body
     
     def searchLiterature(query, retstart=1, retmax=5):
         qstring = f'db=pmc&term={query}&sort=relevance&retstart={retstart}&retmax={retmax}&api_key={api_key}'
@@ -207,6 +194,8 @@ def search_pubmed_article(query: str,
             return xmltodict.parse(response.text)
         except:
             raise Exception(response.text)
+
+    print(query)
 
     try:
         res = searchLiterature(query)
@@ -222,14 +211,14 @@ def search_pubmed_article(query: str,
     res = []
     for id in ids:
         try:
-            ref, content = getArticleEutils(pmcid=id)
+            ref, abstract, body = getArticleEutils(pmcid=id)
         except Exception as exp:
             print(f'In getArticleEutils(pmcid={id}):, Line number: {exp.__traceback__.tb_lineno}, Description: {exp}\n\n{traceback.format_exc()}')
             continue
 
-        if content_size is not None: content = content[:content_size]
+        if content_size is not None: body = body[:content_size]
         
-        res.append({"ref": ref, "content": content})
+        res.append({"ref": ref, "abstract": abstract, "body": body})
 
         if len(res) >= max_results: break
 
@@ -285,7 +274,7 @@ def scholar2result_llm(llm, query: str):
         try:
             summary_prompt = ChatPromptTemplate.from_template(summary_prompt_template)
             summary_chain = summary_prompt | llm
-            summary = summary_chain.invoke({"ref": p["ref"], "query": query, "content": p["content"]})
+            summary = summary_chain.invoke({"ref": p["ref"], "query": query, "content": p["body"]})
             summary = f"{summary.content} (source: {p['ref']})"
 
         except:

@@ -6,6 +6,20 @@ from typing import Literal
 from pydantic import BaseModel, Field
 from langgraph.graph import END
 from .utils import Config, State, setPrompt
+import json
+
+class CustomJSONParser(PydanticOutputParser):
+
+    def parse(self, text: str) -> str:
+        """Parse the output of an LLM call to a pydantic object.
+
+        Args:
+            text: The output of the LLM call.
+
+        Returns:
+            The parsed pydantic object.
+        """
+        return super().parse(json.loads(json.dumps(text)))
 
 class QueryWithContextSchema(BaseModel):
     '''
@@ -107,7 +121,7 @@ class Query:
     )
 
     def __init__(self, llm):
-        parser = OutputFixingParser.from_llm(parser=PydanticOutputParser(pydantic_object=QueryWithContextSchema), llm=llm, max_retries=Config.RETRY_COUNTER)
+        parser = OutputFixingParser.from_llm(parser=CustomJSONParser(pydantic_object=QueryWithContextSchema), llm=llm, max_retries=Config.RETRY_COUNTER)
         query_with_context_prompt = setPrompt(system_prompt=self.system_prompt,
                                          human_prompt=self.human_prompt_with_context).partial(format_instructions_example=parser.get_format_instructions())
         self.query_with_context_chain = query_with_context_prompt | llm | parser

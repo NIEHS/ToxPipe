@@ -280,7 +280,7 @@ async def query_literature(request: Request, response: Response, agentid: uuid.U
 
 # Endpoint for directly querying the RAG search
 @app.get("/rag/", tags=["rag"])
-async def query_rag(request: Request, response: Response, model: str, q: str, use_training_data: bool = True, reasoning_effort: str = "low"):    
+async def query_rag(request: Request, response: Response, model: str, q: str, use_training_data: bool = True, reasoning_effort: str | None = None):    
     tpa = None
     res = None
 
