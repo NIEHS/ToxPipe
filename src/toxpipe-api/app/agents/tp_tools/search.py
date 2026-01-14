@@ -185,7 +185,7 @@ def search_pubmed_article(query: str,
         if 'elocation-id' in front['article-meta']:
             ref['pages'] = front['article-meta']['elocation-id']
         else:
-            ref['pages'] = f'{front['article-meta']['fpage']}-{front['article-meta']['lpage']}'
+            ref['pages'] = f"{front['article-meta']['fpage']}-{front['article-meta']['lpage']}"
 
         ref['pages'] = parseTextField(ref['pages'])
 
