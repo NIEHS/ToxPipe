@@ -561,6 +561,8 @@ def create_react_agent(
         global CURRENT_DELIBERATION_STEP
         CURRENT_DELIBERATION_STEP = CURRENT_DELIBERATION_STEP # This is just so the Python linter doesn't complain
 
+        print(f"> STEP: {CURRENT_DELIBERATION_STEP} / {MAX_DELIBERATION_STEPS}")
+
         if CURRENT_DELIBERATION_STEP > MAX_DELIBERATION_STEPS:
             return "SUMMARY_NODE"
 

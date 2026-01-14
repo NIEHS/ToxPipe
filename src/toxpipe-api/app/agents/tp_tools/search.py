@@ -16,7 +16,18 @@ if os.path.exists(DIR_HOME / ".config" / ".env"):
     env_config = dotenv_values(DIR_HOME / ".config" / ".env")
 
 N_PAPERS = env_config["TOXPIPE_MAX_PAPERS"]
+try:
+    N_PAPERS = int(N_PAPERS)
+except Exception as e:
+    N_PAPERS = 10
+
 PAPER_CONTENT_SIZE = env_config["TOXPIPE_PAPER_CONTENT_MAX_SIZE"]
+
+try:
+    PAPER_CONTENT_SIZE = int(PAPER_CONTENT_SIZE)
+except Exception as e:
+    PAPER_CONTENT_SIZE = 10000
+
 PUBMED_API_KEY = env_config["TOXPIPE_PUBMED_API_KEY"]
 
 #### ADAPTED CODE FROM AMLAN'S PUBMED TOOL
@@ -25,64 +36,6 @@ def search_pubmed_article(query: str,
                           content_size: int|None=None,
                           api_key: str='') -> list:
     """Returns a list of pubmed reference and article content for a given query"""
-    
-    # def doi2apa(doi):
-    #     url = f'http://dx.doi.org/{doi}'
-    #     response = requests.get(url, headers={'accept':'text/x-bibliography; style=apa'})
-    #     if not response.ok: raise Exception(response.text)
-    #     return response.text.strip()
-        
-    # def getPubMedArticle(pmcid):
-
-    #     url = f'https://www.ncbi.nlm.nih.gov/research/bionlp/RESTful/pmcoa.cgi/BioC_json/PMC{pmcid}/unicode'
-    #     response = requests.get(url)
-    #     if not response.ok: raise Exception(response.text)
-    #     try:
-    #         return response.json()
-    #     except:
-    #         raise Exception(response.text)
-        
-    # def getPubMedArticlePubtator(pmid):
-    #     url = f'https://www.ncbi.nlm.nih.gov/research/pubtator3-api/publications/export/biocjson?pmids={pmid}&full=true'
-    #     response = requests.get(url)
-    #     if not response.ok: raise Exception(response.text)
-    #     try:
-    #         return response.json()
-    #     except:
-    #         raise Exception(response.text)
-        
-    # def getArticleBioC(pmcid):
-
-    #     exclude_sections: list=['REF', 'METHODS', 'RESULTS']
-
-    #     d = getPubMedArticle(pmcid=pmcid)
-    #     passages = d[0]['documents'][0]['passages']
-    #     doi = passages[0]['infons']['article-id_doi']
-
-    #     # d = getPubMedArticlePubtator(pmid=pmid)
-    #     # passages = d['PubTator3'][0]['passages']
-    #     # if 'journal' in passages[0]['infons']:
-    #     #     doi = passages[0]['infons']['journal'].split('doi:')[-1].split('. ')[0].strip()
-    #     # elif 'article-id_doi' in passages[0]['infons']:
-    #     #     doi = passages[0]['infons']['article-id_doi']
-    #     # else:
-    #     #     raise Exception('DOI could not be found')
-
-    #     ref = doi2apa(doi)
-
-    #     section_type, section_content = '', ''
-    #     content = '' 
-    #     for item in passages[1:] + [{'infons': {'section_type': '', 'type': ''}, 'text': ''}]:
-
-    #         if item['infons']['section_type'] in exclude_sections : continue
-    #         if section_type != item['infons']['section_type']:
-    #             if section_type != '' and section_content != '':
-    #                 content += (('\n\n\n' if content != '' else '') + f'**{section_type}**\n\n{section_content}')
-    #         section_type = item['infons']['section_type']
-    #         section_content += f'\n*{item['text']}*\n' if 'title' in item['infons']['type'] else item['text']
-
-    #     return ref, content
-    
     
     def getPubMedArticleEutils(pmcid):
         url = f'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id={pmcid}&rettype=full&api_key={api_key}'
@@ -207,8 +160,6 @@ def search_pubmed_article(query: str,
         except:
             raise Exception(response.text)
 
-    print(query)
-
     try:
         res = searchLiterature(query)
         ids = res['eSearchResult']['IdList']
@@ -227,7 +178,7 @@ def search_pubmed_article(query: str,
         except Exception as exp:
             print(f'In getArticleEutils(pmcid={id}):, Line number: {exp.__traceback__.tb_lineno}, Description: {exp}\n\n{traceback.format_exc()}')
             continue
-
+        
         if content_size is not None: body = body[:content_size]
         
         res.append({"ref": ref, "abstract": abstract, "body": body})
@@ -243,7 +194,9 @@ def paper_scraper(search: str, pdir: str = "query") -> dict:
     try:
         res = search_pubmed_article(query=search, max_results=N_PAPERS, content_size=PAPER_CONTENT_SIZE, api_key=PUBMED_API_KEY)
         return res
-    except Exception:
+    except Exception as e:
+        print(e)
+        print( traceback.print_exc())
         return {}
 
 def paper_search(llm, query: str):
@@ -267,6 +220,7 @@ def scholar2result_llm(llm, query: str):
     technical knowledge. Ask a specific question."""
 
     papers = paper_search(llm, query)
+
     if len(papers) == 0:
         #return "Not enough papers found"
         return ""
@@ -307,7 +261,8 @@ class Scholar2ResultLLM(BaseTool):
         self.llm = llm
 
     def _run(self, query:str, **kwargs) -> str:
-        return scholar2result_llm(self.llm, query)
+        search_response = scholar2result_llm(self.llm, query)
+        return search_response
 
     async def _arun(self, query) -> str:
         """Use the tool asynchronously."""
