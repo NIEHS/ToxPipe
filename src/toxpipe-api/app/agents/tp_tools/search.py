@@ -143,7 +143,7 @@ def search_pubmed_article(query: str,
 
         ref['pages'] = parseTextField(ref['pages'])
 
-        abstract = front['article-meta']['abstract']
+        abstract = front['article-meta'].get('abstract', [])
         body = d['pmc-articleset']['article']['body']
         
         abstract = ' '.join(parseText(abstract))
