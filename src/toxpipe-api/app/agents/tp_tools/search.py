@@ -72,7 +72,7 @@ def search_pubmed_article(query: str,
         def extractAuthors(contrib):
             if 'collab' in contrib:
                 return {'first_name': '', 
-                        'last_name': contrib['collab'].strip()}
+                        'last_name': parseTextField(contrib['collab']).strip()}
             else:
                 return {'first_name': contrib['name']['given-names']['#text'].strip(), 
                         'last_name': contrib['name']['surname'].strip()}
@@ -100,8 +100,8 @@ def search_pubmed_article(query: str,
     
         authors = []            
 
-        contrib_group = front['article-meta']['contrib-group']
-    
+        contrib_group = front['article-meta'].get('contrib-group')
+        
         if isinstance(contrib_group, list):
             for contrib_group_element in contrib_group:
                 if isinstance(contrib_group_element['contrib'], list):
@@ -112,14 +112,15 @@ def search_pubmed_article(query: str,
                     contrib = contrib_group_element['contrib']
                     if contrib['@contrib-type'] == 'author':
                             authors.append(extractAuthors(contrib))
-        elif isinstance(contrib_group['contrib'], list):
-            for contrib in contrib_group['contrib']:
+        elif isinstance(contrib_group, dict):
+            if isinstance(contrib_group['contrib'], list):
+                for contrib in contrib_group['contrib']:
+                    if contrib['@contrib-type'] == 'author':
+                        authors.append(extractAuthors(contrib))
+            elif isinstance(contrib_group['contrib'], dict):
+                contrib = contrib_group['contrib']
                 if contrib['@contrib-type'] == 'author':
                     authors.append(extractAuthors(contrib))
-        else:
-            contrib = contrib_group['contrib']
-            if contrib['@contrib-type'] == 'author':
-                authors.append(extractAuthors(contrib))
             
 
         ref['authors'] = authors
