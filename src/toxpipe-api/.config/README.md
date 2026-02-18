@@ -1,3 +1,0 @@
-# Configuration
-
-Configurations go here.
