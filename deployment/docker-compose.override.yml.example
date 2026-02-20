@@ -5,22 +5,22 @@ version: '3.4'
 services:
 
 # Traefik reverse proxy
-  traefik:
-    image: traefik:v2.11.2
-    ports:
-      - "80:80" # for HTTP
-      - "443:443" # for HTTPS
-      - "8080:8080" # for Traefik dashboard
-    restart: always
-    volumes:
-      - cert.key:/etc/traefik/tls/toxpipe_niehs_nih_gov.key # CHANGEME - use your own certs
-      - cert.crt:/etc/traefik/tls/toxpipe_niehs_nih_gov.crt # CHANGEME
-      - chain.crt:/etc/traefik/tls/nih-dpki-chain.crt # CHANGEME
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./traefik/config.yml:/etc/traefik/config.yml
-      - ./traefik/traefik.yml:/etc/traefik/traefik.yml
-    networks:
-      - autonomous
+#  traefik:
+#    image: traefik:v2.11.2
+#    ports:
+#      - "80:80" # for HTTP
+#      - "443:443" # for HTTPS
+#      - "8080:8080" # for Traefik dashboard
+#    restart: always
+#    volumes:
+#      - cert.key:/etc/traefik/tls/toxpipe_niehs_nih_gov.key # CHANGEME - use your own certs
+#      - cert.crt:/etc/traefik/tls/toxpipe_niehs_nih_gov.crt # CHANGEME
+#      - chain.crt:/etc/traefik/tls/nih-dpki-chain.crt # CHANGEME
+#      - /var/run/docker.sock:/var/run/docker.sock
+#      - ./traefik/config.yml:/etc/traefik/config.yml
+#      - ./traefik/traefik.yml:/etc/traefik/traefik.yml
+#    networks:
+#      - autonomous
 
 # LibreChat API service
   api:
@@ -28,9 +28,9 @@ services:
     volumes:
       - ./librechat.yaml:/app/librechat.yaml
       - ./.env:/app/.env
-    labels:
-      traefik.docker.network: "autonomous"
-      traefik.enable: "true"
+#    labels:
+#      traefik.docker.network: "autonomous"
+#      traefik.enable: "true"
     networks:
       - autonomous
 
@@ -122,9 +122,9 @@ services:
       LANGFUSE_PUBLIC_KEY: pk-xxxx # CHANGEME
       LANGFUSE_SECRET_KEY: sk-xxxx # CHANGEME
       LANGFUSE_HOST: http://langfuse-server:3000
-    labels:
-      traefik.docker.network: "autonomous"
-      traefik.enable: "true"
+#    labels:
+#      traefik.docker.network: "autonomous"
+#      traefik.enable: "true"
     networks:
       - autonomous
 
@@ -264,9 +264,9 @@ services:
       AUTH_AZURE_AD_TENANT_ID: ${LANGFUSE_AZURE_AD_TENANT_ID}
       AUTH_AZURE_ALLOW_ACCOUNT_LINKING: true
       LANGFUSE_DEBUG: true
-    labels:
-      traefik.docker.network: "autonomous"
-      traefik.enable: "true"
+#    labels:
+#      traefik.docker.network: "autonomous"
+#      traefik.enable: "true"
     networks:
       - autonomous
 
@@ -296,9 +296,9 @@ services:
       AUTH_AZURE_AD_TENANT_ID: ${LANGFUSE_AZURE_AD_TENANT_ID}
       AUTH_AZURE_ALLOW_ACCOUNT_LINKING: true
       LANGFUSE_DEBUG: true
-    labels:
-      traefik.docker.network: "autonomous"
-      traefik.enable: "true"
+#    labels:
+#      traefik.docker.network: "autonomous"
+#      traefik.enable: "true"
     networks:
       - autonomous
 
@@ -323,9 +323,9 @@ services:
       timeout: 5s
       retries: 10
       start_period: 1s
-    labels:
-      traefik.docker.network: "autonomous"
-      traefik.enable: "true"
+#    labels:
+#      traefik.docker.network: "autonomous"
+#      traefik.enable: "true"
     networks:
       - autonomous
 
@@ -350,9 +350,9 @@ services:
       timeout: 5s
       retries: 5
       start_period: 1s
-    labels:
-      traefik.docker.network: "autonomous"
-      traefik.enable: "true"
+#    labels:
+#      traefik.docker.network: "autonomous"
+#      traefik.enable: "true"
     networks:
       - autonomous
 
@@ -372,9 +372,9 @@ services:
       interval: 3s
       timeout: 10s
       retries: 10
-    labels:
-      traefik.docker.network: "autonomous"
-      traefik.enable: "true"
+#    labels:
+#      traefik.docker.network: "autonomous"
+#      traefik.enable: "true"
     networks:
       - autonomous
 
@@ -395,9 +395,9 @@ services:
       - 5435:5432
     volumes:
       - langfuse_postgres_data:/var/lib/postgresql/data
-    labels:
-      traefik.docker.network: "autonomous"
-      traefik.enable: "true"
+#    labels:
+#      traefik.docker.network: "autonomous"
+#      traefik.enable: "true"
     networks:
       - autonomous
 
@@ -457,8 +457,8 @@ services:
 # Define Traefik network
 networks:
   autonomous:
-    driver: overlay
-    external: true
+    driver: bridge #overlay
+    #external: true
 
 # Volumes
 volumes:
