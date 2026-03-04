@@ -38,7 +38,7 @@ litellm_settings:
     supported_call_types: ["acompletion", "completion", "embedding", "aembedding"]
 
 general_settings:
-  master_key: 12345
+  master_key: ${API_MASTER_KEY}
 
 assistant_settings:
   custom_llm_provider: azure
