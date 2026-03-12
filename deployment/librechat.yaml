@@ -1,0 +1,316 @@
+# For more information, see the Configuration Guide:
+# https://docs.librechat.ai/install/configuration/custom_config.html
+
+# Configuration version (required)
+version: 1.1.7
+
+cache: false
+
+fileConfig:
+  serverFileSizeLimit: 2000 # in MB
+  endpoints:
+    assistants:
+      fileLimit: 5
+      fileSizeLimit: 2000
+      totalSizeLimit: 2000
+    openAI:
+      disabled: true
+      fileLimit: 5
+      fileSizeLimit: 2000
+      totalSizeLimit: 2000
+    azureOpenAI:
+      disabled: true
+      fileLimit: 5
+      fileSizeLimit: 2000
+      totalSizeLimit: 2000
+    google:
+      disabled: true
+      fileLimit: 5
+      fileSizeLimit: 2000
+      totalSizeLimit: 2000
+    default:
+      fileLimit: 5
+      fileSizeLimit: 2000
+      totalSizeLimit: 2000
+
+filteredTools: ["traversaal_search", "google", "e2b_code_interpreter", "codesherpa_tools", "serpapi", "dall-e", "tavily_search_results_json", "stable-diffusion", "zapier", "Ai_PDF", "Dr_Thoths_Tarot", "DreamInterpreter", "drink_maestro", "earthImagesAndVisualizations", "uberchord", "VoxScript"]
+
+interface:
+  modelSelect: true
+  parameters: true
+  presets: true
+  privacyPolicy:
+    externalUrl: 'https://librechat.ai/privacy-policy'
+    openNewTab: true
+  termsOfService:
+    externalUrl: 'https://librechat.ai/tos'
+    openNewTab: true
+
+registration:
+  socialLogins: ['openid']
+
+#ocr:
+#  mistralModel: 'mistral-ocr-2505'
+#  strategy: 'vertexai_mistral_ocr'
+
+  #modelSpecs:
+  #enforce: false
+  #prioritize: true
+  #list:
+  #  - name: "ollama-gpt-oss-20b"
+  #    label: "GPT-OSS 20b (Ollama)"
+  #    default: true
+  #    preset:
+  #      endpoint: "Ollama (Locally Hosted)"
+  #      model: "ollama-gpt-oss-20b"
+  #      disableStreaming: true
+
+endpoints:
+  agents:
+    plugins: true
+    recursionLimit: 30
+    maxRecursionLimit: 60
+
+  custom:
+    - name: "Ollama (Locally Hosted)"
+      apiKey: ${API_MASTER_KEY}
+      iconURL: "https://simpleicons.org/icons/ollama.svg"
+      baseURL: "http://host.docker.internal:8000"
+      models:
+        default: ["ollama-mistral-7b"] #, "ollama-gemma3-12b", "ollama-gemma3-4b", "ollama-llama4-scout", "ollama-llama4-16x17b", "ollama-gpt-oss-20b", "ollama-llama3.1-70b", "ollama-llama3", "ollama-llama3-70b"]
+        fetch: false
+        userIdQuery: True
+      titleConvo: true
+      titleModel: "ollama-mistral-7b"
+      titleMethod: "functions"
+      titleMessageRole: "user"
+      modelDisplayLabel: "Ollama"
+      dropParams:
+        - "stop"
+        - "presence_penalty"
+        - "frequency_penalty"
+
+    - name: "Azure OpenAI"
+      apiKey: ${API_MASTER_KEY}
+      iconURL: "https://icons.getbootstrap.com/assets/icons/openai.svg"
+      baseURL: "http://host.docker.internal:8000"
+      models:
+        default: ["azure-gpt-5"] #"azure-o4-mini", "azure-o3", "azure-o3-pro", "azure-o3-mini", "azure-o3-deep-research", "azure-o1", "azure-o1-mini", "azure-gpt-5", "azure-gpt-5-mini", "azure-gpt-5-nano", "azure-gpt-5-chat", "azure-gpt-4o", "azure-gpt-4o-mini", "azure-gpt-35-turbo"]
+        fetch: false
+        userIdQuery: True
+      titleConvo: true
+      titleModel: "azure-gpt-5"
+      titleMethod: "functions"
+      titleMessageRole: "user"
+      modelDisplayLabel: "Azure OpenAI"
+      dropParams:
+        - "stop"
+        - "presence_penalty"
+        - "frequency_penalty"
+
+    - name: "Google Gemini"
+      apiKey: ${API_MASTER_KEY}
+      iconURL: "https://simpleicons.org/icons/googlegemini.svg"
+      baseURL: "http://host.docker.internal:8000"
+      models:
+        default: ["gemini-2.5-flash"] #"gemini-3.1-pro", "gemini-3.1-flash-lite", "gemini-3-flash", "gemini-3-pro", "gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash-exp", "gemini-1.5-pro-002", "gemini-1.5-flash-002", "gemini-1.0-pro-vision-001", "gemini-1.0-pro-002"]
+        fetch: false
+        userIdQuery: True
+      titleConvo: true
+      titleModel: "gemini-2.5-flash"
+      titleMethod: "functions"
+      titleMessageRole: "user"
+      modelDisplayLabel: "Google Gemini"
+      dropParams:
+        - "stop"
+        - "presence_penalty"
+        - "frequency_penalty"
+
+    - name: "Anthropic Bedrock"
+      apiKey: ${API_MASTER_KEY}
+      iconURL: "https://simpleicons.org/icons/anthropic.svg"
+      baseURL: "http://host.docker.internal:8000"
+      models:
+        default: ["claude-4.5-sonnet"] #, "claude-4.6-opus", "claude-4.5-opus", "claude-4.5-haiku", "claude-4.6-sonnet", "claude-4.1-opus", "claude-4-sonnet", "claude-4-opus", "claude-3-7-sonnet", "claude-3-5-sonnet", "claude-3-opus", "claude-3-haiku", "claude-3-sonnet", "claude-v2", "claude-instant"]
+        fetch: false
+        userIdQuery: True
+      titleConvo: true
+      titleModel: "claude-4.5-sonnet"
+      titleMethod: "functions"
+      titleMessageRole: "user"
+      modelDisplayLabel: "Anthropic Bedrock"
+      dropParams:
+        - "stop"
+        - "presence_penalty"
+        - "frequency_penalty"
+
+    - name: "Mistral AI"
+      apiKey: ${API_MASTER_KEY}
+      baseURL: "http://host.docker.internal:8000"
+      models:
+        default: ["mistral-large-2"] #, "mistral-large-3", "mistral-large", "mistral-7b-instruct", "mistral-8x7b-instruct"]
+        # Attempt to dynamically fetch available models
+        fetch: false
+        userIdQuery: True
+      iconURL: "https://simpleicons.org/icons/mistralai.svg"
+      titleConvo: true
+      titleModel: "mistral-large-2"
+      modelDisplayLabel: "Mistral AI"
+      # addParams:
+      # Mistral API specific value for moderating messages
+      #   safe_prompt: true 
+      dropParams:
+        - "stop"
+        - "user"
+        - "presence_penalty"
+        - "frequency_penalty"
+      # headers:
+      #    x-custom-header: "${CUSTOM_HEADER_VALUE}
+
+    - name: "Meta AI"
+      apiKey: ${API_MASTER_KEY}
+      baseURL: "http://host.docker.internal:8000"
+      models:
+        default: ["llama4-scout-17b-instruct"] #, "llama4-maverick-17b-instruct", "llama3-3-70b", "llama3-2-90b", "llama3-2-11b", "llama3-1-405b", "llama3-1-70b", "llama3-1-8b", "llama3-70b", "llama3-8b"]
+        fetch: false
+        userIdQuery: True
+      iconURL: "https://simpleicons.org/icons/meta.svg"
+      titleConvo: true
+      titleModel: "llama4-scout-17b-instruct"
+      modelDisplayLabel: "Meta AI"
+
+# Tool support via MCP
+mcpServers:
+  ToxPipe-MCP:
+    chatMenu: true
+    type: http
+    url: http://cbtmcp:9222/mcp
+    timeout: 1900000
+    initTimeout: 1900000
+    serverInstructions: false
+    startup: true
+    headers:
+      X-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
+      X-User-Role: "{{LIBRECHAT_USER_ROLE}}"
+      X-User-Google-ID: "{{LIBRECHAT_USER_GOOGLEID}}"
+      x-librechat-thread-id: "{{LIBRECHAT_BODY_CONVERSATIONID}}"
+  lars-civic-mcp-server:
+    chatMenu: true
+    command: "npx"
+    args: ["mcp-remote", "https://civic-mcp-server-v2.larscivic.workers.dev/mcp"]
+    timeout: 1900000
+    initTimeout: 1900000
+    serverInstructions: false
+    startup: true
+  lars-dgidb-mcp-server:
+    chatMenu: true
+    command: "npx"
+    args: ["mcp-remote", "https://dgidb-mcp-server.larscivic.workers.dev/mcp"]
+    timeout: 1900000
+    initTimeout: 1900000
+    serverInstructions: false
+    startup: true
+  TP-MCP-ChEMBL:
+    chatMenu: true
+    type: http
+    url: http://tpmcp-chembl:8888/mcp
+    timeout: 1900000
+    initTimeout: 1900000
+    serverInstructions: false
+    startup: false
+    headers:
+      X-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
+      X-User-Role: "{{LIBRECHAT_USER_ROLE}}"
+      X-User-Google-ID: "{{LIBRECHAT_USER_GOOGLEID}}"
+      x-librechat-thread-id: "{{LIBRECHAT_BODY_CONVERSATIONID}}"
+  TP-MCP-ChemHarmony:
+    chatMenu: true
+    type: http
+    url: http://tpmcp-chemharmony:8888/mcp
+    timeout: 1900000
+    initTimeout: 1900000
+    serverInstructions: false
+    startup: false
+    headers:
+      X-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
+      X-User-Role: "{{LIBRECHAT_USER_ROLE}}"
+      X-User-Google-ID: "{{LIBRECHAT_USER_GOOGLEID}}"
+      x-librechat-thread-id: "{{LIBRECHAT_BODY_CONVERSATIONID}}"
+  TP-MCP-ctxR:
+    chatMenu: true
+    type: http
+    url: http://tpmcp-ctxr:8888/mcp
+    timeout: 1900000
+    initTimeout: 1900000
+    serverInstructions: false
+    startup: false
+    headers:
+      X-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
+      X-User-Role: "{{LIBRECHAT_USER_ROLE}}"
+      X-User-Google-ID: "{{LIBRECHAT_USER_GOOGLEID}}"
+      x-librechat-thread-id: "{{LIBRECHAT_BODY_CONVERSATIONID}}"
+  TP-MCP-EFSA:
+    chatMenu: true
+    type: http
+    url: http://tpmcp-efsa:8888/mcp
+    timeout: 1900000
+    initTimeout: 1900000
+    serverInstructions: false
+    startup: false
+    headers:
+      X-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
+      X-User-Role: "{{LIBRECHAT_USER_ROLE}}"
+      X-User-Google-ID: "{{LIBRECHAT_USER_GOOGLEID}}"
+      x-librechat-thread-id: "{{LIBRECHAT_BODY_CONVERSATIONID}}"
+  TP-MCP-enrichr:
+    chatMenu: true
+    type: http
+    url: http://tpmcp-enrichr:8888/mcp
+    timeout: 1900000
+    initTimeout: 1900000
+    serverInstructions: false
+    startup: false
+    headers:
+      X-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
+      X-User-Role: "{{LIBRECHAT_USER_ROLE}}"
+      X-User-Google-ID: "{{LIBRECHAT_USER_GOOGLEID}}"
+      x-librechat-thread-id: "{{LIBRECHAT_BODY_CONVERSATIONID}}"
+  TP-MCP-EPISuite:
+    chatMenu: true
+    type: http
+    url: http://tpmcp-episuite:8888/mcp
+    timeout: 1900000
+    initTimeout: 1900000
+    serverInstructions: false
+    startup: false
+    headers:
+      X-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
+      X-User-Role: "{{LIBRECHAT_USER_ROLE}}"
+      X-User-Google-ID: "{{LIBRECHAT_USER_GOOGLEID}}"
+      x-librechat-thread-id: "{{LIBRECHAT_BODY_CONVERSATIONID}}"
+  TP-MCP-msigdbr:
+    chatMenu: true
+    type: http
+    url: http://tpmcp-msigdbr:8888/mcp
+    timeout: 1900000
+    initTimeout: 1900000
+    serverInstructions: false
+    startup: false
+    headers:
+      X-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
+      X-User-Role: "{{LIBRECHAT_USER_ROLE}}"
+      X-User-Google-ID: "{{LIBRECHAT_USER_GOOGLEID}}"
+      x-librechat-thread-id: "{{LIBRECHAT_BODY_CONVERSATIONID}}"
+  TP-MCP-ToxTree:
+    chatMenu: true
+    type: http
+    url: http://tpmcp-toxtree:8888/mcp
+    timeout: 1900000
+    initTimeout: 1900000
+    serverInstructions: false
+    startup: false
+    headers:
+      X-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
+      X-User-Role: "{{LIBRECHAT_USER_ROLE}}"
+      X-User-Google-ID: "{{LIBRECHAT_USER_GOOGLEID}}"
+      x-librechat-thread-id: "{{LIBRECHAT_BODY_CONVERSATIONID}}"

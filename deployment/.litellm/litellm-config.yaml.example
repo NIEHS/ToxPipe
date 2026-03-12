@@ -1,47 +1,84 @@
-# LiteLLM configuration file
-
 model_list:
   # AWS format
-  - model_name: model-name
+  - model_name: llama4-scout-17b-instruct
     litellm_params:
-      model: bedrock/model-name
+      model: bedrock/us.meta.llama4-scout-17b-instruct-v1:0 # Need inference profile since llama3.2+ doesn't support on-demand throughput
       aws_region_name: us-east-1
-      aws_access_key_id: 12345
-      aws_secret_access_key: 12345
+      aws_access_key_id: os.environ/AWS_ACCESS_KEY
+      aws_secret_access_key: os.environ/AWS_ACCESS_SECRET
   
   # Azure OpenAI format
-  - model_name: model-name
+  - model_name: azure-gpt-5
     litellm_params:
-      model: azure/model-name
-      api_base: https://example.openai.azure.com
-      api_key: 12345
+      model: azure/gpt-5
+      api_base: os.environ/AZURE_ENDPOINT
+      api_key: os.environ/AZURE_KEY
       api_version: 2024-12-01-preview
 
   # Google Vertex AI format
-  - model_name: model-name
+  - model_name: gemini-2.5-flash
     litellm_params:
-      model: vertex_ai/model-name
-      vertex_project: project-name
-      vertex_location: us-central1
+      model: gemini/gemini-2.5-flash
+      api_key: os.environ/GOOGLE_API_KEY
 
   # Ollama format
-  - model_name: model-name
+  - model_name: ollama-mistral-7b
     litellm_params:
-      model: ollama/model-name
+      model: ollama/mistral:7b
       api_base: http://ollama:11434
+
+  # Anthropic Claude Format
+  - model_name: claude-4.5-sonnet
+    litellm_params:
+      model: bedrock/us.anthropic.claude-sonnet-4-5-20250929-v1:0
+      aws_region_name: us-east-1
+      aws_access_key_id: os.environ/AWS_ACCESS_KEY
+      aws_secret_access_key: os.environ/AWS_ACCESS_SECRET
+
+  # Mistral Large 2 (24.07)
+  - model_name: mistral-large-2
+    litellm_params:
+      model: bedrock/mistral.mistral-large-2407-v1:0
+      aws_region_name: us-west-2
+      aws_access_key_id: os.environ/AWS_ACCESS_KEY_ID
+      aws_secret_access_key: os.environ/AWS_SECRET_ACCESS_KEY
 
 litellm_settings:
   success_callback: ["langfuse"]
   cache: False
   drop_params: True
   cache_params:
+  #  type: "redis"
     supported_call_types: ["acompletion", "completion", "embedding", "aembedding"]
 
 general_settings:
-  master_key: ${API_MASTER_KEY}
+  master_key: os.environ/API_MASTER_KEY
 
 assistant_settings:
   custom_llm_provider: azure
   litellm_params: 
-    api_key: 12345
-    api_base: https://example.openai.azure.com
+    api_key: os.environ/AZURE_KEY
+    api_base: os.environ/AZURE_ENDPOINT
+
+files_settings:
+  - custom_llm_provider: azure
+    api_key: os.environ/AZURE_KEY
+    api_base: os.environ/AZURE_ENDPOINT
+
+router_settings:
+  routing_strategy: least-busy # Literal["simple-shuffle", "least-busy", "usage-based-routing","latency-based-routing"], default="simple-shuffle"
+  num_retries: 10 
+  timeout: 14400
+
+guardrails:
+  - guardrail_name: "ToxPipe-Claude"
+    litellm_params:
+      guardrail: bedrock
+      mode: "during_call"
+      guardrailIdentifier: 8lmavblrfjlk
+      guardrailVersion: "DRAFT"
+      aws_region_name: os.environ/AWS_REGION
+      aws_role_name: os.environ/AWS_ROLE_ARN
+      disable_exception_on_block: true
+
+

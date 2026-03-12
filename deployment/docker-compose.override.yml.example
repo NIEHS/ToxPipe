@@ -4,131 +4,133 @@ version: '3.4'
 
 services:
 
-# Traefik reverse proxy
-#  traefik:
-#    image: traefik:v2.11.2
-#    ports:
-#      - "80:80" # for HTTP
-#      - "443:443" # for HTTPS
-#      - "8080:8080" # for Traefik dashboard
-#    restart: always
-#    volumes:
-#      - cert.key:/etc/traefik/tls/toxpipe_niehs_nih_gov.key # CHANGEME - use your own certs
-#      - cert.crt:/etc/traefik/tls/toxpipe_niehs_nih_gov.crt # CHANGEME
-#      - chain.crt:/etc/traefik/tls/nih-dpki-chain.crt # CHANGEME
-#      - /var/run/docker.sock:/var/run/docker.sock
-#      - ./traefik/config.yml:/etc/traefik/config.yml
-#      - ./traefik/traefik.yml:/etc/traefik/traefik.yml
-#    networks:
-#      - autonomous
-
-# LibreChat API service
+# USE LIBRECHAT CONFIG FILE
   api:
-    image: ghcr.io/danny-avila/librechat:latest
     volumes:
       - ./librechat.yaml:/app/librechat.yaml
       - ./.env:/app/.env
-#    labels:
-#      traefik.docker.network: "autonomous"
-#      traefik.enable: "true"
+      - ../cbt-mcp/src/cbtmcp.py:/app/cbtmcp/cbtmcp.py
+      - ../cbt-mcp/mcpenv/:/app/cbtmcp/mcpenv/
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
     networks:
       - autonomous
+    environment:
+      - MEILI_NO_SYNC=true
 
-# MongoDB instance for LibreChat
   mongodb:
     networks:
       - autonomous
-
-# Meilisearch instance for LibreChat
+    ports:
+      - 27017:27017
   meilisearch:
     networks:
       - autonomous
 
-# Dashy dashboard for all services
   dashy:
     image: lissy93/dashy:latest
     networks:
       - autonomous
     ports:
-      - 8082:8080
+      - 8082:443
     volumes:
       - ./user-data/:/app/user-data/
 
-# RAG API with embeddings support for LibreChat
+
+# USE RAG API IMAGE WITH LOCAL EMBEDDINGS SUPPORT
   rag_api:
     image: ghcr.io/danny-avila/librechat-rag-api-dev:latest
     environment:
-      - AZURE_OPENAI_ENDPOINT=https://toxpipe-chat.openai.azure.com
+      - AZURE_OPENAI_ENDPOINT=${AZURE_ENDPOINT}
       - OPENAI_API_VERSION=2024-02-01
     networks:
       - autonomous
     ports:
       - 8001:8000
 
-# Postgres with pgvector for vector DB support
   vectordb:
     image: pgvector/pgvector:pg16
     ports:
       - 5432:5432
     environment:
       - POSTGRES_USER=${VECTDB_POSTGRES_USER}
-      - POSTGRES_PASSWORD=${VECTDB_POSTGRES_PASSWORD} 
-      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=${VECTDB_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${VECTDB_POSTGRES_DB}
     volumes:
       - librechat-pg:/var/lib/postgresql/data
     networks:
       - autonomous
 
-# Ollama for local model deployment, requires NVIDIA GPU with docker support
   ollama:
     container_name: ollama
     image: ollama/ollama:latest
-#    deploy: #uncomment this section for gpu performance with ollama
-#      resources:
-#        reservations:
-#          devices:
-#            - driver: nvidia
-#              capabilities: [compute, utility]
-    ports:
-      - "11434:11434"
+    #deploy:
+    #  resources:
+    #    reservations:
+    #      devices:
+    #        - driver: nvidia
+    #          capabilities: [compute, utility]
+              #ports:
+              #- 11434:11434
     volumes:
-      - ./models:/root/models
-      - ./ollama:/root/.ollama
+      - /data/models:/root/models
+      - ollama:/root/.ollama
     networks:
       - autonomous
 
-# LiteLLM - NEED TO CONFIGURE litellm-config.yaml, ONLY NEED ENV TO ENABLE REDIS FOR CACHING OR LANGFUSE FOR MONITORING
+  # ADD LITELLM BASIC - NEED TO CONFIGURE litellm-config.yaml, ONLY NEED ENV TO ENABLE REDIS FOR CACHING OR LANGFUSE FOR MONITORING
   litellm:
     container_name: litellm
     image: ghcr.io/berriai/litellm:main-latest
+    #image: ghcr.io/berriai/litellm:main-v1.61.1
     ports:
       - "8000:8000"
     volumes:
       - ./.litellm/litellm-config.yaml:/app/config.yaml
       - ./api/data/auth.json:/app/application_default_credentials.json
     depends_on:
-      - litellm-db
+      litellm-db:
+        condition: service_healthy
     restart: unless-stopped
-    command: [ "--config", "/app/config.yaml", "--port", "8000", "--num_workers", "1" ]
+    command: [ "--config", "/app/config.yaml", "--port", "8000", "--num_workers", "1" ] #CHANGE FOR MORE WORKERS
+    env_file:
+      - .env
     environment:
-      UI_USERNAME: ${LITELLM_UI_USER} 
-      UI_PASSWORD: ${LITELLM_UI_PASSWORD} 
-      GOOGLE_APPLICATION_CREDENTIALS: /app/application_default_credentials.json
-      OPENAI_API_KEY: ollama # needs to be set if ollama's openai api compatibility is used
-      DATABASE_URL: postgresql://${LITELLM_DB_USER}:${LITELLM_DB_PASSWORD}@litellm-db:5432/postgres 
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: ${LITELLM_REDIS_PASSWORD} 
-      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY} 
-      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY} 
+      UI_USERNAME: ${UI_USERNAME}
+      UI_PASSWORD: ${UI_PASSWORD}
+      #GOOGLE_APPLICATION_CREDENTIALS: /app/application_default_credentials.json
+      #OPENAI_API_KEY: ollama ## needs to be set if ollama's openai api compatibility is used
+      DATABASE_URL: postgresql://${LITELLM_DB_POSTGRES_USER}:${LITELLM_DB_POSTGRES_PASSWORD}@litellm-db:5432/${LITELLM_DB_POSTGRES}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY}
       LANGFUSE_HOST: http://langfuse-server:3000
-#    labels:
-#      traefik.docker.network: "autonomous"
-#      traefik.enable: "true"
+      #LITELLM_LOG: DEBUG
+      AWS_REGION: us-east-1
+      AWS_ROLE_ARN: arn:aws:account::956747263890:account
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
     networks:
       - autonomous
 
-# Redis for LiteLLM caching
+  llama-index-mongodb:
+    container_name: llama-index-mongodb
+    image: mongo
+    restart: always
+    user: "${UID}:${GID}"
+    volumes:
+      - ./llama-index-mongodb-data:/data/db
+    command: mongod --noauth --dbpath /data/db
+    networks:
+      - autonomous
+    ports:
+      - 7733:27017
+
+  # ADD LITELLM CACHING
   redis:
     image: redis:7-alpine
     command:
@@ -136,20 +138,21 @@ services:
     - -c # this is to evaluate the $REDIS_PASSWORD from the env
     - redis-server --appendonly yes --requirepass $$REDIS_PASSWORD ## $$ because of docker-compose
     environment:
-      REDIS_PASSWORD: ${LITELLM_REDIS_PASSWORD} 
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
     volumes:
       - ./redis:/data
     networks:
       - autonomous
 
-# Postgres for LiteLLM
   litellm-db:
     image: postgres:16.4
     restart: always
     environment:
-      - POSTGRES_USER=${LITELLM_DB_USER}
-      - POSTGRES_PASSWORD=${LITELLM_DB_PASSWORD}
-      - POSTGRES_DB=postgres
+      - POSTGRES_USER=${LITELLM_DB_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${LITELLM_DB_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${LITELLM_DB_POSTGRES}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${LITELLM_DB_POSTGRES_USER}"]
     ports:
       - 5434:5432
     volumes:
@@ -157,25 +160,39 @@ services:
     networks:
       - autonomous
 
-# Dozzle for live log monitoring
+  # Live log monitoring
   dozzle:
     container_name: dozzle
     image: amir20/dozzle:latest
+    environment:
+      - DOZZLE_AUTH_PROVIDER=simple
+    secrets:
+      - source: users
+        target: /data/users.yml
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - dozzle:/data
     ports:
       - 8888:8080
     networks:
       - autonomous
 
-# Mongo Express for LibreChat's MongoDB instance
+# ADD MONGO-EXPRESS
   mongo-express:
-    image: mongo-express
+    image: mongo-express:latest
     container_name: mongo-express
     environment:
-      ME_CONFIG_MONGODB_SERVER: mongodb
-      ME_CONFIG_BASICAUTH_USERNAME: ${ME_CONFIG_BASICAUTH_USERNAME} 
-      ME_CONFIG_BASICAUTH_PASSWORD: ${ME_CONFIG_BASICAUTH_PASSWORD} 
+            #ME_CONFIG_MONGODB_URL: mongodb://toxpipe-user:i9ckGdM9hnDXk@mongodb:27017
+      ME_CONFIG_MONGODB_URL: mongodb://mongodb:27017
+      ME_CONFIG_BASICAUTH_ENABLED: true # This enables non-default user/pwd login 
+      ME_CONFIG_BASICAUTH_USERNAME: ${ME_CONFIG_BASICAUTH_USERNAME}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${ME_CONFIG_BASICAUTH_PASSWORD}
+      #ME_CONFIG_MONGODB_ENABLE_ADMIN: true
+      #ME_CONFIG_MONGODB_ADMINUSERNAME: toxpipe-user
+      #ME_CONFIG_MONGODB_ADMINPASSWORD: i9ckGdM9hnDXk
+      #ME_CONFIG_MONGODB_AUTH_DATABASE: admin
+      #ME_CONFIG_MONGODB_AUTH_USERNAME: toxpipe-user
+      #ME_CONFIG_MONGODB_AUTH_PASSWORD: i9ckGdM9hnDXk
     ports:
       - '8081:8081'
     depends_on:
@@ -184,7 +201,7 @@ services:
     networks:
       - autonomous
 
-# ChromaDB database that hosts embeddings for NTP documents
+  # ChromaDB database that hosts embeddings for NTP documents
   chromadb:
     image: ghcr.io/chroma-core/chroma:latest
     #image: ghcr.io/chroma-core/chroma:0.6.4.dev361 # use specific version to avoid breaking changes, updating this causes a key error in the agentic API 
@@ -192,12 +209,33 @@ services:
     restart: always
     ports:
       - "8009:8000" # LiteLLM already uses 8000, so we use 8009 for ChromaDB
+    healthcheck:
+      test: [ "CMD", "/bin/bash", "-c", "cat < /dev/null > /dev/tcp/localhost/8000" ]
+      interval: 30s
+      timeout: 3600s
+      retries: 5
     volumes:
       - ./ntp_docs_rag_db/chroma-data:/data
     networks:
       - autonomous
 
-# Langfuse worker 
+  # ChromaDB database that hosts gene embeddings
+  chromadb-genes:
+    image: ghcr.io/chroma-core/chroma:1.0.0
+    container_name: chromadb-genes
+    restart: always
+    ports:
+      - "8099:8000" # LiteLLM already uses 8000, so we use 8099 for ChromaDB
+    healthcheck:
+      test: [ "CMD", "/bin/bash", "-c", "cat < /dev/null > /dev/tcp/localhost/8000" ]
+      interval: 30s
+      timeout: 3600s
+      retries: 5
+    volumes:
+      - ./chromadb_genes/chroma-data:/data
+    networks:
+      - autonomous
+
   langfuse-worker:
     image: docker.io/langfuse/langfuse-worker:3
     restart: always
@@ -213,16 +251,16 @@ services:
     ports:
       - 3030:3030
     environment: &langfuse-worker-env
-      NEXTAUTH_URL: ${LANGFUSE_SERVER_URL} 
-      DATABASE_URL: postgresql://${LANGFUSE_DB_USER}:${LANGFUSE_DB_PASSWORD}@langfuse-db:5432/postgres
-      SALT: ${LANGFUSE_WORKER_SALT} 
-      ENCRYPTION_KEY: ${LANGFUSE_WORKER_KEY} 
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      DATABASE_URL: postgresql://${LANGFUSE_DB_POSTGRES_USER}:${LANGFUSE_DB_POSTGRES_PASSWORD}@langfuse-db:5432/${LANGFUSE_DB_POSTGRES}
+      SALT: ${SALT}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       TELEMETRY_ENABLED: ${TELEMETRY_ENABLED:-true}
       LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES: ${LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES:-true}
       CLICKHOUSE_MIGRATION_URL: ${CLICKHOUSE_MIGRATION_URL:-clickhouse://clickhouse:9000}
       CLICKHOUSE_URL: ${CLICKHOUSE_URL:-http://clickhouse:8123}
-      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-clickhouse} 
-      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-clickhouse} 
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-clickhouse}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-clickhouse} # CHANGEME
       CLICKHOUSE_CLUSTER_ENABLED: ${CLICKHOUSE_CLUSTER_ENABLED:-false}
       LANGFUSE_USE_AZURE_BLOB: ${LANGFUSE_USE_AZURE_BLOB:-false}
       LANGFUSE_S3_EVENT_UPLOAD_BUCKET: ${LANGFUSE_S3_EVENT_UPLOAD_BUCKET:-langfuse}
@@ -252,11 +290,11 @@ services:
       LANGFUSE_INGESTION_CLICKHOUSE_WRITE_INTERVAL_MS: ${LANGFUSE_INGESTION_CLICKHOUSE_WRITE_INTERVAL_MS:-}
       REDIS_HOST: ${REDIS_HOST:-redis-langfuse}
       REDIS_PORT: ${REDIS_PORT:-6379}
-      REDIS_AUTH: ${LANGFUSE_REDIS_PASSWORD} 
+      REDIS_AUTH: ${REDIS_AUTH:-Dfrf7J57t^h7uyt8$zp65DBP2} # CHANGEME
       REDIS_TLS_ENABLED: ${REDIS_TLS_ENABLED:-false}
-      REDIS_TLS_CA: ${REDIS_TLS_CA:-/certs/ca.crt} # CHANGEME, should be false
-      REDIS_TLS_CERT: ${REDIS_TLS_CERT:-/certs/redis.crt} # CHANGEME
-      REDIS_TLS_KEY: ${REDIS_TLS_KEY:-/certs/redis.key} # CHANGEME
+      REDIS_TLS_CA: ${REDIS_TLS_CA:-/certs/ca.crt}
+      REDIS_TLS_CERT: ${REDIS_TLS_CERT:-/certs/redis.crt}
+      REDIS_TLS_KEY: ${REDIS_TLS_KEY:-/certs/redis.key}
       EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:-}
       SMTP_CONNECTION_URL: ${SMTP_CONNECTION_URL:-}
       AUTH_AZURE_AD_CLIENT_ID: ${LANGFUSE_AZURE_AD_CLIENT_ID}
@@ -264,13 +302,12 @@ services:
       AUTH_AZURE_AD_TENANT_ID: ${LANGFUSE_AZURE_AD_TENANT_ID}
       AUTH_AZURE_ALLOW_ACCOUNT_LINKING: true
       LANGFUSE_DEBUG: true
-#    labels:
-#      traefik.docker.network: "autonomous"
-#      traefik.enable: "true"
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
     networks:
       - autonomous
 
-# Langfuse web service - this is what an end user connects to
   langfuse-server:
     image: docker.io/langfuse/langfuse:3
     restart: always
@@ -279,8 +316,8 @@ services:
       - 3000:3000
     environment:
       <<: *langfuse-worker-env
-      NEXTAUTH_URL: ${LANGFUSE_SERVER_URL} 
-      NEXTAUTH_SECRET: ${LANGFUSE_SERVER_SECRET} 
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
       LANGFUSE_INIT_ORG_ID: ${LANGFUSE_INIT_ORG_ID:-}
       LANGFUSE_INIT_ORG_NAME: ${LANGFUSE_INIT_ORG_NAME:-}
       LANGFUSE_INIT_PROJECT_ID: ${LANGFUSE_INIT_PROJECT_ID:-}
@@ -296,21 +333,20 @@ services:
       AUTH_AZURE_AD_TENANT_ID: ${LANGFUSE_AZURE_AD_TENANT_ID}
       AUTH_AZURE_ALLOW_ACCOUNT_LINKING: true
       LANGFUSE_DEBUG: true
-#    labels:
-#      traefik.docker.network: "autonomous"
-#      traefik.enable: "true"
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
     networks:
       - autonomous
 
-# Clickhouse - required by Langfuse
   clickhouse:
     image: docker.io/clickhouse/clickhouse-server
     restart: always
     user: "101:101"
     environment:
-      CLICKHOUSE_DB: default
-      CLICKHOUSE_USER: ${CLICKHOUSE_USER} 
-      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD} 
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD} # CHANGEME
     volumes:
       - langfuse_clickhouse_data:/var/lib/clickhouse
       - langfuse_clickhouse_logs:/var/log/clickhouse-server
@@ -323,13 +359,12 @@ services:
       timeout: 5s
       retries: 10
       start_period: 1s
-#    labels:
-#      traefik.docker.network: "autonomous"
-#      traefik.enable: "true"
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
     networks:
       - autonomous
 
-# Minio - required by Langfuse
   minio:
     image: docker.io/minio/minio
     restart: always
@@ -337,8 +372,8 @@ services:
     # create the 'langfuse' bucket before starting the service
     command: -c 'mkdir -p /data/langfuse && minio server --address ":9000" --console-address ":9001" /data'
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER} 
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD} 
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD} # CHANGEME
     ports:
       - 9090:9000
       - 127.0.0.1:9091:9001
@@ -350,58 +385,57 @@ services:
       timeout: 5s
       retries: 5
       start_period: 1s
-#    labels:
-#      traefik.docker.network: "autonomous"
-#      traefik.enable: "true"
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
     networks:
       - autonomous
 
-# Redis for Langfuse caching
   redis-langfuse:
     image: docker.io/redis:7
     restart: always
     # CHANGEME: row below to secure redis password
     command: >
-      --requirepass ${LANGFUSE_REDIS_PASSWORD:-password}
+      --requirepass ${REDIS_AUTH:-Dfrf7J57t^h7uyt8$zp65DBP2}
     ports:
       - 127.0.0.1:6379:6379
     volumes:
       - ./redis-langfuse:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${LANGFUSE_REDIS_PASSWORD:-password}", "ping"]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 3s
       timeout: 10s
       retries: 10
-#    labels:
-#      traefik.docker.network: "autonomous"
-#      traefik.enable: "true"
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
     networks:
       - autonomous
 
-# postgres for Langfuse
   langfuse-db:
-    image: docker.io/postgres:${POSTGRES_VERSION:-latest}
+    image: docker.io/postgres:17.7
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${LANGFUSE_DB_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 3s
       timeout: 3s
       retries: 10
     environment:
-      - POSTGRES_USER=${LANGFUSE_DB_USER} 
-      - POSTGRES_PASSWORD=${LANGFUSE_DB_PASSWORD} 
-      - POSTGRES_DB=postgres
+      - POSTGRES_USER=${LANGFUSE_DB_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${LANGFUSE_DB_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${LANGFUSE_DB_POSTGRES}
+        #- PG_DATA=/var/lib/postgresql/18/docker
     ports:
       - 5435:5432
     volumes:
-      - langfuse_postgres_data:/var/lib/postgresql
-#    labels:
-#      traefik.docker.network: "autonomous"
-#      traefik.enable: "true"
+      - langfuse_postgres_data:/var/lib/postgresql/data
+            #- langfuse_postgres_data:/var/lib/postgresql/18/docker
+    labels:
+      traefik.docker.network: "autonomous"
+      traefik.enable: "true"
     networks:
       - autonomous
 
-# Langflow - visual editor for LLM workflows
   langflow:
     container_name: langflow
     image: langflowai/langflow:latest # or another version tag on https://hub.docker.com/r/langflowai/langflow 
@@ -411,10 +445,10 @@ services:
     depends_on:
       - postgres-langflow
     environment:
-      - LANGFLOW_SUPERUSER=${LANGFLOW_SUPERUSER} 
-      - LANGFLOW_SUPERUSER_PASSWORD=${LANGFLOW_SUPERUSER_PASSWORD} 
+      - LANGFLOW_SUPERUSER=${LANGFLOW_SUPERUSER}
+      - LANGFLOW_SUPERUSER_PASSWORD=${LANGFLOW_SUPERUSER_PASSWORD}
       - LANGFLOW_AUTO_LOGIN=false
-      - LANGFLOW_DATABASE_URL=postgresql://${LANGFLOW_POSTGRES_USER}:${LANGFLOW_POSTGRES_PASSWORD}@postgres-langflow:5432/langflow
+      - LANGFLOW_DATABASE_URL=postgresql://${POSTGRES_LANGFLOW_USER}:${POSTGRES_LANGFLOW_PASSWORD}@postgres-langflow:5432/${POSTGRES_LANGFLOW_DB}
       # This variable defines where the logs, file storage, monitor data and secret keys are stored.
     restart: always
     volumes:
@@ -422,14 +456,13 @@ services:
     networks:
       - autonomous
 
-# Postgres for Langflow
   postgres-langflow:
     container_name: postgres-langflow
     image: postgres:16
     environment:
-      POSTGRES_USER: ${LANGFLOW_POSTGRES_USER} 
-      POSTGRES_PASSWORD: ${LANGFLOW_POSTGRES_PASSWORD}
-      POSTGRES_DB: langflow
+      POSTGRES_USER: ${POSTGRES_LANGFLOW_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_LANGFLOW_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_LANGFLOW_DB}
     restart: always
     volumes:
       - langflow-postgres:/var/lib/postgresql/data
@@ -438,14 +471,13 @@ services:
     networks:
       - autonomous
 
-# Postgres for ToxPipe Agentic API
   postgres-toxpipe-agent:
     container_name: postgres-toxpipe-agent
     image: postgres:16
     environment:
-      POSTGRES_USER: ${TOXPIPE_AGENT_POSTGRES_USER} 
-      POSTGRES_PASSWORD: ${TOXPIPE_AGENT_POSTGRES_PASSWORD} 
-      POSTGRES_DB: toxpipe-agent
+      POSTGRES_USER: ${TOXPIPE_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${TOXPIPE_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${TOXPIPE_POSTGRES_DB}
     restart: always
     volumes:
       - ./toxpipe-agent-postgres:/var/lib/postgresql/data
@@ -454,13 +486,16 @@ services:
     networks:
       - autonomous
 
-# Define Traefik network
+# Traefik network
 networks:
   autonomous:
     driver: bridge #overlay
     #external: true
+   
+secrets:
+  users:
+    file: dozzle/users.yml
 
-# Volumes
 volumes:
   librechat-pg:
   langfuse-pg:
@@ -477,5 +512,4 @@ volumes:
   langflow-postgres:
   langflow-data:
   toxpipe-agent-postgres:
-  models:
-
+  dozzle:
