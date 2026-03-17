@@ -19,6 +19,14 @@ services:
     environment:
       - MEILI_NO_SYNC=true
 
+  toxpipe-mcp:
+    build: ./ToxPipe-MCP
+    ports:
+      - "9222:9222"
+    restart: always
+    networks:
+      - autonomous
+
   mongodb:
     networks:
       - autonomous

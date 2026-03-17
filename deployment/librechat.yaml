@@ -184,7 +184,7 @@ mcpServers:
   ToxPipe-MCP:
     chatMenu: true
     type: http
-    url: http://cbtmcp:9222/mcp
+    url: http://toxpipe-mcp:9222/mcp
     timeout: 1900000
     initTimeout: 1900000
     serverInstructions: false
@@ -194,123 +194,7 @@ mcpServers:
       X-User-Role: "{{LIBRECHAT_USER_ROLE}}"
       X-User-Google-ID: "{{LIBRECHAT_USER_GOOGLEID}}"
       x-librechat-thread-id: "{{LIBRECHAT_BODY_CONVERSATIONID}}"
-  lars-civic-mcp-server:
-    chatMenu: true
-    command: "npx"
-    args: ["mcp-remote", "https://civic-mcp-server-v2.larscivic.workers.dev/mcp"]
-    timeout: 1900000
-    initTimeout: 1900000
-    serverInstructions: false
-    startup: true
-  lars-dgidb-mcp-server:
-    chatMenu: true
-    command: "npx"
-    args: ["mcp-remote", "https://dgidb-mcp-server.larscivic.workers.dev/mcp"]
-    timeout: 1900000
-    initTimeout: 1900000
-    serverInstructions: false
-    startup: true
-  TP-MCP-ChEMBL:
-    chatMenu: true
-    type: http
-    url: http://tpmcp-chembl:8888/mcp
-    timeout: 1900000
-    initTimeout: 1900000
-    serverInstructions: false
-    startup: false
-    headers:
-      X-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
-      X-User-Role: "{{LIBRECHAT_USER_ROLE}}"
-      X-User-Google-ID: "{{LIBRECHAT_USER_GOOGLEID}}"
-      x-librechat-thread-id: "{{LIBRECHAT_BODY_CONVERSATIONID}}"
-  TP-MCP-ChemHarmony:
-    chatMenu: true
-    type: http
-    url: http://tpmcp-chemharmony:8888/mcp
-    timeout: 1900000
-    initTimeout: 1900000
-    serverInstructions: false
-    startup: false
-    headers:
-      X-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
-      X-User-Role: "{{LIBRECHAT_USER_ROLE}}"
-      X-User-Google-ID: "{{LIBRECHAT_USER_GOOGLEID}}"
-      x-librechat-thread-id: "{{LIBRECHAT_BODY_CONVERSATIONID}}"
-  TP-MCP-ctxR:
-    chatMenu: true
-    type: http
-    url: http://tpmcp-ctxr:8888/mcp
-    timeout: 1900000
-    initTimeout: 1900000
-    serverInstructions: false
-    startup: false
-    headers:
-      X-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
-      X-User-Role: "{{LIBRECHAT_USER_ROLE}}"
-      X-User-Google-ID: "{{LIBRECHAT_USER_GOOGLEID}}"
-      x-librechat-thread-id: "{{LIBRECHAT_BODY_CONVERSATIONID}}"
-  TP-MCP-EFSA:
-    chatMenu: true
-    type: http
-    url: http://tpmcp-efsa:8888/mcp
-    timeout: 1900000
-    initTimeout: 1900000
-    serverInstructions: false
-    startup: false
-    headers:
-      X-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
-      X-User-Role: "{{LIBRECHAT_USER_ROLE}}"
-      X-User-Google-ID: "{{LIBRECHAT_USER_GOOGLEID}}"
-      x-librechat-thread-id: "{{LIBRECHAT_BODY_CONVERSATIONID}}"
-  TP-MCP-enrichr:
-    chatMenu: true
-    type: http
-    url: http://tpmcp-enrichr:8888/mcp
-    timeout: 1900000
-    initTimeout: 1900000
-    serverInstructions: false
-    startup: false
-    headers:
-      X-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
-      X-User-Role: "{{LIBRECHAT_USER_ROLE}}"
-      X-User-Google-ID: "{{LIBRECHAT_USER_GOOGLEID}}"
-      x-librechat-thread-id: "{{LIBRECHAT_BODY_CONVERSATIONID}}"
-  TP-MCP-EPISuite:
-    chatMenu: true
-    type: http
-    url: http://tpmcp-episuite:8888/mcp
-    timeout: 1900000
-    initTimeout: 1900000
-    serverInstructions: false
-    startup: false
-    headers:
-      X-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
-      X-User-Role: "{{LIBRECHAT_USER_ROLE}}"
-      X-User-Google-ID: "{{LIBRECHAT_USER_GOOGLEID}}"
-      x-librechat-thread-id: "{{LIBRECHAT_BODY_CONVERSATIONID}}"
-  TP-MCP-msigdbr:
-    chatMenu: true
-    type: http
-    url: http://tpmcp-msigdbr:8888/mcp
-    timeout: 1900000
-    initTimeout: 1900000
-    serverInstructions: false
-    startup: false
-    headers:
-      X-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
-      X-User-Role: "{{LIBRECHAT_USER_ROLE}}"
-      X-User-Google-ID: "{{LIBRECHAT_USER_GOOGLEID}}"
-      x-librechat-thread-id: "{{LIBRECHAT_BODY_CONVERSATIONID}}"
-  TP-MCP-ToxTree:
-    chatMenu: true
-    type: http
-    url: http://tpmcp-toxtree:8888/mcp
-    timeout: 1900000
-    initTimeout: 1900000
-    serverInstructions: false
-    startup: false
-    headers:
-      X-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
-      X-User-Role: "{{LIBRECHAT_USER_ROLE}}"
-      X-User-Google-ID: "{{LIBRECHAT_USER_GOOGLEID}}"
-      x-librechat-thread-id: "{{LIBRECHAT_BODY_CONVERSATIONID}}"
+
+mcpSettings:
+  allowedDomains:
+    - "http://toxpipe-mcp:9222/mcp"    
