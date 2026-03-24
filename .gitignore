@@ -1,5 +1,5 @@
 *_files/
-*.html
+#*.html
 .config/heimdall/log/
 .config/heimdall/www/logs/
 .config/heimdall/keys/*
