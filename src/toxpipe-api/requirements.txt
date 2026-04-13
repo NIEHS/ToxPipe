@@ -84,7 +84,7 @@ overrides==7.7.0
 packaging==25.0
 pathable==0.4.4
 pathvalidate==3.3.1
-pillow==12.0.0
+pillow==12.2.0
 platformdirs==4.5.1
 posthog==5.4.0
 protobuf==6.33.4
