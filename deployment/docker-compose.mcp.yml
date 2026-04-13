@@ -1,0 +1,11 @@
+services:
+  toxpipe-mcp:
+    build: https://github.com/NIEHS/ToxPipeMCP.git#v1.2.0 
+    container_name: toxpipe-mcp
+    volumes:
+      - ./.env:/tpmcp/.config/.env    
+    ports:
+      - "9222:9222"
+    restart: always
+    networks:
+      - autonomous

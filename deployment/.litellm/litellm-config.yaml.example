@@ -4,15 +4,15 @@ model_list:
     litellm_params:
       model: bedrock/us.meta.llama4-scout-17b-instruct-v1:0 # Need inference profile since llama3.2+ doesn't support on-demand throughput
       aws_region_name: us-east-1
-      aws_access_key_id: os.environ/AWS_ACCESS_KEY
-      aws_secret_access_key: os.environ/AWS_ACCESS_SECRET
-  
+      aws_access_key_id: os.environ/AWS_ACCESS_KEY_ID
+      aws_secret_access_key: os.environ/AWS_SECRET_ACCESS_KEY
+
   # Azure OpenAI format
   - model_name: azure-gpt-5
     litellm_params:
       model: azure/gpt-5
-      api_base: os.environ/AZURE_ENDPOINT
-      api_key: os.environ/AZURE_KEY
+      api_base: os.environ/AZURE_API_BASE
+      api_key: os.environ/AZURE_API_KEY
       api_version: 2024-12-01-preview
 
   # Google Vertex AI format
@@ -32,8 +32,8 @@ model_list:
     litellm_params:
       model: bedrock/us.anthropic.claude-sonnet-4-5-20250929-v1:0
       aws_region_name: us-east-1
-      aws_access_key_id: os.environ/AWS_ACCESS_KEY
-      aws_secret_access_key: os.environ/AWS_ACCESS_SECRET
+      aws_access_key_id: os.environ/AWS_ACCESS_KEY_ID
+      aws_secret_access_key: os.environ/AWS_SECRET_ACCESS_SECRET
 
   # Mistral Large 2 (24.07)
   - model_name: mistral-large-2
@@ -44,26 +44,26 @@ model_list:
       aws_secret_access_key: os.environ/AWS_SECRET_ACCESS_KEY
 
 litellm_settings:
-  success_callback: ["langfuse"]
-  cache: False
-  drop_params: True
+  success_callback: os.environ/SUCCESS_CALLBACK
+  cache: True
   cache_params:
-  #  type: "redis"
+    type: redis
+    url: os.environ/REDIS_URL
     supported_call_types: ["acompletion", "completion", "embedding", "aembedding"]
 
 general_settings:
-  master_key: os.environ/API_MASTER_KEY
+  master_key: os.environ/LITELLM_MASTER_KEY
 
 assistant_settings:
   custom_llm_provider: azure
   litellm_params: 
-    api_key: os.environ/AZURE_KEY
-    api_base: os.environ/AZURE_ENDPOINT
+    api_key: os.environ/AZURE_API_KEY
+    api_base: os.environ/AZURE_API_BASE
 
 files_settings:
   - custom_llm_provider: azure
-    api_key: os.environ/AZURE_KEY
-    api_base: os.environ/AZURE_ENDPOINT
+    api_key: os.environ/AZURE_API_KEY
+    api_base: os.environ/AZURE_API_BASE
 
 router_settings:
   routing_strategy: least-busy # Literal["simple-shuffle", "least-busy", "usage-based-routing","latency-based-routing"], default="simple-shuffle"

@@ -2,7 +2,7 @@
 # https://docs.librechat.ai/install/configuration/custom_config.html
 
 # Configuration version (required)
-version: 1.1.7
+version: 1.2.1
 
 cache: false
 
@@ -73,9 +73,9 @@ endpoints:
 
   custom:
     - name: "Ollama (Locally Hosted)"
-      apiKey: ${API_MASTER_KEY}
+      apiKey: ${LITELLM_MASTER_KEY}
       iconURL: "https://simpleicons.org/icons/ollama.svg"
-      baseURL: "http://host.docker.internal:8000"
+      baseURL: "http://litellm:8000"
       models:
         default: ["ollama-mistral-7b"] #, "ollama-gemma3-12b", "ollama-gemma3-4b", "ollama-llama4-scout", "ollama-llama4-16x17b", "ollama-gpt-oss-20b", "ollama-llama3.1-70b", "ollama-llama3", "ollama-llama3-70b"]
         fetch: false
@@ -91,9 +91,9 @@ endpoints:
         - "frequency_penalty"
 
     - name: "Azure OpenAI"
-      apiKey: ${API_MASTER_KEY}
+      apiKey: ${LITELLM_MASTER_KEY}
       iconURL: "https://icons.getbootstrap.com/assets/icons/openai.svg"
-      baseURL: "http://host.docker.internal:8000"
+      baseURL: "http://litellm:8000"
       models:
         default: ["azure-gpt-5"] #"azure-o4-mini", "azure-o3", "azure-o3-pro", "azure-o3-mini", "azure-o3-deep-research", "azure-o1", "azure-o1-mini", "azure-gpt-5", "azure-gpt-5-mini", "azure-gpt-5-nano", "azure-gpt-5-chat", "azure-gpt-4o", "azure-gpt-4o-mini", "azure-gpt-35-turbo"]
         fetch: false
@@ -109,9 +109,9 @@ endpoints:
         - "frequency_penalty"
 
     - name: "Google Gemini"
-      apiKey: ${API_MASTER_KEY}
+      apiKey: ${LITELLM_MASTER_KEY}
       iconURL: "https://simpleicons.org/icons/googlegemini.svg"
-      baseURL: "http://host.docker.internal:8000"
+      baseURL: "http://litellm:8000"
       models:
         default: ["gemini-2.5-flash"] #"gemini-3.1-pro", "gemini-3.1-flash-lite", "gemini-3-flash", "gemini-3-pro", "gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash-exp", "gemini-1.5-pro-002", "gemini-1.5-flash-002", "gemini-1.0-pro-vision-001", "gemini-1.0-pro-002"]
         fetch: false
@@ -127,9 +127,9 @@ endpoints:
         - "frequency_penalty"
 
     - name: "Anthropic Bedrock"
-      apiKey: ${API_MASTER_KEY}
+      apiKey: ${LITELLM_MASTER_KEY}
       iconURL: "https://simpleicons.org/icons/anthropic.svg"
-      baseURL: "http://host.docker.internal:8000"
+      baseURL: "http://litellm:8000"
       models:
         default: ["claude-4.5-sonnet"] #, "claude-4.6-opus", "claude-4.5-opus", "claude-4.5-haiku", "claude-4.6-sonnet", "claude-4.1-opus", "claude-4-sonnet", "claude-4-opus", "claude-3-7-sonnet", "claude-3-5-sonnet", "claude-3-opus", "claude-3-haiku", "claude-3-sonnet", "claude-v2", "claude-instant"]
         fetch: false
@@ -145,8 +145,8 @@ endpoints:
         - "frequency_penalty"
 
     - name: "Mistral AI"
-      apiKey: ${API_MASTER_KEY}
-      baseURL: "http://host.docker.internal:8000"
+      apiKey: ${LITELLM_MASTER_KEY}
+      baseURL: "http://litellm:8000"
       models:
         default: ["mistral-large-2"] #, "mistral-large-3", "mistral-large", "mistral-7b-instruct", "mistral-8x7b-instruct"]
         # Attempt to dynamically fetch available models
@@ -168,8 +168,8 @@ endpoints:
       #    x-custom-header: "${CUSTOM_HEADER_VALUE}
 
     - name: "Meta AI"
-      apiKey: ${API_MASTER_KEY}
-      baseURL: "http://host.docker.internal:8000"
+      apiKey: ${LITELLM_MASTER_KEY}
+      baseURL: "http://litellm:8000"
       models:
         default: ["llama4-scout-17b-instruct"] #, "llama4-maverick-17b-instruct", "llama3-3-70b", "llama3-2-90b", "llama3-2-11b", "llama3-1-405b", "llama3-1-70b", "llama3-1-8b", "llama3-70b", "llama3-8b"]
         fetch: false
@@ -183,13 +183,15 @@ endpoints:
 mcpServers:
   ToxPipe-MCP:
     chatMenu: true
-    type: http
-    url: http://toxpipe-mcp:9222/mcp
+    type: streamable-http
+    url: "http://toxpipe-mcp:9222/mcp" 
     timeout: 1900000
     initTimeout: 1900000
     serverInstructions: false
     startup: true
     headers:
+      #Accept: application/json, text/event-stream
+      #Content-Type: application/json
       X-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
       X-User-Role: "{{LIBRECHAT_USER_ROLE}}"
       X-User-Google-ID: "{{LIBRECHAT_USER_GOOGLEID}}"
