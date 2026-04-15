@@ -253,6 +253,15 @@ services:
     networks:
       - autonomous
 
+  dashy:
+      image: lissy93/dashy:latest
+      networks:
+        - autonomous
+      ports:
+        - 8082:8080
+      volumes:
+        - ./user-data/:/app/user-data/
+        
 volumes:
   mongodb-data:
   meili-data:
