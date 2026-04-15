@@ -107,7 +107,7 @@ pyproject_hooks==1.2.0
 pysqlite3==0.6.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.2.1
-python-multipart==0.0.20
+python-multipart==0.0.26
 PyYAML==6.0.3
 rdkit==2025.9.3
 referencing
