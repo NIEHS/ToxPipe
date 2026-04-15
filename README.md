@@ -1,140 +1,77 @@
-<a name="readme-top"></a>
+# 🚀 Docker Stack Setup Guide
 
-<!--
-*** Thanks for checking out the Best-README-Template. If you have a suggestion
-*** that would make this better, please fork the repo and create a pull request
-*** or simply open an issue with the tag "enhancement".
-*** Don't forget to give the project a star!
-*** Thanks again! Now go create something AMAZING! :D
--->
+This guide will walk you through how to spin up and use the full Docker stack.
 
-<!-- PROJECT LOGO -->
-<div align="center">
-  <img src="./toxpipe-logo-v2.png" alt="ToxPipe Logo" width="412" height="178">
-  <h1 align="center">ToxPipe: Semi-autonomous AI integration of diverse toxicological data streams</h1>
-</div>
+---
 
-<!-- PROJECT SHIELDS -->
-<!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
+## 📦 Prerequisites
 
-[![](https://img.shields.io/badge/Microsoft%20Teams-6264A7?logo=microsoftteams&logoColor=fff&style=plastic)](https://teams.microsoft.com/l/channel/19%3a5aa8e5c5ac6a400da6b57916a96083ee%40thread.skype/ToxPipe?groupId=af61690e-7397-48d4-947c-8a0444e36e90&tenantId=14b77578-9773-42d5-8507-251ca2dc2b06)
+Make sure you have the following installed:
+- [Git](https://git-scm.com/) Optional, but helps to easily download ToxPipe code to your server
 
-[![Python application](https://github.com/NIEHS/ToxPipe/actions/workflows/run_toxpipe_api.yml/badge.svg)](https://github.com/NIEHS/ToxPipe/actions/workflows/run_toxpipe_api.yml)
+- [Docker](https://docs.docker.com/get-started/get-docker/) Required
 
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>🗂️ Table of Contents</summary>
-  <ol>
-    <li><a href="#what-is-toxpipe">What is ToxPipe?</a></li>
-    <li><a href="#approach">Approach</a></li>
-    <li><a href="#system-architecture">System Architecture</a></li>
-    <li><a href="#deployment">Deployment</a></li>
-    <li><a href="#useful-links">Useful Links</a></li>
-    <li><a href="#repo-structure">Repo Structure</a></li>
-    <li><a href="#%EF%B8%8F-built-with">🛠️ Built With</a></li>
-    <li><a href="#funding-sources">Funding Sources</a></li>
-  </ol>
-</details>
+---
 
-## 🤔 What is ToxPipe?
+## 🛠️ Setup Instructions
 
-ToxPipe aims to explore the use of expert entrained AI-based systems for the rapid analysis and interpretation of toxicological properties of various compounds. By leveraging cutting-edge semi-autonomous AI systems, ToxPipe will enable scientists and toxicologists to explore diverse types of toxicologically relevant data through natural language instructions. Further, through use of expert entrainment ToxPipe will provide context generation that will act as a guide to novel, contemporary data streams that were previously challenging to access and integrate into toxicological characterization.
+### 1. Clone the Repository
+Clone or download the repository to your server.
 
-ToxPipe is meant to be a platform for interacting with various toxicological data streams. It comprises multiple components and like any agentic retrieval augmented generation (RAG) system, requires managing agents, state, prompts, database connections, APIs, and other systems.
+```
+git clone https://github.com/NIEHS/ToxPipe.git
+```
+---
 
-<p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
-    <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
-        ↑ Back to Top ↑
-    </a>
-</p>
+### 2. Configure Environment Variables
+ToxPipe should work out of the box, with the only changes required being to the environment file. An example environment is provided with all required variables at env.example. Please copy this as .env and replace all example keys with your keys. If any keys are not provided, the specified model or feature will not work. All required changes are contained within < >; however, it is strongly recommended to change all default usernames, passwords, and secrets as well. While Langfuse and MCP variables are marked as optional, we suggest changing these as well for inclusion of the corresponding features into your stack. 
 
-## Approach
+Note: NUM_WORKERS is set to 1. Increasing this is suggested, as it will increase efficiency and speed of requests. However, this is dependent on specifications (ie. CPU cores, memory) of your server. Increasing it too much will cause the stack to fail upon creation with no clear warning, as your server may be incapable of handling the load. We suggest first setting it to the number of cores on your server and increasing/decreasing from there.
 
-Large language models (LLMs), such as [OpenAI’s GPT-based models](https://openai.com/blog/chatgpt), can be used to solve complicated tasks with natural language as a generic interface. By using techniques like retrieval augmented generation (RAG), LLMs can be given a set of instructions and can (semi-)autonomously explore various data sources. The LLMs will then generate responses or interpretations based on information stored inside the models along with the contextual data retrieved through RAG.
+#### Example copy and edit command
+```
+cp .env.example .env
+nano .env
+```
 
-ToxPipe aims to repurpose (semi-)autonomous AI agents for AI-augmented exploration of existing toxicological data and literature. Some of the tasks that we believe are possible with autonomous agents and RAG are:
+---
 
-- Generation of toxicological narratives with deep explanatory context
-- Analysis of chemical structure
-- Analysis of biological assay results
-- Summarization of journal abstracts
-- Biological database exploration using text-to-SQL AI models
-- A variety of other tasks that currently require large amounts of human time and labor.
+### 3. Optionally Configure Services/Add Models
+Preset service and model cofigurations are already provided for use, with only .env variables needing to be changed for their function. However, if you would like to add new models or configure existing models, this can be done from within librechat.yaml and .litellm/litellm-config.yaml. If you would like to further configure the dashy dashboard, edits can be made to user-data/conf.yml. Finally, if you would like to configure existing services or add new services, you can create a docker-compose.override.yml file and include any desired changes or additions there. For more info on how using multiple compose files see [Docker](https://docs.docker.com/compose/how-tos/multiple-compose-files/merge/#merge-compose-files).
 
-By offloading these tasks to ToxPipe, it would allow toxicologists to repurpose their time towards higher-level cognitive tasks of directing the AI towards specific outputs.
+### 4. Deploy With Desired Servicess
+This project includes multiple docker compose files for use.  
+- docker-compose.yml (the default file)
+- docker-compose.langfuse.yml (optional compose file for including langfuse)
+- docker-compose.mcp.yml (optional compose for including mcp)
 
-<p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
-    <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
-        ↑ Back to Top ↑
-    </a>
-</p>
+Docker compose is the main way to set up the stack with your desired services. Docker compose pull must be used first to obtain the specified images for each service. If using the ToxPipeMCP service in your stack, docker compose build must be used to manually build that image. Finally, docker compose up -d must be used to create and host the containers in a detached state so that others can access your stack. If you only care about the default services, no files will need to be specified when running compose. Additionally, if you want all features and combine the optional compose file services into a single docker-compose.override.yml file (see [Docker](https://docs.docker.com/compose/how-tos/multiple-compose-files/merge/#merge-compose-files)), then once again no files will need to be specified when running compose. However, if you want to use only some of the optional features, or keep the docker service files separated by function (ie. mcp, langfuse), then all desired compose files will have to be specified with -f each time docker compose is used. For example:
 
-## System Architecture
+#### Default docker file only, or default + override file
+```
+docker compose pull
+docker compose build (if using mcp)
+docker compose up -d
+```
 
-The following diagram demonstrates an overall structure of ToxPipe. This model is subject to change as the project develops.
+#### Individual service files 
+```
+docker compose -f docker-compose.yml -f docker-compose.langfuse.yml -f docker-compose.mcp.yml pull
+docker compose -f docker-compose.yml -f docker-compose.langfuse.yml -f docker-compose.mcp.yml build
+docker compose -f docker-compose.yml -f docker-compose.langfuse.yml -f docker-compose.mcp.yml up -d 
+```
 
-![ToxPipe Overview](toxpipe-ecosystem-new-2025.png)
+---
 
-Architecture documentation is in [`docs/architecture`](docs/architecture/index.qmd). Stack decisions are saved in [`docs/decisions`](docs/decisions/index.md). This is where we will document the reasoning behind our stack decisions.
+## 🌐 Accessing the Application
 
-<p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
-    <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
-        ↑ Back to Top ↑
-    </a>
-</p>
+Once the stack is running, access the services using your server’s IP address:
 
-## Deployment
+Dashy: http://<SERVER_IP>:8082  
+LibreChat: http://<SERVER_IP>:3080  
+LangFuse: http://<SERVER_IP>:3000  
+Langflow: http://<SERVER_IP>:7860  
 
-Deployment information is contained in [`docs/deployment`](docs/deployment/index.md).
+## Maintaing the Application
+For more tips on running, maintaining, and updating your docker stack, please refer to the offical [Docker](https://docs.docker.com/guides/) manuals.
 
-<p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
-    <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
-        ↑ Back to Top ↑
-    </a>
-</p>
-
-## Related Repositories
-
-- [ToxPipe LLM Model Comparisons](https://github.com/NIEHS/toxpipe-model-comparison)
-
-<p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
-    <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
-        ↑ Back to Top ↑
-    </a>
-</p>
-
-## Repo Structure
-
-- `docs`: Documentation and guides
-- `examples`: Example code and vignettes for common use cases
-- `src`: Source code for the backend and frontend components of ToxPipe
-  - `web`: Containers (Docker) and configuration for ToxPipe's contituent services (LibreChat, LiteLLM, Langflow, Langfuse, Ollama, etc.) 
-  - `toxpipe-api`: Source code for the ToxPipe FastAPI web API and RAG/literature search features
-
-<p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
-    <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
-        ↑ Back to Top ↑
-    </a>
-</p>
-
-## 🛠️ Built With
-
-![FastAPI Badge](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=fff&style=plastic)
-
-<p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
-    <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
-        ↑ Back to Top ↑
-    </a>
-</p>
-
-## Funding Sources
-
-This work was funded by the National Institutes Health (NIH) under the following grants:
-
-- [NOT-OD-23-070: Notice of Special Interest (NOSI): Administrative Supplements to Support the Exploration of Cloud in NIH-supported Research](https://grants.nih.gov/grants/guide/notice-files/NOT-OD-23-070.html)
