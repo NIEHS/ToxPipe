@@ -54,7 +54,7 @@ langchain-chroma==1.1.0
 langchain-classic==1.0.1
 langchain-core==1.2.7
 langchain-openai==1.1.7
-langchain-text-splitters==1.1.0
+langchain-text-splitters==1.1.2
 langfuse==3.12.0
 langgraph==1.0.6
 langgraph-checkpoint==4.0.0
