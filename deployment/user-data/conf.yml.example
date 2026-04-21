@@ -7,41 +7,34 @@ sections:
       - title: LibreChat
         description: A ChatGPT-like interface for conversing with an AI model or agent
         icon: far fa-robot
-        url: http://localhost:3080
+        url: http://<my-vm-ip>:3080 # CHANGEME
         id: 0_1274_librechat
       - title: LiteLLM
         description: API for unified LLM access
         icon: far fa-code
-        url: http://localhost:8000
+        url: http://<my-vm-ip>:8000 # CHANGEME
         id: 1_1274_litellm
-      - title: Agentic API
-        description: >-
-          API for creating and calling agents with tool, RAG search, and
-          literature search support
-        icon: far fa-code
-        url: http://localhost
-        id: 2_1274_agenticapi
       - title: ToxPipe Evaluations
         description: Application for testing and auditing models and agents
         icon: far fa-vial
-        url: http://localhost
+        url: https://rstudio.niehs.nih.gov/tox-eval/
         id: 3_1274_toxpipeevaluations
       - title: ChemBioTox API
         description: >-
           API for interfacing with the ChemBioTox database, which contains
           experimental and predicted chemical toxicology data
         icon: far fa-code
-        url: http://localhost
+        url: https://rstudio.niehs.nih.gov/chembiotox-api/
         id: 4_1274_chembiotoxapi
       - title: RAG API
         description: API for performing RAG, used internally by LibreChat
         icon: far fa-code
-        url: http://localhost:8001
         id: 5_1274_ragapi
       - title: LangFlow
         description: Interface for visually creating AI workflows
         icon: far fa-robot
-        url: http://localhost:7860
+        url: http://<my-vm-ip>:7860 # CHANGEME
+
   - name: ToxPipe Backend
     icon: far fa-database
     items:
@@ -50,44 +43,30 @@ sections:
           Interface for MongoDB instance that stores history and config for
           LibreChat
         icon: far fa-database
-        url: http://localhost:8081
+        url: http://<my-vm-ip>:8081 # CHANGEME
         id: 0_1425_mongoexpress
       - title: Ollama
         description: Local hosting of AI models (no web interface)
         icon: far fa-robot
-        url: http://localhost:11434
         id: 1_1425_ollama
       - title: ChromaDB
         description: >-
           Database that stores text embeddings for the NTP documents at
           https://ntp.niehs.nih.gov/publications (no web interface)
         icon: far fa-database
-        url: hhttp://localhost:8009
         id: 2_1425_chromadb
   - name: ToxPipe Management
     icon: far fa-wrench
     items:
-      - title: Traefik
-        description: Interface for monitoring web traffic and activity
-        icon: far fa-traffic-light
-        url: http://localhost:8080
-        id: 0_1766_traefik
       - title: Dozzle
         description: Interface for monitoring logs
-        icon: far fa-file
-        url: http://localhost:8888
+        icon: far fa-chart-bar
+        url: http://ehsdttlp30:8888/ # CHANGEME
         id: 1_1766_dozzle
       - title: LangFuse
         description: Interface for monitoring LLM queries
-        icon: far fa-file
-        url: http://localhost:3000
-      - title: Secret Server
-        description: >-
-          Server for securely storing secrets like API keys, login credentials,
-          etc.
-        icon: far fa-lock
-        url: http://localhost
-        id: 2_1766_secretserver
+        icon: far fa-chart-bar
+        url: https://<my-vm-ip>:3000 # CHANGEME
   - name: ToxPipe Documentation
     icon: far fa-book
     items:
@@ -96,11 +75,47 @@ sections:
         icon: fab fa-github
         url: https://github.com/NIEHS/ToxPipe
         id: 0_2115_toxpiperepository
-      - title: ChemBioTox API Repository
-        description: Code repository for the ChemBioTox API
+      - title: ToxPipe Deployment Repository
+        description: Repository branch for quick ToxPipe deployment
         icon: fab fa-github
-        url: https://github.com/combspk/chembiotox-api
+        url: https://github.com/NIEHS/ToxPipe/tree/Deployment
+      - title: ToxPipe Evaluations Repository
+        description: Code repository for ToxPipe evaluations and model comparisons
+        icon: fab fa-github
+        url: https://github.com/NIEHS/ToxPipe-Model-Comparison
+      - title: ToxPipe Wiki
+        description: Wiki with guides, FAQs, and information
+        icon: far fa-book
+        url: https://github.com/NIEHS/ToxPipe/wiki
+      - title: ToxPipe Evaluations Documentation
+        description: Documentation for evaluations run on ToxPipe
+        icon: far fa-book
+        url: https://niehs.github.io/ToxPipe-Model-Comparison/eval_app.html
+      - title: Dyad Setup
+        description: Guide for setting up a vibe-coding client with ToxPipe models
+        icon: far fa-book
+        url: https://github.com/NIEHS/ToxPipe/blob/main/guides/setup.md
+  - name: Related Projects
+    icon: far fa-folder-open
+    items:
+      - title: ChemBioTox API Repository
+        description: API for interfacing with the ChemBioTox database, containing predicted and experimental data for 1,000,000+ chemicals
+        icon: fab fa-github
+        url: https://github.com/NIEHS/chembiotox-api
         id: 1_2115_chembiotoxapirepository
+      - title: InterCiteR Repository
+        description: Shiny application for working with citations, documents, and embeddings search with AI
+        icon: fab fa-github
+        url: https://github.com/NIEHS/InterCiteR
+      - title: ToxPipeMCP Repository
+        description: MCP server with various toxicological tools and CBT integration
+        icon: fab fa-github
+        url: https://github.com/NIEHS/ToxPipeMCP
+      - title: ToxPipeMCP-Suite Repository
+        description: Collection of MCP servers extending functionality of ToxPipeMCP that interface with external APIs
+        icon: fab fa-github
+        url: https://github.com/NIEHS/ToxPipeMCP-Suite
 appConfig:
   layout: horizontal
   iconSize: large
+
