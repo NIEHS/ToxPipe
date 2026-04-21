@@ -44,7 +44,7 @@ model_list:
       aws_secret_access_key: os.environ/AWS_SECRET_ACCESS_KEY
 
 litellm_settings:
-  success_callback: os.environ/SUCCESS_CALLBACK
+  success_callback: ["langfuse"]
   cache: True
   cache_params:
     type: redis

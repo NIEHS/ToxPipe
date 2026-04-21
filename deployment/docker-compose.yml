@@ -122,6 +122,8 @@ services:
   litellm:
     container_name: litellm
     image: ghcr.io/berriai/litellm:main-v1.80.11.rc.1
+    ports:
+      - '8000:8000'
     volumes:
       - ./.litellm/litellm-config.yaml:/app/config.yaml
     depends_on:
@@ -142,7 +144,6 @@ services:
       REDIS_HOST: redis
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-      SUCCESS_CALLBACK: ${SUCCESS_CALLBACK}
       LANGFUSE_PUBLIC_KEY: ${LANGFUSE_INIT_PROJECT_PUBLIC_KEY}
       LANGFUSE_SECRET_KEY: ${LANGFUSE_INIT_PROJECT_SECRET_KEY}
       LANGFUSE_HOST: http://langfuse-server:3000
@@ -261,7 +262,162 @@ services:
         - 8082:8080
       volumes:
         - ./user-data/:/app/user-data/
-        
+
+  langfuse-worker:
+    container_name: langfuse-worker
+    image: docker.io/langfuse/langfuse-worker:3
+    restart: always
+    depends_on: &langfuse-depends-on
+      langfuse-db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      redis-langfuse:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+    ports:
+      - 3030:3030
+    environment: &langfuse-worker-env
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      DATABASE_URL: postgresql://${LANGFUSE_POSTGRES_USER}:${LANGFUSE_POSTGRES_PASSWORD}@langfuse-db:5432/${LANGFUSE_POSTGRES_DB}
+      SALT: ${SALT}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      CLICKHOUSE_MIGRATION_URL: clickhouse://clickhouse:9000
+      CLICKHOUSE_URL: http://clickhouse:8123
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD} 
+      CLICKHOUSE_CLUSTER_ENABLED: false
+      LANGFUSE_S3_EVENT_UPLOAD_BUCKET: langfuse
+      LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD} 
+      LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT: http://minio:9000
+      LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE: true
+      LANGFUSE_S3_EVENT_UPLOAD_PREFIX: events/
+      LANGFUSE_S3_EVENT_UPLOAD_REGION: auto
+      LANGFUSE_S3_MEDIA_UPLOAD_BUCKET: langfuse
+      LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD} 
+      LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT: http://minio:9000
+      LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE: true
+      LANGFUSE_S3_MEDIA_UPLOAD_PREFIX: media/
+      LANGFUSE_S3_MEDIA_UPLOAD_REGION: auto
+      REDIS_HOST: redis-langfuse
+      REDIS_PORT: 6379
+      REDIS_AUTH: ${REDIS_PASSWORD} 
+      LANGFUSE_DEBUG: true
+    networks:
+      - autonomous
+
+  langfuse-server:
+    container_name: langfuse-server
+    image: docker.io/langfuse/langfuse:3
+    restart: always
+    depends_on: *langfuse-depends-on
+    ports:
+      - 3000:3000
+    environment:
+      <<: *langfuse-worker-env
+      LANGFUSE_INIT_ORG_ID: ${LANGFUSE_INIT_ORG_ID}
+      LANGFUSE_INIT_PROJECT_ID: ${LANGFUSE_INIT_PROJECT_ID}
+      LANGFUSE_INIT_PROJECT_PUBLIC_KEY: ${LANGFUSE_INIT_PROJECT_PUBLIC_KEY}
+      LANGFUSE_INIT_PROJECT_SECRET_KEY: ${LANGFUSE_INIT_PROJECT_SECRET_KEY}
+      LANGFUSE_INIT_PROJECT_NAME: ${LANGFUSE_INIT_PROJECT_NAME}
+      LANGFUSE_INIT_USER_EMAIL: ${LANGFUSE_INIT_USER_EMAIL}
+      LANGFUSE_INIT_USER_NAME: ${LANGFUSE_INIT_USER_NAME}
+      LANGFUSE_INIT_USER_PASSWORD: ${LANGFUSE_INIT_USER_PASSWORD}
+    networks:
+      - autonomous
+
+  clickhouse:
+    container_name: clickhouse
+    image: docker.io/clickhouse/clickhouse-server
+    restart: always
+    user: "101:101"
+    environment:
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD} 
+    volumes:
+      - langfuse_clickhouse_data:/var/lib/clickhouse
+      - langfuse_clickhouse_logs:/var/log/clickhouse-server
+    ports:
+      - 8123:8123
+      - 9000:9000
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 1s
+    networks:
+      - autonomous
+
+  minio:
+    container_name: minio
+    image: docker.io/minio/minio
+    restart: always
+    entrypoint: sh
+    # create the 'langfuse' bucket before starting the service
+    command: -c 'mkdir -p /data/langfuse && minio server --address ":9000" --console-address ":9001" /data'
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD} 
+    ports:
+      - 9090:9000
+      - 127.0.0.1:9091:9001
+    volumes:
+      - langfuse_minio_data:/minio_data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+      start_period: 1s
+    networks:
+      - autonomous
+
+  redis-langfuse:
+    container_name: redis-langfuse
+    image: docker.io/redis:7
+    restart: always
+    command: >
+      --requirepass ${REDIS_PASSWORD}
+    ports:
+      - 127.0.0.1:6379:6379
+    volumes:
+      - redis-langfuse_data:/redis_langfuse_data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 10s
+      retries: 10
+    networks:
+      - autonomous
+
+  langfuse-db:
+    container_name: langfuse-db
+    image: docker.io/postgres:17.7
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${LANGFUSE_POSTGRES_USER} -d ${LANGFUSE_POSTGRES_DB}"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    environment:
+      - POSTGRES_USER=${LANGFUSE_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${LANGFUSE_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${LANGFUSE_POSTGRES_DB}
+        #- PG_DATA=/var/lib/postgresql/18/docker
+    ports:
+      - 5435:5432
+    volumes:
+      - langfuse_postgres_data:/var/lib/postgresql/data
+    networks:
+      - autonomous
+
 volumes:
   mongodb-data:
   meili-data:
@@ -274,6 +430,11 @@ volumes:
   chroma-genes-data:
   langflow-data:
   langflow-postgres:
+  langfuse_clickhouse_data:
+  langfuse_clickhouse_logs:
+  langfuse_minio_data:
+  redis-langfuse_data:
+  langfuse_postgres_data:
 
 networks:
   autonomous:
