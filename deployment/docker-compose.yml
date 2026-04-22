@@ -225,7 +225,7 @@ services:
 
   langflow:
     container_name: langflow
-    image: langflowai/langflow:1.7.2
+    image: langflowai/langflow:1.9.0
     depends_on:
       - postgres-langflow
     environment:
@@ -233,6 +233,7 @@ services:
       - LANGFLOW_SUPERUSER_PASSWORD=${LANGFLOW_SUPERUSER_PASSWORD}
       - LANGFLOW_AUTO_LOGIN=false
       - LANGFLOW_DATABASE_URL=postgresql://${LANGFLOW_USER}:${LANGFLOW_PASSWORD}@postgres-langflow:5432/${LANGFLOW_DB}
+      - LANGFLOW_NEW_USER_IS_ACTIVE=True
     ports:
       - "7860:7860"
     restart: always
