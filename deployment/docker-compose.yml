@@ -42,7 +42,7 @@ services:
       - mongodb-data:/data/db
 
   mongo-express: 
-    image: mongo-express:latest
+    image: mongo-express:1.0.2-20-alpine3.19
     container_name: mongo-express
     environment:
       ME_CONFIG_MONGODB_URL: mongodb://mongodb:27017
@@ -252,6 +252,19 @@ services:
     restart: always
     volumes:
       - langflow-postgres:/var/lib/postgresql/data
+    networks:
+      - autonomous
+
+  dozzle:
+    container_name: dozzle
+    image: amir20/dozzle:v10
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./dozzle/users.yml:/data/users.yml
+    environment:
+      - DOZZLE_AUTH_PROVIDER=simple
+    ports:
+      - 8888:8080
     networks:
       - autonomous
 

@@ -61,7 +61,7 @@ sections:
       - title: Dozzle
         description: Interface for monitoring logs
         icon: far fa-chart-bar
-        url: http://ehsdttlp30:8888/ # CHANGEME
+        url: http://<my-vm-ip>:8888/ # CHANGEME
         id: 1_1766_dozzle
       - title: LangFuse
         description: Interface for monitoring LLM queries
