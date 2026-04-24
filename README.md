@@ -69,6 +69,7 @@ Once the stack is running, access the services using your server’s IP address:
 
 Dashy: http://<SERVER_IP>:8082  
 LibreChat: http://<SERVER_IP>:3080  
+LiteLLM: http://<SERVER_IP>:8000  
 LangFuse: http://<SERVER_IP>:3000  
 Langflow: http://<SERVER_IP>:7860  
 
