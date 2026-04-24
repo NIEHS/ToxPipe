@@ -3,10 +3,11 @@ users:
   # docker run -it --rm amir20/dozzle generate <username> --password <password> --email <email> --name "<name>"
 
   # Example:
-  # docker run -it --rm amir20/dozzle generate admin --password my_password --email me@email.net --name "<Admin>" 
+  # docker run -it --rm amir20/dozzle generate admin --password my_password --email me@email.net --name "Admin" 
   # "admin" here is username
   # "my_password" is the password, represented by the hash 
-  admin:
-    email: me@email.net
-    name: Admin
-    password: $2a$11$2wepioHpXklEkuQA7KU5QOgB5X.NU.rP6jQ52ZCxYs0Wq/1SV16a6
+
+  #admin:
+  #  email: me@email.net
+  #  name: Admin
+  #  password: $2a$11$2wepioHpXklEkuQA7KU5QOgB5X.NU.rP6jQ52ZCxYs0Wq/1SV16a6

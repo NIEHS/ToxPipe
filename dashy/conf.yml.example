@@ -7,12 +7,12 @@ sections:
       - title: LibreChat
         description: A ChatGPT-like interface for conversing with an AI model or agent
         icon: far fa-robot
-        url: http://<my-vm-ip>:3080 # CHANGEME
+        url: http://<my-server-ip>:3080 # CHANGEME
         id: 0_1274_librechat
       - title: LiteLLM
         description: API for unified LLM access
         icon: far fa-code
-        url: http://<my-vm-ip>:8000 # CHANGEME
+        url: http://<my-server-ip>:8000 # CHANGEME
         id: 1_1274_litellm
       - title: ToxPipe Evaluations
         description: Application for testing and auditing models and agents
@@ -33,7 +33,7 @@ sections:
       - title: LangFlow
         description: Interface for visually creating AI workflows
         icon: far fa-robot
-        url: http://<my-vm-ip>:7860 # CHANGEME
+        url: http://<my-server-ip>:7860 # CHANGEME
 
   - name: ToxPipe Backend
     icon: far fa-database
@@ -43,7 +43,7 @@ sections:
           Interface for MongoDB instance that stores history and config for
           LibreChat
         icon: far fa-database
-        url: http://<my-vm-ip>:8081 # CHANGEME
+        url: http://<my-server-ip>:8081 # CHANGEME
         id: 0_1425_mongoexpress
       - title: Ollama
         description: Local hosting of AI models (no web interface)
@@ -61,12 +61,12 @@ sections:
       - title: Dozzle
         description: Interface for monitoring logs
         icon: far fa-chart-bar
-        url: http://<my-vm-ip>:8888/ # CHANGEME
+        url: http://<my-server-ip>:8888/ # CHANGEME
         id: 1_1766_dozzle
       - title: LangFuse
         description: Interface for monitoring LLM queries
         icon: far fa-chart-bar
-        url: https://<my-vm-ip>:3000 # CHANGEME
+        url: https://<my-server-ip>:3000 # CHANGEME
   - name: ToxPipe Documentation
     icon: far fa-book
     items:
