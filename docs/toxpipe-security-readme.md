@@ -355,7 +355,7 @@ After the above configuration is complete, you may run the Traefik service with 
 Most of ToxPipe's constituent services have application-level authentication that may be enabled. This section will detail these options. **Please note that none of these options are meant to be the singular form of security in a public-facing deployment, nor are they meant to be unbreakable. Deploying ToxPipe behind a reverse proxy with SSL and/or behind a VPN will always provide better security.**
 
 ## Dashy
-Follow the guide at [https://dashy.to/docs/authentication/](https://dashy.to/docs/authentication/). The ```conf.yml``` discussed in this guide will be your Dashy configuration file in the directory: ```(toxpipe-root)/user-data/conf.yml```. Any environment variables should be configured in ToxPipe's ```.env``` file.
+Follow the guide at [https://dashy.to/docs/authentication/](https://dashy.to/docs/authentication/). The ```conf.yml``` discussed in this guide will be your Dashy configuration file in the directory: ```(toxpipe-root)/dashy/conf.yml```. Any environment variables should be configured in ToxPipe's ```.env``` file.
 
 ## LibreChat
 Follow the guide at [https://www.librechat.ai/docs/configuration/authentication](https://www.librechat.ai/docs/configuration/authentication). You will need to configure these environment variables in ToxPipe's ```.env``` file.
