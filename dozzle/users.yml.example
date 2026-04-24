@@ -5,7 +5,8 @@ users:
   # Example:
   # docker run -it --rm amir20/dozzle generate admin --password my_password --email me@email.net --name "Admin" 
   # "admin" here is username
-  # "my_password" is the password, represented by the hash 
+  # "my_password" is the password for signing into the ui, represented by the hash below
+  # results from the command would be pasted as shown below
 
   #admin:
   #  email: me@email.net

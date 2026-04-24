@@ -1,3 +1,5 @@
+# Replace <my-server-ip> with your servers ip address. 
+# Alternatively, if you setup custom domains change all urls accordingly
 pageInfo:
   title: ToxPipe
 sections:
