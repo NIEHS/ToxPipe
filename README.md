@@ -83,7 +83,7 @@ By offloading these tasks to ToxPipe, it would allow toxicologists to redirect t
 
 ## System Architecture
 
-The following diagram demonstrates an overall structure of ToxPipe. This model is subject to change as the project develops.
+The following diagram demonstrates the architecture of . This model is subject to change as the project develops.
 
 ![ToxPipe Overview](toxpipe-ecosystem-new-2025.png)
 
