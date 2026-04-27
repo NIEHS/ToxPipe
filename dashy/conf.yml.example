@@ -28,10 +28,6 @@ sections:
         icon: far fa-code
         url: https://rstudio.niehs.nih.gov/chembiotox-api/
         id: 4_1274_chembiotoxapi
-      - title: RAG API
-        description: API for performing RAG, used internally by LibreChat
-        icon: far fa-code
-        id: 5_1274_ragapi
       - title: LangFlow
         description: Interface for visually creating AI workflows
         icon: far fa-robot
@@ -47,16 +43,6 @@ sections:
         icon: far fa-database
         url: http://<my-server-ip>:8081 # CHANGEME
         id: 0_1425_mongoexpress
-      - title: Ollama
-        description: Local hosting of AI models (no web interface)
-        icon: far fa-robot
-        id: 1_1425_ollama
-      - title: ChromaDB
-        description: >-
-          Database that stores text embeddings for the NTP documents at
-          https://ntp.niehs.nih.gov/publications (no web interface)
-        icon: far fa-database
-        id: 2_1425_chromadb
   - name: ToxPipe Management
     icon: far fa-wrench
     items:
