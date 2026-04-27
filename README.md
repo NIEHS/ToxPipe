@@ -48,7 +48,7 @@
   <li><a href="https://rstudio.niehs.nih.gov/tox-eval/">ToxPipe evaluations software</a></li>
 </ul>
 
-## 🤔 What is ToxPipe?
+## What is ToxPipe?
 
 ToxPipe is an ecosystem of open-source software that aims to explore the use of large language models (LLMs) for the rapid analysis and interpretation of toxicological properties of various compounds. By leveraging these cutting-edge semi-autonomous AI systems, ToxPipe enables scientists and toxicologists to explore diverse types of toxicologically relevant data through natural language instructions. Further, through the provision of curated data streams as additional context for models, ToxPipe integrates novel, contemporary data streams that were previously challenging to access and use in toxicological characterization.
 
