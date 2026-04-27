@@ -1,4 +1,7 @@
+
 # ToxPipe: Installing and Using NIEHS SSL Certificates in Python
+**Note: This guide is specific to users attempting to access the NIEHS's main ToxPipe deployment. It may be disregarded if you are using a separate or self-hosted ToxPipe deployment.**
+
 When attempting to call ToxPipe's AI models in Python, you may run into errors like:
 
 `httpx.ConnectError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self signed certificate in certificate chain`
