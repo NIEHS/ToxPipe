@@ -37,16 +37,15 @@
     <li><a href="#deployment">Deployment</a></li>
     <li><a href="#useful-links">Useful Links</a></li>
     <li><a href="#repo-structure">Repo Structure</a></li>
-    <li><a href="#%EF%B8%8F-built-with">🛠️ Built With</a></li>
     <li><a href="#funding-sources">Funding Sources</a></li>
   </ol>
 </details>
 
 ## 🤔 What is ToxPipe?
 
-ToxPipe aims to explore the use of expert entrained AI-based systems for the rapid analysis and interpretation of toxicological properties of various compounds. By leveraging cutting-edge semi-autonomous AI systems, ToxPipe will enable scientists and toxicologists to explore diverse types of toxicologically relevant data through natural language instructions. Further, through use of expert entrainment ToxPipe will provide context generation that will act as a guide to novel, contemporary data streams that were previously challenging to access and integrate into toxicological characterization.
+ToxPipe is an ecosystem of open-source software that aims to explore the use of large language models (LLMs) for the rapid analysis and interpretation of toxicological properties of various compounds. By leveraging these cutting-edge semi-autonomous AI systems, ToxPipe enables scientists and toxicologists to explore diverse types of toxicologically relevant data through natural language instructions. Further, through the provision of curated data streams as additional context for models, ToxPipe integrates novel, contemporary data streams that were previously challenging to access and use in toxicological characterization.
 
-ToxPipe is meant to be a platform for interacting with various toxicological data streams. It comprises multiple components and like any agentic retrieval augmented generation (RAG) system, requires managing agents, state, prompts, database connections, APIs, and other systems.
+ToxPipe is meant to be a platform for interacting with various toxicological data streams. It comprises multiple components and, like any agentic retrieval augmented generation (RAG) system, requires managing agents, states, prompts, database connections, APIs, and other systems.
 
 <p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
     <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
@@ -56,7 +55,7 @@ ToxPipe is meant to be a platform for interacting with various toxicological dat
 
 ## Approach
 
-Large language models (LLMs), such as [OpenAI’s GPT-based models](https://openai.com/blog/chatgpt), can be used to solve complicated tasks with natural language as a generic interface. By using techniques like retrieval augmented generation (RAG), LLMs can be given a set of instructions and can (semi-)autonomously explore various data sources. The LLMs will then generate responses or interpretations based on information stored inside the models along with the contextual data retrieved through RAG.
+LLMs, such as [OpenAI’s GPT models](https://openai.com/blog/chatgpt), can be used to solve complicated tasks with natural language as a generic interface. By using techniques like retrieval augmented generation (RAG) and model context protocol (MCP)-based tools, LLMs can be given a set of instructions and can (semi-)autonomously explore various data sources. LLMs can then generate responses or interpretations based on information stored inside the models (pretrained data) along with the contextual data retrieved through external streams like RAG and tool calls.
 
 ToxPipe aims to repurpose (semi-)autonomous AI agents for AI-augmented exploration of existing toxicological data and literature. Some of the tasks that we believe are possible with autonomous agents and RAG are:
 
@@ -64,10 +63,10 @@ ToxPipe aims to repurpose (semi-)autonomous AI agents for AI-augmented explorati
 - Analysis of chemical structure
 - Analysis of biological assay results
 - Summarization of journal abstracts
-- Biological database exploration using text-to-SQL AI models
-- A variety of other tasks that currently require large amounts of human time and labor.
+- Biological, chemical, and toxicological database exploration
+- A variety of other tasks that currently require large amounts of human time and labor
 
-By offloading these tasks to ToxPipe, it would allow toxicologists to repurpose their time towards higher-level cognitive tasks of directing the AI towards specific outputs.
+By offloading these tasks to ToxPipe, it would allow toxicologists to redirect their time towards higher-level cognitive tasks of directing the AI towards specific outputs.
 
 <p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
     <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
@@ -81,8 +80,6 @@ The following diagram demonstrates an overall structure of ToxPipe. This model i
 
 ![ToxPipe Overview](toxpipe-ecosystem-new-2025.png)
 
-Architecture documentation is in [`docs/architecture`](docs/architecture/index.qmd). Stack decisions are saved in [`docs/decisions`](docs/decisions/index.md). This is where we will document the reasoning behind our stack decisions.
-
 <p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
     <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
         ↑ Back to Top ↑
@@ -91,7 +88,7 @@ Architecture documentation is in [`docs/architecture`](docs/architecture/index.q
 
 ## Deployment
 
-Deployment information is contained in [`docs/deployment`](docs/deployment/index.md).
+Deployment information is contained at [`docs/docker-setup-readme.md`](docs/docker-setup-readme.md).
 
 <p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
     <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
@@ -101,7 +98,11 @@ Deployment information is contained in [`docs/deployment`](docs/deployment/index
 
 ## Related Repositories
 
-- [ToxPipe LLM Model Comparisons](https://github.com/NIEHS/toxpipe-model-comparison)
+- [ToxPipe LLM Model Comparison](https://github.com/NIEHS/ToxPipe-Model-Comparison) - Evaluations for the various models supported by ToxPipe
+- [ToxPipeMCP](https://github.com/NIEHS/ToxPipeMCP) - MCP server providing various toxicological tools to LLMs
+- [ToxPipeMCP-Suite](https://github.com/NIEHS/ToxPipeMCP-Suite) - Additional MCP servers providing broader data access to LLMs
+- [ToxPipeRAG](https://github.com/NIEHS/ToxPipeRAG) - Embeddings database built from chemical and technical reports from ChEMBL and the NTP for use in RAG
+- [ChemBioTox-API](https://github.com/NIEHS/ChemBioTox-API) - REST API for interfacing with ChemBioTox, a database of experimental and predicted toxicological data for over 1 million chemicals
 
 <p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
     <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
@@ -111,28 +112,30 @@ Deployment information is contained in [`docs/deployment`](docs/deployment/index
 
 ## Repo Structure
 
+- `.litellm`: Configuration related to LiteLLM, a provider-agnostic proxy for accessing various LLMs through a unified interface
+- `dashy`: Configuration related to Dashy, a dashboard software for providing a singular interface for accessing ToxPipe's services 
 - `docs`: Documentation and guides
+  - `docker-setup-readme.md`: Main guide for deploying ToxPipe using Docker Compose
+  - `dyad-setup-readme.md`: Guide for configuring ToxPipe models to work with [Dyad](https://www.dyad.sh/), a desktop application for vibe-coding
+  - `niehs-certificate-readme.md`: Guide for configuring SSL certificates for proper access to the NIEHS-hosted ToxPipe models
+  - `ollama-readme.md`: Guide for installing and hosting local AI models through Ollama
+  - `toxpipe-security-readme.md`: Security recommendations for hosting a public ToxPipe deployment
+- `dozzle`: Configuration related to Dozzle, a service for monitoring Docker containers
 - `examples`: Example code and vignettes for common use cases
-- `src`: Source code for the backend and frontend components of ToxPipe
-  - `web`: Containers (Docker) and configuration for ToxPipe's contituent services (LibreChat, LiteLLM, Langflow, Langfuse, Ollama, etc.) 
-  - `toxpipe-api`: Source code for the ToxPipe FastAPI web API and RAG/literature search features
+- `models`: Storage of locally-downloaded AI models from Ollama
+- `ntp_docs_rag_db`: Data directory for ChromaDB data for [ToxPipeRAG](https://github.com/NIEHS/ToxPipeRAG)
+- `ollama`: Configuration related to Ollama, a software for managing and hosting local AI models
+- `traefik`: Configuration related to Traefik, a reverse proxy service
+- `docker-compose.mcp.yml`: Docker compose file for the [ToxPipeMCP](https://github.com/NIEHS/ToxPipeMCP) component of ToxPipe - this may be deployed standalone
+- `docker-compose.yml`: Docker compose file for all other constituent services for ToxPipe
+- `env.example`: Example `.env` file for setting environment variables for the ToxPipe Docker Compose environment
+- `librechat.yaml`: Configuration related to LibreChat, a ChatGPT-like interface for conversing with LLMs and agents
 
 <p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
     <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
         ↑ Back to Top ↑
     </a>
 </p>
-
-## 🛠️ Built With
-
-![FastAPI Badge](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=fff&style=plastic)
-
-<p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
-    <a href="#readme-top" style="text-decoration: none; color: #007bff; font-weight: bold;">
-        ↑ Back to Top ↑
-    </a>
-</p>
-
 ## Funding Sources
 
 This work was funded by the National Institutes Health (NIH) under the following grants:
