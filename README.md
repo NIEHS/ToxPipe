@@ -27,15 +27,26 @@
 <details>
   <summary>🗂️ Table of Contents</summary>
   <ol>
+    <li><a href="#quick-links">Quick Links</a></li>
     <li><a href="#what-is-toxpipe">What is ToxPipe?</a></li>
     <li><a href="#approach">Approach</a></li>
     <li><a href="#system-architecture">System Architecture</a></li>
     <li><a href="#deployment">Deployment</a></li>
-    <li><a href="#useful-links">Useful Links</a></li>
+    <li><a href="#related-repositories">Related Repositories</a></li>
     <li><a href="#repo-structure">Repo Structure</a></li>
     <li><a href="#funding-sources">Funding Sources</a></li>
   </ol>
 </details>
+
+## Quick Links
+
+<ul>
+  <li><a href="https://combspk.github.io/ToxPipe-Models-List-NIEHS/">Available models in the NIEHS ToxPipe deployment</a></li>
+  <li><a href="https://github.com/NIEHS/ToxPipe/blob/Deployment/docs/docker-setup-readme.md">Setup guide for Docker</a></li>
+  <li><a href="https://toxpipe.niehs.nih.gov/">NIEHS ToxPipe dashboard</a></li>
+  <li><a href="https://github.com/NIEHS/ToxPipe/wiki">ToxPipe wiki</a></li>
+  <li><a href="https://rstudio.niehs.nih.gov/tox-eval/">ToxPipe evaluations software</a></li>
+</ul>
 
 ## 🤔 What is ToxPipe?
 
