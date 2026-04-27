@@ -46,6 +46,7 @@
   <li><a href="https://toxpipe.niehs.nih.gov/">NIEHS ToxPipe dashboard</a></li>
   <li><a href="https://github.com/NIEHS/ToxPipe/wiki">ToxPipe wiki</a></li>
   <li><a href="https://rstudio.niehs.nih.gov/tox-eval/">ToxPipe evaluations software</a></li>
+  <li><a href="https://github.com/NIEHS/ToxPipe-Model-Comparison/wiki">ToxPipe evaluations documentation</a></li>
 </ul>
 
 ## What is ToxPipe?
