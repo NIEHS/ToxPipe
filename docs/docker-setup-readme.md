@@ -33,7 +33,7 @@ Note: NUM_WORKERS is set to 1. Increasing this is suggested, as it will increase
 
 ### Example copy and edit command
 ```
-cp .env.example .env
+cp env.example .env
 nano .env
 ```
 
