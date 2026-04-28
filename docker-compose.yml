@@ -154,6 +154,7 @@ services:
       - autonomous
 
   litellm-db:
+    container_name: litellm-db
     image: postgres:16.4
     restart: always
     environment:
@@ -168,6 +169,7 @@ services:
       - autonomous
 
   redis:
+    container_name: redis
     # ADD LITELLM CACHING
     image: redis:7-alpine
     command:
@@ -255,13 +257,14 @@ services:
       - autonomous
 
   dashy:
-      image: lissy93/dashy:3.1
-      networks:
-        - autonomous
-      ports:
-        - 8082:8080
-      volumes:
-        - ./dashy/:/app/user-data/
+    container_name: dashy
+    image: lissy93/dashy:3.1
+    networks:
+      - autonomous
+    ports:
+      - 8082:8080
+    volumes:
+      - ./dashy/:/app/user-data/
 
   langfuse-worker:
     container_name: langfuse-worker
