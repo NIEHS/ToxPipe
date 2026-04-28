@@ -209,20 +209,6 @@ services:
     networks:
       - autonomous
 
-  chromadb-genes:
-    image: ghcr.io/chroma-core/chroma:1.0.0
-    container_name: chromadb-genes
-    restart: always
-    healthcheck:
-      test: [ "CMD", "/bin/bash", "-c", "cat < /dev/null > /dev/tcp/localhost/8000" ]
-      interval: 30s
-      timeout: 3600s
-      retries: 5
-    volumes:
-      - chroma-genes-data:/data
-    networks:
-      - autonomous
-
   langflow:
     container_name: langflow
     image: langflowai/langflow:1.9.0
@@ -440,7 +426,6 @@ volumes:
   redis-data:
   llama-index-mongodb-data:
   chroma-data:
-  chroma-genes-data:
   langflow-data:
   langflow-postgres:
   langfuse-clickhouse-data:
