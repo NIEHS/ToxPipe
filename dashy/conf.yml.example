@@ -75,10 +75,6 @@ sections:
         description: Wiki with guides, FAQs, and information
         icon: far fa-book
         url: https://github.com/NIEHS/ToxPipe/wiki
-      - title: ToxPipe Evaluations Documentation
-        description: Documentation for evaluations run on ToxPipe
-        icon: far fa-book
-        url: https://niehs.github.io/ToxPipe-Model-Comparison/eval_app.html
       - title: Dyad Setup
         description: Guide for setting up a vibe-coding client with ToxPipe models
         icon: far fa-book
