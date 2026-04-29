@@ -63,10 +63,6 @@ sections:
         icon: fab fa-github
         url: https://github.com/NIEHS/ToxPipe
         id: 0_2115_toxpiperepository
-      - title: ToxPipe Deployment Repository
-        description: Repository branch for quick ToxPipe deployment
-        icon: fab fa-github
-        url: https://github.com/NIEHS/ToxPipe/tree/Deployment
       - title: ToxPipe Evaluations Repository
         description: Code repository for ToxPipe evaluations and model comparisons
         icon: fab fa-github
