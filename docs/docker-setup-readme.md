@@ -24,6 +24,8 @@ Optional, but helps to easily download ToxPipe code to your server with the foll
 git clone https://github.com/NIEHS/ToxPipe.git
 ```
 
+Note that if using Docker Desktop, you must ensure Docker Desktop is fully installed and running before setting up ToxPipe.
+
 ---
 
 ## 2. Copying and configuring the env file 
@@ -54,7 +56,14 @@ Preset service and model cofigurations are already provided for use, with only .
 
 Note: Ollama models will require extra configuration to make them work, as these models require custom downloads and access to a gpu server. Please see our [Ollama setup guide](ollama-readme.md) for help setting these models up. Also, setting up additional security measures is highly recommended, as by default the services are hosted publicly such that anyone with the url can access and use them. Please see our [security guide](toxpipe-security-readme.md) for help setting up additional security measures.
 
-## 6. Running Docker Compose
+## 6. Setup Docker's Network
+We recommend that ToxPipe be used with a dedicated bridged network for its Docker containers. This can easily be done with:
+```
+docker network create autonomous
+```
+Note that by default, this network's name is ```autonomous```, but this may be changed as desired.
+
+## 7. Running Docker Compose
 This project includes two docker compose files for use.  
 - docker-compose.yml (the default file)
 - docker-compose.mcp.yml (optional compose for including mcp)
@@ -62,9 +71,13 @@ This project includes two docker compose files for use.
 Docker compose is the main way to set up the stack with your desired services. Docker Compose must be used to create and host the containers in a detached state so that others can access your stack. If you only care about the default services, no files will need to be specified when running compose. Additionally, if you want mcp or any other new services and combine them into a single docker-compose.override.yml file (see [Docker](https://docs.docker.com/compose/how-tos/multiple-compose-files/merge/#merge-compose-files)), then once again no files will need to be specified when running compose. However, if you want to keep the optional docker service files separated by function (ie. mcp), and want to use those optional services, then all desired compose files will have to be specified with -f each time docker compose is used. For example:
 
 ### Default docker file only, or default + override file
-Note: This command pulls, builds, creates, and starts all services if any of those steps have not been done prior. Each step can be done individually with docker commands if desired. 
+Note: This command pulls, builds, creates, and starts all services if any of those steps have not been done prior. 
 ```
 docker compose up -d
+```
+Each step can be done individually with docker commands if desired.
+```
+docker compose litellm up -d
 ```
 
 #### Individual service files 
@@ -72,9 +85,19 @@ docker compose up -d
 docker compose -f docker-compose.yml -f docker-compose.langfuse.yml up -d 
 ```
 
+#### Shutting down Docker containers
+All containers may be shut down with:
+```
+docker compose down
+```
+Individual containers may be shut down with:
+```
+docker compose litellm down
+```
+
 ---
 
-## 7. Accessing the Application
+## 8. Accessing the Application
 
 Once the stack is running, access the services using your server’s IP address and each services host port unless you have configured custom domains. The default url for each publicly hosted service is shown below:
 
