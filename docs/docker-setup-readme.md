@@ -24,7 +24,7 @@ Optional, but helps to easily download ToxPipe code to your server with the foll
 git clone https://github.com/NIEHS/ToxPipe.git
 ```
 
-Note that if using Docker Desktop, you must ensure Docker Desktop is fully installed and running before setting up ToxPipe.
+Note that if using Docker Desktop, you must ensure Docker Desktop is fully installed and the Docker Engine is running before setting up ToxPipe.
 
 ---
 
