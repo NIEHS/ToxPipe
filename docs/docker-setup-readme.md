@@ -11,8 +11,9 @@ This guide will walk you through how to spin up and use the full Docker stack. A
 4. Copy dashy/user-data.yml.example to dashy/user-data.yml and set the domain paths for all services
 5. Optionally configure services or add new models
 6. Set up Docker's network
-7. Run Docker Compose to create and start all containers defined in the configuration
-8. Access the application at the hosted url
+7. Set up databases
+8. Run Docker Compose to create and start all containers defined in the configuration
+9. Access the application at the hosted url
 
 ---
 
@@ -59,14 +60,25 @@ Preset service and model cofigurations are already provided for use, with only .
 
 Note: Ollama models will require extra configuration to make them work, as these models require custom downloads and access to a gpu server. Please see our [Ollama setup guide](ollama-readme.md) for help setting these models up. Also, setting up additional security measures is highly recommended, as by default the services are hosted publicly such that anyone with the url can access and use them. Please see our [security guide](toxpipe-security-readme.md) for help setting up additional security measures.
 
-## 6. Setup Docker's Network
+## 6. Set Up Docker's Network
 We recommend that ToxPipe be used with a dedicated bridged network for its Docker containers. This can easily be done with:
 ```
 docker network create autonomous
 ```
 Note that by default, this network's name is ```autonomous```, but this may be changed as desired.
 
-## 7. Running Docker Compose
+## 7. Set Up Databases
+ToxPipe's default configuration contains multiple Postgres databases. In order for these to properly initialize, their mounted data directories must be empty. When you download the ToxPipe repository for the first time, these directories contain empty README files to ensure they are not ignored by Git. You will need to delete these README files in order for the database initialization to complete properly.
+
+Ensure the following directories exist and are empty in the project's root directory:
+```
+langflow-postgres
+langfuse-postgres
+librechat-postgres
+litellm-postgres
+```
+
+## 8. Running Docker Compose
 This project includes two docker compose files for use.  
 - docker-compose.yml (the default file)
 - docker-compose.mcp.yml (optional compose for including mcp)
@@ -102,7 +114,7 @@ docker compose litellm down
 
 ---
 
-## 8. Accessing the Application
+## 9. Accessing the Application
 
 Once the stack is running, access the services using your server’s IP address and each services host port unless you have configured custom domains. The default url for each publicly hosted service is shown below:
 
