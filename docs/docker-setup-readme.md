@@ -2,6 +2,8 @@
 
 This guide will walk you through how to spin up and use the full Docker stack. A list of steps is shown below, with in depth descriptions provided later for those unfamiliar with any of the methods.
 
+**Warning: ToxPipe is a _large_ project. Make sure you have at least 40GB of free space before following these steps.**
+
 
 1. Install docker and clone the repository onto your server
 2. Copy env.example to .env and edit required variables
