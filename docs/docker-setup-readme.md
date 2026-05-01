@@ -11,9 +11,8 @@ This guide will walk you through how to spin up and use the full Docker stack. A
 4. Copy dashy/user-data.yml.example to dashy/user-data.yml and set the domain paths for all services
 5. Optionally configure services or add new models
 6. Set up Docker's network
-7. Set up databases
-8. Run Docker Compose to create and start all containers defined in the configuration
-9. Access the application at the hosted url
+7. Run Docker Compose to create and start all containers defined in the configuration
+8. Access the application at the hosted url
 
 ---
 
@@ -66,17 +65,6 @@ We recommend that ToxPipe be used with a dedicated bridged network for its Docke
 docker network create autonomous
 ```
 Note that by default, this network's name is ```autonomous```, but this may be changed as desired.
-
-## 7. Set Up Databases
-ToxPipe's default configuration contains multiple Postgres databases. In order for these to properly initialize, their mounted data directories must be empty. When you download the ToxPipe repository for the first time, these directories contain empty README files to ensure they are not ignored by Git. You will need to delete these README files in order for the database initialization to complete properly.
-
-Ensure the following directories exist and are empty in the project's root directory:
-```
-langflow-postgres
-langfuse-postgres
-librechat-postgres
-litellm-postgres
-```
 
 ## 8. Running Docker Compose
 This project includes two docker compose files for use.  
