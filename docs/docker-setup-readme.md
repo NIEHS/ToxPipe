@@ -8,8 +8,9 @@ This guide will walk you through how to spin up and use the full Docker stack. A
 3. Copy dozzle/users.yml.example to dozzle/users.yml and provide any desired user info
 4. Copy dashy/user-data.yml.example to dashy/user-data.yml and set the domain paths for all services
 5. Optionally configure services or add new models
-6. Run Docker Compose to create and start all containers defined in the configuration
-7. Access the application at the hosted url
+6. Set up Docker's network
+7. Run Docker Compose to create and start all containers defined in the configuration
+8. Access the application at the hosted url
 
 ---
 
@@ -69,6 +70,8 @@ This project includes two docker compose files for use.
 - docker-compose.mcp.yml (optional compose for including mcp)
 
 Docker compose is the main way to set up the stack with your desired services. Docker Compose must be used to create and host the containers in a detached state so that others can access your stack. If you only care about the default services, no files will need to be specified when running compose. Additionally, if you want mcp or any other new services and combine them into a single docker-compose.override.yml file (see [Docker](https://docs.docker.com/compose/how-tos/multiple-compose-files/merge/#merge-compose-files)), then once again no files will need to be specified when running compose. However, if you want to keep the optional docker service files separated by function (ie. mcp), and want to use those optional services, then all desired compose files will have to be specified with -f each time docker compose is used. For example:
+
+**Note: multiple images will need to be pulled simultaneously if setting up ToxPipe for the first time. This may take a while (~30 min.). If this process fails due to a connection error, try pulling the images again, or try pulling each image individually.**
 
 ### Default docker file only, or default + override file
 Note: This command pulls, builds, creates, and starts all services if any of those steps have not been done prior. 
