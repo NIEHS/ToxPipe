@@ -116,3 +116,59 @@ Dozzle: http://<SERVER_IP>:8888
 ## Maintaining the Application
 For more tips on running, maintaining, and updating your docker stack, please refer to the offical [Docker](https://docs.docker.com/guides/) manuals.
 
+# Common Issues and FAQs
+
+## Databases
+
+### Database does not exist
+If using the database components of ToxPipe (i.e., ```LITELLM_DB``` and ```LANGFLOW_DB``` in the ```.env``` file), ensure these databases actually exist in their respective Docker containers and that your specified user has access to the corresponding database. The Postgres Docker image should automatically create the specified database(s) upon first startup as long as the volume is empty; however, if they were not created for some reason, you may do it manually in Postgres with the following steps:
+1. First, run ```docker exec -it litellm-db psql -U postgres``` to attach to the container running the Postgres instance and run the Postgres command line utility as the ``postgres``` user and connect to the default ```postgres``` database.
+2. Run
+   ```
+   CREATE USER <username> WITH PASSWORD '<password>';
+   CREATE DATABASE <database_name> OWNER <username>;
+   ```
+
+### Database connection refused
+#### Ensure the user has appropriate database permissions
+1. First, run ```docker exec -it litellm-db psql -U postgres``` to attach to the container running the Postgres instance and run the Postgres command line utility as the ``postgres``` user and connect to the default ```postgres``` database.
+2. Run
+   ```
+   GRANT ALL PRIVILEGES ON DATABASE <database_name> TO <username>;
+   \c <database_name>
+   GRANT ALL ON SCHEMA public TO <username>;
+   ```
+
+#### Ensure the Postgres server is running on 0.0.0.0 and accepting connections
+1. Create a ```pg_hba.conf``` file and ensure it contains the line:
+   ```
+   host    all             all             0.0.0.0/0               md5
+   ```
+   For this example, we will save this file at ```litellm-pg-etc/pg_hba.conf``` in the ToxPipe project directory.
+2. Add the following to your ```docker-compose.yml``` specifications for the database service:
+   ```
+   command: >
+     -c hba_file=/etc/postgresql/pg_hba.conf
+   ```
+
+   For example:
+   ```
+    litellm-db:
+        container_name: litellm-db
+        image: postgres:16.4
+        restart: always
+        environment:
+          - POSTGRES_USER=${LITELLM_USER}
+          - POSTGRES_PASSWORD=${LITELLM_PASSWORD}
+          - POSTGRES_DB=${LITELLM_DB}
+        volumes:
+          - ./litellm-pg-etc/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro # ensure you allow Docker to see this file
+          - litellm-pg:/var/lib/postgresql/data
+        networks:
+          - autonomous
+        healthcheck:
+          test: ["CMD-SHELL", "pg_isready -U ${LITELLM_USER} -d ${LITELLM_DB}"]
+        command: >
+          -c hba_file=/etc/postgresql/pg_hba.conf
+   ```
+3. Completely shut down and delete the container, then recreate it and start it back up.
