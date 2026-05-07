@@ -9,3 +9,6 @@ services:
     restart: always
     networks:
       - autonomous
+networks:
+  autonomous:
+    driver: bridge 
