@@ -102,7 +102,7 @@ docker compose litellm down
 
 ---
 
-## 9. Accessing the Application
+## 9. Accessing the application
 
 Once the stack is running, access the services using your server’s IP address and each services host port unless you have configured custom domains. The default url for each publicly hosted service is shown below:
 
@@ -112,6 +112,9 @@ LiteLLM: http://<SERVER_IP>:8000
 LangFuse: http://<SERVER_IP>:3000  
 Langflow: http://<SERVER_IP>:7860  
 Dozzle: http://<SERVER_IP>:8888
+
+## (Optional) Deploy the ToxPipeMCP server
+To set up the ToxPipeMCP server, follow the instructions at [docs/toxpipemcp-readme.md](https://github.com/NIEHS/ToxPipe/blob/Deployment/docs/toxpipemcp-readme.md)
 
 ## Maintaining the Application
 For more tips on running, maintaining, and updating your docker stack, please refer to the offical [Docker](https://docs.docker.com/guides/) manuals.
