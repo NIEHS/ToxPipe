@@ -1,6 +1,6 @@
 services:
   toxpipe-mcp:
-    build: https://github.com/NIEHS/ToxPipeMCP.git#v1.2.1
+    build: https://github.com/NIEHS/ToxPipeMCP.git#v1.2.2
     container_name: toxpipe-mcp
     volumes:
       - ./.env:/tpmcp/.config/.env    
