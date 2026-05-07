@@ -1,0 +1,7 @@
+# Installing ToxPipeMCP for use with ToxPipe and other AI models
+
+ToxPipeMCP is a bespoke MCP server developed to provide data from [NIEHS's ChemBioTox API](https://rstudio.niehs.nih.gov/chembiotox-api/) to LLMs. ToxPipeMCP is designed to be deployed alongside the rest of the ToxPipe stack and may be used separately from it with any other compatible LLM service. The ToxPipe code repository comes with a Docker Compose file, [docker-compose.mcp.yml](https://github.com/NIEHS/ToxPipe/blob/Deployment/docker-compose.mcp.yml), that can be used to easily setup ToxPipeMCP on your machine. To set up the MCP server:
+1. Build the ToxPipeMCP Docker image with ```docker compose -f docker-compose.mcp.yml build toxpipe-mcp``` from the ToxPipe project's root directory. If you run into the error: ```failed to evaluate path "https://github.com/NIEHS/ToxPipeMCP.git#v1.2.0": CreateFile C:\...\https:: The filename, directory name, or volume label syntax is incorrect.```, set the ```COMPOSE_BAKE``` environment variable to ```false```. This can be done in Windows Powershell with ```$env:COMPOSE_BAKE="false"``` and in Linux with ```export COMPOSE_BAKE="false"```.
+2. Set the ToxPipeMCP configuration settings in the ```.env``` file.
+3. Ensure the ```autonomous``` network exists. If it does not, create it with ```docker network create autonomous```.
+4. Run the ToxPipeMCP container with ```docker compose -f docker-compose.mcp.yml up toxpipe-mcp -d```.
