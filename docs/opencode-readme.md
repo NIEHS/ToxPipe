@@ -1,3 +1,4 @@
+# Using ToxPipe with OpenCode
 
 This guide shows how to manually create an OpenCode config on a new installation without hard-coding a specific username.
 
@@ -8,7 +9,7 @@ It covers two setups:
 
 ## Prerequisites
 
-- OpenCode is already installed
+- OpenCode is already installed (OpenCode may be installed with [this guide](https://opencode.ai/docs#install))
 - You know the provider settings you want to add
 - You have the API key or token for that provider
 
