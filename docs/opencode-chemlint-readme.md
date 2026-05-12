@@ -8,7 +8,9 @@ This guide will walk you through how to use ChemLint alongside OpenCode with Tox
 Follow the [official OpenCode documentation](https://opencode.ai/) to install OpenCode on your system.
 
 ## Add ToxPipe models to OpenCode
-Follow [our guide here](https://github.com/NIEHS/ToxPipe/blob/Deployment/docs/opencode-readme.md) for setting up OpenCode to use ToxPipe's AI models.
+Follow our guides for setting up OpenCode to use ToxPipe's AI models:
+- [OSX/*nix](https://github.com/NIEHS/ToxPipe/blob/Deployment/docs/opencode-readme.md)
+- [Windows](https://github.com/NIEHS/ToxPipe/blob/Deployment/docs/opencode-esl2-r-readme.md)
 
 ## Install ChemLint
 ChemLint may be installed locally using the instructions [in the `README.md` of the repository](https://github.com/molML/ChemLint). Refer to the "manual" installation instructions, which state to run the following:
