@@ -1,6 +1,6 @@
 # Using ToxPipe with OpenCode
 
-This guide is for setting up OpenCode on OSX (Mac) and Linux/Unix/etc. systems. [The Windows guide is here](https://github.com/NIEHS/ToxPipe/blob/Deployment/docs/opencode-esl2-r-readme.md).
+This guide is for setting up OpenCode on OSX (Mac) and Linux/Unix/etc. systems. [The Windows guide is here](https://github.com/NIEHS/ToxPipe/blob/Deployment/docs/opencode-wsl2-r-readme.md).
 
 This guide shows how to manually create an OpenCode config on a new installation without hard-coding a specific username.
 
