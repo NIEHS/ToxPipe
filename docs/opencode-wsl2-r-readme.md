@@ -1,5 +1,7 @@
 # Using OpenCode on Windows via WSL2 (with R and RStudio Server)
 
+This guide is for setting up OpenCode on Windows systems. [The OSX (Mac) and Linux/Unix/etc. guide is here](https://github.com/NIEHS/ToxPipe/blob/Deployment/docs/opencode-readme.md).
+
 > **Scope:** Windows users only. Commands are written for Debian or Ubuntu 22.04 (Jammy) inside WSL2.
 > The R and RStudio Server sections are specific to R users — skip them if you only need OpenCode.
 
