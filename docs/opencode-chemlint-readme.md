@@ -33,7 +33,7 @@ Finally, you will need to add the MCP config to OpenCode. You can simply just as
     "--with",
     "mcp[cli]",
     "--directory",
-    "C:/Users/combspk/Desktop/opencode/chemlint-test/ChemLint",
+    "/path/to/your/local/ChemLint", # CHANGEME, use absolute path
     "mcp",
     "run",
     "./src/chemlint/server.py"
@@ -56,7 +56,7 @@ When this step is done, your `opencode.json` file should look like the following
         "--with",
         "mcp[cli]",
         "--directory",
-        "/path/to/your/local/ChemLint", # CHANGEME
+        "/path/to/your/local/ChemLint", # CHANGEME, use absolute path
         "mcp",
         "run",
         "./src/chemlint/server.py"
