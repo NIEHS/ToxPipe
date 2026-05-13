@@ -5,7 +5,9 @@ ToxPipe's Anthropic models are compatible with the Claude Code desktop and comma
 _(The following guide was written by Jennifer Serafini and edited for formatting by Parker Combs)_
 
 # Setting Up Claude Code via ToxPipe LiteLLM Proxy 
-Documented by Jennifer Serafini, April 2026 For use by other NIEHS/AFDS developers on Windows GFE 
+Documented by Jennifer Serafini, April 2026 For use by other NIEHS/AFDS developers on Windows GFE.
+Special thanks to Benjamin Petersen and Rich Ogin for discovering the correct JSON keynames:values for
+sending the API key to LiteLLM and disabling Claude's AutoUpdater
 
 _A note on authorship: This document was developed collaboratively with Claude (Anthropic), an AI assistant, which assisted with drafting, structure, and technical documentation. All decisions, testing, and validation reflect the judgment and domain expertise of the author. The author takes full responsibility for the content of this document._
 
@@ -67,14 +69,14 @@ npm install -g @anthropic-ai/claude-code@2.1.45
 **Prevent auto-updates**: Claude Code may auto-update to a newer incompatible version. To prevent this, run once after installing: 
 ```
 New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude" 
-'{"autoUpdate": false}' | Out-File -FilePath "$env:USERPROFILE\.claude\settings.json" -Encoding utf8 
+'{"env": {"DISABLE_AUTOUPDATER": "1"}}' | Out-File -FilePath "$env:USERPROFILE\.claude\settings.json" -Encoding utf8 
 ```
 
 ### Step 5A: Set Environment Variables 
 In Powershell (or compatible style, i.e., PyCharm) terminal: 
 ```
 $env:ANTHROPIC_BASE_URL = "https://litellm.toxpipe.niehs.nih.gov" 
-$env:ANTHROPIC_API_KEY = "your_key_here" 
+$env:ANTHROPIC_AUTH_TOKEN = "your_key_here" 
 $env:NODE_EXTRA_CA_CERTS = "C:\path\to\your\project\certs\NIH_CA_Bundle.pem" 
 ```
 Replace the NODE_EXTRA_CA_CERTS path with the actual path to your NIH CA Bundle file. 
@@ -97,7 +99,7 @@ Use this method if Node.js is not available on your GFE.
 ### Step 3B: Add .env File to Project Root 
 Create .env at project root. **Never commit this file**: 
 ```
-ANTHROPIC_API_KEY=your_key_here 
+ANTHROPIC_AUTH_TOKEN=your_key_here 
 ```
 Confirm .gitignore includes: 
 ```
@@ -134,7 +136,7 @@ claude_code:
     - "./:/app" 
   environment: 
     - ANTHROPIC_BASE_URL=https://litellm.toxpipe.niehs.nih.gov 
-    - ANTHROPIC_API_KEY 
+    - ANTHROPIC_AUTH_TOKEN 
     - NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/NIH_CA_Bundle.crt 
   stdin_open: true 
   tty: true 
@@ -142,7 +144,7 @@ claude_code:
 ```
 Notes:
 - ```ANTHROPIC_BASE_URL``` does not include the path. Claude Code appends /v1/messages automatically
-- ```ANTHROPIC_API_KEY``` with no value tells Compose to pull from .env
+- ```ANTHROPIC_AUTH_TOKEN``` with no value tells Compose to pull from .env
 - ```NODE_EXTRA_CA_CERTS``` is the Node.js equivalent of curl’s ```–cacert``` flag
 - ```stdin_open``` and ```tty``` make the container interactive
 - ```ANTHROPIC_MODEL``` environment variable is not reliable - always use –model flag 
@@ -172,13 +174,10 @@ docker-compose run --rm claude_code claude --model claude-4.6-sonnet --continue
 docker-compose run --rm claude_code claude --model claude-4.6-sonnet --resume 
 ```
 
-**Important**: If a session crashes or ends unexpectedly, do not use ```--resume``` with the old session ID. This can carry corrupted state including remapped model names which causes the Invalid model name error. Start a fresh session instead. 
-
 # First Launch Setup 
 On first launch Claude Code will: 
 1. Ask you to select a color theme - choose your preference 
-2. Show a marketplace/plugins prompt - dismiss it, no plugins needed 
-3. Prompt about a custom API key - select Yes - this is your ToxPipe key and is intentional 
+2. If ANTHROPIC_AUTH_TOKEN and ANTHROPIC_BASE_URL are set as persistent environment variables, Claude Code will connect to ToxPipe and drop into a prompt ready for use. If an auth screen appears, see Known Issues: Auth screen on first launch.
 
 # Useful Claude Code Commands 
 - Exit Claude Code: ```/exit```
@@ -214,6 +213,7 @@ All traffic routes through ToxPipe. No direct Anthropic API calls.
 | Wrong model name | Invalid model name passed in ```model=claude-sonnet-4-6``` | Always use ```--model``` flag at launch. Never rely on ```ANTHROPIC_MODEL``` env var. 
 | ```npm``` blocked outside PyCharm | running scripts is disabled on this system | Run ```npm``` from PyCharm terminal only. PowerShell execution policy blocks it in standalone windows. 
 | Docker - ```ANTHROPIC_MODEL``` ignored | Model name not passed correctly | Use ```--model``` flag in command, not environment variable 
+| Auth screen on first launch | Three login options appear; none accept ToxPipe API key directly | Ensure ANTHROPIC_AUTH_TOKEN is set as a persistent user environment variable before launching. Do not use ANTHROPIC_API_KEY - ToxPipe requires the Bearer token header sent by ANTHROPIC_AUTH_TOKEN. If both are set, unset ANTHROPIC_API_KEY. |
 
 # Troubleshooting: Which Version Am I Running? 
 ```
@@ -241,7 +241,7 @@ npm install -g @anthropic-ai/claude-code@2.1.45
 ## Step 3: Disable auto-updates permanently 
 ```
 New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude" 
-'{"autoUpdate": false}' | Out-File -FilePath "$env:USERPROFILE\.claude\settings.json" -Encoding utf8 
+'{"env": {"DISABLE_AUTOUPDATER": "1"}}' | Out-File -FilePath "$env:USERPROFILE\.claude\settings.json" -Encoding utf8 
 ```
 
 ## Step 4: Verify the settings file was created 
@@ -250,7 +250,7 @@ Get-Content "$env:USERPROFILE\.claude\settings.json"
 ```
 Should return: 
 ```
-{"autoUpdate": false} 
+{"env": {"DISABLE_AUTOUPDATER": "1"}} 
 ```
 
 ## Step 5: Launch and verify version again 
