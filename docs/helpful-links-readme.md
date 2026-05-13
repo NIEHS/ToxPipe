@@ -24,7 +24,7 @@ OpenCode can connect to MCP servers to integrate external tools as context to it
 OpenCode appears to be quite adept at generating its own skills and tools. I was able to get Claude 4.6 Sonnet running through OpenCode to do the following:
 - Write its own skills, specifically geared toward scientific web application generation
 - "Think" about possible ways to improve expand an existing application it had written and implement those changes autonomously
-- Write its own MCP server based on the FastMCP specifications and add it to its own configuration so it could use it in future queries. I provided it just links to the EPA EpiSuite's and PubChem's APIs, and gave it free reign to pull in other related sources as needed: EPA COmpTox, UniProt, NCBI, ChEMBL.
+- Write its own MCP server based on the FastMCP specifications and add it to its own configuration so it could use it in future queries. I provided it just links to the EPA EpiSuite's and PubChem's APIs, and gave it free reign to pull in other related sources as needed: EPA CompTox, UniProt, NCBI, ChEMBL.
 - Audit its own code for accessibility/508 compliance issues and fix them
 - Audit its own code for bugs and fix them
 - Write unit tests for bug detection
