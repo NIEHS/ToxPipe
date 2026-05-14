@@ -12,7 +12,7 @@ This document compiles links to various external guides and resources (as well a
 
 ### OpenCode Rules
 [https://opencode.ai/docs/rules/](https://opencode.ai/docs/rules/)
-Rules are a set of instructions given to your OpenCode agent. They can be defined in a `AGENTS.md` file in your project directory. They are easily sharable and reusable.
+Rules are a set of instructions given to your OpenCode agent. They can be defined in a `AGENTS.md` file in your project directory. They are best used for encoraging or restricting certain behaviors and are easily sharable and reusable.
 
 ### OpenCode agent skills
 [https://opencode.ai/docs/skills/](https://opencode.ai/docs/skills/)
