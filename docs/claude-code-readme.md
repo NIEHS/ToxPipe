@@ -6,8 +6,7 @@ _(The following guide was written by Jennifer Serafini and edited for formatting
 
 # Setting Up Claude Code via ToxPipe LiteLLM Proxy 
 Documented by Jennifer Serafini, April 2026 For use by other NIEHS/AFDS developers on Windows GFE.
-Special thanks to Benjamin Petersen and Rich Ogin for discovering the correct JSON keynames:values for
-sending the API key to LiteLLM and disabling Claude's AutoUpdater
+Special thanks to Benjamin Petersen and Rich Ogin, for discovering the correct JSON keynames:values for sending the API key to LiteLLM, disabling Claude's AutoUpdater, and additional troubleshooting contributions.
 
 _A note on authorship: This document was developed collaboratively with Claude (Anthropic), an AI assistant, which assisted with drafting, structure, and technical documentation. All decisions, testing, and validation reflect the judgment and domain expertise of the author. The author takes full responsibility for the content of this document._
 
@@ -20,7 +19,7 @@ Both methods connect Claude Code to the ToxPipe LiteLLM proxy instead of directl
 
 ## Prerequisites 
 - ToxPipe API key 
-- NIH CA Bundle PEM file (certs/NIH_CA_Bundle.pem) - for Docker method 
+- NIH CA Bundle PEM file (certs/NIH_CA_Bundle.pem) 
 - Node.js installed (Method A) or Docker Desktop 27.0.3+ (Method B) 
 
 ## Step 1: Verify the /v1/messages Endpoint is Working 
@@ -73,6 +72,9 @@ New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude"
 ```
 
 ### Step 5A: Set Environment Variables 
+Option 1: Persistent (recommended) - skip to Step 7A to set these as permanent user environment variables. This is the recommended approach. Do not set both persistent and session variables - this causes a conflict warning.
+
+Option 2: Session only (for testing) - set in the current terminal session only. Variables will be lost when the terminal closes:
 In Powershell (or compatible style, i.e., PyCharm) terminal: 
 ```
 $env:ANTHROPIC_BASE_URL = "https://litellm.toxpipe.niehs.nih.gov" 
@@ -91,7 +93,11 @@ To avoid setting environment variables every session, add them to your PyCharm r
 1. Search “environment variables” in Windows Start 
 2. Click “Edit environment variables for your account” 
 3. Add each variable under User variables 
-4. No admin rights required for user-level variables 
+4. No admin rights required for user-level variables
+5. Enter variable values without surrounding quotes - Windows handles quoting automatically 
+6. If Git Bash is installed, add this additional variable:
+   Variable: CLAUDE_CODE_GIT_BASH_PATH
+   Value: C:\Users\<your-username>\AppData\Local\Programs\Git\git-bash.exe
 
 ## Method B: Docker Installation 
 Use this method if Node.js is not available on your GFE. 
@@ -214,6 +220,8 @@ All traffic routes through ToxPipe. No direct Anthropic API calls.
 | ```npm``` blocked outside PyCharm | running scripts is disabled on this system | Run ```npm``` from PyCharm terminal only. PowerShell execution policy blocks it in standalone windows. 
 | Docker - ```ANTHROPIC_MODEL``` ignored | Model name not passed correctly | Use ```--model``` flag in command, not environment variable 
 | Auth screen on first launch | Three login options appear; none accept ToxPipe API key directly | Ensure ANTHROPIC_AUTH_TOKEN is set as a persistent user environment variable before launching. Do not use ANTHROPIC_API_KEY - ToxPipe requires the Bearer token header sent by ANTHROPIC_AUTH_TOKEN. If both are set, unset ANTHROPIC_API_KEY. |
+| SSL certificate error | Unable to connect to API: Self-signed certificate detected | Ensure NODE_EXTRA_CA_CERTS is set to the full path of your NIH CA Bundle PEM file. Required for both native and Docker methods. See Step 5A / Step 7A. |
+| Git Bash not found | Claude Code cannot locate Git Bash | Add user environment variable CLAUDE_CODE_GIT_BASH_PATH pointing to your git-bash.exe. See Step 7A. |
 
 # Troubleshooting: Which Version Am I Running? 
 ```
