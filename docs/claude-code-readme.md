@@ -72,23 +72,19 @@ New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude"
 ```
 
 ### Step 5A: Set Environment Variables 
-Option 1: Persistent (recommended) - skip to Step 7A to set these as permanent user environment variables. This is the recommended approach. Do not set both persistent and session variables - this causes a conflict warning.
+Option 1: Persistent (recommended) - skip to Step 6A to set these as permanent user environment variables. This is the recommended approach. Do not set both persistent and session variables - this causes a conflict warning.
 
 Option 2: Session only (for testing) - set in the current terminal session only. Variables will be lost when the terminal closes:
 In Powershell (or compatible style, i.e., PyCharm) terminal: 
 ```
 $env:ANTHROPIC_BASE_URL = "https://litellm.toxpipe.niehs.nih.gov" 
 $env:ANTHROPIC_AUTH_TOKEN = "your_key_here" 
-$env:NODE_EXTRA_CA_CERTS = "C:\path\to\your\project\certs\NIH_CA_Bundle.pem" 
+$env:NODE_EXTRA_CA_CERTS = "C:\path\to\your\project\certs\NIH_CA_Bundle.pem"
+$env:CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS = "1" 
 ```
-Replace the NODE_EXTRA_CA_CERTS path with the actual path to your NIH CA Bundle file. 
+Replace the NODE_EXTRA_CA_CERTS path with the actual path to your NIH CA Bundle file. Setting CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS to 1 fixes an issue where updates to ToxPipe's LiteLLM instance breaks compatibility with Claude Code.
 
-### Step 6A: Launch Claude Code 
-```
-claude --model claude-4.6-sonnet 
-```
-
-### Step 7A: Make Environment Variables Persistent 
+### Step 6A: Make Environment Variables Persistent 
 To avoid setting environment variables every session, add them to your PyCharm run configuration or Windows user environment variables: 
 1. Search “environment variables” in Windows Start 
 2. Click “Edit environment variables for your account” 
@@ -98,6 +94,23 @@ To avoid setting environment variables every session, add them to your PyCharm r
 6. If Git Bash is installed, add this additional variable:
    Variable: CLAUDE_CODE_GIT_BASH_PATH
    Value: C:\Users\<your-username>\AppData\Local\Programs\Git\git-bash.exe
+
+Alternatively, to set environment variables on a per-project or per-repository basis, you can create a `.claude` directory in your project file and create a `.claude/settings.local.json` configuration file there. This file should contain the environment variable assignments as follows:
+```
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://litellm.toxpipe.niehs.nih.gov" ,
+    "ANTHROPIC_AUTH_TOKEN": "your_key_here", 
+    "NODE_EXTRA_CA_CERTS": "C:\path\to\your\project\certs\NIH_CA_Bundle.pem",
+    "CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS": "1"
+  }
+}
+```
+
+### Step 7A: Launch Claude Code 
+```
+claude --model claude-4.6-sonnet 
+```
 
 ## Method B: Docker Installation 
 Use this method if Node.js is not available on your GFE. 
@@ -143,7 +156,8 @@ claude_code:
   environment: 
     - ANTHROPIC_BASE_URL=https://litellm.toxpipe.niehs.nih.gov 
     - ANTHROPIC_AUTH_TOKEN 
-    - NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/NIH_CA_Bundle.crt 
+    - NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/NIH_CA_Bundle.crt
+    - CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1
   stdin_open: true 
   tty: true 
   command: claude --model claude-4.6-sonnet 
@@ -152,6 +166,7 @@ Notes:
 - ```ANTHROPIC_BASE_URL``` does not include the path. Claude Code appends /v1/messages automatically
 - ```ANTHROPIC_AUTH_TOKEN``` with no value tells Compose to pull from .env
 - ```NODE_EXTRA_CA_CERTS``` is the Node.js equivalent of curl’s ```–cacert``` flag
+- ```CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS``` must be set to 1 to fix an issue where updates to ToxPipe's LiteLLM instance breaks compatibility with Claude Code
 - ```stdin_open``` and ```tty``` make the container interactive
 - ```ANTHROPIC_MODEL``` environment variable is not reliable - always use –model flag 
 
