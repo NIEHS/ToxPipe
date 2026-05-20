@@ -282,6 +282,13 @@ claude --version
 ```
 Should still show 2.1.45 after the next launch. 
 
+# Troubleshooting: API Error 400: text content blocks must contain non-whitespace text
+
+You can sometimes get a `API Error 400: text content blocks must contain non-whitespace text` error if you have previous failed queries in Claude Code's conversation history. To fix this, you can manually edit the conversation history .jsonl file (or delete it outright) to remove the offending entries. The conversation history files are typically stored at:
+```
+<user_home_directory>/.claude/projects/<project_name>/
+```
+
 _Tested on: Windows GFE, Node.js v24.14.1, npm 11.11.0, Claude Code v2.1.45, LiteLLM proxy, April 2026 _
 
 _Docker tested on: Docker Desktop 27.0.3, Docker Compose v2.28.1 _
