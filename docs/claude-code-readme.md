@@ -289,6 +289,6 @@ You can sometimes get a `API Error 400: text content blocks must contain non-whi
 <user_home_directory>/.claude/projects/<project_name>/
 ```
 
-_Tested on: Windows GFE, Node.js v24.14.1, npm 11.11.0, Claude Code v2.1.45, LiteLLM proxy, April 2026 _
+_Tested on: Windows GFE, Node.js v24.14.1, npm 11.11.0, Claude Code v2.1.45, LiteLLM proxy, April 2026_
 
-_Docker tested on: Docker Desktop 27.0.3, Docker Compose v2.28.1 _
+_Docker tested on: Docker Desktop 27.0.3, Docker Compose v2.28.1_
