@@ -210,7 +210,20 @@ printenv OPENCODE_CONFIG
 
 If it is empty, add it to the correct shell startup file and restart the shell.
 
-## Minimal Example For Another Provider
+### GPT models: `litellm.ContentPolicyViolationError: AzureException - Unknown parameter: 'reasoningSummary'`
+The `litellm.ContentPolicyViolationError: AzureException - Unknown parameter: 'reasoningSummary'` error may sometimes be triggered when attempting to use OpenAI's GPT models (specifically noticed with GPT 5.4) with OpenCode. OpenCode includes a summary of its reasoning steps in its messages, which is unrecognized by the GPT models' API. This can be done by nullifying the `reasoningSummary` parameter in the model's configuration in your `opencode.json` file: `"reasoningSummary": null`.
+
+For example, if using GPT-5.4, your configuration should look like the following:
+```
+"azure-gpt-5.4": {
+    "name": "Azure GPT-5.4",
+    "options": {
+        "reasoningSummary": null
+    }
+}
+```
+
+### Minimal Example For Another Provider
 
 This pattern also works for other providers.
 
@@ -233,15 +246,12 @@ This pattern also works for other providers.
 }
 ```
 
-### GPT models: `litellm.ContentPolicyViolationError: AzureException - Unknown parameter: 'reasoningSummary'`
-The `litellm.ContentPolicyViolationError: AzureException - Unknown parameter: 'reasoningSummary'` error may sometimes be triggered when attempting to use OpenAI's GPT models with OpenCode. OpenCode includes a summary of its reasoning steps in its messages, which is unrecognized by the GPT models' API. This can be done by nullifying the `reasoningSummary` parameter in the model's configuration in your `opencode.json` file: `"reasoningSummary": null`.
-
-For example, if using GPT-5.4, your configuration should look like the following:
+The provider may then be specified in the model definition:
 ```
-"azure-gpt-5.4": {
-    "name": "Azure GPT-5.4",
-    "options": {
-        "reasoningSummary": null
-    }
+"azure-gpt-5.5": {
+  "name": "Azure GPT-5.5 (NIEHS)",
+  "provider": {
+    "npm": "@ai-sdk/openai"
+  }
 }
 ```
