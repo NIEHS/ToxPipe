@@ -10,34 +10,34 @@ VSCode's Copilot can be configured to use models from ToxPipe using these steps:
 ```
 "oaicopilot.baseUrl": "https://litellm.toxpipe.niehs.nih.gov/",
 "oaicopilot.models": [
-{
-    "id": "model-name-as-it-appears-in-LiteLLM",
-    "owned_by": "owner-of-the-model",
-    "context_length": 256000,
-    "max_tokens": 8192,
-    "temperature": 0
-},
-... (continue as needed for however many models you want to add)
+    {
+        "id": "model-name-as-it-appears-in-LiteLLM",
+        "owned_by": "owner-of-the-model",
+        "context_length": 256000,
+        "max_tokens": 8192,
+        "temperature": 0
+    },
+    ... (continue as needed for however many models you want to add)
 ]
 ```
 For example:
 ```
 "oaicopilot.baseUrl": "https://litellm.toxpipe.niehs.nih.gov/",
 "oaicopilot.models": [
-{
-    "id": "claude-sonnet-4.6",
-    "owned_by": "Anthropic",
-    "context_length": 256000,
-    "max_tokens": 8192,
-    "temperature": 0
-},
-{
-    "id": "azure-gpt-5.4",
-    "owned_by": "OpenAI",
-    "context_length": 256000,
-    "max_tokens": 8192,
-    "temperature": 0
-}
+    {
+        "id": "claude-sonnet-4.6",
+        "owned_by": "Anthropic",
+        "context_length": 256000,
+        "max_tokens": 8192,
+        "temperature": 0
+    },
+    {
+        "id": "azure-gpt-5.4",
+        "owned_by": "OpenAI",
+        "context_length": 256000,
+        "max_tokens": 8192,
+        "temperature": 0
+    }
 ]
 ```
 5. Save your changes to the settings JSON and exit out of the settings menu.
