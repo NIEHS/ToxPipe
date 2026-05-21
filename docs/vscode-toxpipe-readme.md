@@ -51,11 +51,11 @@ For example:
 ]
 ```
 Note that the `apiMode` parameter in each model is critical to getting the model to work properly. This value must be set to the correct provider for the corresponding model. The OAI Compatible Provider for Copilot extension currently can handle the following API modes:
-    - openai
-    - openai-responses
-    - ollama - for local models hsoted via Ollama
-    - anthropic - for Claude models
-    - gemini - for Gemini models
+- openai
+- openai-responses
+- ollama - for local models hsoted via Ollama
+- anthropic - for Claude models
+- gemini - for Gemini models
 
 5. Save your changes to the settings JSON and exit out of the settings menu.
 6. Open the Copilot chat menu with `Ctrl+Alt+I` and click the "Pick Model" menu.
