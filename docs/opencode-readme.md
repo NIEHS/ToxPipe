@@ -1,6 +1,6 @@
 # Using ToxPipe with OpenCode
 
-This guide is for setting up OpenCode on OSX (Mac) and Linux/Unix/etc. systems. [The Windows guide is here](https://github.com/NIEHS/ToxPipe/blob/Deployment/docs/opencode-wsl2-r-readme.md).
+This guide is for setting up OpenCode on OSX (Mac) and Linux/Unix/etc. systems. [Additional considerations for using Windows are here](https://github.com/NIEHS/ToxPipe/blob/Deployment/docs/opencode-wsl2-r-readme.md).
 
 This guide shows how to manually create an OpenCode config on a new installation without hard-coding a specific username.
 
@@ -230,5 +230,18 @@ This pattern also works for other providers.
     }
   },
   "model": "my-provider/my-model"
+}
+```
+
+### GPT models: `litellm.ContentPolicyViolationError: AzureException - Unknown parameter: 'reasoningSummary'`
+The `litellm.ContentPolicyViolationError: AzureException - Unknown parameter: 'reasoningSummary'` error may sometimes be triggered when attempting to use OpenAI's GPT models with OpenCode. OpenCode includes a summary of its reasoning steps in its messages, which is unrecognized by the GPT models' API. This can be done by nullifying the `reasoningSummary` parameter in the model's configuration in your `opencode.json` file: `"reasoningSummary": null`.
+
+For example, if using GPT-5.4, your configuration should look like the following:
+```
+"azure-gpt-5.4": {
+    "name": "Azure GPT-5.4",
+    "options": {
+        "reasoningSummary": null
+    }
 }
 ```
