@@ -5,7 +5,7 @@ __Note: This is tested and confirmed working on VSCode version 1.121.0. This fun
 VSCode's Copilot can be configured to use models from ToxPipe using these steps:
 1. Install Johnny Zhao's ["OAI Compatible Provider for Copilot" extension for VSCode]([https://marketplace.visualstudio.com/items?itemName=Gethnet.litellm-connector-copilot](https://marketplace.visualstudio.com/items?itemName=johnny-zhao.oai-compatible-copilot)). This guide was tested with version 0.4.2 of this extension.
 2. After the extension is installed, use `Ctrl+,` to open VSCode's settings menu.
-3. Click the !["Open Settings (JSON)"](json-menu.png) icon in the top right corner of the settings menu to view and edit VSCode's settings in JSON format.
+3. Click the !["Open Settings (JSON)"](img/json-menu.png) icon in the top right corner of the settings menu to view and edit VSCode's settings in JSON format.
 4. Add the following configuration between the outermost curly braces `{}` of the settings JSON:
 ```
 "oaicopilot.baseUrl": "https://litellm.toxpipe.niehs.nih.gov/",
