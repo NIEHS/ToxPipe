@@ -43,3 +43,9 @@ Overall, I have found it helpful to treat working with OpenCode simialrly to the
 6. Identify possible enhancements to the software
 7. Implement enhancements
 8. Repeat as needed until tests pass, all TODO features are implemented, and software complies with accessibility standards
+
+## ToolUniverse
+[ToolUniverse](https://aiscientist.tools/) is a suite of AI agent skills, compatible with agent software like OpenCode, that provides LLMs with access to hundreds of scientific tools. ToolUniverse may be installed simply by querying your agent with:
+```
+Read https://aiscientist.tools/setup.md (if 403, use https://raw.githubusercontent.com/mims-harvard/ToolUniverse/main/skills/setup-tooluniverse/SKILL.md) and setup tooluniverse for me.
+```
