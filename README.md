@@ -1,5 +1,7 @@
 <a name="readme-top"></a>
 
+### Important: Do NOT upload PII, keys/passwords, proprietary data, or any other sensitive material to ToxPipe. Model providers may collect data, and we cannot guarantee that any data input to ToxPipe is not transmitted to third-party model providers. Additionally, certain models, like Anthropic's Claude Fable 5 require data retention. Please be mindful of this when interacting with ToxPipe.
+
 <!--
 *** Thanks for checking out the Best-README-Template. If you have a suggestion
 *** that would make this better, please fork the repo and create a pull request
