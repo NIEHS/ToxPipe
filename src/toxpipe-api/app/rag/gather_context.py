@@ -9,7 +9,7 @@ class CustomRetriever():
     docs_res: dict = {}
 
     def __init__(self):
-        embedding = getAIModel(model_name='text-embedding-ada-002', is_embedding=True)
+        embedding = getAIModel(model_name=Config.env_config['TOXPIPE_RAG_EMBEDDING_MODEL'], is_embedding=True)
 
         # Local use
         #db = Chroma(collection_name='quickstart', persist_directory=str(Config.DIR_DATA), embedding_function=embedding)
