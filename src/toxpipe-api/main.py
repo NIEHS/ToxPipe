@@ -286,10 +286,7 @@ async def query_rag(request: Request, response: Response, model: str, q: str, us
 
     try:
         res = query(q, llm=model, use_training_data=use_training_data, reasoning_effort=reasoning_effort)
-        used_rag_context = res['steps_taken'] and (res['steps_taken'][-1] == 'query_with_context')
-        response = (f'*[The following response was taken from ' + ("RAG resources" if used_rag_context else "model's training knowledge") + ']*\n\n' + 
-                    '**Response:**\n' + res['response'] + '\n\n' +
-                    '**Searched Keyphrases:**\n' + '\n'.join([f'- {x}' for x in res['searched_keyphrases']]))
+        response = res['response']
         error = res['error']
     except Exception as e:
         print("Error performing search.")
